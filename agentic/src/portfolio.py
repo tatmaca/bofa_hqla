@@ -16,8 +16,13 @@ from assets import Asset
 class Portfolio:
     """Container for HQLA assets and portfolio-level operations."""
 
-    def __init__(self):
+    def __init__(
+        self, total_expected_outflows_30d: float, required_stable_funding: float
+    ):
         self.assets: Dict[str, List[Asset]] = {"L1": [], "L2A": [], "L2B": []}
+
+        self.total_expected_outflows_30d = total_expected_outflows_30d
+        self.required_stable_funding = required_stable_funding
 
     def add_asset(self, asset: Asset) -> None:
         cat = asset.category()

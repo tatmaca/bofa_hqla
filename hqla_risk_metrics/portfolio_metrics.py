@@ -1,67 +1,70 @@
 """
 portfolio_metrics.py
 --------------------
-Compute portfolio-level HQLA metrics: LCR, NSFR, RWA, market value.
+Calculates portfolio-level HQLA metrics under stress scenarios.
 
 Author: Togay Atmaca
 Created: 2025-10-19
 """
 
-import os
-import sys
-
-sys.path.append(os.path.abspath("../agentic/src"))
-
-from typing import Dict
-
-from base import LCR_LIQUIDITY_FACTORS, RWA_WEIGHTS
 from portfolio import Portfolio
 
+# Haircuts for each HQLA level (illustrative)
+L1_HAIRCUT = 0.0  # Level 1 assets (cash + sovereigns)
+L2A_HAIRCUT = 0.15  # Level 2A assets
+L2B_HAIRCUT = 0.25  # Level 2B assets
 
-def portfolio_value(portfolio: Portfolio) -> float:
-    """Return total market value of portfolio."""
-    return portfolio.total_value()
+# Risk weights for RWA calculation
+RWA_WEIGHTS = {"L1": 0.0, "L2A": 0.2, "L2B": 0.5}
 
-
-def adjusted_portfolio_value(portfolio: Portfolio) -> float:
-    """Return adjusted value using asset-level haircuts."""
-    return portfolio.adjusted_value()
-
-
-def compute_lcr(portfolio: Portfolio) -> float:
-    """
-    Simple LCR: sum(adjusted HQLA value * liquidity factor) / total net cash outflows.
-    For now, assume net cash outflows = 1 (normalized), returns ratio.
-    """
-    total_hqla = 0.0
-    for cat, assets in portfolio.assets.items():
-        factor = LCR_LIQUIDITY_FACTORS.get(cat, 0.0)
-        total_hqla += factor * sum(a.adjusted_value() for a in assets)
-    # Normalize by total market value (or cash outflows placeholder)
-    return total_hqla / max(portfolio.total_value(), 1e-9)
+# Stable funding factors (illustrative)
+STABLE_FUNDING_FACTORS = {
+    "L1": 100.0,  # fully count towards stable funding
+    "L2A": 50.0,  # 50% counts
+    "L2B": 50.0,  # 50% counts
+}
 
 
-def compute_rwa(portfolio: Portfolio) -> float:
-    """
-    Compute simple RWA = sum(asset value * risk weight)
-    """
+def portfolio_value(p: Portfolio) -> float:
+    """Total market value of portfolio."""
+    return sum(a.market_value for group in p.assets.values() for a in group)
+
+
+def adjusted_portfolio_value(p: Portfolio) -> float:
+    """Market value adjusted for haircuts."""
+    total = 0.0
+    for cat, assets in p.assets.items():
+        haircut = 0.0
+        if cat == "L1":
+            haircut = L1_HAIRCUT
+        elif cat == "L2A":
+            haircut = L2A_HAIRCUT
+        elif cat == "L2B":
+            haircut = L2B_HAIRCUT
+        total += sum(a.market_value * (1 - haircut) for a in assets)
+    return total
+
+
+def compute_lcr(p: Portfolio) -> float:
+    """Liquidity Coverage Ratio under scenario-adjusted asset values."""
+    hqla_adjusted = adjusted_portfolio_value(p)
+    return hqla_adjusted / p.total_expected_outflows_30d
+
+
+def compute_rwa(p: Portfolio) -> float:
+    """Risk Weighted Assets under scenario-adjusted asset values."""
     total_rwa = 0.0
-    for cat, assets in portfolio.assets.items():
+    for cat, assets in p.assets.items():
         weight = RWA_WEIGHTS.get(cat, 0.0)
-        total_rwa += weight * sum(a.adjusted_value() for a in assets)
+        total_rwa += sum(a.market_value * weight for a in assets)
     return total_rwa
 
 
-def compute_nsfr(portfolio: Portfolio) -> float:
-    """
-    Simple NSFR: stable funding ratio
-    NSFR = Available stable funding / Required stable funding
-    For demo: ASF = adjusted HQLA * liquidity factor
-              RSF = total portfolio value
-    """
-    asf = sum(
-        LCR_LIQUIDITY_FACTORS.get(cat, 0.0) * sum(a.adjusted_value() for a in assets)
-        for cat, assets in portfolio.assets.items()
-    )
-    rsf = portfolio.total_value()
-    return asf / max(rsf, 1e-9)
+def compute_nsfr(p: Portfolio) -> float:
+    """Net Stable Funding Ratio under scenario-adjusted asset values."""
+    numerator = 0.0
+    for cat, assets in p.assets.items():
+        factor = STABLE_FUNDING_FACTORS.get(cat, 0.0) / 100.0
+        numerator += sum(a.market_value * factor for a in assets)
+    denominator = p.required_stable_funding
+    return numerator / denominator
