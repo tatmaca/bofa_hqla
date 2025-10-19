@@ -1,0 +1,25 @@
+Scenario         |  Description         |  Probability        |  Rationale         | Impact Channels      
+------------------------------------------------------------------------------------------------------------
+Repricing Risk   |Portfolio value drops |                     |Driven by Fed policy|Market value loss on
+                 |as yields rise.       |                     |shifts or inflation |fixed-rate treasuries.
+                 |                      |                     |surprises.          |
+------------------------------------------------------------------------------------------------------------
+YC Steepening    |Long-term rates rise  |                     |                    |Duration mismatch; reduces
+                 |relative to short-term|                     |                    |long-end Treasury prices.
+                 |rates.                |                     |                    |
+------------------------------------------------------------------------------------------------------------
+YC Flattening    |Short-term rates rise |                     |                    |Losses concentrated in
+                 |relative to long-term |                     |                    |shorter-duration holdings;
+                 |rates.                |                     |                    |roll-down effects.
+                 |                      |                     |                    |
+                 |                      |                     |                    |
+------------------------------------------------------------------------------------------------------------
+Duration /       |Nonlinear price       |                     |                    |Exaggerated mark-to-market
+Convexity Shock  |sensitivity amplifying|                     |                    |impacts for longer-duration
+                 |Treasury losses during|                     |                    |Treasuries.
+                 |large rate swings.    |                     |                    |
+------------------------------------------------------------------------------------------------------------
+Basis Spread     |Treasury-OIS spread   |                     |                    |Temporary mark-to-market
+Widening         |widens under stress.  |                     |                    |differences; may influence
+                 |                      |                     |                    |liquidity value.
+                 |                      |                     |                    |
