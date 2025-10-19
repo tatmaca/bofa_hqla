@@ -10,7 +10,7 @@ Created: 2025-10-19
 
 from typing import Dict, List
 
-from .assets import Asset
+from assets import Asset
 
 
 class Portfolio:
