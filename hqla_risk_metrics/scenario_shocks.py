@@ -42,7 +42,9 @@ class YCSteepening(YieldCurveScenario):
         )
 
     def apply(self, portfolio: Portfolio) -> Portfolio:
-        new_portfolio = Portfolio()
+        new_portfolio = Portfolio(
+            total_expected_outflows_30d=120_000_000, required_stable_funding=150_000_000
+        )
         for cat, assets in portfolio.assets.items():
             for asset in assets:
                 new_asset = asset  # shallow copy; deepcopy if needed
@@ -62,7 +64,9 @@ class YCFlattening(YieldCurveScenario):
         )
 
     def apply(self, portfolio: Portfolio) -> Portfolio:
-        new_portfolio = Portfolio()
+        new_portfolio = Portfolio(
+            total_expected_outflows_30d=120_000_000, required_stable_funding=150_000_000
+        )
         for cat, assets in portfolio.assets.items():
             for asset in assets:
                 new_asset = asset

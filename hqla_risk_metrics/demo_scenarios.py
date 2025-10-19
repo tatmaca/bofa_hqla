@@ -7,16 +7,16 @@ Author: Togay Atmaca
 Created: 2025-10-19
 """
 
-import sys
 import os
+import sys
 
 # Ensure agentic/src is on path
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../agentic/src"))
 )
 
-from portfolio import Portfolio
 from assets import Asset, Level1Asset
+from portfolio import Portfolio
 from portfolio_metrics import (
     adjusted_portfolio_value,
     compute_lcr,
@@ -24,10 +24,12 @@ from portfolio_metrics import (
     compute_rwa,
     portfolio_value,
 )
-from scenario_shocks import YCSteepening, YCFlattening
+from scenario_shocks import YCFlattening, YCSteepening
 
 # --- Build a simple portfolio ---
-p = Portfolio()
+p = Portfolio(
+    total_expected_outflows_30d=120_000_000, required_stable_funding=150_000_000
+)
 cash = Level1Asset(name="Cash", market_value=100_000_000)
 ust = Level1Asset(name="UST_10Y", market_value=50_000_000)
 
