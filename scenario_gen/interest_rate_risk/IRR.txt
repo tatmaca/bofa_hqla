@@ -5,12 +5,12 @@ Repricing Risk   |Portfolio value drops |                     |Driven by Fed pol
                  |                      |                     |surprises.          |
 ------------------------------------------------------------------------------------------------------------
 YC Steepening    |Long-term rates rise  |                     |                    |Duration mismatch; reduces
-                 |relative to short-term|                     |                    |long-end Treasury prices.
+                 |relative to short-term|      28.50%         |                    |long-end Treasury prices.
                  |rates.                |                     |                    |
 ------------------------------------------------------------------------------------------------------------
 YC Flattening    |Short-term rates rise |                     |                    |Losses concentrated in
                  |relative to long-term |                     |                    |shorter-duration holdings;
-                 |rates.                |                     |                    |roll-down effects.
+                 |rates.                |      32.60%         |                    |roll-down effects.
                  |                      |                     |                    |
                  |                      |                     |                    |
 ------------------------------------------------------------------------------------------------------------
