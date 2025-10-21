@@ -4,6 +4,8 @@ import pandas as pd
 from .scenario import Scenario
 from .formatting import scenarios_to_matrix
 
+# ㅊ 다녀감
+
 def load_json_scenarios(folder: Path):
     scenarios = []
     for p in sorted(folder.glob("*.json")):

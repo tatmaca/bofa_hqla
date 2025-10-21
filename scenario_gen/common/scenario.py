@@ -5,6 +5,8 @@ from typing import Dict, List, Optional
 from datetime import datetime
 import json, hashlib
 
+# ㅊ 다녀감
+
 class ScenarioFamily(str, Enum):
     LIQUIDITY = "Liquidity"
     IRR = "InterestRateRisk"
