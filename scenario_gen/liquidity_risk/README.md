@@ -150,5 +150,5 @@ Paste that prompt into ChatGPT / Claude / Gemini → you’ll get a table like:
 
 ---
 
-_ㅊ 다녀감_
+ㅊ 다녀감
 ---
