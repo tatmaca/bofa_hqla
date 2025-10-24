@@ -42,6 +42,8 @@ Portfolio summary:
 ```{summary_str}```
 """
 
+print(prompt)
+
 print("Submitting prompt to ChatGPT...\n")
-response = chatgpt_reallocation(prompt, headless=False)
-print("GPT reallocation suggestions:\n", response)
+# response = chatgpt_reallocation(prompt, headless=False)
+# print("GPT reallocation suggestions:\n", response)
