@@ -1,0 +1,15 @@
+{
+  "generated_at": "2025-10-24T07:27:50.479836+00:00",
+  "hash_sha256": "32c667ae1a42bb8d8c2b081493c5fb89bd5b57ca7b1fd957a49716f99b624888",
+  "output_path": "shocks/shocks_resolved.json",
+  "probs_csv": "scenario_gen/combined_probabilities.csv",
+  "scenario_count": 6,
+  "keys": [
+    "credit/compress",
+    "credit/mild",
+    "credit/severe",
+    "interest_rate/bear_steepen",
+    "interest_rate/bull_flatten",
+    "liquidity/stress"
+  ]
+}

@@ -1,0 +1,10 @@
+# Interest rate scenario shocks
+# Units: basis points (bp); positive = yield increase
+bear_steepen:
+  DGS2_bp: 10
+  DGS10_bp: 30
+  SLOPE_2s10s_bps: 20
+bull_flatten:
+  DGS2_bp: -25
+  DGS10_bp: -10
+  SLOPE_2s10s_bps: -15

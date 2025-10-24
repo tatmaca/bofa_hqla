@@ -1,0 +1,8 @@
+# Liquidity stress scenario shocks
+# Units:
+# - MOVE_pts: index points (Treasury volatility)
+# - *_bps: basis points
+stress:
+  MOVE_pts: 25
+  SLOPE_2s10s_bps: -20
+  funding_spread_bp: 15

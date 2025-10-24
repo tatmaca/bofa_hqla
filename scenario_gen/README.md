@@ -15,3 +15,11 @@ and overseen by Professor Amitabh Chaudhary at the University of Chicago.
 
 The student collaborators on this project are Aryaa Gunavante, Charles
 Benello, Josh Li, Togay Atmaca, and Xiangchen Liu.
+
+
+To run call: 
+```
+python -m scenario_gen.run_all_probs   
+```
+
+Currently we are naievly computing the probabilities of events occuring using z score + exponential
