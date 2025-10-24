@@ -1,87 +1,56 @@
-# prompt/builder.py
-import json
-from typing import Any, Dict
+"""
+builder.py
+------------
+Builds LLM prompts for HQLA portfolio scenarios (IRR, liquidity, credit, etc.)
+in a structured and reproducible JSON format.
 
-from portfolio import Portfolio
+Author: Togay Atmaca (updated)
+Created: 2025-10-24
+"""
+
+from typing import List
 
 from agentic.gpt_interface.portfolio_summary import summarize_portfolio
-from hqla_risk_metrics.base import Scenario
-
-RIGID_RESPONSE_SCHEMA = {
-    "type": "object",
-    "required": [
-        "scenario_impact",
-        "recommended_reallocation",
-        "rationale",
-        "metadata",
-    ],
-    "properties": {
-        "scenario_impact": {"type": "string"},
-        "recommended_reallocation": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "required": ["asset", "action", "notional"],
-                "properties": {
-                    "asset": {"type": "string"},
-                    "action": {"type": "string", "enum": ["buy", "sell", "hold"]},
-                    "notional": {"type": "number"},
-                },
-            },
-        },
-        "rationale": {"type": "string"},
-        "metadata": {
-            "type": "object",
-            "required": [
-                "lcr_before",
-                "lcr_after_est",
-                "nsfr_before",
-                "nsfr_after_est",
-                "rwa_before",
-                "rwa_after_est",
-            ],
-        },
-    },
-}
+from agentic.src.portfolio import Portfolio
+from scenario_gen.common.scenario import Scenario
 
 
-def build_prompt(
-    portfolio: Portfolio, scenario: Scenario, instructions: str = ""
-) -> str:
+def build_prompt(portfolio: Portfolio, scenarios: List[Scenario]) -> str:
     """
-    Build deterministic prompt. Instructs LLM to respond ONLY with JSON matching schema.
+    Construct a prompt string for an LLM that includes the portfolio summary
+    and multiple scenarios of different families.
+
+    Args:
+        portfolio: Portfolio object (any composition of L1/L2A/L2B assets)
+        scenarios: List of Scenario objects (IRR, Liquidity, Credit, etc.)
+
+    Returns:
+        A single string prompt ready to submit to an LLM.
     """
-    summary_str = summarize_portfolio(portfolio, scenario_name=scenario.name)
-    schema_snippet = json.dumps(RIGID_RESPONSE_SCHEMA, indent=2)
+    summary_str = summarize_portfolio(portfolio)
+    blocks = [f"Portfolio summary:\n```{summary_str}```\n"]
 
-    prompt = f"""
-You are a financial risk analyst AI that ALWAYS replies with a single JSON object and NOTHING ELSE.
-Do not include explanation text. Do not wrap code fences. Respond using US decimal numbers.
+    for s in scenarios:
+        row = s.to_matrix_row()
+        blocks.append(
+            f"Scenario Type: {s.family.value}\n"
+            f"Scenario: {row['Scenario']}\n"
+            f"Description: {row['Description']}\n"
+            f"Probability: {row['Probability']}\n"
+            f"Rationale: {row['Rationale']}\n"
+            f"Impact Channels: {row['Impact Channels']}\n"
+        )
 
-Task:
-1) Analyze the portfolio under the scenario: {scenario.name} (type: {scenario.scenario_type}, magnitude: {scenario.magnitude}, probability: {scenario.probability})
-2) Provide a concise scenario impact summary string.
-3) Provide a list named "recommended_reallocation" of trades to optimize LCR, NSFR, and RWA. Each item must be:
-   - asset: exact asset name from the portfolio summary
-   - action: one of "buy", "sell", "hold"
-   - notional: positive number in same currency units as portfolio (do not include currency symbol)
-
-4) Provide "rationale" string summarizing the logic.
-5) Provide "metadata" with numeric estimates for LCR/NSFR/RWA before and after the proposed reallocations:
-   - lcr_before, lcr_after_est, nsfr_before, nsfr_after_est, rwa_before, rwa_after_est
-
-Portfolio summary (do not invent assets):
-{summary_str}
-
-Additional instructions:
-{instructions}
-
-RESPONSE SCHEMA (strict). Generate JSON exactly matching this schema:
-{schema_snippet}
-
-Respond now with only the JSON object.
-"""
-    # normalize whitespace
-    return "\n".join(
-        line.strip() for line in prompt.strip().splitlines() if line.strip()
+    prompt = (
+        "You are a financial analyst AI. "
+        "Provide recommended portfolio reallocations to optimize LCR, NSFR, and RWA, "
+        "while respecting regulatory guardrails. "
+        "Output strictly in JSON with the following keys:\n"
+        "  - scenario_impact: textual summary of portfolio changes\n"
+        "  - recommended_reallocation: list of dicts {asset, action, notional}\n"
+        "  - rationale: justification of reallocation\n"
+        "  - metadata: dictionary of LCR, NSFR, RWA before and after scenario\n\n"
+        + "\n".join(blocks)
     )
+
+    return prompt

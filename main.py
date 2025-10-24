@@ -1,41 +1,83 @@
-# pipeline/main.py
+"""
+main.py
+--------
+Driver script for building HQLA portfolios, applying scenarios, and generating GPT prompts.
+
+Author: Togay Atmaca
+Updated: 2025-10-24
+"""
+
 import os
 import sys
-
-# Ensure agentic/src is on path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "agentic/src")))
-
-from assets import Level1Asset, Level2AAsset, Level2BAsset
-from portfolio import Portfolio
+from datetime import datetime
 
 from agentic.gpt_interface.builder import build_prompt
-from hqla_risk_metrics.scenario_shocks import YCSteepening
+
+# Ensure access to local src
+sys.path.append(os.path.abspath("./agentic/src"))
+sys.path.append(os.path.abspath("./hqla_risk_metrics"))
+
+from assets import Level1Asset, Level2AAsset, Level2BAsset
+from scenario_shocks import YCFlattening, YCSteepening
+
+from agentic.src.portfolio import Portfolio
+from scenario_gen.common.scenario import (
+    ImpactChannels,
+    Probability,
+    Scenario,
+    ScenarioFamily,
+)
+
+
+def wrap_irr_scenario(irr_obj) -> Scenario:
+    """
+    Convert a YCSteepening / YCFlattening object into a Scenario dataclass.
+    """
+    return Scenario(
+        name=irr_obj.name,
+        family=ScenarioFamily.IRR,
+        description=f"{irr_obj.name} scenario with magnitude {irr_obj.magnitude}",
+        rationale="Interest rate move applied to long-duration assets",
+        probability=Probability(value=irr_obj.probability),
+        impact=ImpactChannels(
+            delta_LCR_bps=None,
+            delta_NSFR_bps=None,
+            delta_RWA_pct=None,
+            delta_NII_bps=None,
+        ),
+        assumptions=f"Magnitude: {irr_obj.magnitude}",
+        sources=["Internal IRR model"],
+    )
 
 
 def run_demo():
-    # build a flexible portfolio
-    p = Portfolio(
+    # Build sample portfolio
+    portfolio = Portfolio(
         total_expected_outflows_30d=120_000_000,
         required_stable_funding=150_000_000,
     )
-    p.add_asset(Level1Asset("Cash", 100_000_000))
-    p.add_asset(Level1Asset("UST_10Y", 50_000_000))
-    p.add_asset(Level2AAsset("Covered_Bond", 30_000_000))
-    p.add_asset(Level2BAsset("Corp_Bond", 20_000_000))
+    portfolio.add_asset(Level1Asset("Cash", 100_000_000))
+    portfolio.add_asset(Level1Asset("UST_10Y", 50_000_000))
+    portfolio.add_asset(Level2AAsset("Covered_Bond", 30_000_000))
+    portfolio.add_asset(Level2BAsset("Corp_Bond", 20_000_000))
 
-    # define a test scenario (could be replaced with liquidity, credit, etc.)
-    scenario = YCSteepening(magnitude=0.05)
+    # Create IRR scenarios
+    irr_scenarios = [YCSteepening(), YCFlattening()]
+    all_scenarios = [wrap_irr_scenario(s) for s in irr_scenarios]
 
-    # apply scenario
-    p_scenario = scenario.apply(p)
+    # Apply first scenario to portfolio (example)
+    p_scenario = irr_scenarios[0].apply(portfolio)
 
-    # build deterministic prompt (no LLM call)
-    prompt = build_prompt(p_scenario, scenario)
+    # Build prompt string
+    prompt = build_prompt(portfolio, all_scenarios)
 
-    print("\n=== GENERATED QUERY PROMPT ===\n")
+    print("\n=== GENERATED GPT PROMPT ===\n")
     print(prompt)
-    print("\n=== END OF PROMPT ===\n")
+
+
+def main():
+    run_demo()
 
 
 if __name__ == "__main__":
-    run_demo()
+    main()

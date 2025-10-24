@@ -5,10 +5,17 @@ Defines interest rate risk scenarios and how they impact HQLA portfolios,
 including historical probabilities.
 
 Author: Togay Atmaca
-Created: 2025-10-19
+Updated: 2025-10-24
 """
 
 from portfolio import Asset, Portfolio
+
+from scenario_gen.common.scenario import (
+    ImpactChannels,
+    Probability,
+    Scenario,
+    ScenarioFamily,
+)
 
 
 class YieldCurveScenario:
@@ -33,6 +40,23 @@ class YieldCurveScenario:
         """
         raise NotImplementedError("Child classes must implement apply method.")
 
+    def to_scenario_dataclass(
+        self, impact: ImpactChannels = None, description: str = "", rationale: str = ""
+    ) -> Scenario:
+        """
+        Convert this YieldCurveScenario into a Scenario dataclass for unified handling.
+        """
+        if impact is None:
+            impact = ImpactChannels()
+        return Scenario(
+            name=self.name,
+            family=ScenarioFamily.IRR,
+            description=description or self.name,
+            rationale=rationale or "",
+            probability=Probability(value=self.probability),
+            impact=impact,
+        )
+
 
 class YCSteepening(YieldCurveScenario):
     """Yield curve steepening scenario."""
@@ -44,13 +68,13 @@ class YCSteepening(YieldCurveScenario):
 
     def apply(self, portfolio: Portfolio) -> Portfolio:
         new_portfolio = Portfolio(
-            total_expected_outflows_30d=120_000_000, required_stable_funding=150_000_000
+            total_expected_outflows_30d=portfolio.total_expected_outflows_30d,
+            required_stable_funding=portfolio.required_stable_funding,
         )
         for cat, assets in portfolio.assets.items():
             for asset in assets:
                 new_asset = asset  # shallow copy; deepcopy if needed
                 if "UST" in asset.name:
-                    # reduce market value proportional to magnitude
                     new_asset.market_value *= 1 - self.magnitude
                 new_portfolio.add_asset(new_asset)
         return new_portfolio
@@ -66,13 +90,13 @@ class YCFlattening(YieldCurveScenario):
 
     def apply(self, portfolio: Portfolio) -> Portfolio:
         new_portfolio = Portfolio(
-            total_expected_outflows_30d=120_000_000, required_stable_funding=150_000_000
+            total_expected_outflows_30d=portfolio.total_expected_outflows_30d,
+            required_stable_funding=portfolio.required_stable_funding,
         )
         for cat, assets in portfolio.assets.items():
             for asset in assets:
                 new_asset = asset
                 if "UST" in asset.name:
-                    # flattening may reduce long-dated treasuries less
                     new_asset.market_value *= 1 - self.magnitude / 2
                 new_portfolio.add_asset(new_asset)
         return new_portfolio
