@@ -7,6 +7,7 @@ BASE_90D = 0.25 #TODO make a config file
 SENSITIVITY = 0.6
 CAP = 0.80
 
+# TODO this is basic update to use some regression or smth
 def composite_probs(X: pd.DataFrame) -> pd.DataFrame:
     zcols = [c for c in X.columns if c.endswith("_z_252") and any(k in c for k in ["MOVE","SURPRISE","EFFR"])]
     if not zcols:
