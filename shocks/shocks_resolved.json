@@ -1,0 +1,29 @@
+{
+  "credit/compress": {
+    "HY_OAS_bp": -50,
+    "IG_OAS_bp": -20
+  },
+  "credit/mild": {
+    "HY_OAS_bp": 70,
+    "IG_OAS_bp": 30
+  },
+  "credit/severe": {
+    "HY_OAS_bp": 200,
+    "IG_OAS_bp": 80
+  },
+  "interest_rate/bear_steepen": {
+    "DGS10_bp": 30,
+    "DGS2_bp": 10,
+    "SLOPE_2s10s_bps": 20
+  },
+  "interest_rate/bull_flatten": {
+    "DGS10_bp": -10,
+    "DGS2_bp": -25,
+    "SLOPE_2s10s_bps": -15
+  },
+  "liquidity/stress": {
+    "MOVE_pts": 25,
+    "SLOPE_2s10s_bps": -20,
+    "funding_spread_bp": 15
+  }
+}

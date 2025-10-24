@@ -1,0 +1,4 @@
+# Units: basis points (bp) for OAS; positive = spread widening
+mild: { IG_OAS_bp: 30,  HY_OAS_bp: 70 }
+severe: { IG_OAS_bp: 80,  HY_OAS_bp: 200 }
+compress: { IG_OAS_bp: -20, HY_OAS_bp: -50 }

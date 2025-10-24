@@ -6,6 +6,8 @@ from scenario_gen.credit_risk.probs import compute_credit_probs
 from scenario_gen.liquidity_risk.probs import compute_liquidity_probs
 from scenario_gen.interest_rate_risk.irr_probs import compute_irr_probs
 
+# ㅊ 다녀감
+
 ROOT = Path(__file__).resolve().parents[1]
 FEATS = ROOT / "new_credit_data" / "credit_features.csv"
 OUT  = ROOT / "scenario_gen" / "combined_probabilities.csv"
