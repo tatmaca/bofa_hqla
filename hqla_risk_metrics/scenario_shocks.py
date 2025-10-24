@@ -23,6 +23,7 @@ class YieldCurveScenario:
         self.name = name
         self.magnitude = magnitude
         self.probability = probability
+        self.scenario_type = "interest_rate"
 
     def apply(self, portfolio: Portfolio) -> Portfolio:
         """
