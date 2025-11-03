@@ -122,7 +122,7 @@ open tools/ust_curve/llm/plots/ust_curve_2025-10-30.png
 
 ---
 
-## 🔍 Analyze a Snapshot Manually
+## Analyze a Snapshot Manually
 
 ```bash
 python tools/ust_curve/llm/analyze_snapshot.py   tools/ust_curve/llm/snapshots/curve_snapshot_2025-10-30.json
