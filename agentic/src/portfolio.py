@@ -47,6 +47,13 @@ class Portfolio:
         """Liquidate portfolio and return total proceeds."""
         return sum(a.liquidate() for group in self.assets.values() for a in group)
 
+    def get_asset(self, name: str):
+        for group in self.assets.values():
+            for a in group:
+                if a.name == name:
+                    return a
+        return None
+
     def summary(self) -> Dict[str, float]:
         """Return aggregate values per asset class."""
         return {

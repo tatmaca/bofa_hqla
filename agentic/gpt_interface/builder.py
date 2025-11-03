@@ -16,17 +16,6 @@ from scenario_gen.common.scenario import Scenario
 
 
 def build_prompt(portfolio: Portfolio, scenarios: List[Scenario]) -> str:
-    """
-    Construct a prompt string for an LLM that includes the portfolio summary
-    and multiple scenarios of different families.
-
-    Args:
-        portfolio: Portfolio object (any composition of L1/L2A/L2B assets)
-        scenarios: List of Scenario objects (IRR, Liquidity, Credit, etc.)
-
-    Returns:
-        A single string prompt ready to submit to an LLM.
-    """
     summary_str = summarize_portfolio(portfolio)
     blocks = [f"Portfolio summary:\n```{summary_str}```\n"]
 
@@ -41,15 +30,60 @@ def build_prompt(portfolio: Portfolio, scenarios: List[Scenario]) -> str:
             f"Impact Channels: {row['Impact Channels']}\n"
         )
 
+    json_schema = """
+JSON_SCHEMA = {
+  "type": "object",
+  "required": ["scenario_impact", "recommended_reallocation", "rationale", "metadata"],
+  "properties": {
+    "scenario_impact": {"type": "string"},
+    "recommended_reallocation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset", "action", "notional"],
+        "properties": {
+          "asset": {"type": "string"},
+          "action": {"type": "string", "enum": ["buy", "sell"]},
+          "notional": {"type": "number"}
+        }
+      }
+    },
+    "rationale": {"type": "string"},
+    "metadata": {
+      "type": "object",
+      "required": ["before", "after"],
+      "properties": {
+        "before": {
+          "type": "object",
+          "required": ["LCR", "NSFR", "RWA"],
+          "properties": {
+            "LCR": {"type": "number"},
+            "NSFR": {"type": "number"},
+            "RWA": {"type": "number"}
+          }
+        },
+        "after": {
+          "type": "object",
+          "required": ["LCR", "NSFR", "RWA"],
+          "properties": {
+            "LCR": {"type": "number"},
+            "NSFR": {"type": "number"},
+            "RWA": {"type": "number"}
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
     prompt = (
         "You are a financial analyst AI. "
-        "Provide recommended portfolio reallocations to optimize LCR, NSFR, and RWA, "
-        "while respecting regulatory guardrails. "
-        "Output strictly in JSON with the following keys:\n"
-        "  - scenario_impact: textual summary of portfolio changes\n"
-        "  - recommended_reallocation: list of dicts {asset, action, notional}\n"
-        "  - rationale: justification of reallocation\n"
-        "  - metadata: dictionary of LCR, NSFR, RWA before and after scenario\n\n"
+        "Respond only with JSON. "
+        "Follow the provided JSON_SCHEMA exactly. "
+        "No commentary. No markdown. No underscores in numbers.\n\n"
+        + json_schema
+        + "\n\nScenario Data:\n"
         + "\n".join(blocks)
     )
 

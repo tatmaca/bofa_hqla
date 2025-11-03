@@ -7,6 +7,7 @@ Prints GPT prompt based on portfolio and multiple scenario types (IRR, Liquidity
 Author: Togay Atmaca
 """
 
+import json
 import os
 import sys
 from datetime import datetime
@@ -70,6 +71,43 @@ def build_liquidity_scenario() -> Scenario:
     )
 
 
+CATEGORY_MAP = {
+    "L1": Level1Asset,
+    "L2A": Level2AAsset,
+    "L2B": Level2BAsset,
+}
+
+
+def apply_recommended_reallocation(portfolio: Portfolio, model_response: str):
+    data = json.loads(model_response)
+    reallocs = data.get("recommended_reallocation", [])
+
+    for r in reallocs:
+        asset_name = r["asset"]
+        action = r["action"]
+        amount = r["notional"]
+
+        asset = portfolio.get_asset(asset_name)
+
+        if asset is None:
+            raise ValueError(f"Unknown asset {asset_name}")
+
+        if action == "sell":
+            if asset.market_value < amount:
+                raise ValueError(
+                    f"Cannot sell {amount}. Only {asset.market_value} exists."
+                )
+            asset.market_value -= amount
+
+        elif action == "buy":
+            asset.market_value += amount
+
+        else:
+            raise ValueError(f"Unsupported action {action}")
+
+    return portfolio
+
+
 def main():
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -106,13 +144,25 @@ def main():
 
     # ---- NEW: Send to API ----
     response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2,
+        model="gpt-4.1",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+        temperature=1,
     )
 
     print("\n=== MODEL RESPONSE ===\n")
     print(response.choices[0].message.content)
+
+    approve = input("Apply reallocation? (y/n): ").lower()
+    if approve == "y":
+        apply_recommended_reallocation(portfolio, response.choices[0].message.content)
+        print("\nUpdated summary:", portfolio.summary())
+    else:
+        print("No changes made.")
 
 
 if __name__ == "__main__":
