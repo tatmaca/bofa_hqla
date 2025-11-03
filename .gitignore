@@ -1,0 +1,9 @@
+
+# curve runner outputs
+tools/ust_curve/ust_zero_curve_*.csv
+tools/ust_curve/ust_zero_curve_*.json
+tools/ust_curve/ust_zero_curve_*.png
+__pycache__/
+.ipynb_checkpoints/
+.venv/
+venv/
