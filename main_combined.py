@@ -9,12 +9,14 @@ Author: Togay Atmaca
 
 import json
 import os
+import re
 import sys
 from datetime import datetime
 
 from openai import OpenAI
 
 from agentic.gpt_interface.builder import build_prompt
+from agentic.gpt_interface.portfolio_summary import summarize_portfolio
 
 # Ensure access to local src
 sys.path.append(os.path.abspath("./agentic/src"))
@@ -155,12 +157,14 @@ def main():
     )
 
     print("\n=== MODEL RESPONSE ===\n")
-    print(response.choices[0].message.content)
+    model_response = response.choices[0].message.content
+    model_response = re.sub(r"(?<=\d)_(?=\d)", "", model_response)
+    print(model_response)
 
     approve = input("Apply reallocation? (y/n): ").lower()
     if approve == "y":
-        apply_recommended_reallocation(portfolio, response.choices[0].message.content)
-        print("\nUpdated summary:", portfolio.summary())
+        apply_recommended_reallocation(portfolio, model_response)
+        print("\nUpdated summary:\n", summarize_portfolio(portfolio))
     else:
         print("No changes made.")
 
