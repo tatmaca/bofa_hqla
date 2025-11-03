@@ -11,6 +11,8 @@ import os
 import sys
 from datetime import datetime
 
+from openai import OpenAI
+
 from agentic.gpt_interface.builder import build_prompt
 
 # Ensure access to local src
@@ -69,6 +71,8 @@ def build_liquidity_scenario() -> Scenario:
 
 
 def main():
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
     portfolio = demo_portfolio()
 
     # Build IRR scenarios
@@ -99,6 +103,16 @@ def main():
     prompt = build_prompt(portfolio, all_scenarios)
     print("\n=== GENERATED GPT PROMPT ===\n")
     print(prompt)
+
+    # ---- NEW: Send to API ----
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2,
+    )
+
+    print("\n=== MODEL RESPONSE ===\n")
+    print(response.choices[0].message.content)
 
 
 if __name__ == "__main__":
