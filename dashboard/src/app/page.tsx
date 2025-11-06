@@ -490,11 +490,50 @@ function FlowCanvas({
           );
         })}
 
-        {/* Smooth loop back from News to top of MAD */}
-        <path
-          d={`M ${nodes[5].x+26} ${nodes[5].y} C ${nodes[5].x+320} -140, ${nodes[1].x-320} -140, ${nodes[1].x} ${nodes[1].y-34}`}
-          fill="none" stroke="#94a3b8" strokeWidth="3.6" markerEnd="url(#arrow-strong)"
-        />
+        {/* Staple-style loop: up from top of News → left across → down into top-center of Debate */}
+        {(() => {
+          // Node circle radius must match the circle r used below
+          const Rnode = 32;
+
+          // News node (index 5) top point
+          const newsX = nodes[5].x;
+          const newsYTop = nodes[5].y - Rnode;
+
+          // Debate node (index 1) top center point
+          const debX = nodes[1].x;
+          const debYTop = nodes[1].y - Rnode;
+
+          // Top rail height (a bit above the nodes row)
+          const topY = Math.min(nodes[1].y, nodes[5].y) - 140;
+
+          // Corner radius for soft right-angle turns
+          const r = 18;
+
+          const d = [
+            // Start at top of News, go straight up to the top rail (with rounded corner onto the rail)
+            `M ${newsX} ${newsYTop}`,
+            `V ${topY + r}`,
+            `Q ${newsX} ${topY} ${newsX - r} ${topY}`,
+            // Go left across the top rail toward Debate (round corner to point downward)
+            `H ${debX + r}`,
+            `Q ${debX} ${topY} ${debX} ${topY + r}`,
+            // Go straight down into the top-center of Debate, so arrowhead points down
+            `V ${debYTop + 2}`
+          ].join(' ');
+
+          return (
+            <path
+              d={d}
+              fill="none"
+              stroke="#64748b"
+              strokeWidth="3.8"
+              strokeOpacity="0.45"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              markerEnd="url(#arrow-strong)"
+            />
+          );
+        })()}
 
         {/* Nodes */}
         {nodes.map((n, idx)=> (
