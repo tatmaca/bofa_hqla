@@ -123,15 +123,15 @@ class DiscountInstrument(HQLAInstrument):
 # Levels
 class Level1:
     haircut = 0.0
-    lcr_weight = 1.0
+    max_lcr_weight = 1.0
 
 class Level2A:
     haircut = 0.15
-    lcr_weight = 0.85
+    max_lcr_weight = 0.40
 
 class Level2B:
     haircut = 0.25
-    lcr_weight = 0.75
+    max_lcr_weight = 0.15
 
 # Examples of Level1, Level2A, and Level2B instruments to use in portfolio 
 
