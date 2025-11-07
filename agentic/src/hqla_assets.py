@@ -5,17 +5,8 @@ from abc import ABC, abstractmethod
 HQLAInstrument (abstract base)
 │
 ├── FixedRateInstrument
-│   ├── Level1Fixed 
-│   ├── Level2AFixed
-│   └── Level2BFixed
-│
 ├── FloatingRateInstrument
-│   ├── Level1Floating
-│   └── Level2AFloating
-│
 └── DiscountInstrument
-    ├── TBill
-    └── CommercialPaper
 """
 
 class HQLAInstrument(ABC):
