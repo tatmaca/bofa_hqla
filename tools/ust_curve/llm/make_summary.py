@@ -2,7 +2,12 @@
 import os, sys, json, argparse
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+# Get repo root - use git if available, otherwise go up 3 levels from script location
+try:
+    import subprocess as sp
+    ROOT = Path(sp.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True).stdout.strip())
+except:
+    ROOT = Path(__file__).resolve().parents[3]  # repo root
 OUT_DIR = ROOT / "tools" / "ust_curve" / "llm" / "summaries"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 

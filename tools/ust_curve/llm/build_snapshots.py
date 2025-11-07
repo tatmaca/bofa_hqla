@@ -3,7 +3,12 @@ import os, sys, json, argparse, math, datetime as dt
 from pathlib import Path
 
 # --- Make repo root importable (so run_curve & book_irds3 work) ---
-ROOT = Path(__file__).resolve().parents[2]  # repo root
+# Script is in tools/ust_curve/llm/, so go up 3 levels to get repo root
+try:
+    import subprocess as sp
+    ROOT = Path(sp.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True).stdout.strip())
+except:
+    ROOT = Path(__file__).resolve().parents[3]  # repo root
 sys.path.append(str(ROOT))
 
 from tools.ust_curve import run_curve as rc  # reuse fetch/solve helpers
