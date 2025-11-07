@@ -289,7 +289,9 @@ def check_dependencies():
             else:
                 __import__(dep)
                 deps[dep] = True
-        except ImportError:
+        except (ImportError, AttributeError, Exception):
+            # Catch all exceptions including NumPy compatibility issues
+            # Silently mark as unavailable
             pass
     
     required = ["feedparser", "trafilatura", "aiolimiter", "beautifulsoup4"]
