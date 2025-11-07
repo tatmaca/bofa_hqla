@@ -215,21 +215,20 @@ def run_daily_pipeline(date: str = None):
     except Exception as e:
         print(f"[ERROR] Training data prep failed: {e}", file=sys.stderr)
     
-    # Step 6: Train/Retrain Models (if enough data)
-    print("\n[6/6] Training Models...")
+    # Step 6: Train/Retrain Models (rolling 30-day window)
+    print("\n[6/6] Training Models (Rolling 30-Day Window)...")
     try:
-        X, y = prepare_training_data(min_days=7)
-        if X is not None and len(X) >= 7:
-            models = train_models(X, y, test_size=0.2)
-            if models:
-                save_models(models, date)
-                print("[OK] Models trained successfully")
-            else:
-                print("[WARN] Model training returned no results")
-        else:
-            print(f"[INFO] Insufficient data for training ({len(X) if X is not None else 0} samples)")
+        # Use rolling 30-day window for model updates
+        from update_models_rolling import update_models_with_rolling_window
+        success = update_models_with_rolling_window(days=30, threshold_mae=3.0)
+        if not success:
+            print("[INFO] Model update skipped - insufficient data or dependencies")
+    except ImportError as e:
+        print(f"[INFO] Model training skipped - dependencies not available: {e}")
     except Exception as e:
         print(f"[ERROR] Model training failed: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
     
     print(f"\n{'='*60}")
     print(f"PIPELINE COMPLETE - {date}")
