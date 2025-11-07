@@ -176,6 +176,20 @@ Check system status:
 python3 check_status.py
 ```
 
+**Comprehensive health check:**
+```bash
+python3 health_check.py
+```
+
+This checks:
+- Database health and data counts
+- Recent pipeline runs
+- Recent data collection
+- Log files
+- Model file updates
+- Automation setup
+- Dependency availability
+
 View recent logs:
 ```bash
 ls -t logs/daily_pipeline_*.log | head -1 | xargs cat
