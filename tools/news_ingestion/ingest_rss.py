@@ -1,4 +1,4 @@
-import feedparser, yaml, datetime as dt, pytz
+import feedparser, yaml, datetime as dt, pytz, os
 from datetime import timezone
 import asyncio
 import concurrent.futures
@@ -56,11 +56,32 @@ def process_entry(e, cutoff_utc, strict):
             art = {"status": "fetch_failed", "title": getattr(e, "title", None),
                    "author": None, "published_at": published, "text": None}
 
+    # Use historical end of day UTC if set, otherwise current time
+    fetched_at_str = os.getenv("_HISTORICAL_END_OF_DAY_UTC")
+    if fetched_at_str:
+        fetched_at = dt.datetime.fromisoformat(fetched_at_str)
+    else:
+        fetched_at = dt.datetime.now(timezone.utc)
+    
+    # Ensure published_at is not after target date (if in historical mode)
+    published_dt = None
+    if published:
+        try:
+            published_dt = dt.datetime.fromisoformat(published)
+        except:
+            pass
+    
+    if published_dt and fetched_at_str:
+        # Historical mode: ensure no future articles
+        end_of_day_utc = dt.datetime.fromisoformat(fetched_at_str)
+        if published_dt > end_of_day_utc:
+            return None  # Reject articles published after target date
+    
     rec = {
         "url": url,
         "source": src,
         "published_at": published or art.get("published_at"),
-        "fetched_at": dt.datetime.now(timezone.utc).isoformat(),
+        "fetched_at": fetched_at.isoformat(),
         "title": art.get("title") or getattr(e, "title", None),
         "author": art.get("author"),
         "summary": getattr(e, "summary", None),
@@ -82,9 +103,29 @@ def process_feed(feed_url):
         print(f"[WARN] Failed to parse feed {feed_url}: {e}")
         return []
 
-def run():
+def run(target_date: dt.date = None):
+    """Run RSS ingestion. If target_date is provided, only collect articles published on or before that date."""
     tz = pytz.timezone(CONFIG.get("timezone", "America/Chicago"))
-    cutoff_utc = (dt.datetime.now(tz) - dt.timedelta(hours=CONFIG.get("window_hours", 24))).astimezone(dt.timezone.utc)
+    
+    # Support historical dates via environment variable or parameter
+    if target_date is None:
+        target_date_str = os.getenv("TARGET_DATE")
+        if target_date_str:
+            target_date = dt.datetime.strptime(target_date_str, "%Y-%m-%d").date()
+    
+    if target_date:
+        # Historical mode: end of target date
+        end_of_day_local = dt.datetime.combine(target_date, dt.time(23, 59, 59))
+        end_of_day_local = tz.localize(end_of_day_local)
+        end_of_day_utc = end_of_day_local.astimezone(dt.timezone.utc)
+        cutoff_utc = end_of_day_utc - dt.timedelta(hours=CONFIG.get("window_hours", 24))
+        # Store for use in process_entry
+        os.environ["_HISTORICAL_END_OF_DAY_UTC"] = end_of_day_utc.isoformat()
+    else:
+        # Current mode
+        cutoff_utc = (dt.datetime.now(tz) - dt.timedelta(hours=CONFIG.get("window_hours", 24))).astimezone(dt.timezone.utc)
+        end_of_day_utc = dt.datetime.now(dt.timezone.utc)
+    
     strict = CONFIG.get("strict_24h", True)
 
     # Parallel RSS feed parsing
