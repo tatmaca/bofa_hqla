@@ -1,0 +1,19 @@
+# Core dependencies for news ingestion
+feedparser>=6.0.10
+pyyaml>=6.0
+pytz>=2023.3
+beautifulsoup4>=4.12.0
+trafilatura>=1.6.0
+python-dateutil>=2.8.2
+
+# Async web crawling
+aiohttp>=3.9.0
+aiolimiter>=1.1.0
+
+# ML/Analytics (optional but recommended)
+numpy>=1.24.0
+scikit-learn>=1.3.0
+
+# LLM (optional - for bucketing and analysis)
+openai>=1.0.0
+
