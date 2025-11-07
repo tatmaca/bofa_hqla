@@ -1,4 +1,5 @@
 import feedparser, yaml, datetime as dt, pytz
+from datetime import timezone
 import asyncio
 import concurrent.futures
 from urllib.parse import urlparse
@@ -59,7 +60,7 @@ def process_entry(e, cutoff_utc, strict):
         "url": url,
         "source": src,
         "published_at": published or art.get("published_at"),
-        "fetched_at": dt.datetime.utcnow().isoformat(),
+        "fetched_at": dt.datetime.now(timezone.utc).isoformat(),
         "title": art.get("title") or getattr(e, "title", None),
         "author": art.get("author"),
         "summary": getattr(e, "summary", None),

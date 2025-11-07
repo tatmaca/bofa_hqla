@@ -1,4 +1,5 @@
 import sqlite3, hashlib, os, datetime as dt
+from datetime import timezone
 
 DB_PATH = os.environ.get("NEWS_DB_PATH", "news.db")
 
@@ -42,14 +43,14 @@ def seen_recent(url:str, days:int=7)->bool:
     if not row: return False
     try:
         fetched = dt.datetime.fromisoformat(row["fetched_at"])
-        return (dt.datetime.utcnow() - fetched).days < days
+        return (dt.datetime.now(timezone.utc) - fetched).days < days
     except: return True
 
 def start_ingestion_run(run_date: str = None):
     """Start tracking a daily ingestion run."""
     if run_date is None:
         run_date = dt.date.today().isoformat()
-    started_at = dt.datetime.utcnow().isoformat()
+    started_at = dt.datetime.now(timezone.utc).isoformat()
     with get_conn() as c:
         c.execute("""
             INSERT OR IGNORE INTO ingestion_runs (run_date, started_at, status)
@@ -61,7 +62,7 @@ def complete_ingestion_run(run_date: str, rss_processed: int = 0, rss_skipped: i
                            crawl_processed: int = 0, crawl_skipped: int = 0,
                            status: str = "completed", error_message: str = None):
     """Complete tracking a daily ingestion run."""
-    completed_at = dt.datetime.utcnow().isoformat()
+    completed_at = dt.datetime.now(timezone.utc).isoformat()
     # Count new articles added today
     with get_conn() as c:
         new_count = c.execute("""

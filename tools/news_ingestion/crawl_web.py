@@ -15,7 +15,7 @@ import aiohttp
 import xml.etree.ElementTree as ET
 
 from typing import Optional
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone as tz
 from urllib.parse import urlparse, urljoin
 from urllib import robotparser
 from aiolimiter import AsyncLimiter
@@ -316,7 +316,7 @@ async def fetch_and_store(session: aiohttp.ClientSession, url: str) -> None:
             "url": url,
             "source": host,
             "published_at": published_at,
-            "fetched_at": datetime.utcnow().isoformat(),
+            "fetched_at": datetime.now(tz.utc).isoformat(),
             "title": art.get("title"),
             "author": art.get("author"),
             "summary": None,

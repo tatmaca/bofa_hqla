@@ -9,6 +9,7 @@ import json
 import yaml
 import sqlite3
 import datetime as dt
+from datetime import timezone
 from typing import Dict, List, Optional
 from pathlib import Path
 
@@ -211,7 +212,7 @@ def save_analysis(date: str, analysis: Dict, bucketed_news: Dict[str, List[Dict]
         "news_summary": {
             bucket: len(articles) for bucket, articles in bucketed_news.items()
         },
-        "created_at": dt.datetime.utcnow().isoformat()
+        "created_at": dt.datetime.now(timezone.utc).isoformat()
     }
     
     output_path = output_dir / f"yield_impact_{date}.json"

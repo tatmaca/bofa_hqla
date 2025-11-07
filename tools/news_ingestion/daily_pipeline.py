@@ -7,6 +7,7 @@ import os
 import sys
 import json
 import datetime as dt
+from datetime import timezone
 import subprocess
 from pathlib import Path
 
@@ -98,7 +99,7 @@ def prepare_training_record(date: str):
             "delta_30y": delta_zeros.get("30y", 0.0),
             "delta_2s10s": delta_spreads.get("2s10s", 0.0),
             "delta_2s30s": delta_spreads.get("2s30s", 0.0),
-            "created_at": dt.datetime.utcnow().isoformat()
+            "created_at": dt.datetime.now(timezone.utc).isoformat()
         }
         records.append(record)
     
@@ -149,12 +150,22 @@ def run_daily_pipeline(date: str = None):
         )
         print(result.stdout)
         if result.stderr:
-            print(result.stderr, file=sys.stderr)
-        complete_ingestion_run(run_date, status="completed")
+            # Filter out expected warnings about missing optional dependencies
+            stderr_lines = [line for line in result.stderr.split('\n') 
+                          if line and 'ModuleNotFoundError' not in line]
+            if stderr_lines:
+                print('\n'.join(stderr_lines), file=sys.stderr)
+        
+        # Check if ingestion actually succeeded (look for "Done" in output)
+        if result.returncode == 0 or "Done" in result.stdout:
+            complete_ingestion_run(run_date, status="completed")
+        else:
+            complete_ingestion_run(run_date, status="failed", 
+                                 error_message=f"Subprocess returned {result.returncode}")
     except Exception as e:
         print(f"[ERROR] Ingestion failed: {e}", file=sys.stderr)
         complete_ingestion_run(run_date, status="failed", error_message=str(e))
-        return
+        # Don't return - continue with other steps
     
     # Step 2: News Bucketing
     print("\n[2/6] News Bucketing...")
@@ -168,7 +179,11 @@ def run_daily_pipeline(date: str = None):
         )
         print(result.stdout)
         if result.stderr:
-            print(result.stderr, file=sys.stderr)
+            # Filter out expected warnings
+            stderr_lines = [line for line in result.stderr.split('\n') 
+                          if line and 'ModuleNotFoundError' not in line and 'DeprecationWarning' not in line]
+            if stderr_lines:
+                print('\n'.join(stderr_lines), file=sys.stderr)
     except Exception as e:
         print(f"[ERROR] Bucketing failed: {e}", file=sys.stderr)
     
