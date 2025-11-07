@@ -14,8 +14,14 @@ from typing import Optional
 sys.path.insert(0, str(Path(__file__).parent))
 
 from collect_training_data import collect_training_data, save_training_data
-from train_xgboost import train_models, load_training_data, evaluate_accuracy, save_models
-from enhance_predictions import load_latest_xgb_models
+
+# Import XGBoost functions only if available
+try:
+    from train_xgboost import train_models, load_training_data, evaluate_accuracy, save_models
+    HAS_XGBOOST_TRAIN = True
+except (ImportError, AttributeError) as e:
+    HAS_XGBOOST_TRAIN = False
+    print(f"[WARN] XGBoost training not available: {e}")
 
 def get_rolling_window_dates(days: int = 30) -> tuple:
     """Get start and end dates for rolling window."""
@@ -53,6 +59,12 @@ def update_models_with_rolling_window(days: int = 30, threshold_mae: float = 3.0
     
     # Step 2: Train models
     print(f"\n[STEP 2] Training XGBoost models on {len(training_data)} examples...")
+    
+    if not HAS_XGBOOST_TRAIN:
+        print("[ERROR] XGBoost training not available")
+        print("[INFO] Install OpenMP: brew install libomp")
+        print("[INFO] Or use conda: conda install -c conda-forge xgboost")
+        return False
     
     try:
         X, y, dates = load_training_data(data_path)
