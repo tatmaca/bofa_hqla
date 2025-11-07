@@ -17,9 +17,11 @@ try:
     from sklearn.model_selection import train_test_split, cross_val_score, TimeSeriesSplit
     from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
     HAS_XGBOOST = True
-except ImportError:
+except (ImportError, AttributeError) as e:
     HAS_XGBOOST = False
-    print("[WARN] XGBoost not installed. Install with: pip install xgboost")
+    xgb = None  # Set to None to avoid NameError
+    print(f"[WARN] XGBoost not available: {e}")
+    print("[WARN] Install with: pip install 'numpy<2.0' xgboost")
 
 TENORS = ["2y", "5y", "10y", "30y"]
 SPREADS = ["2s10s", "2s30s"]
@@ -66,8 +68,10 @@ def load_training_data(data_path: Path) -> Tuple[np.ndarray, Dict[str, np.ndarra
 
 def train_xgboost_model(X_train: np.ndarray, y_train: np.ndarray,
                        X_val: np.ndarray, y_val: np.ndarray,
-                       target_name: str) -> Tuple[xgb.XGBRegressor, Dict]:
+                       target_name: str) -> Tuple[Optional[object], Dict]:
     """Train XGBoost model for a single target."""
+    if not HAS_XGBOOST or xgb is None:
+        raise ImportError("XGBoost not available")
     
     # XGBoost parameters - tuned for financial time series
     params = {

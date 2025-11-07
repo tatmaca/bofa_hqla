@@ -15,8 +15,10 @@ import datetime as dt
 try:
     import xgboost as xgb
     HAS_XGBOOST = True
-except ImportError:
+except (ImportError, AttributeError) as e:
     HAS_XGBOOST = False
+    xgb = None
+    print(f"[WARN] XGBoost not available: {e}")
 
 from bucket_news import get_bucket_counts, BUCKETS
 from analyze_yield_impact import analyze_yield_impact, get_bucketed_news, load_curve_snapshot, extract_llm_features

@@ -87,20 +87,33 @@ def collect_training_data(start_date: str, end_date: str) -> List[Dict]:
     
     print(f"[COLLECT] Collecting data for {len(dates)} dates from {start_date} to {end_date}")
     
+    missing_news = []
+    missing_llm = []
+    missing_snapshots = []
+    
     for date in dates:
         # Get news buckets
         bucket_counts = get_bucket_counts(date)
         if not bucket_counts:
+            missing_news.append(date)
             continue
         
         # Get LLM prediction
         llm_pred = get_llm_prediction(date)
         if not llm_pred:
+            missing_llm.append(date)
+            continue
+        
+        # Check if LLM prediction is valid (not fallback)
+        predictions = llm_pred.get("predictions", {})
+        if not predictions or any("Fallback" in pred.get("reasoning", "") for pred in predictions.values()):
+            missing_llm.append(date)
             continue
         
         # Get actual yield changes
         actual = get_actual_yield_changes(date)
         if not actual:
+            missing_snapshots.append(date)
             continue
         
         # Extract features
@@ -129,6 +142,13 @@ def collect_training_data(start_date: str, end_date: str) -> List[Dict]:
         })
     
     print(f"[COLLECT] Collected {len(training_data)} complete training examples")
+    if missing_news:
+        print(f"[COLLECT] Missing news buckets: {len(missing_news)} dates")
+    if missing_llm:
+        print(f"[COLLECT] Missing LLM predictions: {len(missing_llm)} dates")
+    if missing_snapshots:
+        print(f"[COLLECT] Missing yield snapshots: {len(missing_snapshots)} dates")
+    
     return training_data
 
 def save_training_data(training_data: List[Dict], output_path: Path):
