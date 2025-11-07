@@ -30,3 +30,11 @@
 
 ---
 
+**UST Yield Curve Summary — 2025-11-03 vs 2025-10-31**
+- Largest yield increase: 10y (+0.02%) → Bear-steepening bias.
+- 2s10s spread = 0.577% (steepened by 2.2 bps).
+- Average shift: yields rose by 1.2 bps (bearish tone).
+- Risks: No immediate structural risks detected.
+
+---
+

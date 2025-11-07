@@ -57,7 +57,7 @@ python3 -c "from bucket_news import get_bucket_counts; import json; print(json.d
 
 ```bash
 # Set API key
-export OPENAI_API_KEY="your-key-here"
+export OPENAI_API_KEY="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"
 
 # Run analysis
 python3 analyze_yield_impact.py --date 2025-11-06
