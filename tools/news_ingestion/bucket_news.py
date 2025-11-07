@@ -17,6 +17,7 @@ import json
 import yaml
 import sqlite3
 import datetime as dt
+from datetime import timezone
 from typing import List, Dict, Optional
 from urllib.parse import urlparse
 
@@ -60,7 +61,7 @@ def get_conn():
 
 def get_unbucketed_articles(hours: int = 24) -> List[Dict]:
     """Get articles from the last N hours that haven't been bucketed."""
-    cutoff = (dt.datetime.utcnow() - dt.timedelta(hours=hours)).isoformat()
+    cutoff = (dt.datetime.now(timezone.utc) - dt.timedelta(hours=hours)).isoformat()
     with get_conn() as c:
         rows = c.execute("""
             SELECT id, url, title, text, summary, source, published_at, status
