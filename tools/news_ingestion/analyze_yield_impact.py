@@ -303,6 +303,38 @@ Respond with ONLY valid JSON in this exact format (no markdown, no code blocks):
         traceback.print_exc()
         return get_fallback_prediction()
 
+def extract_llm_features(prediction: Dict) -> Dict[str, float]:
+    """Extract features from LLM prediction for model training."""
+    features = {}
+    predictions = prediction.get("predictions", {})
+    spreads = prediction.get("spreads", {})
+    
+    # Extract magnitude and direction for each tenor/spread
+    for tenor in TENORS:
+        pred = predictions.get(tenor, {})
+        magnitude = pred.get("magnitude_bps", 0.0)
+        direction = pred.get("direction", "flat")
+        
+        # Convert direction to numeric: up=1, down=-1, flat=0
+        dir_val = 1.0 if direction == "up" else (-1.0 if direction == "down" else 0.0)
+        
+        features[f"{tenor}_pred_magnitude"] = float(magnitude)
+        features[f"{tenor}_pred_direction"] = dir_val
+        features[f"{tenor}_pred_signed"] = float(magnitude) * dir_val  # Signed magnitude
+    
+    for spread in SPREADS:
+        spred = spreads.get(spread, {})
+        magnitude = spred.get("magnitude_bps", 0.0)
+        direction = spred.get("direction", "flat")
+        
+        dir_val = 1.0 if direction == "steepen" else (-1.0 if direction == "flatten" else 0.0)
+        
+        features[f"{spread}_pred_magnitude"] = float(magnitude)
+        features[f"{spread}_pred_direction"] = dir_val
+        features[f"{spread}_pred_signed"] = float(magnitude) * dir_val
+    
+    return features
+
 def get_fallback_prediction() -> Dict:
     """Fallback prediction when LLM is unavailable."""
     return {
