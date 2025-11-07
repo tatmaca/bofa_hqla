@@ -187,9 +187,47 @@ def run_daily_pipeline(date: str = None):
     except Exception as e:
         print(f"[ERROR] Bucketing failed: {e}", file=sys.stderr)
     
-    # Step 3: Sync Yield Curve Data
+    # Step 3: Check for New Yield Curve Data and Generate Snapshot
+    print("\n[3/6] Checking for New Yield Curve Data...")
+    try:
+        # Try to generate snapshot for today (or most recent available date)
+        repo_root = Path(__file__).resolve().parents[2]
+        auto_snapshot_script = repo_root / "tools" / "ust_curve" / "llm" / "auto_snapshot.py"
+        
+        if auto_snapshot_script.exists():
+            result = subprocess.run(
+                [sys.executable, str(auto_snapshot_script), "--target-date", date, "--skip-plot", "--skip-summary"],
+                cwd=str(repo_root),
+                capture_output=True,
+                text=True,
+                timeout=600,
+                check=False
+            )
+            if result.returncode == 0:
+                print(result.stdout)
+            else:
+                print(f"[WARN] Auto-snapshot check failed: {result.stderr}")
+        else:
+            print("[WARN] Auto-snapshot script not found, skipping automatic snapshot generation")
+    except Exception as e:
+        print(f"[WARN] Auto-snapshot check failed: {e}")
+    
+    # Sync Yield Curve Data (for the date we have)
     print("\n[3/6] Syncing Yield Curve Data...")
+    # Try to sync for today, but also check for most recent available date
     sync_yield_curve_data(date)
+    
+    # Also try to sync the most recent available snapshot if today's doesn't exist
+    repo_root = Path(__file__).resolve().parents[2]
+    snapshots_dir = repo_root / "tools" / "ust_curve" / "llm" / "snapshots"
+    if snapshots_dir.exists():
+        snapshot_files = sorted(list(snapshots_dir.glob("curve_snapshot_*.json")))
+        if snapshot_files:
+            latest_snapshot = snapshot_files[-1]
+            latest_date = latest_snapshot.stem.replace("curve_snapshot_", "")
+            if latest_date != date:
+                print(f"[INFO] Also syncing most recent snapshot: {latest_date}")
+                sync_yield_curve_data(latest_date)
     
     # Step 4: LLM Yield Impact Analysis
     print("\n[4/6] LLM Yield Impact Analysis...")

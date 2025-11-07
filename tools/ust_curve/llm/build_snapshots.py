@@ -9,7 +9,10 @@ try:
     ROOT = Path(sp.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True).stdout.strip())
 except:
     ROOT = Path(__file__).resolve().parents[3]  # repo root
-sys.path.append(str(ROOT))
+# Add both repo root and ust_curve directory to path for bookirds module
+UST_CURVE_DIR = ROOT / "tools" / "ust_curve"
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(UST_CURVE_DIR))
 
 from tools.ust_curve import run_curve as rc  # reuse fetch/solve helpers
 

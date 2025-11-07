@@ -15,7 +15,7 @@ import aiohttp
 import xml.etree.ElementTree as ET
 
 from typing import Optional
-from datetime import datetime, timedelta, timezone as tz
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse, urljoin
 from urllib import robotparser
 from aiolimiter import AsyncLimiter
