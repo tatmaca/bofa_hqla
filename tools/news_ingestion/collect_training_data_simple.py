@@ -83,11 +83,11 @@ def collect_training_data_simple(start_date: str, end_date: str) -> List[Dict]:
         # Add total article count
         features["total_articles"] = float(total_articles)
         
-        # Create training example
+        # Create training example (format compatible with train_xgboost.py)
         example = {
             "date": date,
             "features": features,
-            "targets": {
+            "actual": {
                 "delta_2y": actual["2y"],
                 "delta_5y": actual["5y"],
                 "delta_10y": actual["10y"],

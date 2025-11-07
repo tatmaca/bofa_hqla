@@ -92,12 +92,21 @@ def train_xgboost_model(X_train: np.ndarray, y_train: np.ndarray,
     model = xgb.XGBRegressor(**params)
     
     # Train with early stopping
-    model.fit(
-        X_train, y_train,
-        eval_set=[(X_val, y_val)],
-        early_stopping_rounds=20,
-        verbose=False
-    )
+    # Note: early_stopping_rounds moved to constructor in newer XGBoost versions
+    try:
+        model.fit(
+            X_train, y_train,
+            eval_set=[(X_val, y_val)],
+            verbose=False
+        )
+    except TypeError:
+        # Fallback for older XGBoost versions
+        model.fit(
+            X_train, y_train,
+            eval_set=[(X_val, y_val)],
+            early_stopping_rounds=20,
+            verbose=False
+        )
     
     # Evaluate
     y_pred_train = model.predict(X_train)
