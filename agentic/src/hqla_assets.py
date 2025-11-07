@@ -140,7 +140,7 @@ class Level2A:
 
 class Level2B:
     haircut = 0.25
-    lcr_weight = 0.60
+    lcr_weight = 0.75
 
 # Examples of Level1, Level2A, and Level2B instruments to use in portfolio 
 
