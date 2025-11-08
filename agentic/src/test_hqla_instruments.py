@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import QuantLib as ql
 
-from .hqla_instruments import Floating
+from .hqla_instruments import Fixed, Floating
 
 # Set the static valuation/calculation date: 2025-04-01
 calc_date = ql.Date(24, 9, 2028)
@@ -47,25 +47,30 @@ floating_bond = Floating(issue_date, maturity_date, face_value, coupon_frequency
 floating_bond.build_bond(
     index=sofr_index, spread=spread, settlement_days=settlement_days
 )
-bond_engine = ql.DiscountingBondEngine(flat_yield_curve_handle)
-floating_bond.bond.setPricingEngine(bond_engine)
-
+fixed_bond = Fixed(
+    issue_date, maturity_date, face_value, coupon_frequency, coupons=[25 * 1e-6]
+)
+fixed_bond.build_bond(settlement_days=settlement_days)
 fixing_dates = list(floating_bond.schedule)
+
 print("========================")
 
 im.clearHistory(sofr_index.name())
 calendar = sofr_index.fixingCalendar()
-for date in fixing_dates:
+for i, date in enumerate(fixing_dates):
     adjusted_date = calendar.adjust(date, ql.Preceding)
-    sofr_index.addFixing(adjusted_date, soft_rate)
+    sofr_index.addFixing(adjusted_date, soft_rate * (1 + i / 10))
 
 
-print(floating_bond.bond.dirtyPrice())
 print("========================")
 
 # --- Price the bond ---
 price = floating_bond.price_from_curve(
-    discount_curve=sofr_term_structure_handle, clean=False
+    discount_curve=flat_yield_curve_handle, clean=False
+)
+price2 = fixed_bond.price_from_curve(
+    discount_curve=flat_yield_curve_handle, clean=False
 )
 
 print(f"Dirty price of the floating rate bond: {price:.4f}")
+print(f"Dirty price of the fixed rate bond: {price2:.4f}")
