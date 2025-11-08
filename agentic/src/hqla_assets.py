@@ -1,5 +1,6 @@
-import QuantLib as ql
 from abc import ABC, abstractmethod
+
+import QuantLib as ql
 
 """
 HQLAInstrument (abstract base)
@@ -9,10 +10,20 @@ HQLAInstrument (abstract base)
 └── DiscountInstrument
 """
 
+
 class HQLAInstrument(ABC):
 
-    def __init__(self, name, face_value, issue_date, maturity_date,
-                 calendar, day_count, business_day_convention, settlement_days=1):
+    def __init__(
+        self,
+        name,
+        face_value,
+        issue_date,
+        maturity_date,
+        calendar,
+        day_count,
+        business_day_convention,
+        settlement_days=1,
+    ):
         self.name = name
         self.face_value = face_value
         self.issue_date = issue_date
@@ -25,25 +36,25 @@ class HQLAInstrument(ABC):
         self.haircut = None
         self.lcr_weight = None
 
-        @abstractmethod
-        def build_bond(self):
-            """Build the bond object using QuantLib"""
-            pass
+    @abstractmethod
+    def build_bond(self):
+        """Build the bond object using QuantLib"""
+        pass
 
-        def price_from_curve(self, yield_curve):
-            """Price (clean) the bond using a QuantLib yield curve"""
+    def price_from_curve(self, yield_curve):
+        """Price (clean) the bond using a QuantLib yield curve"""
 
-            if self.bond is None:
-                self.build_bond()
+        if self.bond is None:
+            self.build_bond()
 
-            engine = ql.DiscountingBondEngine(ql.YieldTermStructureHandle(yield_curve))
-            self.bond.setPricingEngine(engine)
-            self.price = self.bond.cleanPrice()
-            return self.price
-
+        engine = ql.DiscountingBondEngine(ql.YieldTermStructureHandle(yield_curve))
+        self.bond.setPricingEngine(engine)
+        self.price = self.bond.dirtyPrice()
+        return self.price
 
 
 # Fixed Rate Instruments
+
 
 class FixedRateInstrument(HQLAInstrument):
     def __init__(self, coupon_rate, frequency=ql.Semiannual, *args, **kwargs):
@@ -59,8 +70,8 @@ class FixedRateInstrument(HQLAInstrument):
             self.calendar,
             self.business_day_convention,
             self.business_day_convention,
-            ql.DateGeneration.Backward, # rule for generating dates
-            False # end of month
+            ql.DateGeneration.Backward,  # rule for generating dates
+            False,  # end of month
         )
         self.bond = ql.FixedRateBond(
             self.settlement_days,
@@ -68,8 +79,9 @@ class FixedRateInstrument(HQLAInstrument):
             schedule,
             [self.coupon_rate],
             self.day_count,
-            self.business_day_convention
+            self.business_day_convention,
         )
+
 
 # Floating Rate Instruments
 class FloatingRateInstrument(HQLAInstrument):
@@ -85,10 +97,10 @@ class FloatingRateInstrument(HQLAInstrument):
             self.maturity_date,
             ql.Period(self.frequency),
             self.calendar,
-            ql.Following, 
             ql.Following,
-            ql.DateGeneration.Backward, # rule for generating dates
-            False # end of month
+            ql.Following,
+            ql.DateGeneration.Backward,  # rule for generating dates
+            False,  # end of month
         )
         self.bond = ql.FloatingRateBond(
             self.settlement_days,
@@ -102,10 +114,11 @@ class FloatingRateInstrument(HQLAInstrument):
             [self.spread],
             [],
             [],
-            [],
-            True,
-            self.face_value
+            False,
+            self.face_value,
+            self.issue_date,
         )
+
 
 # Discount Instruments
 class DiscountInstrument(HQLAInstrument):
@@ -117,30 +130,60 @@ class DiscountInstrument(HQLAInstrument):
             self.maturity_date,
             self.business_day_convention,
             self.face_value,
-            self.issue_date
+            self.issue_date,
         )
+
 
 # Levels
 class Level1:
     haircut = 0.0
     max_lcr_weight = 1.0
 
+
 class Level2A:
     haircut = 0.15
     max_lcr_weight = 0.40
+
 
 class Level2B:
     haircut = 0.25
     max_lcr_weight = 0.15
 
-# Examples of Level1, Level2A, and Level2B instruments to use in portfolio 
 
-class Level1Fixed(Level1, FixedRateInstrument): 
-    pass # inherit from Level1 and FixedRateInstrument
+# Examples of Level1, Level2A, and Level2B instruments to use in portfolio
 
-class Level2AFloating(Level2A, FloatingRateInstrument): 
-    pass # inherit from Level2A and FloatingRateInstrument
 
-class Level2BDiscount(Level2B, DiscountInstrument): 
-    pass # inherit from Level2B and DiscountInstrument
+class Level1Fixed(Level1, FixedRateInstrument):
+    pass  # inherit from Level1 and FixedRateInstrument
 
+
+class Level1Floating(Level1, FloatingRateInstrument):
+    pass  # inherit from Level1 and FixedRateInstrument
+
+
+class Level1Discount(Level1, DiscountInstrument):
+    pass  # inherit from Level1 and FixedRateInstrument
+
+
+class Level2AFixed(Level2A, FixedRateInstrument):
+    pass  # inherit from Level2A and FloatingRateInstrument
+
+
+class Level2AFloating(Level2A, FloatingRateInstrument):
+    pass  # inherit from Level2A and FloatingRateInstrument
+
+
+class Level2ADiscount(Level2A, DiscountInstrument):
+    pass  # inherit from Level2A and FloatingRateInstrument
+
+
+class Level2BFixed(Level2B, FixedRateInstrument):
+    pass  # inherit from Level2B and DiscountInstrument
+
+
+class Level2BFloating(Level2B, FloatingRateInstrument):
+    pass  # inherit from Level2B and DiscountInstrument
+
+
+class Level2BDiscount(Level2B, DiscountInstrument):
+    pass  # inherit from Level2B and DiscountInstrument
