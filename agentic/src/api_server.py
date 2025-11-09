@@ -10,12 +10,14 @@ app = FastAPI()
 portfolio = Portfolio()
 
 
-@app.post("/upload_csv/")
-async def upload_csv(file: UploadFile):
+@app.post("/upload-portfolio/")
+async def upload_portfolio(file: UploadFile):
     df = pd.read_csv(file.file)
     today = ql.Date.todaysDate()
     ql.Settings.instance().evaluationDate = today
     sofr_index = ql.Sofr()
+
+    portfolio.clear()  # optional: reset existing portfolio
 
     for _, row in df.iterrows():
         cls = getattr(HQLA, f"{row['level']}{row['type']}")
@@ -36,4 +38,18 @@ async def upload_csv(file: UploadFile):
         else:
             inst.build_bond()
         portfolio.add_instrument(inst)
-    return {"status": "Portfolio created", "count": len(df)}
+
+    # Build frontend-friendly JSON
+    assets = []
+    for inst in portfolio.instruments:
+        assets.append(
+            {
+                "name": inst.name,
+                "isin": inst.isin,
+                "dirty_price": inst.dirty_price or 0.0,
+                "quantity": inst.quantity,
+                "category": type(inst).__name__,
+            }
+        )
+
+    return {"assets": assets}
