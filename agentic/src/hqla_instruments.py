@@ -16,12 +16,20 @@ class HQLA_Asset(ABC):
         face_value: float = 100,
         calendar: ql.Calendar = ql.UnitedStates(ql.UnitedStates.GovernmentBond),
         day_count: ql.DayCounter = ql.ActualActual(ql.ActualActual.ISMA),
+        quantity: float = 0,
+        name: str = "No Name Assigned",
+        isin: str = "No ISIN Provided",
     ):
         self.issue_date = issue_date
         self.maturity_date = maturity_date
         self.face_value = face_value
         self.calendar = calendar
         self.day_count = day_count
+        self.dirty_price = None
+        self.clean_price = None
+        self.quantity = quantity
+        self.name = name
+        self.isin = isin
 
         # Placeholder for the QuantLib bond object
         self.bond = None
@@ -56,6 +64,9 @@ class Floating(HQLA_Asset):
         coupon_frequency: ql.Period = ql.Period(ql.Quarterly),
         day_count: ql.DayCounter = ql.Actual360(),
         business_day_conv: int = ql.Unadjusted,
+        quantity: float = 0,
+        name: str = "No Name Assigned",
+        isin: str = "No ISIN Provided",
     ):
         super().__init__(
             issue_date,
@@ -63,13 +74,16 @@ class Floating(HQLA_Asset):
             face_value,
             ql.UnitedStates(ql.UnitedStates.GovernmentBond),
             day_count,
+            quantity,
+            name,
+            isin,
         )
         self.coupon_frequency = coupon_frequency
         self.business_day_conv = business_day_conv
 
     def build_bond(
         self,
-        index: ql.IborIndex,
+        index: ql.Index,
         spread: list[float] = [25 * 1e-6],
         settlement_days: int = 1,
     ):
@@ -103,6 +117,8 @@ class Floating(HQLA_Asset):
 
         engine = ql.DiscountingBondEngine(discount_curve)
         self.bond.setPricingEngine(engine)
+        self.dirty_price = self.bond.dirtyPrice()
+        self.clean_price = self.bond.cleanPrice()
         return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
 
 
@@ -120,6 +136,9 @@ class Fixed(HQLA_Asset):
         day_count: ql.DayCounter = ql.ActualActual(ql.ActualActual.ISMA),
         business_day_conv: int = ql.Unadjusted,
         coupons: list[float] = [25 * 1e-6],
+        quantity: float = 0,
+        name: str = "No Name Assigned",
+        isin: str = "No ISIN Provided",
     ):
         super().__init__(
             issue_date,
@@ -127,6 +146,9 @@ class Fixed(HQLA_Asset):
             face_value,
             ql.UnitedStates(ql.UnitedStates.GovernmentBond),
             day_count,
+            quantity,
+            name,
+            isin,
         )
         self.coupon_frequency = coupon_frequency
         self.business_day_conv = business_day_conv
@@ -164,6 +186,8 @@ class Fixed(HQLA_Asset):
 
         engine = ql.DiscountingBondEngine(discount_curve)
         self.bond.setPricingEngine(engine)
+        self.dirty_price = self.bond.dirtyPrice()
+        self.clean_price = self.bond.cleanPrice()
         return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
 
 
@@ -179,6 +203,9 @@ class Zero(HQLA_Asset):
         face_value: float = 100,
         day_count: ql.DayCounter = ql.ActualActual(ql.ActualActual.ISMA),
         business_day_conv: int = ql.Unadjusted,
+        quantity: float = 0,
+        name: str = "No Name Assigned",
+        isin: str = "No ISIN Provided",
     ):
         super().__init__(
             issue_date,
@@ -186,6 +213,9 @@ class Zero(HQLA_Asset):
             face_value,
             ql.UnitedStates(ql.UnitedStates.GovernmentBond),
             day_count,
+            quantity,
+            name,
+            isin,
         )
         self.business_day_conv = business_day_conv
 
@@ -210,6 +240,8 @@ class Zero(HQLA_Asset):
 
         engine = ql.DiscountingBondEngine(discount_curve)
         self.bond.setPricingEngine(engine)
+        self.dirty_price = self.bond.dirtyPrice()
+        self.clean_price = self.bond.cleanPrice()
         return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
 
 
