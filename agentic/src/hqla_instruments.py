@@ -211,3 +211,55 @@ class Zero(HQLA_Asset):
         engine = ql.DiscountingBondEngine(discount_curve)
         self.bond.setPricingEngine(engine)
         return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
+
+
+# Levels
+class Level1:
+    haircut = 0.0
+    max_lcr_weight = 1.0
+
+
+class Level2A:
+    haircut = 0.15
+    max_lcr_weight = 0.40
+
+
+class Level2B:
+    haircut = 0.25
+    max_lcr_weight = 0.15
+
+
+class Level1Fixed(Level1, Fixed):
+    pass  # inherit from Level1 and FixedRateInstrument
+
+
+class Level1Floating(Level1, Floating):
+    pass  # inherit from Level1 and FixedRateInstrument
+
+
+class Level1Discount(Level1, Zero):
+    pass  # inherit from Level1 and FixedRateInstrument
+
+
+class Level2AFixed(Level2A, Fixed):
+    pass  # inherit from Level2A and FloatingRateInstrument
+
+
+class Level2AFloating(Level2A, Floating):
+    pass  # inherit from Level2A and FloatingRateInstrument
+
+
+class Level2ADiscount(Level2A, Zero):
+    pass  # inherit from Level2A and FloatingRateInstrument
+
+
+class Level2BFixed(Level2B, Fixed):
+    pass  # inherit from Level2B and DiscountInstrument
+
+
+class Level2BFloating(Level2B, Floating):
+    pass  # inherit from Level2B and DiscountInstrument
+
+
+class Level2BDiscount(Level2B, Zero):
+    pass  # inherit from Level2B and DiscountInstrument
