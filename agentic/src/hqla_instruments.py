@@ -154,6 +154,53 @@ class Fixed(HQLA_Asset):
             paymentDayCounter=self.day_count,
             paymentConvention=self.business_day_conv,
         )
+        return self.bond
+
+    def price_from_curve(
+        self, discount_curve: ql.YieldTermStructureHandle, clean: bool = False
+    ):
+        if self.bond is None:
+            raise ValueError("Bond not built yet. Call build_bond first.")
+
+        engine = ql.DiscountingBondEngine(discount_curve)
+        self.bond.setPricingEngine(engine)
+        return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
+
+
+class Zero(HQLA_Asset):
+    """
+    Zero coupon instrument
+    """
+
+    def __init__(
+        self,
+        issue_date: ql.Date,
+        maturity_date: ql.Date,
+        face_value: float = 100,
+        day_count: ql.DayCounter = ql.ActualActual(ql.ActualActual.ISMA),
+        business_day_conv: int = ql.Unadjusted,
+    ):
+        super().__init__(
+            issue_date,
+            maturity_date,
+            face_value,
+            ql.UnitedStates(ql.UnitedStates.GovernmentBond),
+            day_count,
+        )
+        self.business_day_conv = business_day_conv
+
+    def build_bond(
+        self,
+        settlement_days: int = 1,
+    ):
+        self.bond = ql.ZeroCouponBond(
+            settlementDays=settlement_days,
+            faceAmount=self.face_value,
+            calendar=self.calendar,
+            maturityDate=self.maturity_date,
+            paymentConvention=self.business_day_conv,
+        )
+        return self.bond
 
     def price_from_curve(
         self, discount_curve: ql.YieldTermStructureHandle, clean: bool = False

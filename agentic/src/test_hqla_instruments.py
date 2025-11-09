@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import QuantLib as ql
 
-from .hqla_instruments import Fixed, Floating
+from .hqla_instruments import Fixed, Floating, Zero
 
 # Set the static valuation/calculation date: 2025-04-01
 calc_date = ql.Date(24, 9, 2028)
@@ -39,7 +39,7 @@ issue_date = ql.Date(1, 4, 2025)
 maturity_date = ql.Date(1, 4, 2029)
 face_value = 100
 coupon_frequency = ql.Period(ql.Quarterly)
-spread = [0.0025]  # 25 bps
+spread = [0.25]  # 25 bps
 settlement_days = 1
 
 # --- Build the Floating bond ---
@@ -48,10 +48,12 @@ floating_bond.build_bond(
     index=sofr_index, spread=spread, settlement_days=settlement_days
 )
 fixed_bond = Fixed(
-    issue_date, maturity_date, face_value, coupon_frequency, coupons=[25 * 1e-6]
+    issue_date, maturity_date, face_value, coupon_frequency, coupons=[25 * 1e-3]
 )
 fixed_bond.build_bond(settlement_days=settlement_days)
 fixing_dates = list(floating_bond.schedule)
+zero_bond = Zero(issue_date, maturity_date, face_value)
+zero_bond.build_bond(settlement_days=settlement_days)
 
 print("========================")
 
@@ -71,6 +73,8 @@ price = floating_bond.price_from_curve(
 price2 = fixed_bond.price_from_curve(
     discount_curve=flat_yield_curve_handle, clean=False
 )
+price3 = zero_bond.price_from_curve(discount_curve=flat_yield_curve_handle, clean=False)
 
 print(f"Dirty price of the floating rate bond: {price:.4f}")
 print(f"Dirty price of the fixed rate bond: {price2:.4f}")
+print(f"Dirty price of the zero coupon bond: {price3:.4f}")
