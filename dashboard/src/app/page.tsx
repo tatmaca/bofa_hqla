@@ -281,25 +281,6 @@ async function runMonitor(setter: (s: any) => void) {
   }));
 }
 
-async function handleUploadPortfolio() {
-  if (!portfolioFile) return;
-  setLoadingPortfolio(true);
-  const formData = new FormData();
-  formData.append("file", portfolioFile);
-  try {
-    const res = await fetch("http://localhost:8000/upload-portfolio", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    setPortfolioSummary(data);
-  } catch (err) {
-    console.error("Upload failed", err);
-  } finally {
-    setLoadingPortfolio(false);
-  }
-}
-
 const Step = ({
   index,
   title,
@@ -398,11 +379,56 @@ export default function HqlaE2EDashboard() {
   }, [impact]);
 
   const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
+  const [yieldCurveFile, setYieldCurveFile] = useState<File | null>(null);
   const [portfolioSummary, setPortfolioSummary] = useState<any>(null);
   const [loadingPortfolio, setLoadingPortfolio] = useState(false);
+  const [loadingCurve, setLoadingCurve] = useState(false);
   const allDone = [scenario, impact, opt, mon].every(
     (s) => s.status === "done",
   );
+
+  async function handleUploadPortfolio() {
+    if (!portfolioFile) return;
+    setLoadingPortfolio(true);
+    const formData = new FormData();
+    formData.append("file", portfolioFile);
+    try {
+      await fetch("http://localhost:8000/upload-portfolio", {
+        method: "POST",
+        body: formData,
+      });
+      await handlePricePortfolio(); // auto-price after upload
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingPortfolio(false);
+    }
+  }
+
+  async function handleUploadYieldCurve() {
+    if (!yieldCurveFile) return;
+    setLoadingCurve(true);
+    const formData = new FormData();
+    formData.append("file", yieldCurveFile);
+    try {
+      await fetch("http://localhost:8000/upload-yield-curve", {
+        method: "POST",
+        body: formData,
+      });
+      await handlePricePortfolio(); // auto-price after curve upload
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingCurve(false);
+    }
+  }
+
+  async function handlePricePortfolio() {
+    const res = await fetch("http://localhost:8000/price-portfolio");
+    if (!res.ok) return console.error(await res.json());
+    const data = await res.json();
+    setPortfolioSummary(data);
+  }
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
@@ -465,7 +491,7 @@ export default function HqlaE2EDashboard() {
             <CardHeader className="pb-3">
               <CardTitle>Inputs</CardTitle>
               <CardDescription>
-                Upload portfolio + define shock priors
+                Upload portfolio + yield curve + define shock priors
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -480,15 +506,8 @@ export default function HqlaE2EDashboard() {
                     onChange={(e) => setPortfolioName(e.target.value)}
                     placeholder="HQLA v2025Q4"
                   />
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <Button variant="outline" size="sm">
-                      Upload Holdings CSV
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Upload Risk Ladder
-                    </Button>
-                  </div>
-                  {/* Portfolio Upload + Process */}
+
+                  {/* Portfolio file upload */}
                   <Input
                     type="file"
                     accept=".csv"
@@ -503,9 +522,28 @@ export default function HqlaE2EDashboard() {
                     onClick={handleUploadPortfolio}
                     disabled={!portfolioFile || loadingPortfolio}
                   >
-                    {loadingPortfolio ? "Uploading..." : "Process Portfolio"}
+                    {loadingPortfolio ? "Uploading..." : "Upload Portfolio"}
+                  </Button>
+
+                  {/* Yield curve file upload */}
+                  <Input
+                    type="file"
+                    accept=".csv"
+                    onChange={(e) =>
+                      setYieldCurveFile(e.target.files?.[0] || null)
+                    }
+                    className="h-8 mt-2"
+                  />
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleUploadYieldCurve}
+                    disabled={!yieldCurveFile || loadingCurve}
+                  >
+                    {loadingCurve ? "Uploading..." : "Upload Yield Curve"}
                   </Button>
                 </div>
+
                 <div className="col-span-2 space-y-2">
                   <label className="text-sm font-medium leading-none">
                     Shock YAML
@@ -521,6 +559,7 @@ export default function HqlaE2EDashboard() {
           </Card>
         </motion.div>
 
+        {/* Portfolio summary table */}
         {portfolioSummary && (
           <Card className="shadow-sm">
             <CardHeader>
@@ -1279,4 +1318,3 @@ function ImpactMiniTable({
     </div>
   );
 }
-

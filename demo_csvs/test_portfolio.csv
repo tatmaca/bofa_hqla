@@ -1,0 +1,6 @@
+level,type,name,isin,issue_date,maturity_date,face_value,quantity,coupon
+1,Fixed,Treasury 2Y,US9128285M81,2024-11-01,2026-11-01,100,15,0.13
+1,Floating,Sofr Note,US9128285N59,2023-11-01,2026-11-01,100,5,
+2A,Fixed,Corporate Bond A,US1234567890,2022-06-01,2027-06-01,500,25,0.08
+2B,Floating,Corporate Bond B,US0987654321,2023-01-01,2028-01-01,500,5,
+1,Discount,Cash,US0000000001,2024-01-01,2030-01-01,100,7,

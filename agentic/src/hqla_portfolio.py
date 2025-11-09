@@ -133,7 +133,7 @@ if __name__ == "__main__":
     im = ql.IndexManager.instance()
     sofr_index = ql.Sofr(sofr_term_structure_handle)
 
-    issue = ql.Date(8, 6, 2024)
+    issue = ql.Date(8, 6, 2022)
     maturity_1y = ql.Date(8, 11, 2026)
     maturity_2y = ql.Date(8, 11, 2027)
     maturity_3y = ql.Date(8, 11, 2028)

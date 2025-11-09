@@ -132,7 +132,7 @@ class Fixed(HQLA_Asset):
         issue_date: ql.Date,
         maturity_date: ql.Date,
         face_value: float = 100,
-        coupon_frequency: ql.Period = ql.Period(ql.Quarterly),
+        coupon_frequency: ql.Period = ql.Period(ql.Semiannual),
         day_count: ql.DayCounter = ql.ActualActual(ql.ActualActual.ISMA),
         business_day_conv: int = ql.Unadjusted,
         coupons: list[float] = [25 * 1e-6],
