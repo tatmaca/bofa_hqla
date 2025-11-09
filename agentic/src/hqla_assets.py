@@ -1,5 +1,5 @@
-import QuantLib as ql
 from abc import ABC, abstractmethod
+import QuantLib as ql
 
 """
 HQLAInstrument (abstract base)
@@ -9,116 +9,247 @@ HQLAInstrument (abstract base)
 └── DiscountInstrument
 """
 
-class HQLAInstrument(ABC):
+class HQLA_Asset(ABC):
+    """
+    Abstract base class for HQLA assets.
+    Child classes should implement build_bond and price_from_curve.
+    """
 
-    def __init__(self, name, face_value, issue_date, maturity_date,
-                 calendar, day_count, business_day_convention, settlement_days=1):
-        self.name = name
-        self.face_value = face_value
+    def __init__(
+        self,
+        issue_date: ql.Date,
+        maturity_date: ql.Date,
+        face_value: float = 100,
+        calendar: ql.Calendar = ql.UnitedStates(ql.UnitedStates.GovernmentBond),
+        day_count: ql.DayCounter = ql.ActualActual(ql.ActualActual.ISMA),
+        quantity: float = 0,
+        name: str = "No Name Assigned",
+        isin: str = "No ISIN Provided",
+    ):
         self.issue_date = issue_date
         self.maturity_date = maturity_date
+        self.face_value = face_value
         self.calendar = calendar
         self.day_count = day_count
-        self.business_day_convention = business_day_convention
-        self.settlement_days = settlement_days
+        self.dirty_price = None
+        self.clean_price = None
+        self.quantity = quantity
+        self.name = name
+        self.isin = isin
+
+        # Placeholder for the QuantLib bond object
         self.bond = None
-        self.haircut = None
-        self.lcr_weight = None
 
-        @abstractmethod
-        def build_bond(self):
-            """Build the bond object using QuantLib"""
-            pass
+    @abstractmethod
+    def build_bond(self, **kwargs):
+        """
+        Abstract method to construct the bond object in QuantLib.
+        kwargs can include coupon rates, spreads, index objects, etc.
+        """
+        pass
 
-        def price_from_curve(self, yield_curve):
-            """Price (clean) the bond using a QuantLib yield curve"""
-
-            if self.bond is None:
-                self.build_bond()
-
-            engine = ql.DiscountingBondEngine(ql.YieldTermStructureHandle(yield_curve))
-            self.bond.setPricingEngine(engine)
-            self.price = self.bond.cleanPrice()
-            return self.price
+    @abstractmethod
+    def price_from_curve(self, discount_curve: ql.YieldTermStructureHandle):
+        """
+        Abstract method to price the bond using a given discount curve.
+        Returns a float representing the present value.
+        """
+        pass
 
 
+class Floating(HQLA_Asset):
+    """
+    Floating rate HQLA asset
+    """
 
-# Fixed Rate Instruments
+    def __init__(
+        self,
+        issue_date: ql.Date,
+        maturity_date: ql.Date,
+        face_value: float = 100,
+        coupon_frequency: ql.Period = ql.Period(ql.Quarterly),
+        day_count: ql.DayCounter = ql.Actual360(),
+        business_day_conv: int = ql.Unadjusted,
+        quantity: float = 0,
+        name: str = "No Name Assigned",
+        isin: str = "No ISIN Provided",
+    ):
+        super().__init__(
+            issue_date,
+            maturity_date,
+            face_value,
+            ql.UnitedStates(ql.UnitedStates.GovernmentBond),
+            day_count,
+            quantity,
+            name,
+            isin,
+        )
+        self.coupon_frequency = coupon_frequency
+        self.business_day_conv = business_day_conv
 
-class FixedRateInstrument(HQLAInstrument):
-    def __init__(self, coupon_rate, frequency=ql.Semiannual, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.coupon_rate = coupon_rate
-        self.frequency = frequency
-
-    def build_bond(self):
-        schedule = ql.Schedule(
+    def build_bond(
+        self,
+        index: ql.Index,
+        spread: list[float] = [25 * 1e-6],
+        settlement_days: int = 1,
+    ):
+        self.schedule = ql.Schedule(
             self.issue_date,
             self.maturity_date,
-            ql.Period(self.frequency),
+            ql.Period(ql.Quarterly),
             self.calendar,
-            self.business_day_convention,
-            self.business_day_convention,
-            ql.DateGeneration.Backward, # rule for generating dates
-            False # end of month
-        )
-        self.bond = ql.FixedRateBond(
-            self.settlement_days,
-            self.face_value,
-            schedule,
-            [self.coupon_rate],
-            self.day_count,
-            self.business_day_convention
-        )
-
-# Floating Rate Instruments
-class FloatingRateInstrument(HQLAInstrument):
-    def __init__(self, index, spread=0.0, frequency=ql.Quarterly, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.index = index
-        self.spread = spread
-        self.frequency = frequency
-
-    def build_bond(self):
-        schedule = ql.Schedule(
-            self.issue_date,
-            self.maturity_date,
-            ql.Period(self.frequency),
-            self.calendar,
-            ql.Following, 
-            ql.Following,
-            ql.DateGeneration.Backward, # rule for generating dates
-            False # end of month
+            self.business_day_conv,
+            self.business_day_conv,
+            ql.DateGeneration.Backward,
+            True,
         )
         self.bond = ql.FloatingRateBond(
-            self.settlement_days,
-            self.face_value,
-            schedule,
-            self.index,
-            self.day_count,
-            ql.Following,
-            2,  # fixing days
-            [1.0],  # gearing
-            [self.spread],
-            [],
-            [],
-            [],
-            True,
-            self.face_value
+            settlementDays=settlement_days,
+            faceAmount=self.face_value,
+            schedule=self.schedule,
+            index=index,
+            paymentDayCounter=self.day_count,
+            paymentConvention=self.business_day_conv,
+            spreads=spread,
+            issueDate=self.issue_date,
         )
+        return self.bond
 
-# Discount Instruments
-class DiscountInstrument(HQLAInstrument):
-    def build_bond(self):
-        self.bond = ql.ZeroCouponBond(
-            self.settlement_days,
-            self.calendar,
-            self.face_value,
-            self.maturity_date,
-            self.business_day_convention,
-            self.face_value,
-            self.issue_date
+    def price_from_curve(
+        self, discount_curve: ql.YieldTermStructureHandle, clean: bool = False
+    ):
+        if self.bond is None:
+            raise ValueError("Bond not built yet. Call build_bond first.")
+
+        engine = ql.DiscountingBondEngine(discount_curve)
+        self.bond.setPricingEngine(engine)
+        self.dirty_price = self.bond.dirtyPrice()
+        self.clean_price = self.bond.cleanPrice()
+        return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
+
+
+class Fixed(HQLA_Asset):
+    """
+    Fixed rate HQLA asset
+    """
+
+    def __init__(
+        self,
+        issue_date: ql.Date,
+        maturity_date: ql.Date,
+        face_value: float = 100,
+        coupon_frequency: ql.Period = ql.Period(ql.Quarterly),
+        day_count: ql.DayCounter = ql.ActualActual(ql.ActualActual.ISMA),
+        business_day_conv: int = ql.Unadjusted,
+        coupons: list[float] = [25 * 1e-6],
+        quantity: float = 0,
+        name: str = "No Name Assigned",
+        isin: str = "No ISIN Provided",
+    ):
+        super().__init__(
+            issue_date,
+            maturity_date,
+            face_value,
+            ql.UnitedStates(ql.UnitedStates.GovernmentBond),
+            day_count,
+            quantity,
+            name,
+            isin,
         )
+        self.coupon_frequency = coupon_frequency
+        self.business_day_conv = business_day_conv
+        self.coupons = coupons
+
+    def build_bond(
+        self,
+        settlement_days: int = 1,
+    ):
+        self.schedule = ql.Schedule(
+            self.issue_date,
+            self.maturity_date,
+            ql.Period(ql.Semiannual),
+            self.calendar,
+            self.business_day_conv,
+            self.business_day_conv,
+            ql.DateGeneration.Backward,
+            True,
+        )
+        self.bond = ql.FixedRateBond(
+            settlementDays=settlement_days,
+            faceAmount=self.face_value,
+            schedule=self.schedule,
+            coupons=self.coupons,
+            paymentDayCounter=self.day_count,
+            paymentConvention=self.business_day_conv,
+        )
+        return self.bond
+
+    def price_from_curve(
+        self, discount_curve: ql.YieldTermStructureHandle, clean: bool = False
+    ):
+        if self.bond is None:
+            raise ValueError("Bond not built yet. Call build_bond first.")
+
+        engine = ql.DiscountingBondEngine(discount_curve)
+        self.bond.setPricingEngine(engine)
+        self.dirty_price = self.bond.dirtyPrice()
+        self.clean_price = self.bond.cleanPrice()
+        return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
+
+
+class Zero(HQLA_Asset):
+    """
+    Zero coupon instrument
+    """
+
+    def __init__(
+        self,
+        issue_date: ql.Date,
+        maturity_date: ql.Date,
+        face_value: float = 100,
+        day_count: ql.DayCounter = ql.ActualActual(ql.ActualActual.ISMA),
+        business_day_conv: int = ql.Unadjusted,
+        quantity: float = 0,
+        name: str = "No Name Assigned",
+        isin: str = "No ISIN Provided",
+    ):
+        super().__init__(
+            issue_date,
+            maturity_date,
+            face_value,
+            ql.UnitedStates(ql.UnitedStates.GovernmentBond),
+            day_count,
+            quantity,
+            name,
+            isin,
+        )
+        self.business_day_conv = business_day_conv
+
+    def build_bond(
+        self,
+        settlement_days: int = 1,
+    ):
+        self.bond = ql.ZeroCouponBond(
+            settlementDays=settlement_days,
+            faceAmount=self.face_value,
+            calendar=self.calendar,
+            maturityDate=self.maturity_date,
+            paymentConvention=self.business_day_conv,
+        )
+        return self.bond
+
+    def price_from_curve(
+        self, discount_curve: ql.YieldTermStructureHandle, clean: bool = False
+    ):
+        if self.bond is None:
+            raise ValueError("Bond not built yet. Call build_bond first.")
+
+        engine = ql.DiscountingBondEngine(discount_curve)
+        self.bond.setPricingEngine(engine)
+        self.dirty_price = self.bond.dirtyPrice()
+        self.clean_price = self.bond.cleanPrice()
+        return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
+
 
 # Levels
 class Level1:
@@ -133,14 +264,38 @@ class Level2B:
     haircut = 0.25
     max_lcr_weight = 0.15
 
-# Examples of Level1, Level2A, and Level2B instruments to use in portfolio 
 
-class Level1Fixed(Level1, FixedRateInstrument): 
-    pass # inherit from Level1 and FixedRateInstrument
+class Level1Fixed(Level1, Fixed):
+    pass  # inherit from Level1 and FixedRateInstrument
 
-class Level2AFloating(Level2A, FloatingRateInstrument): 
-    pass # inherit from Level2A and FloatingRateInstrument
 
-class Level2BDiscount(Level2B, DiscountInstrument): 
-    pass # inherit from Level2B and DiscountInstrument
+class Level1Floating(Level1, Floating):
+    pass  # inherit from Level1 and FixedRateInstrument
 
+
+class Level1Discount(Level1, Zero):
+    pass  # inherit from Level1 and FixedRateInstrument
+
+
+class Level2AFixed(Level2A, Fixed):
+    pass  # inherit from Level2A and FloatingRateInstrument
+
+
+class Level2AFloating(Level2A, Floating):
+    pass  # inherit from Level2A and FloatingRateInstrument
+
+
+class Level2ADiscount(Level2A, Zero):
+    pass  # inherit from Level2A and FloatingRateInstrument
+
+
+class Level2BFixed(Level2B, Fixed):
+    pass  # inherit from Level2B and DiscountInstrument
+
+
+class Level2BFloating(Level2B, Floating):
+    pass  # inherit from Level2B and DiscountInstrument
+
+
+class Level2BDiscount(Level2B, Zero):
+    pass  # inherit from Level2B and DiscountInstrument
