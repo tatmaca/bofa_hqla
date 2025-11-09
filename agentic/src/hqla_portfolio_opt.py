@@ -242,8 +242,3 @@ if __name__ == "__main__":
     print("\n====== OPTIMIZED PORTFOLIO (NEW SCENARIO) ======")
     print(opt_df[["Name", "Level", "YTM", "Price", "Opt_Weight", "Weighted_Return"]])
     print(f"\nOptimized Objective (Expected Return): {-result.fun:.6f}")
-
-
-
-
-    
