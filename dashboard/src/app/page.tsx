@@ -27,9 +27,9 @@ async function runScenarioGen(setter:(s:any)=>void){
   setter((s:any)=>({...s,status:"done", pct:100, logs:[...s.logs,"Scenario matrix v0.3 written."],
     output:{
       debate:[
-        {role:"Debater A", text:"I argue a hawkish Fed shock is likely given the latest dot plot drift and term premium rise."},
-        {role:"Debater B", text:"Counter: labor softness and easing core inflation suggest a benign path — bull flattening dominates."},
-        {role:"Debater A", text:"MOVE > 110 and supply overhang into auctions support bear-steepener probabilities."},
+        {role:"Proponent", text:"I argue a hawkish Fed shock is likely given the latest dot plot drift and term premium rise."},
+        {role:"Devil's advocate", text:"Counter: labor softness and easing core inflation suggest a benign path — bull flattening dominates."},
+        {role:"Proponent", text:"MOVE > 110 and supply overhang into auctions support bear-steepener probabilities."},
         {role:"Judge",     text:"Verdict: assign higher weight to ‘Hawkish Fed Surprise’; keep a moderate mass on ‘Soft-Landing Grind’."}
       ],
       scenarios:[
@@ -115,12 +115,25 @@ export default function HqlaE2EDashboard(){
   const [mon, setMon] = useState({status:"idle", pct:0, logs:[], output:null} as any);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
 
+  // Debate configuration (mirrors Python MAD config high-level knobs)
+  const [debateRounds, setDebateRounds] = useState(3);
+  const [debaterAPrompt, setDebaterAPrompt] = useState(
+    "You are the Proponent (macro hawk). Propose and defend HQLA scenarios with emphasis on hawkish risks, funding stress, and term-premium shocks."
+  );
+  const [debaterBPrompt, setDebaterBPrompt] = useState(
+    "You are the Devil's advocate (macro dove / soft-landing). Propose and defend HQLA scenarios with emphasis on benign inflation, carry, and stable funding."
+  );
+  const [judgePrompt, setJudgePrompt] = useState(
+    "You are the Judge. You merge Proponent / Devil's advocate proposals into a final, coherent set of 3–6 HQLA scenarios with probabilities ~summed to 1 and Basel-consistent shocks."
+  );
+
   // Popups
   const [openScenario, setOpenScenario] = useState(false);
   const [openDebate, setOpenDebate] = useState(false);
   const [openImpact, setOpenImpact] = useState(false);
   const [openOpt, setOpenOpt] = useState(false);
   const [openMon, setOpenMon] = useState(false);
+  const [openDebateParams, setOpenDebateParams] = useState(false);
 
   const pipelinePct = useMemo(()=>{
     const pcs = [scenario.pct||0, impact.pct||0, opt.pct||0, mon.pct||0];
@@ -213,12 +226,22 @@ export default function HqlaE2EDashboard(){
               <div className="flex items-stretch gap-3 overflow-x-auto pb-2">
                 {/* Debate */}
                 <div className="min-w-[280px] flex-1">
-                  <Step index={1} title="Debate Preview" desc="MAD: A vs B + Judge" status={scenario.status as any}/>
+                  <Step index={1} title="Debate Preview" desc="MAD: Proponent vs Devil's advocate + Judge" status={scenario.status as any}/>
                   <div className="mt-2 rounded-lg border p-2">
-                    <div className="text-[11px] text-slate-500 mb-1">← Portfolio input feeds MAD debate and scenario generation</div>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="text-[11px] text-slate-500">
+                        ← Portfolio input feeds MAD debate and scenario generation
+                      </div>
+                      <div className="text-[11px] text-slate-500">
+                        Rounds: <span className="font-medium">{debateRounds}</span>
+                      </div>
+                    </div>
                     <DebatePreview debate={scenario.output?.debate||[]} />
-                    <div className="flex justify-between mt-2">
-                      <Button variant="ghost" size="sm" onClick={()=>setOpenDebate(true)}>Details</Button>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" onClick={()=>setOpenDebate(true)}>Details</Button>
+                        <Button variant="ghost" size="sm" onClick={()=>setOpenDebateParams(true)}>Parameters</Button>
+                      </div>
                       <Button variant="outline" size="sm" onClick={()=>runScenarioGen(setScenario)}>
                         <PlayCircle className="h-4 w-4 mr-1"/>Run
                       </Button>
@@ -300,8 +323,81 @@ export default function HqlaE2EDashboard(){
         <div className="hidden" />
 
         {/* Popups */}
+        <Dialog open={openDebateParams} onOpenChange={setOpenDebateParams}>
+          <DialogContent className="max-w-none w-[95vw] sm:max-w-[95vw] md:max-w-[95vw] h-[88vh] overflow-auto text-[15px] px-8 py-6">
+            <DialogHeader>
+              <DialogTitle>Debate Parameters (MAD)</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 max-h-[78vh] overflow-auto">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="col-span-1 space-y-2">
+                  <label className="text-sm font-medium leading-none">Rounds</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={10}
+                    className="w-28"
+                    value={debateRounds}
+                    onChange={(e)=> {
+                      const n = Number(e.target.value);
+                      setDebateRounds(Number.isFinite(n) && n > 0 ? n : 1);
+                    }}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Mirrors <code className="font-mono text-[10px]">cfg[&quot;debate&quot;][&quot;rounds&quot;]</code> in the Python MAD script.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2 rounded-lg border bg-slate-50/40 p-3">
+                  <label className="text-sm font-medium leading-none">Proponent system prompt</label>
+                  <Textarea
+                    className="min-h-[220px] md:min-h-[260px] text-sm"
+                    value={debaterAPrompt}
+                    onChange={(e)=>setDebaterAPrompt(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Maps to Proponent (A) <code className="font-mono text-[10px]">system_debater</code> prompt.
+                  </p>
+                </div>
+
+                <div className="space-y-2 rounded-lg border bg-slate-50/40 p-3">
+                  <label className="text-sm font-medium leading-none">Devil's advocate system prompt</label>
+                  <Textarea
+                    className="min-h-[220px] md:min-h-[260px] text-sm"
+                    value={debaterBPrompt}
+                    onChange={(e)=>setDebaterBPrompt(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Maps to Devil's advocate (B) <code className="font-mono text-[10px]">system_debater</code> prompt.
+                  </p>
+                </div>
+
+                <div className="space-y-2 rounded-lg border bg-slate-50/40 p-3">
+                  <label className="text-sm font-medium leading-none">Judge system prompt</label>
+                  <Textarea
+                    className="min-h-[220px] md:min-h-[260px] text-sm"
+                    value={judgePrompt}
+                    onChange={(e)=>setJudgePrompt(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Maps to <code className="font-mono text-[10px]">system_judge</code> in your MAD config.
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-xs text-muted-foreground">
+                These controls are front-end only for now. When you wire the UI to your Python runner,
+                pass <code className="font-mono text-[10px]">debateRounds</code>, <code className="font-mono text-[10px]">debaterAPrompt</code>,
+                <code className="font-mono text-[10px]">debaterBPrompt</code>, and <code className="font-mono text-[10px]">judgePrompt</code> into your YAML / run config.
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={openDebate} onOpenChange={setOpenDebate}>
-          <DialogContent className="max-w-[1200px] w-[85vw] md:w-[72vw] h-[78vh] overflow-auto text-[16px] p-6">
+          <DialogContent className="max-w-[1800px] w-[100vw] md:w-[96vw] h-[88vh] overflow-auto text-[15px] p-6">
             <DialogHeader>
               <DialogTitle>Debate (MAD)</DialogTitle>
             </DialogHeader>
