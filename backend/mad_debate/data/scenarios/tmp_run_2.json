@@ -1,0 +1,112 @@
+[
+  {
+    "Scenario": "Rate Hike Surprise",
+    "Description": "A sudden increase in rates by 50 bps due to unexpectedly strong economic data.",
+    "Probability": 0.3,
+    "Rationale": "Central banks may react to strong economic indicators, leading to rate hikes.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve",
+      "Credit OAS"
+    ],
+    "Shocks": {
+      "Rate": 50,
+      "Curve": "bear steepening",
+      "Credit OAS": 50
+    },
+    "MetricsDelta": {
+      "level1_tsys_pct": -1.5,
+      "level2a_agency_mbs_pct": -0.5,
+      "level2b_corp_munis_pct": -1
+    },
+    "TradeList": [
+      "Short 10-year Treasuries using futures",
+      "Long MBS through TBA contracts"
+    ],
+    "Assumptions": "Economic indicators such as GDP growth and employment figures show unexpected strength."
+  },
+  {
+    "Scenario": "Credit Market Deterioration",
+    "Description": "Increase in corporate defaults widens IG and HY spreads.",
+    "Probability": 0.25,
+    "Rationale": "Rising rates lead to increased credit risk as companies struggle.",
+    "ImpactChannels": [
+      "Credit OAS"
+    ],
+    "Shocks": {
+      "IG OAS": 50,
+      "HY OAS": 100
+    },
+    "MetricsDelta": {
+      "level2b_corp_munis_pct": -2
+    },
+    "TradeList": [
+      "Reduce exposure to BBB-rated corporate bonds by selling specific holdings"
+    ],
+    "Assumptions": "Economic slowdown leads to higher default rates among lower-rated corporations."
+  },
+  {
+    "Scenario": "MBS Basis Contraction",
+    "Description": "Tightening of the MBS basis by 25 bps improves MBS valuations.",
+    "Probability": 0.2,
+    "Rationale": "Improved liquidity leads to better pricing for MBS assets.",
+    "ImpactChannels": [
+      "MBS basis"
+    ],
+    "Shocks": {
+      "MBS Basis": -25
+    },
+    "MetricsDelta": {
+      "level2a_agency_mbs_pct": 0.75
+    },
+    "TradeList": [
+      "Increase holdings in Agency MBS through direct purchases"
+    ],
+    "Assumptions": "Investor sentiment shifts towards MBS due to increased demand for safer assets."
+  },
+  {
+    "Scenario": "Regulatory Changes Favorable to Liquidity",
+    "Description": "A regulatory easing that temporarily raises the Level 2 cap to 50%.",
+    "Probability": 0.15,
+    "Rationale": "Regulatory bodies may consider easing in response to economic challenges.",
+    "ImpactChannels": [
+      "Reg changes"
+    ],
+    "Shocks": {
+      "Level 2 Cap": 50
+    },
+    "MetricsDelta": {
+      "level2a_agency_mbs_pct": 1,
+      "level2b_corp_munis_pct": 0.5
+    },
+    "TradeList": [
+      "Rebalance towards Level 2 assets within new regulatory limits"
+    ],
+    "Assumptions": "Temporary regulatory relief is enacted to support bank liquidity."
+  },
+  {
+    "Scenario": "Stable Economic Conditions",
+    "Description": "Economic conditions remain stable, leading to no significant changes in rates or spreads.",
+    "Probability": 0.1,
+    "Rationale": "Despite volatility, a period of stability is possible as markets digest prior moves.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit OAS",
+      "MBS basis"
+    ],
+    "Shocks": {
+      "Rate": 0,
+      "Credit OAS": 0,
+      "MBS Basis": 0
+    },
+    "MetricsDelta": {
+      "level1_tsys_pct": 0,
+      "level2a_agency_mbs_pct": 0,
+      "level2b_corp_munis_pct": 0
+    },
+    "TradeList": [
+      "Maintain current HQLA allocations"
+    ],
+    "Assumptions": "No material macro or regulatory shocks occur over the next 6 months."
+  }
+]

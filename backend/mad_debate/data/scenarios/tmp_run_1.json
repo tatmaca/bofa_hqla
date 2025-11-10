@@ -1,0 +1,97 @@
+[
+  {
+    "Scenario": "Mild Rate Hike Surprise",
+    "Description": "Unexpected 25 bps rate hike by the Fed due to stronger-than-expected employment and inflation data, resulting in a bear flattening of the yield curve and moderate credit spread widening.",
+    "Probability": 0.4,
+    "Rationale": "Recent labor market and inflation data suggest upward pressure on rates, making a moderate rate increase plausible within six months.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve",
+      "Credit OAS"
+    ],
+    "Shocks": {
+      "Rates": 25,
+      "Curve": "bear flattening",
+      "Credit OAS": 10
+    },
+    "MetricsDelta": {
+      "PortfolioValue": -1.5,
+      "LiquidityRatio": -0.05
+    },
+    "TradeList": [
+      "Short 5-year Treasuries",
+      "Increase allocation to 10-year bonds"
+    ],
+    "Assumptions": "Fed responds to persistent inflation and strong employment data; no major exogenous shocks."
+  },
+  {
+    "Scenario": "Credit Widening Due to Default Fears",
+    "Description": "A major corporate default triggers a sharp widening in credit spreads (IG +20bps, HY +50bps) and a moderate MBS basis widening, reflecting increased risk aversion.",
+    "Probability": 0.3,
+    "Rationale": "A high-profile bankruptcy or negative earnings surprise could plausibly trigger a repricing of credit risk within six months.",
+    "ImpactChannels": [
+      "Credit OAS",
+      "MBS basis"
+    ],
+    "Shocks": {
+      "Credit OAS": {
+        "IG": 20,
+        "HY": 50
+      },
+      "MBS basis": 10
+    },
+    "MetricsDelta": {
+      "PortfolioValue": -2.0,
+      "LiquidityRatio": -0.1
+    },
+    "TradeList": [
+      "Reduce exposure to high-yield bonds",
+      "Increase Treasury positions"
+    ],
+    "Assumptions": "No government intervention; risk-off sentiment persists for several months."
+  },
+  {
+    "Scenario": "Regulatory Change Favoring Liquidity",
+    "Description": "Regulators temporarily ease liquidity requirements, leading to a 5% increase in deposits and improved liquidity ratios as banks adjust balance sheets.",
+    "Probability": 0.2,
+    "Rationale": "In response to macroeconomic stress, regulators may plausibly relax LCR requirements to support banking sector stability.",
+    "ImpactChannels": [
+      "Reg changes",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Reg changes": "easing liquidity requirements",
+      "Deposits": 5
+    },
+    "MetricsDelta": {
+      "PortfolioValue": 0.5,
+      "LiquidityRatio": 0.15
+    },
+    "TradeList": [
+      "Maintain current asset allocations",
+      "Monitor liquidity ratios closely"
+    ],
+    "Assumptions": "Regulatory relief is temporary and does not trigger moral hazard or systemic risk."
+  },
+  {
+    "Scenario": "MBS Market Stress",
+    "Description": "Rising mortgage defaults cause a 40 bps widening in the MBS basis, reducing the attractiveness and liquidity of MBS holdings.",
+    "Probability": 0.1,
+    "Rationale": "A plausible uptick in mortgage delinquencies could trigger a sharp repricing in the MBS market within six months.",
+    "ImpactChannels": [
+      "MBS basis"
+    ],
+    "Shocks": {
+      "MBS basis": 40
+    },
+    "MetricsDelta": {
+      "PortfolioValue": -1.0,
+      "LiquidityRatio": -0.08
+    },
+    "TradeList": [
+      "Reduce MBS holdings",
+      "Increase Treasury positions"
+    ],
+    "Assumptions": "No government MBS purchase program; housing market remains under stress."
+  }
+]
