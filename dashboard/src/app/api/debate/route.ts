@@ -174,7 +174,11 @@ function extractLatestRoundFromLog(logText: string) {
  * Returns the full debate for that run (all rounds), sorted by round then speaker.
  * This function will be called for multiple transcript files, one per run.
  */
-function extractLatestRoundFromTranscript(jsonlText: string, runNumber: number) {
+function extractLatestRoundFromTranscript(
+  jsonlText: string,
+  runNumber: number,
+  judgeNarrative?: string
+) {
   type Speaker = "A" | "B" | "JUDGE";
 
   type Ev = {
@@ -281,15 +285,99 @@ function extractLatestRoundFromTranscript(jsonlText: string, runNumber: number) 
 
       const text = parts.join("\n\n").trim();
 
-      return {
+      const scenarios = safeParseScenarioJson(jsonText);
+
+      const message = {
         role: roleLabel(e.speaker),
         text,
         round: effectiveRound,
         run: runNumber,
+        scenarios,
       };
+
+      if (judgeNarrative && message.role === "Judge") {
+        message.text = judgeNarrative.trim();
+      }
+
+      return message;
     });
 
   return debate;
+}
+
+function safeParseScenarioJson(raw: string | undefined): any[] {
+  if (!raw) return [];
+  let cleaned = raw.trim();
+  if (!cleaned) return [];
+  cleaned = cleaned.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+
+  const firstCurly = cleaned.indexOf("{");
+  const firstBracket = cleaned.indexOf("[");
+  const startIdx =
+    firstCurly === -1
+      ? firstBracket
+      : firstBracket === -1
+      ? firstCurly
+      : Math.min(firstCurly, firstBracket);
+  if (startIdx > 0) {
+    cleaned = cleaned.slice(startIdx);
+  }
+
+  const lastSq = cleaned.lastIndexOf("]");
+  const lastCurly = cleaned.lastIndexOf("}");
+  const endIdx = Math.max(lastSq, lastCurly);
+  if (endIdx !== -1) {
+    cleaned = cleaned.slice(0, endIdx + 1);
+  }
+
+  const attempts: string[] = [cleaned];
+  if (!cleaned.trim().startsWith("[") && /}\s*\n\s*{/.test(cleaned)) {
+    attempts.push("[" + cleaned.replace(/}\s*\n\s*{/g, "},{") + "]");
+  }
+
+  for (const attempt of attempts) {
+    try {
+      const parsed = JSON.parse(attempt);
+      if (Array.isArray(parsed)) return parsed;
+      if (parsed && typeof parsed === "object") return [parsed];
+    } catch (err) {
+      continue;
+    }
+  }
+
+  return [];
+}
+
+function extractNarrativeFromMarkdown(md: string): string {
+  if (!md) return "";
+  const lines = md.split(/\r?\n/);
+  let capturing = false;
+  const captured: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const normalized = trimmed.replace(/[*_`]/g, "").replace(/^#+\s*/, "").trim();
+
+    if (!capturing) {
+      if (/^evaluation$/i.test(normalized)) {
+        capturing = true;
+        continue;
+      }
+      continue;
+    }
+
+    if (/^json\b/i.test(normalized) || /^```/i.test(trimmed)) {
+      break;
+    }
+    captured.push(line);
+  }
+
+  const text = captured.join("\n").trim();
+  if (text) return text;
+
+  const fenceIdx = md.indexOf("```json");
+  const slice = fenceIdx !== -1 ? md.slice(0, fenceIdx) : md;
+  return slice.trim();
 }
 
 export async function POST(req: Request) {
@@ -363,7 +451,7 @@ export async function POST(req: Request) {
     }
 
     // 2) Load the debate: prefer transcript_run_*.jsonl (full reasoning), fall back to temp.txt previews.
-    let debate: { role: string; text: string; round: number; run?: number }[] = [];
+    let debate: { role: string; text: string; round: number; run?: number; scenarios?: any[] }[] = [];
 
     try {
       const scenariosDir = path.join(backendDir, "data", "scenarios");
@@ -383,11 +471,17 @@ export async function POST(req: Request) {
         const match = fileName.match(/transcript_run_(\d+)\.jsonl/);
         if (!match) continue;
         const runNumber = parseInt(match[1], 10);
-        const transcriptPath = path.join(scenariosDir, fileName);
-        const jsonlText = await readFile(transcriptPath, "utf-8");
-        const runDebate = extractLatestRoundFromTranscript(jsonlText, runNumber);
-        debate.push(...runDebate);
-      }
+      const transcriptPath = path.join(scenariosDir, fileName);
+      const jsonlText = await readFile(transcriptPath, "utf-8");
+      let judgeNarrative: string | undefined;
+      try {
+        const mdPath = transcriptPath.replace(/\.jsonl$/, ".md");
+        const md = await readFile(mdPath, "utf-8");
+        judgeNarrative = extractNarrativeFromMarkdown(md);
+      } catch {}
+      const runDebate = extractLatestRoundFromTranscript(jsonlText, runNumber, judgeNarrative);
+      debate.push(...runDebate);
+    }
     } catch (e) {
       console.error(
         "[scenario-gen] Error while trying to read transcript_run_*.jsonl; will fall back to temp.txt.",
@@ -428,7 +522,29 @@ export async function POST(req: Request) {
         role: "Judge",
         text: judgeText,
         round: judgeRound,
+        scenarios,
       });
+    }
+
+    const judgeWithMatrix = debate
+      .filter(
+        (m) =>
+          m.role === "Judge" &&
+          Array.isArray((m as any).scenarios) &&
+          (m as any).scenarios.length
+      )
+      .sort((a, b) => {
+        const arun = typeof a.run === "number" ? a.run : 0;
+        const brun = typeof b.run === "number" ? b.run : 0;
+        if (arun !== brun) return arun - brun;
+        return (a.round ?? 0) - (b.round ?? 0);
+      });
+
+    if (judgeWithMatrix.length) {
+      const latestJudge = judgeWithMatrix[judgeWithMatrix.length - 1];
+      if (latestJudge.scenarios?.length) {
+        scenarios = latestJudge.scenarios;
+      }
     }
 
     // Shape: { debate, scenarios } — exactly what runScenarioGen on the UI expects

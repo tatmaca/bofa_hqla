@@ -50,6 +50,7 @@ async function runScenarioGen(
       ...(s.output || {}),
       debate: [],
       scenarios: [],
+      scenarioMatrix: [],
     },
   }));
 
@@ -80,6 +81,7 @@ async function runScenarioGen(
       text: m.text || "",
       round: typeof m.round === "number" ? m.round : null,
       run: typeof m.run === "number" ? m.run : null,
+      scenarios: Array.isArray(m.scenarios) ? m.scenarios : [],
     }));
 
     // Ensure chronological order with Judge at the end of each run, sort by run, round, role
@@ -103,7 +105,10 @@ async function runScenarioGen(
     });
 
     const rawScenarios = Array.isArray(data.scenarios) ? data.scenarios : [];
-    const scenarios = rawScenarios.map((sc:any, idx:number) => {
+    const scenarioMatrix = rawScenarios
+      .map((sc:any) => (sc && typeof sc === "object" ? sc : null))
+      .filter(Boolean);
+    const scenarios = scenarioMatrix.map((sc:any, idx:number) => {
       const name =
         sc.Scenario ||
         sc.name ||
@@ -122,8 +127,13 @@ async function runScenarioGen(
         sc.Rationale ||
         sc.rationale ||
         "";
-
-      return { name, p, channels, rationale };
+      const probability = typeof p === "number" && p > 1 ? p / 100 : p;
+      return {
+        name,
+        p: probability,
+        channels: Array.isArray(channels) ? channels : [],
+        rationale,
+      };
     });
 
     setter((s:any)=>({
@@ -138,8 +148,10 @@ async function runScenarioGen(
         ...(s.output || {}),
         debate: sortedDebate,
         scenarios,
+        scenarioMatrix,
       },
     }));
+    return { scenarios, scenarioMatrix, debate: sortedDebate };
   } catch (err:any) {
     console.error("runScenarioGen error", err);
     setter((s:any)=>({
@@ -154,49 +166,138 @@ async function runScenarioGen(
         ...(s.output || {}),
         debate: s.output?.debate || [],
         scenarios: s.output?.scenarios || [],
+        scenarioMatrix: s.output?.scenarioMatrix || [],
       },
     }));
+    return null;
   }
 }
 
-async function runImpact(setter:(s:any)=>void){
+async function runImpact(setter:(s:any)=>void, scenarioMatrix:any[] = []){
   setter((s:any)=>({...s,status:"running", pct:15, logs:[...s.logs,"Shock buckets → duration ladder…"] }));
   await fakeWait(600);
   setter((s:any)=>({...s, pct:56, logs:[...s.logs,"ΔLCR/ΔNSFR computed (Basel caps)"] }));
   await fakeWait(600);
-  setter((s:any)=>({...s,status:"done", pct:100, logs:[...s.logs,"Attribution + NII done"], output:{
-    metrics:[
-      {scenario:"Hawkish Fed Surprise", dLCR:-6,  dNSFR:-1, dNII:+3.1, note:"Reprice short-end; sell 30y MBS",  riskScore: 6},
-      {scenario:"Deposit Outflow Scare", dLCR:-14, dNSFR:-3, dNII:-1.0, note:"Raise Level 1; runoff factors ↑",  riskScore: 14},
-      {scenario:"Soft-Landing Grind",    dLCR:+2,  dNSFR:+1, dNII:+1.4, note:"Carry OK; watch issuance",        riskScore: -2},
-      {scenario:"MBS Basis Blowout",     dLCR:-4,  dNSFR: 0, dNII:-2.2, note:"Trim 2A/2B; convexity risk",       riskScore: 4},
-      {scenario:"Treasury Supply Shock",  dLCR:-7,  dNSFR:-2, dNII:-0.9, note:"Bills up; term premium ↑",        riskScore: 7},
-      {scenario:"Credit Risk Off",        dLCR:-9,  dNSFR:-2, dNII:-1.6, note:"HY/IG OAS widen; rotate to L1",   riskScore: 9}
-    ]
-  }}));
+
+  const matrix = Array.isArray(scenarioMatrix) ? scenarioMatrix : [];
+  const metrics = matrix.length
+    ? matrix.slice(0, 6).map((sc:any, idx:number) => {
+        const name = sc.Scenario || sc.name || `Scenario ${idx + 1}`;
+        const probRaw =
+          typeof sc.Probability === "number"
+            ? sc.Probability
+            : typeof sc.p === "number"
+            ? sc.p
+            : 0;
+        const prob = probRaw > 1 ? probRaw / 100 : probRaw;
+        const signal = (prob - 0.35) * 20;
+        const dLCR = Number((signal * -1.2).toFixed(1));
+        const dNSFR = Number((signal * -0.6).toFixed(1));
+        const dNII = Number(((prob - 0.25) * 6).toFixed(2));
+        const note =
+          sc.Description ||
+          sc.Rationale ||
+          sc.Assumptions ||
+          "See scenario matrix for details.";
+        return {
+          scenario: name,
+          dLCR,
+          dNSFR,
+          dNII,
+          note,
+          riskScore: Math.round(Math.abs(signal) + prob * 10),
+        };
+      })
+    : [
+        {scenario:"Hawkish Fed Surprise", dLCR:-6,  dNSFR:-1, dNII:+3.1, note:"Reprice short-end; sell 30y MBS",  riskScore: 6},
+        {scenario:"Deposit Outflow Scare", dLCR:-14, dNSFR:-3, dNII:-1.0, note:"Raise Level 1; runoff factors ↑",  riskScore: 14},
+        {scenario:"Soft-Landing Grind",    dLCR:+2,  dNSFR:+1, dNII:+1.4, note:"Carry OK; watch issuance",        riskScore: -2},
+        {scenario:"MBS Basis Blowout",     dLCR:-4,  dNSFR: 0, dNII:-2.2, note:"Trim 2A/2B; convexity risk",       riskScore: 4},
+        {scenario:"Treasury Supply Shock",  dLCR:-7,  dNSFR:-2, dNII:-0.9, note:"Bills up; term premium ↑",        riskScore: 7},
+        {scenario:"Credit Risk Off",        dLCR:-9,  dNSFR:-2, dNII:-1.6, note:"HY/IG OAS widen; rotate to L1",   riskScore: 9}
+      ];
+
+  setter((s:any)=>({...s,status:"done", pct:100, logs:[...s.logs,"Attribution + NII done"], output:{ metrics, source:"matrix" }}));
 }
 
-async function runOptimize(setter:(s:any)=>void){
+async function runOptimize(setter:(s:any)=>void, scenarioMatrix:any[] = [], focusScenario?:string){
   setter((s:any)=>({...s,status:"running", pct:12, logs:[...s.logs,"Building guardrails (L2 caps, LCR≥110%)…"] }));
   await fakeWait(700);
   setter((s:any)=>({...s, pct:64, logs:[...s.logs,"Solving QP for risk-adjusted NII…"] }));
   await fakeWait(700);
-  setter((s:any)=>({...s,status:"done", pct:100, logs:[...s.logs,"Trade list v1 posted."], output:{
-    trades:[
-      {action:"BUY", instr:"UST 2y", size:"+$500mm", reason:"LCR support; bear-steepener hedge"},
-      {action:"SELL", instr:"MBS 30y 2.0%", size:"-$300mm", reason:"Neg. convexity under stress"},
-      {action:"HOLD", instr:"UST Bills", size:"–", reason:"Cash buffer for outflows"}
-    ]
-  }}));
+
+  const matrix = Array.isArray(scenarioMatrix) ? scenarioMatrix : [];
+  const ordered = matrix.slice();
+
+  if (focusScenario) {
+    ordered.sort((a, b) => {
+      const aname = (a.Scenario || a.name || "").toLowerCase();
+      const bname = (b.Scenario || b.name || "").toLowerCase();
+      if (aname === focusScenario.toLowerCase()) return -1;
+      if (bname === focusScenario.toLowerCase()) return 1;
+      return 0;
+    });
+  }
+
+  const trades = ordered.length
+    ? ordered.slice(0, 4).map((sc:any, idx:number) => {
+        const name = sc.Scenario || sc.name || `Scenario ${idx + 1}`;
+        const probRaw =
+          typeof sc.Probability === "number"
+            ? sc.Probability
+            : typeof sc.p === "number"
+            ? sc.p
+            : 0;
+        const prob = probRaw > 1 ? probRaw / 100 : probRaw;
+        const action = prob >= 0.3 ? "SELL" : prob <= 0.15 ? "BUY" : "HOLD";
+        const instr = sc.ImpactChannels?.[0] || "HQLA Mix";
+        const size =
+          action === "HOLD"
+            ? "—"
+            : `${action === "BUY" ? "+" : "-"}${Math.round(prob * 100)} bps`;
+        const reason =
+          sc.Description ||
+          sc.Rationale ||
+          sc.Assumptions ||
+          "Align with judge scenario guidance.";
+        return { action, instr, size, reason: `${name}: ${reason}` };
+      })
+    : [
+        {action:"BUY", instr:"UST 2y", size:"+$500mm", reason:"LCR support; bear-steepener hedge"},
+        {action:"SELL", instr:"MBS 30y 2.0%", size:"-$300mm", reason:"Neg. convexity under stress"},
+        {action:"HOLD", instr:"UST Bills", size:"–", reason:"Cash buffer for outflows"}
+      ];
+
+  setter((s:any)=>({...s,status:"done", pct:100, logs:[...s.logs,"Trade list v1 posted."], output:{ trades, focusScenario }}));
 }
 
-async function runMonitor(setter:(s:any)=>void){
+async function runMonitor(setter:(s:any)=>void, scenarioMatrix:any[] = []){
   setter((s:any)=>({...s,status:"running", pct:18, logs:[...s.logs,"Scraping FOMC/Fed-speak, UST auction, geopolitics…"] }));
   await fakeWait(600);
-  setter((s:any)=>({...s, pct:70, logs:[...s.logs,"Classified: ‘hawkish tilt’ → scenario score +0.1"] }));
+  setter((s:any)=>({...s, pct:70, logs:[...s.logs,"Classified: headlines mapped to judge scenarios"] }));
   await fakeWait(600);
+
+  const matrix = Array.isArray(scenarioMatrix) ? scenarioMatrix : [];
+  const stories = matrix.slice(0, 3).map((sc:any, idx:number) => {
+    const name = sc.Scenario || sc.name || `Scenario ${idx + 1}`;
+    const desc =
+      sc.Description ||
+      sc.Rationale ||
+      sc.Assumptions ||
+      "Monitoring ongoing drivers.";
+    return `• ${name}: ${desc}`;
+  });
+  const summary = matrix.length
+    ? `News focus tracks the top judge scenarios (${matrix
+        .slice(0, 2)
+        .map((sc:any) => sc.Scenario || sc.name)
+        .filter(Boolean)
+        .join(", ")}).`
+    : "News focus unchanged; run scenario generation for fresh signals.";
+  const brief = [summary, ...stories].join("\n");
+
   setter((s:any)=>({...s,status:"done", pct:100, logs:[...s.logs,"Briefing drafted + alerts queued"],
-    output:{brief:"Hawkish Fed language nudged bear-steepener risk; suggest +$200mm 2y add, monitor MBS basis."}
+    output:{brief}
   }));
 }
 
@@ -298,7 +399,7 @@ export default function HqlaE2EDashboard(){
           <div className="flex items-center gap-2">
             <Button variant="outline"><Download className="h-4 w-4 mr-2"/>Export Brief</Button>
             <Button onClick={async()=>{
-              await runScenarioGen(setScenario, {
+              const scenarioResult = await runScenarioGen(setScenario, {
                 portfolioName,
                 yaml,
                 debateRounds,
@@ -306,9 +407,13 @@ export default function HqlaE2EDashboard(){
                 debaterBPrompt,
                 judgePrompt,
               });
-              await runImpact(setImpact);
-              await runOptimize(setOpt);
-              await runMonitor(setMon);
+              const scenarioMatrix =
+                scenarioResult?.scenarioMatrix ||
+                scenario.output?.scenarioMatrix ||
+                [];
+              await runImpact(setImpact, scenarioMatrix);
+              await runOptimize(setOpt, scenarioMatrix);
+              await runMonitor(setMon, scenarioMatrix);
             }}>
               <PlayCircle className="h-4 w-4 mr-2"/>Run E2E
             </Button>
@@ -447,12 +552,12 @@ export default function HqlaE2EDashboard(){
                     <ImpactMiniTable
                       data={impact.output?.metrics||[]}
                       worst={worst?.scenario}
-                      onOptimize={(name)=>{ setSelectedScenario(name); runOptimize(setOpt); }}
+                      onOptimize={(name)=>{ setSelectedScenario(name); runOptimize(setOpt, scenario.output?.scenarioMatrix||[], name); }}
                       open={()=>setOpenImpact(true)}
                     />
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={()=>runImpact(setImpact)}><PlayCircle className="h-4 w-4 mr-1"/>Run Impact</Button>
+                        <Button variant="outline" size="sm" onClick={()=>runImpact(setImpact, scenario.output?.scenarioMatrix||[])}><PlayCircle className="h-4 w-4 mr-1"/>Run Impact</Button>
                         <Button variant="ghost" size="sm" onClick={()=>setOpenImpact(true)}>Details</Button>
                       </div>
                       <div className="text-xs text-muted-foreground">Worst-case: <span className="font-medium">{worst?.scenario||"—"}</span></div>
@@ -473,7 +578,7 @@ export default function HqlaE2EDashboard(){
                       {mon.output?.brief || "No news brief yet. Click Run Monitor."}
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <Button variant="outline" size="sm" onClick={()=>runMonitor(setMon)}><PlayCircle className="h-4 w-4 mr-1"/>Run Monitor</Button>
+                      <Button variant="outline" size="sm" onClick={()=>runMonitor(setMon, scenario.output?.scenarioMatrix||[])}><PlayCircle className="h-4 w-4 mr-1"/>Run Monitor</Button>
                       <Button variant="ghost" size="sm" title="Use news to update scenarios"><RefreshCw className="h-4 w-4 mr-1"/>Update Scenarios</Button>
                       <Button variant="ghost" size="sm" onClick={()=>setOpenMon(true)}>Details</Button>
                     </div>
@@ -614,8 +719,8 @@ export default function HqlaE2EDashboard(){
               <DialogTitle>Scenario Generation</DialogTitle>
             </DialogHeader>
             <div className="space-y-3 max-h-[86vh] overflow-auto">
-              {scenario.output?.scenarios?.length ? (
-                <ScenarioBubbleTable data={scenario.output.scenarios} />
+              {(scenario.output?.scenarioMatrix?.length || scenario.output?.scenarios?.length) ? (
+                <ScenarioBubbleTable data={scenario.output?.scenarioMatrix?.length ? scenario.output.scenarioMatrix : scenario.output.scenarios} />
               ) : (
                 <div className="rounded-lg border border-dashed p-6 text-center text-muted-foreground text-sm">
                   No scenarios yet. Run the step.
@@ -710,11 +815,11 @@ export default function HqlaE2EDashboard(){
         </Dialog>
 
         <Dialog open={Boolean(matrixModal)} onOpenChange={(open) => { if (!open) setMatrixModal(null); }}>
-          <DialogContent className="max-w-none w-[100vw] md:w-[95vw] h-[90vh] overflow-auto text-[15px] p-6">
+          <DialogContent className="max-w-none w-[98vw] sm:w-[96vw] md:w-[94vw] lg:w-[92vw] xl:w-[88vw] sm:max-w-[96vw] md:max-w-[94vw] lg:max-w-[92vw] xl:max-w-[88vw] 2xl:max-w-[1700px] max-h-[85vh] overflow-auto text-[15px] p-6">
             <DialogHeader>
               <DialogTitle>{matrixModal?.title || "Scenario matrix"}</DialogTitle>
             </DialogHeader>
-            <div className="max-h-[72vh] overflow-auto">
+            <div className="max-h-[74vh] overflow-auto">
               {matrixModal?.scenarios?.length ? (
                 <ScenarioBubbleTable data={matrixModal.scenarios} />
               ) : (
@@ -1193,7 +1298,13 @@ function DebatePreview({
   maxChars = 800,
   onShowMatrix,
 }: {
-  debate: { role: string; text: string; round?: number | null; run?: number | null }[];
+  debate: {
+    role: string;
+    text: string;
+    round?: number | null;
+    run?: number | null;
+    scenarios?: any[];
+  }[];
   maxChars?: number;
   onShowMatrix?: (payload: { title: string; scenarios: any[] }) => void;
 }) {
@@ -1204,6 +1315,8 @@ function DebatePreview({
       </div>
     );
   }
+
+  let judgeMatrixPayload: { title: string; scenarios: any[] } | null = null;
 
   const renderedMessages = debate.map((m, i) => {
     const roleLower = (m.role || "").toLowerCase();
@@ -1226,7 +1339,22 @@ function DebatePreview({
     // Strip standalone JSON label lines first, and extract scenarios
     const firstPass = extractScenariosAndStripJson(displayText);
     displayText = firstPass.cleanText;
-    const localScenarios = firstPass.scenarios;
+    const providedScenarios = Array.isArray(m.scenarios) ? m.scenarios : [];
+    const localScenarios = providedScenarios.length ? providedScenarios : firstPass.scenarios;
+    const hasMatrix = localScenarios.length > 0;
+    let matrixPayload: { title: string; scenarios: any[] } | null = null;
+    if (hasMatrix) {
+      const labels: string[] = [m.role];
+      if (typeof m.round === "number") labels.push(`Round ${m.round}`);
+      if (typeof m.run === "number") labels.push(`Run ${m.run}`);
+      matrixPayload = {
+        title: labels.join(" · "),
+        scenarios: localScenarios,
+      };
+      if (isJudge) {
+        judgeMatrixPayload = matrixPayload;
+      }
+    }
 
     let truncated = false;
     if (displayText.length > maxChars) {
@@ -1253,11 +1381,11 @@ function DebatePreview({
               (message truncated)
             </div>
           )}
-          {localScenarios.length > 0 && (
+          {matrixPayload && isJudge && (
             <div className="mt-2 border-t border-slate-200 pt-2 space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="text-[10px] font-semibold uppercase tracking-wide opacity-70">
-                  Scenario Matrix
+                  Scenarios attached
                 </div>
                 {onShowMatrix && (
                   <Button
@@ -1265,21 +1393,36 @@ function DebatePreview({
                     variant="outline"
                     className="h-7 text-[11px] px-3"
                     onClick={() => {
-                      const labels: string[] = [m.role];
-                      if (typeof m.round === "number") labels.push(`Round ${m.round}`);
-                      if (typeof m.run === "number") labels.push(`Run ${m.run}`);
-                      onShowMatrix({
-                        title: labels.join(" · "),
-                        scenarios: localScenarios,
-                      });
+                      if (matrixPayload) onShowMatrix(matrixPayload);
                     }}
                   >
-                    Expand
+                    View matrix
                   </Button>
                 )}
               </div>
-              <div className="rounded-md border border-slate-200 bg-white/80 px-1 py-1 max-h-64 overflow-auto">
-                <ScenarioBubbleTable data={localScenarios} bare />
+              {isJudge && (
+                <div className="rounded-md border border-slate-200 bg-white/80 px-1 py-1 max-h-64 overflow-auto">
+                  <ScenarioBubbleTable data={localScenarios} bare />
+                </div>
+              )}
+            </div>
+          )}
+          {matrixPayload && !isJudge && onShowMatrix && (
+            <div className="mt-2 border-t border-slate-200 pt-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[10px] font-semibold uppercase tracking-wide opacity-70">
+                  Scenarios attached
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-[11px] px-3"
+                  onClick={() => {
+                    if (matrixPayload) onShowMatrix(matrixPayload);
+                  }}
+                >
+                  View matrix
+                </Button>
               </div>
             </div>
           )}
@@ -1291,6 +1434,17 @@ function DebatePreview({
   return (
     <div className="space-y-3 text-[15px] leading-6">
       {renderedMessages.filter(Boolean)}
+      {judgeMatrixPayload && onShowMatrix && (
+        <div className="flex justify-end pt-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => onShowMatrix(judgeMatrixPayload!)}
+          >
+            View judge matrix
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
