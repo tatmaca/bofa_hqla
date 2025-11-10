@@ -80,6 +80,41 @@ def check_logs(days=7):
     
     return logs
 
+def check_missing_data(days_back=7):
+    """Check for missing snapshots and analyses."""
+    repo_root = Path(__file__).parent.parent.parent
+    snapshots_dir = repo_root / "tools" / "ust_curve" / "llm" / "snapshots"
+    analyses_dir = Path(__file__).parent / "analyses"
+    
+    # Get business days
+    today = dt.date.today()
+    dates = []
+    current = today
+    for _ in range(days_back * 2):
+        if current.weekday() < 5:  # Business day
+            dates.append(current.isoformat())
+        if len(dates) >= days_back:
+            break
+        current -= timedelta(days=1)
+    
+    missing_snapshots = []
+    missing_analyses = []
+    
+    for date in dates:
+        snapshot_path = snapshots_dir / f"curve_snapshot_{date}.json"
+        analysis_path = analyses_dir / f"yield_impact_{date}.json"
+        
+        if not snapshot_path.exists():
+            missing_snapshots.append(date)
+        if not analysis_path.exists():
+            missing_analyses.append(date)
+    
+    return {
+        "missing_snapshots": sorted(missing_snapshots),
+        "missing_analyses": sorted(missing_analyses),
+        "total_checked": len(dates)
+    }
+
 def main():
     import argparse
     
@@ -158,6 +193,35 @@ def main():
             print(f"  ⚠ Latest articles are {days_old} day(s) old")
         else:
             print(f"  ✗ Latest articles are {days_old} days old")
+    
+    # Check for missing data
+    print(f"\n🔍 MISSING DATA CHECK (last {args.days} days)")
+    print("-" * 70)
+    try:
+        missing = check_missing_data(args.days)
+        if missing["missing_snapshots"]:
+            print(f"  ⚠ Missing {len(missing['missing_snapshots'])} yield curve snapshots:")
+            for date in missing["missing_snapshots"][:5]:
+                print(f"     - {date}")
+            if len(missing["missing_snapshots"]) > 5:
+                print(f"     ... and {len(missing['missing_snapshots']) - 5} more")
+        else:
+            print("  ✓ All yield curve snapshots exist")
+        
+        if missing["missing_analyses"]:
+            print(f"\n  ⚠ Missing {len(missing['missing_analyses'])} news analyses:")
+            for date in missing["missing_analyses"][:5]:
+                print(f"     - {date}")
+            if len(missing["missing_analyses"]) > 5:
+                print(f"     ... and {len(missing['missing_analyses']) - 5} more")
+        else:
+            print("  ✓ All news analyses exist")
+        
+        if missing["missing_snapshots"] or missing["missing_analyses"]:
+            print(f"\n  💡 Run catch-up script to fill missing data:")
+            print(f"     python3 catch_up_missing_data.py --days-back {args.days}")
+    except Exception as e:
+        print(f"  ⚠ Could not check missing data: {e}")
     
     print(f"\n{'='*70}\n")
 

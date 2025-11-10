@@ -6,7 +6,7 @@ timeout_s: 15
 dedupe_horizon_days: 1
 
 # <-- NEW -->
-window_hours: 24
+window_hours: 72  # Increased to catch weekend news (3 days)
 timezone: "America/Chicago"
 strict_24h: true         # drop items with missing/old dates at SOURCE stage
 
