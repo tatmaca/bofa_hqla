@@ -67,11 +67,25 @@ def call_openai_with_retry(client, messages, model="gpt-4o", max_retries=3, **kw
             )
             return response
         except Exception as e:
+            error_msg = str(e).lower()
+            
+            # Check for specific error types
+            if "api key" in error_msg or "authentication" in error_msg or "invalid" in error_msg:
+                print(f"[ERROR] OpenAI API key issue: {e}")
+                raise ValueError(f"Invalid or missing OpenAI API key: {e}")
+            elif "quota" in error_msg or "billing" in error_msg:
+                print(f"[ERROR] OpenAI API quota exceeded: {e}")
+                raise ValueError(f"OpenAI API quota exceeded: {e}")
+            elif "rate limit" in error_msg:
+                if attempt < max_retries - 1:
+                    wait_time = min(2 ** attempt * 2, 60)  # Longer wait for rate limits
+                    print(f"[RETRY] Rate limit hit. Waiting {wait_time}s before retry {attempt + 2}/{max_retries}...")
+                    time.sleep(wait_time)
+                else:
+                    raise
+            else:
             if attempt < max_retries - 1:
                 wait_time = 2 ** attempt  # Exponential backoff
-                error_msg = str(e).lower()
-                if "rate limit" in error_msg:
-                    wait_time = min(wait_time * 2, 60)  # Longer wait for rate limits
                 print(f"[RETRY] Attempt {attempt + 1} failed: {e}. Retrying in {wait_time}s...")
                 time.sleep(wait_time)
             else:
@@ -80,6 +94,14 @@ def call_openai_with_retry(client, messages, model="gpt-4o", max_retries=3, **kw
 
 def validate_analysis_response(result: Dict) -> Dict:
     """Validate and fix analysis response structure."""
+    # Handle case where spreads might be nested inside predictions
+    if "predictions" in result and "spreads" in result["predictions"]:
+        # Move spreads out of predictions
+        result["spreads"] = result["predictions"].pop("spreads")
+        # Also check if overall_summary is nested
+        if "overall_summary" in result["predictions"]:
+            result["overall_summary"] = result["predictions"].pop("overall_summary")
+    
     # Ensure all required fields exist
     if "predictions" not in result:
         result["predictions"] = {}
@@ -92,6 +114,10 @@ def validate_analysis_response(result: Dict) -> Dict:
             result["predictions"][tenor] = {"direction": "flat", "magnitude_bps": 0.0, "reasoning": "Missing prediction"}
         else:
             pred = result["predictions"][tenor]
+            # Skip if it's not a dict (might be nested structure)
+            if not isinstance(pred, dict):
+                result["predictions"][tenor] = {"direction": "flat", "magnitude_bps": 0.0, "reasoning": "Invalid prediction format"}
+                continue
             # Ensure direction is valid
             if pred.get("direction") not in ["up", "down", "flat"]:
                 pred["direction"] = "flat"
@@ -107,8 +133,21 @@ def validate_analysis_response(result: Dict) -> Dict:
             result["spreads"][spread] = {"direction": "flat", "magnitude_bps": 0.0, "reasoning": "Missing prediction"}
         else:
             spred = result["spreads"][spread]
-            if spred.get("direction") not in ["steepen", "flatten", "flat"]:
+            if not isinstance(spred, dict):
+                result["spreads"][spread] = {"direction": "flat", "magnitude_bps": 0.0, "reasoning": "Invalid spread format"}
+                continue
+            # Normalize direction: "flatten" -> "flatten", "steepen" -> "steepen", else "flat"
+            direction = spred.get("direction", "flat").lower()
+            if direction not in ["steepen", "flatten", "flat"]:
+                # Try to infer from direction
+                if "flatten" in direction or "narrow" in direction:
+                    spred["direction"] = "flatten"
+                elif "steepen" in direction or "widen" in direction:
+                    spred["direction"] = "steepen"
+                else:
                 spred["direction"] = "flat"
+            else:
+                spred["direction"] = direction
             try:
                 spred["magnitude_bps"] = float(spred.get("magnitude_bps", 0.0))
             except (ValueError, TypeError):
@@ -149,9 +188,14 @@ def analyze_yield_impact(bucketed_news: Dict[str, List[Dict]],
     
     if not api_key:
         print("[WARN] No OpenAI API key found. Using fallback prediction.")
+        print("[WARN] To enable LLM analysis, set OPENAI_API_KEY environment variable or add 'openai_api_key' to news_config.yaml")
         return get_fallback_prediction()
     
+    try:
     client = OpenAI(api_key=api_key)
+    except Exception as e:
+        print(f"[ERROR] Failed to initialize OpenAI client: {e}")
+        return get_fallback_prediction()
     
     # Prepare detailed news summary by bucket
     news_summary = []
@@ -202,13 +246,17 @@ CURRENT YIELD CURVE STATE (as of {current_curve.get('as_of', 'today')}):
 """
         
         if delta_zeros or delta_spreads:
+            # Determine direction indicators (using text instead of arrows)
+            dir_2y = "up" if delta_zeros.get('2y', 0) > 0 else ("down" if delta_zeros.get('2y', 0) < 0 else "unchanged")
+            spread_dir = "steepened" if delta_spreads.get('2s10s', 0) > 0 else ("flattened" if delta_spreads.get('2s10s', 0) < 0 else "unchanged")
+            
             delta_context = f"""
 RECENT MOVEMENT (vs previous day):
-- 2y: {delta_zeros.get('2y', 0.0):+.2f}% ({'↑' if delta_zeros.get('2y', 0) > 0 else '↓' if delta_zeros.get('2y', 0) < 0 else '→'})
+- 2y: {delta_zeros.get('2y', 0.0):+.2f}% ({dir_2y})
 - 5y: {delta_zeros.get('5y', 0.0):+.2f}%
 - 10y: {delta_zeros.get('10y', 0.0):+.2f}%
 - 30y: {delta_zeros.get('30y', 0.0):+.2f}%
-- 2s10s spread: {delta_spreads.get('2s10s', 0.0):+.2f}% ({'steepened' if delta_spreads.get('2s10s', 0) > 0 else 'flattened' if delta_spreads.get('2s10s', 0) < 0 else 'unchanged'})
+- 2s10s spread: {delta_spreads.get('2s10s', 0.0):+.2f}% ({spread_dir})
 - 2s30s spread: {delta_spreads.get('2s30s', 0.0):+.2f}%
 """
     
@@ -293,6 +341,10 @@ Respond with ONLY valid JSON in this exact format (no markdown, no code blocks):
         result = validate_analysis_response(result)
         return result
         
+    except ValueError as e:
+        # API key or quota errors - don't retry, just return fallback
+        print(f"[ERROR] {e}")
+        return get_fallback_prediction()
     except json.JSONDecodeError as e:
         print(f"[ERROR] Failed to parse LLM response as JSON: {e}")
         print(f"[DEBUG] Response text: {result_text[:500]}")
@@ -424,11 +476,17 @@ def main():
     
     print("Tenor Predictions:")
     for tenor, pred in analysis.get("predictions", {}).items():
-        print(f"  {tenor}: {pred['direction']} {pred['magnitude_bps']:.1f}bps - {pred['reasoning']}")
+        if isinstance(pred, dict):
+            print(f"  {tenor}: {pred.get('direction', 'N/A')} {pred.get('magnitude_bps', 0.0):.1f}bps - {pred.get('reasoning', 'N/A')}")
+        else:
+            print(f"  {tenor}: {pred}")
     
     print("\nSpread Predictions:")
     for spread, pred in analysis.get("spreads", {}).items():
-        print(f"  {spread}: {pred['direction']} {pred['magnitude_bps']:.1f}bps - {pred['reasoning']}")
+        if isinstance(pred, dict):
+            print(f"  {spread}: {pred.get('direction', 'N/A')} {pred.get('magnitude_bps', 0.0):.1f}bps - {pred.get('reasoning', 'N/A')}")
+        else:
+            print(f"  {spread}: {pred}")
     
     # Save
     save_analysis(date, analysis, bucketed_news)

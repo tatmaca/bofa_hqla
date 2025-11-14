@@ -50,7 +50,9 @@ def update_models_with_rolling_window(days: int = 30, threshold_mae: float = 3.0
     
     if len(training_data) < 7:
         print(f"[INFO] Insufficient training data: {len(training_data)} examples (need at least 7)")
-        print(f"[INFO] Need more historical data. Run daily pipeline to generate analyses and snapshots.")
+        print(f"[INFO] Need more historical data with valid LLM predictions.")
+        print(f"[INFO] Make sure OpenAI API key is set and daily pipeline is generating real LLM analyses.")
+        print(f"[INFO] Current data: {len(training_data)} examples (need 7+)")
         return False
     
     # Save training data

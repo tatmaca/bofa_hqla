@@ -178,7 +178,7 @@ def run(target_date: dt.date = None):
             except Exception as e:
                 skipped += 1
                 print(f"[WARN] Entry processing failed: {e}")
-    
+
     # Insert remaining articles
     if articles_buffer:
         from db import batch_upsert_articles

@@ -9,21 +9,21 @@ It supports **daily automation** and **LLM-ready analytics**, enabling models (a
 
 ```
 tools/ust_curve/
-├── bookirds/                # Core math and curve-fitting library
-├── curves.py                # Core Curve, SolvedCurve, and Swap classes
-├── run_curve.py             # Builds the curve for a specified date
-├── llm/
-│   ├── build_snapshots.py   # Builds today vs previous-day zero curve snapshot
-│   ├── make_summary.py      # Generates summary files (Markdown + compact JSON)
-│   ├── analyze_snapshot.py  # Prints curve interpretation to console
-│   ├── plot_snapshot.py     # Creates yield/spread plots
-│   ├── daily.sh             # End-to-end daily runner
-│   ├── snapshots/           # JSON data outputs
-│   ├── summaries/           # Markdown and JSON summaries
-│   ├── plots/               # PNG plots
-│   └── curve_daily_log.md   # Rolling text log of daily summaries
-├── requirements.txt
-└── README.md
+ bookirds/                # Core math and curve-fitting library
+ curves.py                # Core Curve, SolvedCurve, and Swap classes
+ run_curve.py             # Builds the curve for a specified date
+ llm/
+    build_snapshots.py   # Builds today vs previous-day zero curve snapshot
+    make_summary.py      # Generates summary files (Markdown + compact JSON)
+    analyze_snapshot.py  # Prints curve interpretation to console
+    plot_snapshot.py     # Creates yield/spread plots
+    daily.sh             # End-to-end daily runner
+    snapshots/           # JSON data outputs
+    summaries/           # Markdown and JSON summaries
+    plots/               # PNG plots
+    curve_daily_log.md   # Rolling text log of daily summaries
+ requirements.txt
+ README.md
 ```
 
 ---

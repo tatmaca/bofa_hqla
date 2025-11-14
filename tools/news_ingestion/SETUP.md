@@ -131,10 +131,10 @@ See [QUICK_FIX.md](QUICK_FIX.md) for more troubleshooting.
 
 ```
 news_ingestion/
-├── news.db                    # SQLite database (created)
-├── models/                    # Model files (created when training)
-├── analyses/                  # Analysis results (created)
-└── logs/                      # Log files (created)
+ news.db                    # SQLite database (created)
+ models/                    # Model files (created when training)
+ analyses/                  # Analysis results (created)
+ logs/                      # Log files (created)
 ```
 
 ## Requirements Summary

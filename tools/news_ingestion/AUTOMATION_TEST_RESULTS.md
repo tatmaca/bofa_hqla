@@ -45,9 +45,9 @@ Script: run_daily.sh
 **Important:** macOS LaunchAgent jobs **ONLY run when the system is AWAKE**.
 
 **Behavior when laptop is closed/sleeping:**
-- ❌ Job will **NOT** run while laptop is sleeping
-- ✅ Job will run when laptop wakes up (but may miss the scheduled time)
-- ⚠️ This is a **macOS system limitation**, not a configuration issue
+-  Job will **NOT** run while laptop is sleeping
+-  Job will run when laptop wakes up (but may miss the scheduled time)
+-  This is a **macOS system limitation**, not a configuration issue
 
 ### Why This Happens
 - macOS puts the system to sleep when the lid is closed
@@ -177,10 +177,10 @@ launchctl start com.news.ingestion
 
 ## Summary
 
-✅ **Pipeline Speed:** Excellent (1.89 minutes)  
-✅ **Automation Config:** Correct and active  
-⚠️ **Sleep Behavior:** Will NOT run when laptop is closed (macOS limitation)  
-💡 **Solution:** Prevent sleep or use alternative method
+ **Pipeline Speed:** Excellent (1.89 minutes)  
+ **Automation Config:** Correct and active  
+ **Sleep Behavior:** Will NOT run when laptop is closed (macOS limitation)  
+ **Solution:** Prevent sleep or use alternative method
 
 The pipeline is optimized and automation is configured correctly. It will run daily at 6 AM when your laptop is awake.
 

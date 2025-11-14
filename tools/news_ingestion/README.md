@@ -131,42 +131,42 @@ Edit `news_config.yaml` to:
 
 ```
 news_ingestion/
-├── README.md                    # This file
-├── SETUP.md                     # Setup guide
-├── DAILY_AUTOMATION.md          # Automation guide
-├── requirements.txt             # Python dependencies
-├── news_config.yaml            # Configuration
-├── schema.sql                   # Database schema
-│
-├── Core Scripts
-├── daily_pipeline.py           # Main pipeline
-├── run_ingest.py               # Ingestion orchestrator
-├── bucket_news.py              # News bucketing
-├── analyze_yield_impact.py    # LLM analysis
-├── train_xgboost.py            # Model training
-├── update_models_rolling.py    # Rolling updates
-├── check_status.py             # Status monitoring
-│
-├── Data Collection
-├── ingest_rss.py               # RSS ingestion
-├── crawl_web.py                # Web crawling
-├── sync_snapshots_to_db.py     # Sync yield data
-├── collect_training_data.py    # Training data (with LLM)
-├── collect_training_data_simple.py  # Training data (simple)
-│
-├── Utilities
-├── test_system.py              # System tests
-├── fix_dependencies.py         # Dependency fixes
-├── run_daily.sh                # Daily runner
-│
-├── Database
-├── db.py                       # Database functions
-├── schema.sql                  # Schema definition
-│
-└── Output Directories
-    ├── analyses/               # LLM analysis results
-    ├── models/                 # Trained model files
-    └── logs/                   # Daily run logs
+ README.md                    # This file
+ SETUP.md                     # Setup guide
+ DAILY_AUTOMATION.md          # Automation guide
+ requirements.txt             # Python dependencies
+ news_config.yaml            # Configuration
+ schema.sql                   # Database schema
+
+ Core Scripts
+ daily_pipeline.py           # Main pipeline
+ run_ingest.py               # Ingestion orchestrator
+ bucket_news.py              # News bucketing
+ analyze_yield_impact.py    # LLM analysis
+ train_xgboost.py            # Model training
+ update_models_rolling.py    # Rolling updates
+ check_status.py             # Status monitoring
+
+ Data Collection
+ ingest_rss.py               # RSS ingestion
+ crawl_web.py                # Web crawling
+ sync_snapshots_to_db.py     # Sync yield data
+ collect_training_data.py    # Training data (with LLM)
+ collect_training_data_simple.py  # Training data (simple)
+
+ Utilities
+ test_system.py              # System tests
+ fix_dependencies.py         # Dependency fixes
+ run_daily.sh                # Daily runner
+
+ Database
+ db.py                       # Database functions
+ schema.sql                  # Schema definition
+
+ Output Directories
+     analyses/               # LLM analysis results
+     models/                 # Trained model files
+     logs/                   # Daily run logs
 ```
 
 ## Monitoring
@@ -195,7 +195,7 @@ View recent logs:
 ls -t logs/daily_pipeline_*.log | head -1 | xargs cat
 ```
 
-## 🧪 Testing
+##  Testing
 
 Run comprehensive tests:
 ```bash

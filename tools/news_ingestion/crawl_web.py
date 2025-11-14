@@ -277,7 +277,7 @@ async def fetch_and_store(session: aiohttp.ClientSession, url: str):
             return None
 
         host = urlparse(url).netloc
-        
+
         # Skip robots.txt check for known-good domains (faster)
         # Only check for unknown or problematic domains
         if host not in ROBOTS:
@@ -395,7 +395,7 @@ async def run():
 
         # Deduplicate combined URL list
         all_urls = list({*front_urls, *sm_urls})
-        
+
         # Limit total URLs to process (for faster runs)
         if len(all_urls) > MAX_TOTAL_URLS:
             print(f"[CRAWL] Limiting URLs from {len(all_urls)} to {MAX_TOTAL_URLS} for faster processing")

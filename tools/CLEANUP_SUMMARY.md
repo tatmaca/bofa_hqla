@@ -38,21 +38,21 @@ All documentation is now organized and cross-referenced:
 
 ```
 tools/
-├── README.md                    # Overview
-├── news_ingestion/
-│   ├── README.md               # Main documentation
-│   ├── SETUP.md                # Setup guide
-│   ├── QUICK_START.md          # Quick reference
-│   ├── DAILY_AUTOMATION.md     # Automation guide
-│   ├── TESTING.md              # Testing guide
-│   ├── TRAINING_STATUS.md      # Training status
-│   ├── HISTORICAL_INGESTION.md # Historical data
-│   ├── XGBOOST_TRAINING.md     # XGBoost details
-│   ├── QUICK_FIX.md            # Troubleshooting
-│   └── [scripts...]
-└── ust_curve/
-    ├── README.md               # Yield curve docs
-    └── [scripts...]
+ README.md                    # Overview
+ news_ingestion/
+    README.md               # Main documentation
+    SETUP.md                # Setup guide
+    QUICK_START.md          # Quick reference
+    DAILY_AUTOMATION.md     # Automation guide
+    TESTING.md              # Testing guide
+    TRAINING_STATUS.md      # Training status
+    HISTORICAL_INGESTION.md # Historical data
+    XGBOOST_TRAINING.md     # XGBoost details
+    QUICK_FIX.md            # Troubleshooting
+    [scripts...]
+ ust_curve/
+     README.md               # Yield curve docs
+     [scripts...]
 ```
 
 ## For New Users
