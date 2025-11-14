@@ -13,8 +13,22 @@ def init_db():
         c.executescript(f.read())
 
 def upsert_article(rec):
+    """Insert or update a single article (for backward compatibility)."""
+    batch_upsert_articles([rec])
+
+def batch_upsert_articles(articles):
+    """Batch insert/update articles - much faster than individual inserts."""
+    if not articles:
+        return
+    
     fields = ("url","source","published_at","fetched_at","title","author","summary","text","content_hash","status","bucket","bucket_confidence")
-    vals = tuple(rec.get(k) for k in fields)
+    
+    # Prepare batch data
+    values = []
+    for rec in articles:
+        vals = tuple(rec.get(k) for k in fields)
+        values.append(vals)
+    
     sql = f"""
     INSERT INTO articles({",".join(fields)})
     VALUES ({",".join(["?"]*len(fields))})
@@ -32,7 +46,8 @@ def upsert_article(rec):
       bucket_confidence=excluded.bucket_confidence
     """
     with get_conn() as c:
-        c.execute(sql, vals)
+        c.executemany(sql, values)
+        c.commit()
 
 def content_hash(text:str)->str:
     return hashlib.sha256((text or "").encode("utf-8")).hexdigest()

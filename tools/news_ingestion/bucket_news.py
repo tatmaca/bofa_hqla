@@ -18,6 +18,7 @@ import yaml
 import sqlite3
 import datetime as dt
 import time
+import concurrent.futures
 from datetime import timezone
 from typing import List, Dict, Optional
 from urllib.parse import urlparse
@@ -56,6 +57,7 @@ BUCKET_DESCRIPTIONS = {
 }
 
 def get_conn():
+    """Get database connection."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
@@ -244,12 +246,15 @@ def update_article_bucket(article_id: int, bucket: str, confidence: float):
         """, (bucket, confidence, article_id))
 
 def bucket_articles(hours: int = 24, batch_size: int = 50, api_key: Optional[str] = None):
-    """Bucket all unbucketed articles from the last N hours."""
+    """Bucket all unbucketed articles from the last N hours with parallel processing."""
     articles = get_unbucketed_articles(hours)
     print(f"[BUCKET] Found {len(articles)} unbucketed articles")
     
     if not articles:
         return
+    
+    # Limit to batch_size
+    articles = articles[:batch_size]
     
     # Load config for API key if not provided
     if not api_key and os.path.exists(CONFIG_PATH):
@@ -265,32 +270,51 @@ def bucket_articles(hours: int = 24, batch_size: int = 50, api_key: Optional[str
         except Exception as e:
             print(f"[WARN] Failed to initialize OpenAI client: {e}")
     
-    processed = 0
-    errors = 0
-    for i, article in enumerate(articles):
-        if i >= batch_size:
-            print(f"[BUCKET] Processed {batch_size} articles (stopping at batch limit)")
-            break
-        
+    # Process articles in parallel batches
+    import concurrent.futures
+    MAX_WORKERS = 10  # Parallel bucketing workers
+    
+    def bucket_single(article):
+        """Bucket a single article."""
         try:
             bucket, confidence = bucket_with_llm(article, api_key, client)
-            update_article_bucket(article["id"], bucket, confidence)
-            processed += 1
+            return (article["id"], bucket, confidence, None)
         except Exception as e:
-            errors += 1
             # Fallback to keyword bucketing on error
             bucket, confidence = bucket_with_keywords(article)
-            update_article_bucket(article["id"], bucket, confidence)
-            processed += 1
-        
-        # Progress update every 10 articles
-        if (i + 1) % 10 == 0:
-            print(f"[BUCKET] Processed {i + 1}/{min(len(articles), batch_size)} articles" + 
-                  (f" ({errors} errors)" if errors > 0 else ""))
-        
-        # Small delay to avoid rate limits
-        if client and (i + 1) % 20 == 0:
-            time.sleep(0.5)
+            return (article["id"], bucket, confidence, str(e))
+    
+    # Process in parallel
+    updates = []
+    processed = 0
+    errors = 0
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_article = {executor.submit(bucket_single, article): article for article in articles}
+        for future in concurrent.futures.as_completed(future_to_article):
+            try:
+                result = future.result()
+                if result:
+                    article_id, bucket, confidence, error = result
+                    updates.append((bucket, confidence, article_id))
+                    processed += 1
+                    if error:
+                        errors += 1
+            except Exception as e:
+                errors += 1
+                print(f"[WARN] Bucketing failed: {e}")
+    
+    # Batch update database
+    if updates:
+        conn = get_conn()
+        c = conn.cursor()
+        c.executemany("""
+            UPDATE articles
+            SET bucket = ?, bucket_confidence = ?
+            WHERE id = ?
+        """, [(bucket, confidence, article_id) for bucket, confidence, article_id in updates])
+        conn.commit()
+        conn.close()
     
     print(f"[BUCKET] Completed: {processed} articles bucketed" + 
           (f" ({errors} fell back to keyword matching)" if errors > 0 else ""))

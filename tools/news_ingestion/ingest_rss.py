@@ -90,8 +90,10 @@ def process_entry(e, cutoff_utc, strict):
             (art.get("text") or "") if not meta_only else (getattr(e, "title", "") or "")
         ),
         "status": art.get("status", "ok") if not meta_only else "paywalled",
+        "bucket": None,
+        "bucket_confidence": None,
     }
-    upsert_article(rec)
+    # Don't insert here - return for batch insert
     return rec
 
 def process_feed(feed_url):
@@ -142,9 +144,13 @@ def run(target_date: dt.date = None):
                 print(f"[ERROR] Feed {feed_url} failed: {e}")
 
     # Process entries with parallel extraction (for non-paywalled)
+    # Collect articles in batches for efficient database operations
+    articles_buffer = []
+    BATCH_SIZE = 50  # Insert in batches of 50
     processed = 0
     skipped = 0
-    with concurrent.futures.ThreadPoolExecutor(max_workers=CONFIG.get("concurrency", 8)) as executor:
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=CONFIG.get("concurrency", 12)) as executor:
         future_to_entry = {
             executor.submit(process_entry, e, cutoff_utc, strict): e 
             for e in all_entries
@@ -153,13 +159,24 @@ def run(target_date: dt.date = None):
             try:
                 result = future.result()
                 if result:
+                    articles_buffer.append(result)
                     processed += 1
+                    # Batch insert when buffer is full
+                    if len(articles_buffer) >= BATCH_SIZE:
+                        from db import batch_upsert_articles
+                        batch_upsert_articles(articles_buffer)
+                        articles_buffer = []
                 else:
                     skipped += 1
             except Exception as e:
                 skipped += 1
                 print(f"[WARN] Entry processing failed: {e}")
-
+    
+    # Insert remaining articles
+    if articles_buffer:
+        from db import batch_upsert_articles
+        batch_upsert_articles(articles_buffer)
+    
     print(f"[RSS] Processed: {processed}, Skipped: {skipped}")
 
 if __name__ == "__main__":

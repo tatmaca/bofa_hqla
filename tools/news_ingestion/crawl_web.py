@@ -251,7 +251,7 @@ async def parse_sitemap(session: aiohttp.ClientSession, url: str) -> list:
 # -----------------------
 # Article fetch/store
 # -----------------------
-async def fetch_and_store(session: aiohttp.ClientSession, url: str) -> None:
+async def fetch_and_store(session: aiohttp.ClientSession, url: str):
     try:
         if seen_recent(url, int(CONFIG.get("dedupe_horizon_days", 1))):
             return
@@ -316,7 +316,7 @@ async def fetch_and_store(session: aiohttp.ClientSession, url: str) -> None:
             "url": url,
             "source": host,
             "published_at": published_at,
-            "fetched_at": datetime.now(tz.utc).isoformat(),
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
             "title": art.get("title"),
             "author": art.get("author"),
             "summary": None,
@@ -325,13 +325,16 @@ async def fetch_and_store(session: aiohttp.ClientSession, url: str) -> None:
                 (art.get("text") or "") if not meta_only else (art.get("title") or url)
             ),
             "status": art.get("status", "ok") if not meta_only else "paywalled",
+            "bucket": None,
+            "bucket_confidence": None,
         }
 
-        upsert_article(rec)
+        # Return article for batch insert instead of inserting immediately
+        return rec
 
     except Exception:
         # swallow per-URL errors to keep the crawl running
-        return
+        return None
 
 # -----------------------
 # Orchestrator
@@ -359,14 +362,30 @@ async def run():
         # Deduplicate combined URL list
         all_urls = list({*front_urls, *sm_urls})
 
-        # 3) Fetch & store with bounded concurrency
+        # 3) Fetch & store with bounded concurrency and batch inserts
         sem = asyncio.Semaphore(CONCURRENCY)
+        articles_buffer = []
+        BATCH_SIZE = 50
 
         async def worker(u: str):
             async with sem:
-                await fetch_and_store(session, u)
+                return await fetch_and_store(session, u)
 
-        await asyncio.gather(*(worker(u) for u in all_urls), return_exceptions=True)
+        results = await asyncio.gather(*(worker(u) for u in all_urls), return_exceptions=True)
+        
+        # Collect valid articles and batch insert
+        for result in results:
+            if isinstance(result, dict) and result:
+                articles_buffer.append(result)
+                if len(articles_buffer) >= BATCH_SIZE:
+                    from db import batch_upsert_articles
+                    batch_upsert_articles(articles_buffer)
+                    articles_buffer = []
+        
+        # Insert remaining articles
+        if articles_buffer:
+            from db import batch_upsert_articles
+            batch_upsert_articles(articles_buffer)
 
 if __name__ == "__main__":
     asyncio.run(run())
