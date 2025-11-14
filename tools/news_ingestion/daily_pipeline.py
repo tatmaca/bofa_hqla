@@ -6,8 +6,10 @@ Daily Pipeline: Complete workflow for news ingestion, bucketing, analysis, and m
 import os
 import sys
 import json
+import yaml
 import datetime as dt
 from datetime import timezone
+from typing import Optional
 import subprocess
 from pathlib import Path
 
@@ -18,6 +20,27 @@ from db import get_conn, start_ingestion_run, complete_ingestion_run
 from bucket_news import get_bucket_counts
 from analyze_yield_impact import get_bucketed_news, analyze_yield_impact, load_curve_snapshot, save_analysis
 from train_models import prepare_daily_features, prepare_training_data, train_models, save_models
+
+def get_openai_api_key() -> Optional[str]:
+    """Load OpenAI API key from environment or config file."""
+    # First try environment variable
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if api_key:
+        return api_key
+    
+    # Then try config file
+    config_path = Path(__file__).parent / "news_config.yaml"
+    if config_path.exists():
+        try:
+            with open(config_path) as f:
+                cfg = yaml.safe_load(f)
+                api_key = cfg.get("openai_api_key")
+                if api_key:
+                    return api_key
+        except Exception as e:
+            print(f"[WARN] Failed to load config: {e}")
+    
+    return None
 
 def sync_yield_curve_data(date: str):
     """Sync yield curve snapshot data to database."""
@@ -189,6 +212,7 @@ def run_daily_pipeline(date: str = None):
     
     # Step 3: Check for New Yield Curve Data and Generate Snapshot
     print("\n[3/6] Checking for New Yield Curve Data...")
+    snapshot_generated = False
     try:
         # Try to generate snapshot for today (or most recent available date)
         repo_root = Path(__file__).resolve().parents[2]
@@ -205,6 +229,7 @@ def run_daily_pipeline(date: str = None):
             )
             if result.returncode == 0:
                 print(result.stdout)
+                snapshot_generated = True
             else:
                 print(f"[WARN] Auto-snapshot check failed: {result.stderr}")
         else:
@@ -215,9 +240,10 @@ def run_daily_pipeline(date: str = None):
     # Sync Yield Curve Data (for the date we have)
     print("\n[3/6] Syncing Yield Curve Data...")
     # Try to sync for today, but also check for most recent available date
-    sync_yield_curve_data(date)
+    synced = sync_yield_curve_data(date)
     
     # Also try to sync the most recent available snapshot if today's doesn't exist
+    if not synced:
     repo_root = Path(__file__).resolve().parents[2]
     snapshots_dir = repo_root / "tools" / "ust_curve" / "llm" / "snapshots"
     if snapshots_dir.exists():
@@ -229,18 +255,40 @@ def run_daily_pipeline(date: str = None):
                 print(f"[INFO] Also syncing most recent snapshot: {latest_date}")
                 sync_yield_curve_data(latest_date)
     
+    if snapshot_generated or synced:
+        print("[OK] Yield curve data updated successfully")
+    else:
+        print("[WARN] No yield curve data available for today - may need to wait for market close")
+    
     # Step 4: LLM Yield Impact Analysis
     print("\n[4/6] LLM Yield Impact Analysis...")
     try:
+        # Load API key
+        api_key = get_openai_api_key()
+        if not api_key:
+            print("[WARN] No OpenAI API key found. Set OPENAI_API_KEY environment variable or add 'openai_api_key' to news_config.yaml")
+            print("[WARN] Analysis will use fallback predictions (not suitable for training)")
+        
         bucketed_news = get_bucketed_news(date)
         if bucketed_news:
             current_curve = load_curve_snapshot(date)
-            analysis = analyze_yield_impact(bucketed_news, current_curve)
+            # Pass API key explicitly
+            analysis = analyze_yield_impact(bucketed_news, current_curve, api_key=api_key)
+            
+            # Check if analysis used fallback
+            predictions = analysis.get("predictions", {})
+            if predictions and any("Fallback" in pred.get("reasoning", "") for pred in predictions.values()):
+                print("[WARN] Analysis used fallback predictions - API key may be missing or invalid")
+            else:
+                print("[OK] LLM analysis completed successfully")
+            
             save_analysis(date, analysis, bucketed_news)
         else:
             print("[WARN] No bucketed news for analysis")
     except Exception as e:
         print(f"[ERROR] Analysis failed: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
     
     # Step 5: Prepare Training Data
     print("\n[5/6] Preparing Training Data...")
@@ -258,11 +306,26 @@ def run_daily_pipeline(date: str = None):
     try:
         # Use rolling 30-day window for model updates
         from update_models_rolling import update_models_with_rolling_window
-        success = update_models_with_rolling_window(days=30, threshold_mae=3.0)
+        
+        # Try with 30 days first, then fall back to smaller windows if needed
+        success = False
+        for window_days in [30, 14, 7]:
+            print(f"[TRAIN] Attempting model training with {window_days}-day window...")
+            success = update_models_with_rolling_window(days=window_days, threshold_mae=3.0)
+            if success:
+                print(f"[SUCCESS] Models trained successfully with {window_days}-day window")
+                break
+            elif window_days == 7:
+                # Last attempt - provide detailed feedback
+                print(f"[INFO] Model training requires at least 7 days of complete training data")
+                print(f"[INFO] Complete data means: news buckets + valid LLM predictions + yield curve snapshots")
+                print(f"[INFO] Continue running daily pipeline to accumulate more training data")
+        
         if not success:
             print("[INFO] Model update skipped - insufficient data or dependencies")
     except ImportError as e:
         print(f"[INFO] Model training skipped - dependencies not available: {e}")
+        print(f"[INFO] Install XGBoost: pip install 'numpy<2.0' xgboost scikit-learn")
     except Exception as e:
         print(f"[ERROR] Model training failed: {e}", file=sys.stderr)
         import traceback

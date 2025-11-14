@@ -8,17 +8,17 @@ Created optimized versions of CPU-intensive components using Cython, while keepi
 
 ```
 tools/news_ingestion/
-├── optimized/              # Cython-optimized modules
-│   ├── extract_article_cy.pyx
-│   ├── db_operations_cy.pyx
-│   ├── text_processing_cy.pyx
-│   ├── setup.py
-│   └── run_ingest_optimized.py
-├── original_python/        # Original scripts (reference)
-│   ├── extract_article.py
-│   ├── db.py
-│   └── bucket_news.py
-└── [existing files]        # Current working pipeline
+ optimized/              # Cython-optimized modules
+    extract_article_cy.pyx
+    db_operations_cy.pyx
+    text_processing_cy.pyx
+    setup.py
+    run_ingest_optimized.py
+ original_python/        # Original scripts (reference)
+    extract_article.py
+    db.py
+    bucket_news.py
+ [existing files]        # Current working pipeline
 ```
 
 ## Optimizations Implemented

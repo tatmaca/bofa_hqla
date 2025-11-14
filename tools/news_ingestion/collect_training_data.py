@@ -106,7 +106,17 @@ def collect_training_data(start_date: str, end_date: str) -> List[Dict]:
         
         # Check if LLM prediction is valid (not fallback)
         predictions = llm_pred.get("predictions", {})
-        if not predictions or any("Fallback" in pred.get("reasoning", "") for pred in predictions.values()):
+        overall_summary = llm_pred.get("overall_summary", "")
+        
+        # Skip if it's clearly a fallback prediction
+        is_fallback = (
+            not predictions or 
+            any("Fallback" in pred.get("reasoning", "") for pred in predictions.values()) or
+            "unavailable" in overall_summary.lower() or
+            "not configured" in overall_summary.lower()
+        )
+        
+        if is_fallback:
             missing_llm.append(date)
             continue
         

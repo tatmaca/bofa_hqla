@@ -6,15 +6,15 @@ This directory contains tools for news ingestion, yield curve analysis, and ML m
 
 ```
 tools/
-├── news_ingestion/          # News ingestion and yield curve prediction system
-│   ├── README.md           # Main documentation
-│   ├── SETUP.md            # Setup instructions
-│   ├── DAILY_AUTOMATION.md # Daily automation guide
-│   └── ...
-│
-└── ust_curve/              # U.S. Treasury yield curve builder
-    ├── README.md           # Documentation
-    └── llm/                # LLM integration and snapshots
+ news_ingestion/          # News ingestion and yield curve prediction system
+    README.md           # Main documentation
+    SETUP.md            # Setup instructions
+    DAILY_AUTOMATION.md # Daily automation guide
+    ...
+
+ ust_curve/              # U.S. Treasury yield curve builder
+     README.md           # Documentation
+     llm/                # LLM integration and snapshots
 ```
 
 ## Quick Start

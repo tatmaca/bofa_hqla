@@ -297,7 +297,7 @@ def bucket_articles(hours: int = 24, batch_size: int = 50, api_key: Optional[str
                 if result:
                     article_id, bucket, confidence, error = result
                     updates.append((bucket, confidence, article_id))
-                    processed += 1
+            processed += 1
                     if error:
                         errors += 1
             except Exception as e:
