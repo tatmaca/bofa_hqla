@@ -79,7 +79,8 @@ sitemaps:
   - https://www.cnbc.com/sitemap.xml
   - https://finance.yahoo.com/sitemap.xml
 
-# Increased limits for more articles
-max_links_per_front: 300  # Increased from 200
-max_urls_per_sitemap: 1000  # Increased from 500
+# Optimized limits for faster crawling
+max_links_per_front: 50  # Reduced for faster processing
+max_urls_per_sitemap: 100  # Reduced for faster processing
+max_total_urls: 200  # Maximum total URLs to process per run (keeps crawl fast)
 
