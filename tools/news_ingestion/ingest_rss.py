@@ -51,7 +51,14 @@ def process_entry(e, cutoff_utc, strict):
                "author": None, "published_at": published, "text": None}
     else:
         try:
-            art = extract(url)
+            # Extract with timeout using concurrent.futures (works on all platforms)
+            from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(extract, url)
+                art = future.result(timeout=8)  # 8 second timeout per article
+        except FutureTimeoutError:
+            art = {"status": "fetch_failed", "title": getattr(e, "title", None),
+                   "author": None, "published_at": published, "text": None}
         except Exception:
             art = {"status": "fetch_failed", "title": getattr(e, "title", None),
                    "author": None, "published_at": published, "text": None}
