@@ -58,16 +58,16 @@ This will show:
 
 Example output:
 ```
-🔍 MISSING DATA CHECK (last 7 days)
+[CHECK] MISSING DATA CHECK (last 7 days)
 ----------------------------------------------------------------------
-  ⚠ Missing 2 yield curve snapshots:
+  [WARN] Missing 2 yield curve snapshots:
      - 2025-11-09
      - 2025-11-10
 
-  ⚠ Missing 1 news analyses:
+  [WARN] Missing 1 news analyses:
      - 2025-11-10
 
-  💡 Run catch-up script to fill missing data:
+  [TIP] Run catch-up script to fill missing data:
      python3 catch_up_missing_data.py --days-back 7
 ```
 

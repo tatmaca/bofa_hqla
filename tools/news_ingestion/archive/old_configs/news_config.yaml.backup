@@ -1,0 +1,42 @@
+user_agent: "JL-NewsCrawler/0.1 (+contact: you@example.com)"
+concurrency: 8
+rss_max_workers: 4  # Parallel RSS feed parsing
+per_host_rps: 0.5        # ~1 request / 2s per host (handled by our limiter fix)
+timeout_s: 15
+dedupe_horizon_days: 1
+
+# <-- NEW -->
+window_hours: 72  # Increased to catch weekend news (3 days)
+timezone: "America/Chicago"
+strict_24h: true         # drop items with missing/old dates at SOURCE stage
+
+# OpenAI API key for LLM bucketing and analysis (optional, can also use env var OPENAI_API_KEY)
+openai_api_key: null
+
+# Domains where we only keep metadata (title/url/published_at); no full-text fetch
+# (prevents paywall scraping, keeps items usable for LLM rationales)
+metadata_only_domains:
+  - www.ft.com
+  - www.bloomberg.com
+  - www.wsj.com
+  - www.nytimes.com
+  - www.economist.com
+
+# Domains to skip entirely (optional; start empty)
+skip_domains:
+  - www.marketwatch.com
+
+rss_feeds:
+  - https://www.reuters.com/finance/markets/us/rss
+  - https://www.reuters.com/world/us/rss
+  - https://apnews.com/hub/ap-top-news?rss=1
+  - https://www.ft.com/?format=rss  # may hit paywall; titles still useful
+
+front_pages:
+  - https://www.reuters.com/markets/us/
+  - https://www.cnbc.com/markets/
+  - https://www.bloomberg.com/markets  # paywalled: metadata-only
+
+sitemaps:
+  - https://www.reuters.com/sitemap_news_index.xml
+  - https://apnews.com/sitemap.xml

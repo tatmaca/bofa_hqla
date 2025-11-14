@@ -85,7 +85,7 @@ You can re-run for past business days:
 
 ---
 
-## 📊 Outputs
+##  Outputs
 
 ### JSON Snapshot
 `tools/ust_curve/llm/snapshots/curve_snapshot_<DATE>.json`

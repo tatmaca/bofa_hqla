@@ -62,10 +62,10 @@ def main():
         print(f"[{i}/{len(dates)}] Syncing {date_str}...", end=" ")
         if sync_yield_curve_data(date_str):
             success_count += 1
-            print("✓")
+            print("[OK]")
         else:
             fail_count += 1
-            print("✗")
+            print("[FAIL]")
     
     # Summary
     print(f"\n{'='*70}")

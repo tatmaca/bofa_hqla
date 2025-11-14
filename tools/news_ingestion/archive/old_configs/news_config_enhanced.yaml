@@ -25,7 +25,8 @@ metadata_only_domains:
   - www.financialtimes.com
 
 # Domains to skip entirely (optional; start empty)
-skip_domains: []  # Removed marketwatch.com - can collect metadata at least
+skip_domains:
+  # Removed marketwatch.com - can collect metadata at least
 
 # Enhanced RSS feeds - added more sources
 rss_feeds:

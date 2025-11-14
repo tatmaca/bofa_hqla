@@ -278,13 +278,13 @@ def main():
     print(f"\n{'='*70}")
     print(f"SUMMARY")
     print(f"{'='*70}")
-    print(f"✓ Snapshot: {date_str}")
+    print(f"[OK] Snapshot: {date_str}")
     if not args.skip_summary:
-        print(f"✓ Summary: {date_str}")
+        print(f"[OK] Summary: {date_str}")
     if not args.skip_plot:
-        print(f"✓ Plots: {date_str}")
+        print(f"[OK] Plots: {date_str}")
     if not args.skip_sync:
-        print(f"✓ Database sync: {date_str}")
+        print(f"[OK] Database sync: {date_str}")
     print(f"{'='*70}\n")
     
     return 0

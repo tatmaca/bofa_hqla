@@ -6,12 +6,12 @@ The `ingest_historical.py` script runs news ingestion for past dates with strict
 
 ## Key Features
 
-### ✅ No Look-Back Bias
+### [OK] No Look-Back Bias
 - **Published Date Filter**: Only collects articles with `published_at <= target_date`
 - **Fetched Date Simulation**: Sets `fetched_at` to target date (end of day UTC)
 - **Verification**: Automatically checks for any articles with `published_at > target_date` and warns if found
 
-### ✅ Timestamp Controls
+### [OK] Timestamp Controls
 - Articles are filtered by `published_at` timestamp
 - `fetched_at` is set to the end of the target date (not current time)
 - Cutoff time is calculated relative to target date, not current time
@@ -42,7 +42,7 @@ python3 ingest_historical.py --days 30 --dry-run
 
 ## Limitations
 
-⚠️ **RSS Feeds**: Most RSS feeds only contain recent articles (last few days/weeks). Historical ingestion from RSS may yield limited results.
+[WARN] **RSS Feeds**: Most RSS feeds only contain recent articles (last few days/weeks). Historical ingestion from RSS may yield limited results.
 
 **Solutions**:
 - Use news archive APIs if available
@@ -66,7 +66,7 @@ INGESTING NEWS FOR 2025-09-26
 >> Starting ingestion run for 2025-09-26
 [OK] Processed RSS feed: ...
 >> Done. New articles: 15
-[VERIFY] ✓ No look-back bias detected (all articles published <= 2025-09-26)
+[VERIFY] [OK] No look-back bias detected (all articles published <= 2025-09-26)
 ```
 
 ## Database Verification

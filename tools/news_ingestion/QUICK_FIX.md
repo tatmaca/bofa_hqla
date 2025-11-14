@@ -79,7 +79,7 @@ python3 fix_dependencies.py
 brew install libomp  # if needed
 
 # 3. Verify imports
-python3 -c "import numpy, xgboost; print('✓ OK')"
+python3 -c "import numpy, xgboost; print('[OK] OK')"
 
 # 4. Generate historical data (run for past dates)
 for date in 2025-10-29 2025-10-30 2025-10-31 2025-11-03; do

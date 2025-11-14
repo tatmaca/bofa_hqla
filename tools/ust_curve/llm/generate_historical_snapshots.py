@@ -208,9 +208,9 @@ def main():
     print(f"SUMMARY")
     print(f"{'='*70}")
     print(f"Total dates processed: {len(business_days)}")
-    print(f"  ✓ Success: {success_count}")
+    print(f"  [OK] Success: {success_count}")
     print(f"  ⊘ Skipped (already exist): {skip_count}")
-    print(f"  ✗ Failed: {fail_count}")
+    print(f"  [FAIL] Failed: {fail_count}")
     print(f"{'='*70}\n")
     
     # List generated snapshots

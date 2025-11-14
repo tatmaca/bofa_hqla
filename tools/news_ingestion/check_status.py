@@ -127,7 +127,7 @@ def main():
     print(f"{'='*70}\n")
     
     # Data counts
-    print("📊 DATA COUNTS")
+    print("DATA COUNTS")
     print("-" * 70)
     counts = get_data_counts()
     print(f"  Articles: {counts['articles']:,}")
@@ -141,7 +141,7 @@ def main():
         print(f"  Yield curve range: {counts['yield_date_range'][0]} to {counts['yield_date_range'][1]}")
     
     # Recent runs
-    print(f"\n📅 RECENT RUNS (last {args.days} days)")
+    print(f"\nRECENT RUNS (last {args.days} days)")
     print("-" * 70)
     runs = check_recent_runs(args.days)
     
@@ -150,13 +150,13 @@ def main():
     else:
         for run in runs:
             run_date, started, completed, status, articles, error = run
-            status_icon = "✓" if status == "completed" else "✗"
+            status_icon = "[OK]" if status == "completed" else "[FAIL]"
             print(f"  {status_icon} {run_date}: {status} ({articles} articles)")
             if error:
                 print(f"      Error: {error[:60]}")
     
     # Logs
-    print(f"\n📝 RECENT LOGS (last {args.days} days)")
+    print(f"\nRECENT LOGS (last {args.days} days)")
     print("-" * 70)
     logs = check_logs(args.days)
     
@@ -168,7 +168,7 @@ def main():
             print(f"  {log_date}: {log_file.name} ({size_kb:.1f} KB)")
     
     # Health check
-    print(f"\n💚 HEALTH CHECK")
+    print(f"\nHEALTH CHECK")
     print("-" * 70)
     
     today = dt.date.today()
@@ -177,51 +177,51 @@ def main():
     if today_runs:
         latest = today_runs[0]
         if latest[3] == "completed":
-            print("  ✓ Today's run completed successfully")
+            print("  [OK] Today's run completed successfully")
         else:
-            print(f"  ✗ Today's run status: {latest[3]}")
+            print(f"  [FAIL] Today's run status: {latest[3]}")
     else:
-        print("  ⚠ No run today yet")
+        print("  [WARN] No run today yet")
     
     # Check for recent data
     if counts["article_date_range"][1]:
         latest_article_date = dt.datetime.strptime(counts["article_date_range"][1], "%Y-%m-%d").date()
         days_old = (today - latest_article_date).days
         if days_old == 0:
-            print("  ✓ Articles from today")
+            print("  [OK] Articles from today")
         elif days_old <= 2:
-            print(f"  ⚠ Latest articles are {days_old} day(s) old")
+            print(f"  [WARN] Latest articles are {days_old} day(s) old")
         else:
-            print(f"  ✗ Latest articles are {days_old} days old")
+            print(f"  [FAIL] Latest articles are {days_old} days old")
     
     # Check for missing data
-    print(f"\n🔍 MISSING DATA CHECK (last {args.days} days)")
+    print(f"\nMISSING DATA CHECK (last {args.days} days)")
     print("-" * 70)
     try:
         missing = check_missing_data(args.days)
         if missing["missing_snapshots"]:
-            print(f"  ⚠ Missing {len(missing['missing_snapshots'])} yield curve snapshots:")
+            print(f"  [WARN] Missing {len(missing['missing_snapshots'])} yield curve snapshots:")
             for date in missing["missing_snapshots"][:5]:
                 print(f"     - {date}")
             if len(missing["missing_snapshots"]) > 5:
                 print(f"     ... and {len(missing['missing_snapshots']) - 5} more")
         else:
-            print("  ✓ All yield curve snapshots exist")
+            print("  [OK] All yield curve snapshots exist")
         
         if missing["missing_analyses"]:
-            print(f"\n  ⚠ Missing {len(missing['missing_analyses'])} news analyses:")
+            print(f"\n  [WARN] Missing {len(missing['missing_analyses'])} news analyses:")
             for date in missing["missing_analyses"][:5]:
                 print(f"     - {date}")
             if len(missing["missing_analyses"]) > 5:
                 print(f"     ... and {len(missing['missing_analyses']) - 5} more")
         else:
-            print("  ✓ All news analyses exist")
+            print("  [OK] All news analyses exist")
         
         if missing["missing_snapshots"] or missing["missing_analyses"]:
-            print(f"\n  💡 Run catch-up script to fill missing data:")
+            print(f"\n  [TIP] Run catch-up script to fill missing data:")
             print(f"     python3 catch_up_missing_data.py --days-back {args.days}")
     except Exception as e:
-        print(f"  ⚠ Could not check missing data: {e}")
+        print(f"  [WARN] Could not check missing data: {e}")
     
     print(f"\n{'='*70}\n")
 
