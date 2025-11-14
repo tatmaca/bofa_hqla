@@ -16,7 +16,7 @@ from db import get_conn
 
 def check_database():
     """Check database health."""
-    print("📊 DATABASE HEALTH")
+    print("[DATA] DATABASE HEALTH")
     print("-" * 70)
     
     try:
@@ -29,7 +29,7 @@ def check_database():
             WHERE type='table' AND name NOT LIKE 'sqlite_%'
         """).fetchall()
         table_names = [t[0] for t in tables]
-        print(f"  ✓ Tables: {', '.join(table_names)}")
+        print(f"  [OK] Tables: {', '.join(table_names)}")
         
         # Counts
         counts = {
@@ -49,12 +49,12 @@ def check_database():
         conn.close()
         return True, counts
     except Exception as e:
-        print(f"  ✗ Database error: {e}")
+        print(f"  [FAIL] Database error: {e}")
         return False, {}
 
 def check_recent_runs(days=7):
     """Check recent pipeline runs."""
-    print(f"\n📅 RECENT RUNS (last {days} days)")
+    print(f"\n[DATE] RECENT RUNS (last {days} days)")
     print("-" * 70)
     
     try:
@@ -72,13 +72,13 @@ def check_recent_runs(days=7):
         conn.close()
         
         if not runs:
-            print("  ⚠ No runs found")
+            print("  [WARN] No runs found")
             return []
         
         today = dt.date.today()
         for run in runs:
             run_date, started, completed, status, articles, error = run
-            status_icon = "✓" if status == "completed" else "✗"
+            status_icon = "[OK]" if status == "completed" else "[FAIL]"
             
             # Check if today
             is_today = run_date == today.isoformat()
@@ -90,12 +90,12 @@ def check_recent_runs(days=7):
         
         return runs
     except Exception as e:
-        print(f"  ✗ Error checking runs: {e}")
+        print(f"  [FAIL] Error checking runs: {e}")
         return []
 
 def check_recent_data():
     """Check for recent data collection."""
-    print("\n📰 RECENT DATA")
+    print("\nRECENT DATA")
     print("-" * 70)
     
     try:
@@ -126,9 +126,9 @@ def check_recent_data():
         conn.close()
         
         if today_count > 0:
-            print(f"  ✓ Articles today: {today_count}")
+            print(f"  [OK] Articles today: {today_count}")
         else:
-            print(f"  ⚠ Articles today: 0")
+            print(f"  [WARN] Articles today: 0")
         
         print(f"  Articles (last 3 days): {recent_count}")
         
@@ -136,25 +136,25 @@ def check_recent_data():
             latest_date = dt.datetime.strptime(latest, "%Y-%m-%d").date()
             days_old = (today - latest_date).days
             if days_old == 0:
-                print(f"  ✓ Latest articles: {latest} (today)")
+                print(f"  [OK] Latest articles: {latest} (today)")
             elif days_old <= 2:
-                print(f"  ⚠ Latest articles: {latest} ({days_old} days ago)")
+                print(f"  [WARN] Latest articles: {latest} ({days_old} days ago)")
             else:
-                print(f"  ✗ Latest articles: {latest} ({days_old} days ago)")
+                print(f"  [FAIL] Latest articles: {latest} ({days_old} days ago)")
         
         return today_count > 0
     except Exception as e:
-        print(f"  ✗ Error checking data: {e}")
+        print(f"  [FAIL] Error checking data: {e}")
         return False
 
 def check_logs(days=7):
     """Check log files."""
-    print("\n📝 LOG FILES")
+    print("\n[LOG] LOG FILES")
     print("-" * 70)
     
     log_dir = Path(__file__).parent / "logs"
     if not log_dir.exists():
-        print("  ⚠ Logs directory doesn't exist")
+        print("  [WARN] Logs directory doesn't exist")
         return []
     
     cutoff = dt.date.today() - timedelta(days=days)
@@ -171,32 +171,32 @@ def check_logs(days=7):
             pass
     
     if not logs:
-        print("  ⚠ No log files found")
+        print("  [WARN] No log files found")
     else:
         today = dt.date.today()
         for log_date, log_file, size in logs[:5]:
             size_kb = size / 1024
             is_today = log_date == today
             marker = " [TODAY]" if is_today else ""
-            print(f"  {'✓' if is_today else ' '} {log_date}{marker}: {log_file.name} ({size_kb:.1f} KB)")
+            print(f"  {'[OK]' if is_today else ' '} {log_date}{marker}: {log_file.name} ({size_kb:.1f} KB)")
     
     return logs
 
 def check_models():
     """Check model files."""
-    print("\n🤖 MODEL FILES")
+    print("\n[ML] MODEL FILES")
     print("-" * 70)
     
     model_dir = Path(__file__).parent / "models"
     if not model_dir.exists():
-        print("  ⚠ Models directory doesn't exist")
+        print("  [WARN] Models directory doesn't exist")
         return []
     
     pkl_files = list(model_dir.glob("*.pkl"))
     json_files = list(model_dir.glob("*evaluation*.json"))
     
     if not pkl_files:
-        print("  ⚠ No model files found")
+        print("  [WARN] No model files found")
         return []
     
     # Get latest model
@@ -210,23 +210,23 @@ def check_models():
     print(f"  Last updated: {latest_time.strftime('%Y-%m-%d %H:%M')} ({days_old} days ago)")
     
     if days_old == 0:
-        print("  ✓ Models updated today")
+        print("  [OK] Models updated today")
     elif days_old <= 3:
-        print(f"  ⚠ Models updated {days_old} days ago")
+        print(f"  [WARN] Models updated {days_old} days ago")
     else:
-        print(f"  ✗ Models are {days_old} days old")
+        print(f"  [FAIL] Models are {days_old} days old")
     
     return pkl_files
 
 def check_automation():
     """Check automation setup."""
-    print("\n⚙️ AUTOMATION SETUP")
+    print("\n[CONFIG] AUTOMATION SETUP")
     print("-" * 70)
     
     # Check LaunchAgent (macOS)
     launchagent_path = Path.home() / "Library/LaunchAgents/com.news.ingestion.plist"
     if launchagent_path.exists():
-        print("  ✓ LaunchAgent file exists")
+        print("  [OK] LaunchAgent file exists")
         # Try to check if loaded (requires subprocess)
         import subprocess
         try:
@@ -237,13 +237,13 @@ def check_automation():
                 timeout=2
             )
             if "com.news.ingestion" in result.stdout:
-                print("  ✓ LaunchAgent is loaded")
+                print("  [OK] LaunchAgent is loaded")
             else:
-                print("  ⚠ LaunchAgent file exists but not loaded")
+                print("  [WARN] LaunchAgent file exists but not loaded")
         except:
             print("  ? Could not check LaunchAgent status")
     else:
-        print("  ⚠ No LaunchAgent found")
+        print("  [WARN] No LaunchAgent found")
         print("     See DAILY_AUTOMATION.md for setup instructions")
     
     # Check cron (basic check)
@@ -256,15 +256,15 @@ def check_automation():
             timeout=2
         )
         if "daily_pipeline" in result.stdout or "run_daily" in result.stdout:
-            print("  ✓ Cron job found")
+            print("  [OK] Cron job found")
         else:
-            print("  ⚠ No cron job found")
+            print("  [WARN] No cron job found")
     except:
         print("  ? Could not check crontab")
 
 def check_dependencies():
     """Check if dependencies are available."""
-    print("\n📦 DEPENDENCIES")
+    print("\n[PACKAGE] DEPENDENCIES")
     print("-" * 70)
     
     deps = {
@@ -300,17 +300,17 @@ def check_dependencies():
     
     print("  Required:")
     for dep in required:
-        status = "✓" if deps[dep] else "✗"
+        status = "[OK]" if deps[dep] else "[FAIL]"
         print(f"    {status} {dep}")
     
     print("  Optional (ML):")
     for dep in optional_ml:
-        status = "✓" if deps[dep] else "⚠"
+        status = "[OK]" if deps[dep] else "[WARN]"
         print(f"    {status} {dep}")
     
     print("  Optional (LLM):")
     for dep in optional_llm:
-        status = "✓" if deps[dep] else "⚠"
+        status = "[OK]" if deps[dep] else "[WARN]"
         print(f"    {status} {dep}")
 
 def main():
@@ -356,12 +356,12 @@ def main():
         issues.append("No model files")
     
     if not issues:
-        print("  ✅ System appears healthy!")
-        print("  ✓ Database OK")
-        print("  ✓ Recent runs found")
-        print("  ✓ Recent data collected")
+        print("  [OK] System appears healthy!")
+        print("  [OK] Database OK")
+        print("  [OK] Recent runs found")
+        print("  [OK] Recent data collected")
     else:
-        print("  ⚠ Issues detected:")
+        print("  [WARN] Issues detected:")
         for issue in issues:
             print(f"    - {issue}")
     

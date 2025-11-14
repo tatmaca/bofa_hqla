@@ -2,10 +2,10 @@
 
 ## Current Status
 
-✅ **Yield Curve Data**: 29 snapshots synced to database (2025-09-26 to 2025-11-06)
-✅ **Database Schema**: All tables created and ready
-⚠️ **News Data**: Limited - only 1 date with bucketed news (2025-11-06)
-⚠️ **Training Examples**: 1 example (need at least 7 for training)
+[OK] **Yield Curve Data**: 29 snapshots synced to database (2025-09-26 to 2025-11-06)
+[OK] **Database Schema**: All tables created and ready
+[WARN] **News Data**: Limited - only 1 date with bucketed news (2025-11-06)
+[WARN] **Training Examples**: 1 example (need at least 7 for training)
 
 ## What's Ready
 

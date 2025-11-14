@@ -100,7 +100,7 @@ brew install libomp
 python3 fix_dependencies.py
 
 # Verify
-python3 -c "import numpy, xgboost; print('✓ OK')"
+python3 -c "import numpy, xgboost; print('[OK] OK')"
 ```
 
 **Then test training:**
@@ -149,7 +149,7 @@ python3 daily_pipeline.py --date 2025-11-07
 
 ## Expected Test Results
 
-### ✅ Passing Tests
+### [OK] Passing Tests
 
 - **Imports**: All core modules load
 - **Database**: Tables exist, articles stored
@@ -158,7 +158,7 @@ python3 daily_pipeline.py --date 2025-11-07
 - **Training Data**: Collection works (may return 0 if no historical data)
 - **Daily Pipeline**: All steps execute
 
-### ⚠️ Optional/Warnings
+### [WARN] Optional/Warnings
 
 - **XGBoost**: Requires OpenMP on macOS (`brew install libomp`)
 - **OpenAI**: Optional for LLM features (uses fallback if missing)

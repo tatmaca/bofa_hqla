@@ -26,9 +26,9 @@ def fix_dependencies():
                 print("  Run: brew install libomp")
                 print("  Or install XGBoost with conda: conda install -c conda-forge xgboost")
             else:
-                print("  ✓ OpenMP found")
+                print("  [OK] OpenMP found")
         except FileNotFoundError:
-            print("  ⚠ Homebrew not found. Install OpenMP manually:")
+            print("  [WARN] Homebrew not found. Install OpenMP manually:")
             print("    brew install libomp")
             print("  Or use conda: conda install -c conda-forge xgboost")
     
@@ -38,9 +38,9 @@ def fix_dependencies():
             sys.executable, "-m", "pip", "install", 
             "numpy>=1.24.0,<2.0.0", "--upgrade", "--quiet"
         ], check=True)
-        print("  ✓ NumPy downgraded successfully")
+        print("  [OK] NumPy downgraded successfully")
     except subprocess.CalledProcessError as e:
-        print(f"  ✗ Failed to downgrade NumPy: {e}")
+        print(f"  [FAIL] Failed to downgrade NumPy: {e}")
         return False
     
     print("\n[3/3] Installing/upgrading XGBoost...")
@@ -50,33 +50,33 @@ def fix_dependencies():
             sys.executable, "-m", "pip", "install", 
             "xgboost>=2.0.0", "--upgrade", "--quiet"
         ], check=True)
-        print("  ✓ XGBoost installed/upgraded")
+        print("  [OK] XGBoost installed/upgraded")
     except subprocess.CalledProcessError:
-        print("  ⚠ Pip install failed. Try conda:")
+        print("  [WARN] Pip install failed. Try conda:")
         print("    conda install -c conda-forge xgboost")
         return False
     
     print("\n[VERIFY] Verifying installation...")
     try:
         import numpy as np
-        print(f"  ✓ NumPy {np.__version__}")
+        print(f"  [OK] NumPy {np.__version__}")
         
         try:
             import xgboost as xgb
-            print(f"  ✓ XGBoost {xgb.__version__}")
+            print(f"  [OK] XGBoost {xgb.__version__}")
             return True
         except Exception as e:
             if is_macos and "libomp" in str(e):
-                print(f"  ✗ XGBoost import failed: OpenMP not found")
+                print(f"  [FAIL] XGBoost import failed: OpenMP not found")
                 print("\n[FIX] Install OpenMP:")
                 print("  brew install libomp")
                 print("\nOr use conda (handles OpenMP automatically):")
                 print("  conda install -c conda-forge xgboost")
             else:
-                print(f"  ✗ XGBoost import failed: {e}")
+                print(f"  [FAIL] XGBoost import failed: {e}")
             return False
     except Exception as e:
-        print(f"  ✗ Verification failed: {e}")
+        print(f"  [FAIL] Verification failed: {e}")
         return False
 
 if __name__ == "__main__":

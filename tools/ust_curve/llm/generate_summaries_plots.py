@@ -122,20 +122,20 @@ def main():
         if not args.skip_summaries:
             success, error = run_make_summary(date_str)
             if success:
-                print(f"  ✓ Summary created")
+                print(f"  [OK] Summary created")
                 summary_success += 1
             else:
-                print(f"  ✗ Summary failed: {error[:100] if error else 'Unknown error'}")
+                print(f"  [FAIL] Summary failed: {error[:100] if error else 'Unknown error'}")
                 summary_fail += 1
         
         # Generate plots
         if not args.skip_plots:
             success, error = run_plot_snapshot(date_str)
             if success:
-                print(f"  ✓ Plots created")
+                print(f"  [OK] Plots created")
                 plot_success += 1
             else:
-                print(f"  ✗ Plots failed: {error[:100] if error else 'Unknown error'}")
+                print(f"  [FAIL] Plots failed: {error[:100] if error else 'Unknown error'}")
                 plot_fail += 1
     
     # Summary

@@ -17,9 +17,9 @@ conda install -y scipy xgboost -c conda-forge
 
 echo ""
 echo "Verifying installation..."
-python3 -c "import numpy as np; print(f'✓ NumPy {np.__version__}')"
-python3 -c "import scipy; print(f'✓ SciPy {scipy.__version__}')"
-python3 -c "import xgboost as xgb; print(f'✓ XGBoost {xgb.__version__}')" 2>/dev/null || echo "⚠ XGBoost may need OpenMP: brew install libomp"
+python3 -c "import numpy as np; print(f'[OK] NumPy {np.__version__}')"
+python3 -c "import scipy; print(f'[OK] SciPy {scipy.__version__}')"
+python3 -c "import xgboost as xgb; print(f'[OK] XGBoost {xgb.__version__}')" 2>/dev/null || echo "[WARN] XGBoost may need OpenMP: brew install libomp"
 
 echo ""
 echo "Done! Try running the pipeline again."

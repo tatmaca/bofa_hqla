@@ -38,8 +38,8 @@ TZ = pytz.timezone(CONFIG.get("timezone", "America/Chicago"))
 CUTOFF_UTC = (datetime.now(TZ) - timedelta(hours=CONFIG.get("window_hours", 24))).astimezone(timezone.utc)
 STRICT = bool(CONFIG.get("strict_24h", True))
 
-META_ONLY = set(CONFIG.get("metadata_only_domains", []))
-SKIP = set(CONFIG.get("skip_domains", []))
+META_ONLY = set(CONFIG.get("metadata_only_domains") or [])
+SKIP = set(CONFIG.get("skip_domains") or [])
 
 FRONT_PAGES = CONFIG.get("front_pages", [])
 SITEMAPS = CONFIG.get("sitemaps", [])

@@ -8,8 +8,8 @@ from extract_article import extract
 
 CONFIG = yaml.safe_load(open("news_config.yaml"))
 DEDAYS = CONFIG.get("dedupe_horizon_days", 1)
-META_ONLY = set(CONFIG.get("metadata_only_domains", []))
-SKIP = set(CONFIG.get("skip_domains", []))
+META_ONLY = set(CONFIG.get("metadata_only_domains") or [])
+SKIP = set(CONFIG.get("skip_domains") or [])
 MAX_WORKERS = CONFIG.get("rss_max_workers", 4)  # Parallel RSS feed parsing
 
 def normalize_time(entry):

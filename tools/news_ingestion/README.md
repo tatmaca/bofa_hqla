@@ -2,7 +2,7 @@
 
 A comprehensive system for ingesting financial news, categorizing it into buckets, analyzing yield curve impacts, and training ML models to predict yield curve movements from news.
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Quick Start](#quick-start)
 - [System Overview](#system-overview)
@@ -12,7 +12,7 @@ A comprehensive system for ingesting financial news, categorizing it into bucket
 - [Configuration](#configuration)
 - [Documentation](#documentation)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Install Dependencies
 
@@ -43,7 +43,7 @@ See [DAILY_AUTOMATION.md](DAILY_AUTOMATION.md) for cron/systemd/launchd setup.
 
 For detailed setup instructions, see [SETUP.md](SETUP.md).
 
-## 📊 System Overview
+## System Overview
 
 The system performs these steps daily:
 
@@ -54,7 +54,7 @@ The system performs these steps daily:
 5. **Training Data Prep** - Prepares training records
 6. **Model Training** - Retrains models with rolling 30-day window
 
-## 🔧 Components
+## Components
 
 ### Core Scripts
 
@@ -86,7 +86,7 @@ The system performs these steps daily:
 | `fix_dependencies.py` | Fix NumPy/XGBoost compatibility |
 | `run_daily.sh` | Daily runner script for automation |
 
-## 🎯 News Buckets
+## News Buckets
 
 The system categorizes news into 8 buckets:
 
@@ -101,7 +101,7 @@ The system categorizes news into 8 buckets:
 
 Uses LLM (GPT-4o-mini) for bucketing with keyword fallback.
 
-## 🤖 ML Models
+## ML Models
 
 The system trains 6 XGBoost models:
 - **2y, 5y, 10y, 30y** - Yield predictions
@@ -109,7 +109,7 @@ The system trains 6 XGBoost models:
 
 Models are retrained daily using a rolling 30-day window.
 
-## ⚙️ Configuration
+## Configuration
 
 Edit `news_config.yaml` to:
 - Add/remove RSS feeds
@@ -117,7 +117,7 @@ Edit `news_config.yaml` to:
 - Set rate limits
 - Add OpenAI API key (optional)
 
-## 📚 Documentation
+## Documentation
 
 - **[SETUP.md](SETUP.md)** - Detailed setup instructions
 - **[DAILY_AUTOMATION.md](DAILY_AUTOMATION.md)** - Automation setup guide
@@ -127,7 +127,7 @@ Edit `news_config.yaml` to:
 - **[XGBOOST_TRAINING.md](XGBOOST_TRAINING.md)** - XGBoost training details
 - **[QUICK_FIX.md](QUICK_FIX.md)** - Common issues and fixes
 
-## 📁 File Structure
+## File Structure
 
 ```
 news_ingestion/
@@ -169,7 +169,7 @@ news_ingestion/
     └── logs/                   # Daily run logs
 ```
 
-## 🔍 Monitoring
+## Monitoring
 
 Check system status:
 ```bash
@@ -204,7 +204,7 @@ python3 test_system.py
 
 See [TESTING.md](TESTING.md) for detailed testing guide.
 
-## 📝 Notes
+## [LOG] Notes
 
 - Database file (`news.db`) is gitignored - each user maintains their own
 - LLM features require OpenAI API key (set via `OPENAI_API_KEY` env var)

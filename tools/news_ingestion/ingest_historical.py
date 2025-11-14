@@ -102,7 +102,7 @@ def run_ingestion_for_date(target_date: dt.date, dry_run: bool = False):
             print("[WARNING] This indicates potential look-back bias!")
             return False
         
-        print(f"[VERIFY] ✓ No look-back bias detected (all articles published <= {date_str})")
+        print(f"[VERIFY] [OK] No look-back bias detected (all articles published <= {date_str})")
         return True
         
     except Exception as e:

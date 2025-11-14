@@ -83,9 +83,9 @@ python3 check_status.py
 ```
 
 Expected output:
-- Database initialized ✓
-- Articles table exists ✓
-- All components importable ✓
+- Database initialized [OK]
+- Articles table exists [OK]
+- All components importable [OK]
 
 ## Next Steps
 
