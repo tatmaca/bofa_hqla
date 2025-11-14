@@ -112,6 +112,14 @@ Load it:
 launchctl load ~/Library/LaunchAgents/com.news.ingestion.plist
 ```
 
+**Important Note on macOS Sleep Behavior:**
+- LaunchAgent jobs only run when the system is **awake**
+- If your laptop is closed/sleeping at the scheduled time, the job will run when the system wakes up
+- To ensure daily runs even when laptop is closed:
+  1. Keep laptop plugged in and prevent sleep: System Preferences → Energy Saver → Prevent sleep when plugged in
+  2. Or use a server/cloud instance that stays awake
+  3. Or manually run the pipeline when the laptop is open
+
 ## What Gets Run Daily
 
 The daily pipeline (`daily_pipeline.py`) runs 6 steps:
