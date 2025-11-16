@@ -21,16 +21,13 @@ except ImportError:
     HAS_OPENAI = False
     print("[WARN] OpenAI not installed. Install with: pip install openai")
 
-DB_PATH = os.environ.get("NEWS_DB_PATH", "news.db")
 CONFIG_PATH = "news_config.yaml"
 
 TENORS = ["2y", "5y", "10y", "30y"]
 SPREADS = ["2s10s", "2s30s"]
 
-def get_conn():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+# Import get_conn from db module to use consistent database path
+from db import get_conn
 
 def get_bucketed_news(date: Optional[str] = None) -> Dict[str, List[Dict]]:
     """Get news articles grouped by bucket for a given date."""
@@ -84,12 +81,12 @@ def call_openai_with_retry(client, messages, model="gpt-4o", max_retries=3, **kw
                 else:
                     raise
             else:
-            if attempt < max_retries - 1:
-                wait_time = 2 ** attempt  # Exponential backoff
-                print(f"[RETRY] Attempt {attempt + 1} failed: {e}. Retrying in {wait_time}s...")
-                time.sleep(wait_time)
-            else:
-                raise
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt  # Exponential backoff
+                    print(f"[RETRY] Attempt {attempt + 1} failed: {e}. Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    raise
     return None
 
 def validate_analysis_response(result: Dict) -> Dict:
@@ -145,7 +142,7 @@ def validate_analysis_response(result: Dict) -> Dict:
                 elif "steepen" in direction or "widen" in direction:
                     spred["direction"] = "steepen"
                 else:
-                spred["direction"] = "flat"
+                    spred["direction"] = "flat"
             else:
                 spred["direction"] = direction
             try:
@@ -192,7 +189,7 @@ def analyze_yield_impact(bucketed_news: Dict[str, List[Dict]],
         return get_fallback_prediction()
     
     try:
-    client = OpenAI(api_key=api_key)
+        client = OpenAI(api_key=api_key)
     except Exception as e:
         print(f"[ERROR] Failed to initialize OpenAI client: {e}")
         return get_fallback_prediction()

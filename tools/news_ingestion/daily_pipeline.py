@@ -244,16 +244,16 @@ def run_daily_pipeline(date: str = None):
     
     # Also try to sync the most recent available snapshot if today's doesn't exist
     if not synced:
-    repo_root = Path(__file__).resolve().parents[2]
-    snapshots_dir = repo_root / "tools" / "ust_curve" / "llm" / "snapshots"
-    if snapshots_dir.exists():
-        snapshot_files = sorted(list(snapshots_dir.glob("curve_snapshot_*.json")))
-        if snapshot_files:
-            latest_snapshot = snapshot_files[-1]
-            latest_date = latest_snapshot.stem.replace("curve_snapshot_", "")
-            if latest_date != date:
-                print(f"[INFO] Also syncing most recent snapshot: {latest_date}")
-                sync_yield_curve_data(latest_date)
+        repo_root = Path(__file__).resolve().parents[2]
+        snapshots_dir = repo_root / "tools" / "ust_curve" / "llm" / "snapshots"
+        if snapshots_dir.exists():
+            snapshot_files = sorted(list(snapshots_dir.glob("curve_snapshot_*.json")))
+            if snapshot_files:
+                latest_snapshot = snapshot_files[-1]
+                latest_date = latest_snapshot.stem.replace("curve_snapshot_", "")
+                if latest_date != date:
+                    print(f"[INFO] Also syncing most recent snapshot: {latest_date}")
+                    sync_yield_curve_data(latest_date)
     
     if snapshot_generated or synced:
         print("[OK] Yield curve data updated successfully")

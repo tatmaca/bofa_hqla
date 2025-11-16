@@ -15,13 +15,13 @@ Categorizes news articles into 8 buckets relevant to yield curve movements:
 import os
 import json
 import yaml
-import sqlite3
 import datetime as dt
 import time
 import concurrent.futures
 from datetime import timezone
 from typing import List, Dict, Optional
 from urllib.parse import urlparse
+from db import get_conn
 
 # Try to import OpenAI, but make it optional
 try:
@@ -31,7 +31,6 @@ except ImportError:
     HAS_OPENAI = False
     print("[WARN] OpenAI not installed. Install with: pip install openai")
 
-DB_PATH = os.environ.get("NEWS_DB_PATH", "news.db")
 CONFIG_PATH = "news_config.yaml"
 
 BUCKETS = [
@@ -55,12 +54,6 @@ BUCKET_DESCRIPTIONS = {
     "commodity_prices": "Oil prices, gold prices, commodity inflation, supply chain disruptions affecting commodities",
     "other_general": "Other news not fitting into the above categories"
 }
-
-def get_conn():
-    """Get database connection."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
 
 def get_unbucketed_articles(hours: int = 24) -> List[Dict]:
     """Get articles from the last N hours that haven't been bucketed."""
@@ -297,9 +290,9 @@ def bucket_articles(hours: int = 24, batch_size: int = 50, api_key: Optional[str
                 if result:
                     article_id, bucket, confidence, error = result
                     updates.append((bucket, confidence, article_id))
-            processed += 1
                     if error:
                         errors += 1
+                processed += 1
             except Exception as e:
                 errors += 1
                 print(f"[WARN] Bucketing failed: {e}")
