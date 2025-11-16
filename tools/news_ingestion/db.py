@@ -1,7 +1,11 @@
 import sqlite3, hashlib, os, datetime as dt
 from datetime import timezone
+from pathlib import Path
 
-DB_PATH = os.environ.get("NEWS_DB_PATH", "news.db")
+# Get database path - use absolute path relative to this script's directory
+_script_dir = Path(__file__).parent
+_default_db_path = _script_dir / "news.db"
+DB_PATH = os.environ.get("NEWS_DB_PATH", str(_default_db_path))
 
 def get_conn():
     conn = sqlite3.connect(DB_PATH)
