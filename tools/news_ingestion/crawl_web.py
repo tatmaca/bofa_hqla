@@ -346,12 +346,17 @@ async def fetch_and_store(session: aiohttp.ClientSession, url: str):
             except Exception:
                 return
 
+        title = art.get("title")
+        # Filter out articles with null or empty titles
+        if not title or not title.strip():
+            return None
+        
         rec = {
             "url": url,
             "source": host,
             "published_at": published_at,
             "fetched_at": datetime.now(timezone.utc).isoformat(),
-            "title": art.get("title"),
+            "title": title,
             "author": art.get("author"),
             "summary": None,
             "text": None if meta_only else art.get("text"),
