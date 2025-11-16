@@ -41,6 +41,8 @@ def get_bucketed_news(date: Optional[str] = None) -> Dict[str, List[Dict]]:
             WHERE DATE(COALESCE(published_at, fetched_at)) = DATE(?)
               AND bucket IS NOT NULL
               AND bucket != ''
+              AND title IS NOT NULL
+              AND title != ''
             ORDER BY bucket_confidence DESC, published_at DESC
         """, (date,)).fetchall()
     

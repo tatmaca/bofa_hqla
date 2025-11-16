@@ -64,6 +64,8 @@ def get_unbucketed_articles(hours: int = 24) -> List[Dict]:
             FROM articles
             WHERE (bucket IS NULL OR bucket = '')
               AND COALESCE(published_at, fetched_at) >= ?
+              AND title IS NOT NULL
+              AND title != ''
             ORDER BY COALESCE(published_at, fetched_at) DESC
         """, (cutoff,)).fetchall()
     return [dict(row) for row in rows]

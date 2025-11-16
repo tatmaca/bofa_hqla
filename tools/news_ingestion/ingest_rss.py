@@ -84,12 +84,17 @@ def process_entry(e, cutoff_utc, strict):
         if published_dt > end_of_day_utc:
             return None  # Reject articles published after target date
     
+    title = art.get("title") or getattr(e, "title", None)
+    # Filter out articles with null or empty titles
+    if not title or not title.strip():
+        return None
+    
     rec = {
         "url": url,
         "source": src,
         "published_at": published or art.get("published_at"),
         "fetched_at": fetched_at.isoformat(),
-        "title": art.get("title") or getattr(e, "title", None),
+        "title": title,
         "author": art.get("author"),
         "summary": getattr(e, "summary", None),
         "text": None if meta_only else art.get("text"),

@@ -25,6 +25,12 @@ def batch_upsert_articles(articles):
     if not articles:
         return
     
+    # Filter out articles with null or empty titles
+    articles = [rec for rec in articles if rec.get("title") and rec.get("title").strip()]
+    
+    if not articles:
+        return
+    
     fields = ("url","source","published_at","fetched_at","title","author","summary","text","content_hash","status","bucket","bucket_confidence")
     
     # Prepare batch data
