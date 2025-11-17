@@ -12,10 +12,6 @@ app = FastAPI()
 portfolio = Portfolio()
 
 # Global placeholder for the base curve
-base_curve = None
-base_curve_handle = None
-base_curve_up = None
-base_curve_down = None
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,8 +25,19 @@ app.add_middleware(
 @app.post("/upload-portfolio/")
 async def upload_portfolio(file: UploadFile):
     """Upload portfolio CSV and build instrument objects."""
-    global base_curve_handle
-    global sofr_term_structure_handle
+    global portfolio, base_curve_handle, base_curve, base_curve_up, base_curve_down
+    global survival_curves, survival_curves_up, survival_curves_down
+
+    # Full reset
+    portfolio = Portfolio()
+    base_curve = None
+    base_curve_handle = None
+    base_curve_up = None
+    base_curve_down = None
+    survival_curves = {}
+    survival_curves_up = {}
+    survival_curves_down = {}
+
     df = pd.read_csv(file.file)
     today = ql.Date.todaysDate()
     ql.Settings.instance().evaluationDate = today
@@ -43,6 +50,7 @@ async def upload_portfolio(file: UploadFile):
     sofr_term_structure_handle = ql.YieldTermStructureHandle(sofr_term_structure)
     # Set SOFR index history
     sofr_index = ql.Sofr(sofr_term_structure_handle)
+    sofr_index.clearFixings()
     calendar = sofr_index.fixingCalendar()
 
     # Reset all categories
@@ -81,8 +89,8 @@ async def upload_portfolio(file: UploadFile):
             inst = cls(**kwargs)
             inst.build_bond()
 
-        if base_curve_handle:
-            inst.price_from_curve(base_curve_handle)
+        #        if base_curve_handle:
+        #            inst.price_from_curve(base_curve_handle)
 
         portfolio.add_instrument(inst)
 
@@ -102,6 +110,15 @@ async def upload_yield_curve(file: UploadFile):
     global survival_curves
     global survival_curves_up
     global survival_curves_down
+
+    # Reset all old curve objects before constructing new ones
+    base_curve = None
+    base_curve_handle = None
+    base_curve_up = None
+    base_curve_down = None
+    survival_curves = {}
+    survival_curves_up = {}
+    survival_curves_down = {}
     df = pd.read_csv(file.file)
 
     today = ql.Date.todaysDate()
@@ -224,6 +241,7 @@ async def price_portfolio():
                     "class": inst.__class__.__name__,
                     "dirty_price": inst.dirty_price,
                     "clean_price": inst.clean_price,
+                    "ytm": inst.ytm,
                     "quantity": inst.quantity,
                     "dv01": inst.dv01,
                     "cs01": inst.cs01,

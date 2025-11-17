@@ -572,7 +572,8 @@ export default function HqlaE2EDashboard() {
                     <TableRow>
                       <TableHead>Instrument</TableHead>
                       <TableHead>ISIN</TableHead>
-                      <TableHead>Price</TableHead>
+                      <TableHead>Clean Price</TableHead>
+                      <TableHead>YTM</TableHead>
                       <TableHead>Quantity</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>DV01</TableHead>
@@ -587,7 +588,8 @@ export default function HqlaE2EDashboard() {
                       <TableRow key={i}>
                         <TableCell>{row.name}</TableCell>
                         <TableCell>{row.isin}</TableCell>
-                        <TableCell>{row.dirty_price.toFixed(2)}</TableCell>
+                        <TableCell>{row.clean_price.toFixed(2)}</TableCell>
+                        <TableCell>{row.ytm.toFixed(2)}%</TableCell>
                         <TableCell>{row.quantity}</TableCell>
                         <TableCell>{row.category}</TableCell>
                         <TableCell>{row.dv01?.toFixed(4)}</TableCell>
