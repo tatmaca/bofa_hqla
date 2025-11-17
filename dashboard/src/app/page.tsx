@@ -42,9 +42,11 @@ async function runScenarioGen(
     ...s,
     status:"running",
     pct:10,
+    liveStage:null,
+    totalRuns:null,
     logs:[
       ...s.logs,
-      `Calling MAD backend for "${portfolioName}" (${debateRounds} rounds, offline mode)…`,
+      `Calling MAD backend for "${portfolioName}" (${debateRounds} rounds)…`,
     ],
     output:{
       ...(s.output || {}),
@@ -54,28 +56,38 @@ async function runScenarioGen(
     },
   }));
 
-  try {
-    const res = await fetch("/api/debate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      cache: "no-store",
-      body: JSON.stringify({
-        portfolioName,
-        yaml,
-        debateRounds,
-        debaterAPrompt,
-        debaterBPrompt,
-        judgePrompt,
-      }),
-    });
+  const appendLog = (incoming: string, channel?: string) => {
+    const raw = (incoming ?? "").toString().trimEnd();
+    if (!raw) return;
+    const prefix =
+      channel && channel !== "stdout"
+        ? `[${channel}] `
+        : "";
+    setter((s:any)=>({
+      ...s,
+      logs:[...(s.logs || []), `${prefix}${raw}`].slice(-120),
+      pct: s.status === "running" ? Math.min(s.pct + 3, 96) : s.pct,
+    }));
+  };
 
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
-    }
+  const applyStage = (stage: any) => {
+    if (!stage || typeof stage !== "object") return;
+    const stageText = typeof stage.text === "string" ? stage.text : null;
+    const totalRuns = typeof stage.totalRuns === "number" ? stage.totalRuns : undefined;
+    const progress = typeof stage.progress === "number" ? Math.round(stage.progress * 100) : undefined;
+    setter((s:any)=>({
+      ...s,
+      liveStage: stageText || s.liveStage,
+      totalRuns: totalRuns ?? s.totalRuns,
+      pct:
+        s.status === "running" && typeof progress === "number"
+          ? Math.max(s.pct, Math.min(progress, 98))
+          : s.pct,
+    }));
+  };
 
-    const data = await res.json();
-
-    const rawDebate = Array.isArray(data.debate) ? data.debate : [];
+  const applyResult = (data: any) => {
+    const rawDebate = Array.isArray(data?.debate) ? data.debate : [];
     const debate = rawDebate.map((m: any) => ({
       role: m.role || "Proponent",
       text: m.text || "",
@@ -84,7 +96,6 @@ async function runScenarioGen(
       scenarios: Array.isArray(m.scenarios) ? m.scenarios : [],
     }));
 
-    // Ensure chronological order with Judge at the end of each run, sort by run, round, role
     const sortedDebate = [...debate].sort((a, b) => {
       const arun = a.run ?? 0;
       const brun = b.run ?? 0;
@@ -104,29 +115,20 @@ async function runScenarioGen(
       return orderForRole(a.role) - orderForRole(b.role);
     });
 
-    const rawScenarios = Array.isArray(data.scenarios) ? data.scenarios : [];
+    const rawScenarios = Array.isArray(data?.scenarios) ? data.scenarios : [];
     const scenarioMatrix = rawScenarios
       .map((sc:any) => (sc && typeof sc === "object" ? sc : null))
       .filter(Boolean);
     const scenarios = scenarioMatrix.map((sc:any, idx:number) => {
-      const name =
-        sc.Scenario ||
-        sc.name ||
-        `Scenario ${idx + 1}`;
+      const name = sc.Scenario || sc.name || `Scenario ${idx + 1}`;
       const p =
         typeof sc.Probability === "number"
           ? sc.Probability
           : typeof sc.p === "number"
           ? sc.p
           : 0;
-      const channels =
-        sc.ImpactChannels ||
-        sc.channels ||
-        [];
-      const rationale =
-        sc.Rationale ||
-        sc.rationale ||
-        "";
+      const channels = sc.ImpactChannels || sc.channels || [];
+      const rationale = sc.Rationale || sc.rationale || "";
       const probability = typeof p === "number" && p > 1 ? p / 100 : p;
       return {
         name,
@@ -136,28 +138,95 @@ async function runScenarioGen(
       };
     });
 
+    const metadata = data?.metadata || null;
     setter((s:any)=>({
       ...s,
       status:"done",
       pct:100,
-      logs:[
-        ...s.logs,
-        "Loaded offline MAD debate from temp.txt and scenarios from /tmp/mad_scenarios.json.",
-      ],
+      logs:[...s.logs, "Loaded live MAD debate + scenarios."],
+      liveStage:"MAD judge consolidated scenarios.",
       output:{
         ...(s.output || {}),
         debate: sortedDebate,
         scenarios,
         scenarioMatrix,
+        metadata,
       },
     }));
-    return { scenarios, scenarioMatrix, debate: sortedDebate };
+    return { scenarios, scenarioMatrix, debate: sortedDebate, metadata };
+  };
+
+  try {
+    const res = await fetch("/api/debate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({
+        portfolioName,
+        yaml,
+        debateRounds,
+        debaterAPrompt,
+        debaterBPrompt,
+        judgePrompt,
+      }),
+    });
+
+    if (!res.ok || !res.body) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let finalResult: { scenarios:any[]; scenarioMatrix:any[]; debate:any[] } | null = null;
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (value) {
+        buffer += decoder.decode(value, { stream:true });
+        let idx = buffer.indexOf("\n");
+        while (idx !== -1) {
+          const rawLine = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 1);
+          const line = rawLine.trim();
+          if (line) {
+            let evt: any;
+            try {
+              evt = JSON.parse(line);
+            } catch {
+              evt = null;
+            }
+            if (evt) {
+              if (evt.type === "log") {
+                appendLog(String(evt.message ?? ""), evt.channel);
+              } else if (evt.type === "stage") {
+                applyStage(evt.data);
+              } else if (evt.type === "error") {
+                await reader.cancel();
+                throw new Error(evt.message || "MAD run failed");
+              } else if (evt.type === "result") {
+                finalResult = applyResult(evt.data);
+              }
+            }
+          }
+          idx = buffer.indexOf("\n");
+        }
+      }
+      if (done) break;
+    }
+
+    if (!finalResult) {
+      throw new Error("MAD run completed without a result payload.");
+    }
+
+    return finalResult;
   } catch (err:any) {
     console.error("runScenarioGen error", err);
     setter((s:any)=>({
       ...s,
       status:"idle",
       pct:0,
+      liveStage:`MAD run failed.`,
       logs:[
         ...s.logs,
         `Scenario generation failed: ${String(err?.message || err)}`,
@@ -325,7 +394,7 @@ export default function HqlaE2EDashboard(){
   const [portfolioName, setPortfolioName] = useState("Example HQLA Portfolio");
   const [yaml, setYaml] = useState("# shocks.yaml\nmove_index: 110\nyield_curve: bear_steepener\ncredit_spreads: { ig_oas: +15, hy_oas: +45 }\n");
 
-  const [scenario, setScenario] = useState({status:"idle", pct:0, logs:[], output:null} as any);
+  const [scenario, setScenario] = useState({status:"idle", pct:0, logs:[], output:null, liveStage:null, totalRuns:null} as any);
   const [impact, setImpact] = useState({status:"idle", pct:0, logs:[], output:null} as any);
   const [opt, setOpt] = useState({status:"idle", pct:0, logs:[], output:null} as any);
   const [mon, setMon] = useState({status:"idle", pct:0, logs:[], output:null} as any);
@@ -335,13 +404,156 @@ export default function HqlaE2EDashboard(){
   // Debate configuration (mirrors Python MAD config high-level knobs)
   const [debateRounds, setDebateRounds] = useState(3);
   const [debaterAPrompt, setDebaterAPrompt] = useState(
-    "You are the Proponent (macro hawk). Propose and defend HQLA scenarios with emphasis on hawkish risks, funding stress, and term-premium shocks."
+  `You are a **Senior Bank Risk Strategist** on a global HQLA (High-Quality Liquid Assets) oversight team.
+  Your task is to generate **plausible 6-month forward scenarios** that materially affect the bank’s HQLA portfolio.  
+  You must think like a **hawkish macro strategist** focused on downside protection, funding stress, and policy tightening risks.  
+
+  Follow these instructions carefully:
+
+  1. **Objective:**  
+    Propose a set of distinct, finance-consistent macro, market, and regulatory scenarios that could plausibly unfold in the next six months.  
+    Each scenario should meaningfully affect HQLA valuations, capital ratios, or liquidity metrics (LCR, NSFR, OCI).
+
+  2. **Shocks:**  
+    For every scenario, specify **quantitative shocks** with explicit magnitudes and directions:  
+    - **Interest Rates:** Level shift in bp (+/–) and slope change (bear/bull steepener/flattener).  
+    - **Credit Spreads:** Change in Investment-Grade (IG) and High-Yield (HY) OAS, in bp.  
+    - **MBS Basis:** Change in MBS spread vs Treasuries.  
+    - **Deposits / Funding:** Net outflow % and runoff factor adjustment.  
+    - **Regulatory / Policy:** Announced or expected policy actions that directly influence liquidity or capital rules.  
+
+  3. **Rationale:**  
+    For each scenario, provide a concise but rigorous explanation of **why** it could occur, referring to plausible macro drivers (e.g., inflation persistence, fiscal issuance, central bank stance, geopolitical shocks, market sentiment).  
+    Cite at least one **transmission channel** such as Rates, Curve, Credit OAS, MBS basis, Deposits, or Regulation.
+
+  4. **Probabilities:**  
+    Assign each scenario a probability between 0 and 1 such that **probabilities sum to ~1.0 across all scenarios in this round.**  
+    Probabilities should be coherent and grounded in relative likelihoods given current macro conditions.
+
+  5. **Portfolio Awareness:**  
+    Assume full visibility into the bank’s HQLA positions (USTs, MBS, Agencies, cash).  
+    Explicitly consider portfolio sensitivities: duration buckets, convexity, Level 2 asset caps, and liquidity runoff assumptions.
+
+  6. **Formatting:**  
+    Always output a valid JSON array. Each element must include the following keys:  
+    \`\`\`json
+    [
+      {
+        "Scenario": "string",
+        "Description": "string",
+        "Probability": float (0–1),
+        "Rationale": "string",
+        "ImpactChannels": ["Rates", "Credit", "MBS", "Deposits", "Regulation"],
+        "Shocks": {"Rates": +25, "Curve": "bear_steepener", "IG_OAS": +20, "HY_OAS": +45, "MBS_Basis": +10},
+        "Assumptions": "string"
+      }
+    ]
+    \`\`\`
+
+  7. **Style:**  
+    Be rigorous, concise, and internally consistent. No generic language.  
+    Prioritize scenarios that stress LCR/NSFR and capital without breaking realism.  
+    Respond as a domain expert to be reviewed by the Judge model.`
   );
   const [debaterBPrompt, setDebaterBPrompt] = useState(
-    "You are the Devil's advocate (macro dove / soft-landing). Propose and defend HQLA scenarios with emphasis on benign inflation, carry, and stable funding."
+  `You are the **Devil’s Advocate** (macro dove / soft-landing strategist) responding to the Proponent’s scenarios.  
+  Your role is to **propose, challenge, and refine** 6-month forward HQLA scenarios that emphasize **benign macro conditions**, resilient funding, and controlled inflation.  
+
+  Instructions:
+
+  1. **Counter-Framing:**  
+    For every aggressive or risk-off scenario proposed by the Proponent, challenge its assumptions.  
+    Argue for softer macro outcomes such as:  
+    - Slower disinflation but anchored expectations.  
+    - Gradual rate cuts or curve flattening from easing policy.  
+    - Stable credit spreads supported by fiscal and corporate balance sheets.  
+    - Positive carry and inflows into short-duration Treasuries.
+
+  2. **Constructive Scenarios:**  
+    Present your own set of scenarios that could plausibly result in a **benign or constructive** market environment for HQLA.  
+    Quantify the same shock dimensions as the Proponent, but with directionally opposite or moderated magnitudes.
+
+  3. **Portfolio Impact Awareness:**  
+    Consider how stable or falling rates, tighter spreads, and ample liquidity support the bank’s HQLA composition.  
+    Highlight cases where Level 1 assets outperform, carry improves, or NII benefits from reinvestment opportunities.
+
+  4. **Probabilities:**  
+    Assign coherent probabilities summing to ~1.0 across your scenarios.  
+    Ensure each probability reflects a realistic assessment of macro stabilization vs risk escalation.
+
+  5. **Formatting:**  
+    Return a **JSON array** identical in structure to the Proponent’s, ensuring compatibility for the Judge:
+    \`\`\`json
+    [
+      {
+        "Scenario": "string",
+        "Description": "string",
+        "Probability": float,
+        "Rationale": "string",
+        "ImpactChannels": ["Rates", "Credit", "MBS", "Deposits", "Regulation"],
+        "Shocks": {"Rates": -25, "Curve": "bull_flattener", "IG_OAS": -5, "HY_OAS": -10, "MBS_Basis": -5},
+        "Assumptions": "string"
+      }
+    ]
+    \`\`\`
+
+  6. **Tone:**  
+    Remain analytical, quantitative, and evidence-based.  
+    You are not dismissing risk — you are reframing it through a softer lens, emphasizing funding stability and market resilience.`
   );
   const [judgePrompt, setJudgePrompt] = useState(
-    "You are the Judge. You merge Proponent / Devil's advocate proposals into a final, coherent set of 3–6 HQLA scenarios with probabilities ~summed to 1 and Basel-consistent shocks."
+  `You are the **Chief Risk Officer** and **Chair of the HQLA Risk Committee**.  
+  Your task is to **review, adjudicate, and merge** the outputs from the Proponent and Devil’s Advocate debates.  
+  You must apply **prudence, plausibility, and regulatory discipline** to select a final set of scenarios that will feed into capital, liquidity, and NII modeling.
+
+  Follow these steps:
+
+  1. **Evaluate Submissions:**  
+    - Compare each side’s scenarios for realism, distinctness, and internal consistency.  
+    - Discard scenarios that violate time horizon (beyond 6 months), lack quantitative shocks, or duplicate another scenario’s drivers.  
+    - Penalize overly vague rationales or probability sets that do not sum to ~1.
+
+  2. **Merge Logic:**  
+    - Retain or synthesize **3–6 final scenarios** that represent a balanced distribution across macro outcomes: hawkish, neutral, and dovish.  
+    - Ensure coverage of at least one risk-off (stress), one base, and one benign case.  
+    - Normalize total probabilities to sum to 1.0.
+
+  3. **Regulatory Constraints:**  
+    Enforce internal risk guardrails:  
+    - Liquidity Coverage Ratio (LCR) ≥ {lcr_min_pct}%.  
+    - Level 2 assets ≤ {level2_cap_pct}% of total HQLA.  
+    - Ensure all shocks are interpretable in the context of Basel liquidity stress testing.
+
+  4. **Scoring Criteria:**  
+    For each candidate scenario, assess:  
+    - **Plausibility** (macroeconomic coherence).  
+    - **Distinctness** (adds unique information).  
+    - **Decision-usefulness** (guides portfolio actions).  
+    - **Impact Breadth** (affects multiple channels, not isolated).  
+
+  5. **Output:**  
+    Produce a **STRICT JSON array** containing the final adjudicated scenarios, each formatted as:  
+    \`\`\`json
+    [
+      {
+        "Scenario": "string",
+        "Description": "string",
+        "Probability": float,
+        "Rationale": "string",
+        "ImpactChannels": ["Rates", "Credit", "MBS", "Deposits", "Regulation"],
+        "Shocks": {"Rates": +50, "Curve": "bear_steepener", "IG_OAS": +20, "HY_OAS": +40, "MBS_Basis": +15},
+        "TradeList": ["BUY 2y UST", "SELL 30y MBS"],
+        "MetricsDelta": {"ΔLCR": -4.0, "ΔNSFR": -1.5, "ΔNII": +2.1},
+        "Assumptions": "string"
+      }
+    ]
+    \`\`\`
+    Ensure the output is valid JSON parsable by downstream systems (no extra commentary).  
+
+  6. **Voice:**  
+    Speak as a disciplined risk chair — impartial, quantitative, concise.  
+    Do not speculate; evaluate.  
+    Your final decision represents the bank’s consensus risk view to be used for HQLA optimization.`
   );
 
   // Popups
@@ -393,7 +605,6 @@ export default function HqlaE2EDashboard(){
               </div>
             </div>
             <h1 className="font-semibold text-lg">AI-Enabled HQLA Risk Platform</h1>
-            <Badge variant="outline" className="ml-2">MVP</Badge>
           </div>
 
           <div className="flex items-center gap-2">
@@ -502,6 +713,16 @@ export default function HqlaE2EDashboard(){
                       maxChars={400}
                       onShowMatrix={(payload)=>setMatrixModal(payload)}
                     />
+                    <div className="mt-2 text-[11px] text-slate-600">
+                      {scenario.liveStage
+                        ? scenario.liveStage
+                        : scenario.status === "running"
+                        ? "MAD debate is running…"
+                        : "Idle. Click Run to launch MAD debate."}
+                    </div>
+                    <div className="mt-2">
+                      <LogView logs={(scenario.logs || []).slice(-8)} title="MAD" />
+                    </div>
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex gap-2">
                         <Button variant="ghost" size="sm" onClick={()=>setOpenDebate(true)}>Details</Button>
@@ -664,7 +885,7 @@ export default function HqlaE2EDashboard(){
               </div>
 
               <div className="text-xs text-muted-foreground">
-                These controls are front-end only for now. When you wire the UI to your Python runner,
+                {/* These controls are front-end only for now. When you wire the UI to your Python runner, */}
                 pass <code className="font-mono text-[10px]">debateRounds</code>, <code className="font-mono text-[10px]">debaterAPrompt</code>,
                 <code className="font-mono text-[10px]">debaterBPrompt</code>, and <code className="font-mono text-[10px]">judgePrompt</code> into your YAML / run config.
               </div>

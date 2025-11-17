@@ -1,23 +1,280 @@
 // src/app/api/scenario-gen/route.ts
 import { NextResponse } from "next/server";
-import { exec } from "child_process"; // kept for later when we re‑enable live runs
+import { spawn } from "child_process";
 import { readFile, readdir } from "fs/promises";
+import { Dirent } from "fs";
 import path from "path";
 
-// Helper to run a shell command and wait for it
-// (not used in offline mode, but kept for future wiring to the live debate script)
-function runCommand(cmd: string, cwd: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const child = exec(cmd, { cwd }, (err) => {
-      if (err) return reject(err);
-      resolve();
+const SCENARIO_OUT_PATH = "/tmp/mad_scenarios.json";
+
+type DebateRunParams = {
+  backendDir: string;
+  configPath: string;
+  debateRounds?: number;
+  portfolioName?: string;
+  yaml?: string;
+  debaterAPrompt?: string;
+  debaterBPrompt?: string;
+  judgePrompt?: string;
+};
+
+type LoggerChannel = "stdout" | "stderr";
+
+type MadLoggerEntry = {
+  channel: LoggerChannel;
+  message: string;
+};
+
+type RunOptions = {
+  logger?: (entry: MadLoggerEntry) => void;
+};
+
+type DebateMessage = {
+  role: string;
+  text: string;
+  round: number;
+  run?: number;
+  scenarios?: any[];
+};
+
+type DebatePayload = {
+  debate: DebateMessage[];
+  scenarios: any[];
+  metadata?: any;
+  runDirectory?: string | null;
+};
+
+type StagePhase = "start" | "debater" | "judge" | "finish" | "error";
+
+type StageEvent = {
+  run: number;
+  totalRuns?: number;
+  round?: number;
+  speakerLabel?: string;
+  phase: StagePhase;
+  text: string;
+};
+
+type StageEventWithProgress = StageEvent & {
+  progress?: number;
+};
+
+const SPEAKER_LABEL: Record<string, string> = {
+  A: "Proponent",
+  B: "Devil's advocate",
+  JUDGE: "Judge",
+};
+
+function extractTrailingText(line: string): string {
+  const idx = line.lastIndexOf("]");
+  return idx !== -1 ? line.slice(idx + 1).trim() : line.trim();
+}
+
+function parseMadStageLine(line: string): StageEvent | null {
+  const match = line.match(
+    /\[RUN#(\d+)(?:\/(\d+))?(?:\s+(R(\d+)-(A|B)|JUDGE))?]/i
+  );
+  if (!match) {
+    return null;
+  }
+
+  const run = Number(match[1]);
+  const totalRuns = match[2] ? Number(match[2]) : undefined;
+  const round = match[4] ? Number(match[4]) : undefined;
+  const token = match[3]?.toUpperCase();
+  const runLabel = totalRuns ? `Run ${run}/${totalRuns}` : `Run ${run}`;
+  const trailing = extractTrailingText(line);
+
+  if (!token) {
+    if (/starting debate/i.test(line)) {
+      return {
+        run,
+        totalRuns,
+        phase: "start",
+        text: trailing ? `${runLabel} – ${trailing}` : `${runLabel} starting debate…`,
+      };
+    }
+    if (/finished/i.test(line)) {
+      return {
+        run,
+        totalRuns,
+        phase: "finish",
+        text: trailing ? `${runLabel} ${trailing}` : `${runLabel} finished`,
+      };
+    }
+    if (/failed/i.test(line)) {
+      return {
+        run,
+        totalRuns,
+        phase: "error",
+        text: `${runLabel} ${trailing}`,
+      };
+    }
+    return null;
+  }
+
+  if (token === "JUDGE") {
+    return {
+      run,
+      totalRuns,
+      phase: "judge",
+      speakerLabel: SPEAKER_LABEL.JUDGE,
+      text: `${runLabel} • Judge selecting scenarios`,
+    };
+  }
+
+  const speakerLetter = match[5]?.toUpperCase();
+  if (speakerLetter) {
+    return {
+      run,
+      totalRuns,
+      phase: "debater",
+      round,
+      speakerLabel: SPEAKER_LABEL[speakerLetter] || `Debater ${speakerLetter}`,
+      text: `${runLabel} • Round ${round ?? "?"} – ${
+        SPEAKER_LABEL[speakerLetter] || speakerLetter
+      } complete`,
+    };
+  }
+
+  return null;
+}
+
+function stageFraction(stage: StageEvent): number {
+  switch (stage.phase) {
+    case "start":
+      return 0.05;
+    case "debater": {
+      const r = stage.round ?? 1;
+      const approx = 0.1 + r * 0.18;
+      return Math.min(approx, 0.85);
+    }
+    case "judge":
+      return 0.92;
+    case "finish":
+    case "error":
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+function enrichStageProgress(
+  stage: StageEvent,
+  runProgress: Map<number, number>,
+  totalRuns: number
+): StageEventWithProgress {
+  const prev = runProgress.get(stage.run) ?? 0;
+  const target = Math.max(prev, stageFraction(stage));
+  runProgress.set(stage.run, target);
+  const normalizedTotal = totalRuns > 0 ? totalRuns : 1;
+  const aggregate = Math.min(
+    1,
+    Math.max(0, ((stage.run - 1) + target) / normalizedTotal)
+  );
+  return { ...stage, totalRuns: normalizedTotal, progress: aggregate };
+}
+
+async function resolveLatestRunDir(runsRoot: string): Promise<string | null> {
+  try {
+    const markerPath = path.join(runsRoot, "latest.txt");
+    const latestName = (await readFile(markerPath, "utf-8")).trim();
+    if (latestName) {
+      const candidate = path.join(runsRoot, latestName);
+      return candidate;
+    }
+  } catch {
+    // ignore missing marker
+  }
+
+  try {
+    const entries = (await readdir(runsRoot, { withFileTypes: true })) as Dirent[];
+    const folders = entries
+      .filter((ent) => ent.isDirectory())
+      .map((ent) => ent.name)
+      .sort();
+    if (folders.length) {
+      return path.join(runsRoot, folders[folders.length - 1]);
+    }
+  } catch {
+    // ignore missing runs directory
+  }
+  return null;
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+async function runMadDebateScript(params: DebateRunParams, options: RunOptions = {}) {
+  const pythonCmd = process.env.MAD_PYTHON || "python3";
+  const scriptPath = path.join(params.backendDir, "code", "debate_scenarios.py");
+  const args = [
+    scriptPath,
+    "--config",
+    params.configPath,
+    "--out",
+    SCENARIO_OUT_PATH,
+    "--format",
+    "json",
+  ];
+  if (typeof params.debateRounds === "number" && Number.isFinite(params.debateRounds)) {
+    args.push("--rounds", String(params.debateRounds));
+  }
+
+  const env = { ...process.env, PYTHONUNBUFFERED: "1" };
+  const setEnv = (key: string, value?: string) => {
+    if (isNonEmptyString(value)) {
+      env[key] = value;
+    } else {
+      delete env[key];
+    }
+  };
+
+  setEnv("MAD_PROMPT_DEBATER_A", params.debaterAPrompt);
+  setEnv("MAD_PROMPT_DEBATER_B", params.debaterBPrompt);
+  setEnv("MAD_PROMPT_JUDGE", params.judgePrompt);
+  setEnv("MAD_PORTFOLIO_NAME", params.portfolioName);
+  setEnv("MAD_SHOCK_YAML", params.yaml);
+
+  console.log("[scenario-gen] launching MAD script", {
+    pythonCmd,
+    args: args.join(" "),
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(pythonCmd, args, {
+      cwd: params.backendDir,
+      env,
     });
 
-    // optional: log stderr for debugging
+    child.stdout?.on("data", (data) => {
+      const text = data.toString();
+      options.logger?.({ channel: "stdout", message: text });
+      if (text.trim()) {
+        console.log("[MAD stdout]", text.trimEnd());
+      }
+    });
     child.stderr?.on("data", (data) => {
-      console.error("[MAD stderr]", data.toString());
+      const text = data.toString();
+      options.logger?.({ channel: "stderr", message: text });
+      if (text.trim()) {
+        console.error("[MAD stderr]", text.trimEnd());
+      }
+    });
+    child.on("error", (err) => {
+      reject(err);
+    });
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`MAD script exited with code ${code ?? "unknown"}`));
+      }
     });
   });
+
+  console.log("[scenario-gen] MAD script finished successfully");
 }
 function cleanSegmentText(raw: string, hardLimit: number): string {
   if (!raw) return "";
@@ -380,97 +637,74 @@ function extractNarrativeFromMarkdown(md: string): string {
   return slice.trim();
 }
 
-export async function POST(req: Request) {
+async function loadMadArtifacts(backendDir: string): Promise<DebatePayload> {
+  // 1) Scenarios from /tmp (preferred) then fallback JSONL
+  let scenarios: any[] = [];
   try {
-    // Read UI params (still mostly informational in this offline mode)
-    let body: any = {};
+    const rawJson = await readFile(SCENARIO_OUT_PATH, "utf-8");
+    const parsed = JSON.parse(rawJson);
+    scenarios = Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.error(
+      "[scenario-gen] Could not read /tmp/mad_scenarios.json; trying data/scenarios/out.jsonl instead.",
+      e
+    );
     try {
-      body = await req.json();
-    } catch {
-      body = {};
-    }
-
-    const { portfolioName, yaml, debateRounds } = body;
-
-    console.log("[scenario-gen] incoming params (OFFLINE)", {
-      portfolioName,
-      hasYaml: Boolean(yaml && String(yaml).trim()),
-      debateRounds,
-    });
-
-    // projectRoot = bofa_hqla/
-    const projectRoot = path.join(process.cwd(), "..");
-    // backend / mad_debate (this folder contains config.yaml, data/, temp.txt, etc.)
-    const backendDir = path.join(projectRoot, "backend", "mad_debate");
-
-    // 1) Load the last scenarios JSON produced by the MAD script.
-    //    Preferred: /tmp/mad_scenarios.json (when you run with --out /tmp/mad_scenarios.json --format json)
-    //    Fallback:  backend data/scenarios/out.jsonl (JSON Lines, one scenario per line)
-    let scenarios: any[] = [];
-    const outPath = "/tmp/mad_scenarios.json";
-
-    try {
-      const rawJson = await readFile(outPath, "utf-8");
-      const parsed = JSON.parse(rawJson);
-      scenarios = Array.isArray(parsed) ? parsed : [];
-    } catch (e) {
-      console.error(
-        "[scenario-gen] Could not read /tmp/mad_scenarios.json; trying data/scenarios/out.jsonl instead.",
-        e
-      );
-      try {
-        const outJsonlPath = path.join(
-          backendDir,
-          "data",
-          "scenarios",
-          "out.jsonl"
-        );
-        const rawJsonl = await readFile(outJsonlPath, "utf-8");
-        const lines = rawJsonl.split(/\r?\n/);
-        const parsedLines: any[] = [];
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) continue;
-          try {
-            parsedLines.push(JSON.parse(trimmed));
-          } catch (err) {
-            console.error(
-              "[scenario-gen] Failed to parse JSONL line in out.jsonl:",
-              err
-            );
-          }
+      const outJsonlPath = path.join(backendDir, "data", "scenarios", "out.jsonl");
+      const rawJsonl = await readFile(outJsonlPath, "utf-8");
+      const lines = rawJsonl.split(/\r?\n/);
+      const parsedLines: any[] = [];
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        try {
+          parsedLines.push(JSON.parse(trimmed));
+        } catch (err) {
+          console.error("[scenario-gen] Failed to parse JSONL line in out.jsonl:", err);
         }
-        scenarios = parsedLines;
-      } catch (e2) {
-        console.error(
-          "[scenario-gen] Could not read data/scenarios/out.jsonl; returning empty scenarios.",
-          e2
-        );
-        scenarios = [];
       }
+      scenarios = parsedLines;
+    } catch (e2) {
+      console.error(
+        "[scenario-gen] Could not read data/scenarios/out.jsonl; returning empty scenarios.",
+        e2
+      );
+      scenarios = [];
     }
+  }
 
-    // 2) Load the debate: prefer transcript_run_*.jsonl (full reasoning), fall back to temp.txt previews.
-    let debate: { role: string; text: string; round: number; run?: number; scenarios?: any[] }[] = [];
-
+  const runsRoot = path.join(backendDir, "data", "scenarios", "runs");
+  const latestRunDir = await resolveLatestRunDir(runsRoot);
+  let metadata: any = null;
+  if (latestRunDir) {
     try {
-      const scenariosDir = path.join(backendDir, "data", "scenarios");
-      const files = await readdir(scenariosDir);
-      const transcriptFiles = files
-        .filter((f) => /^transcript_run_\d+\.jsonl$/.test(f))
-        .sort((a, b) => {
-          const ma = a.match(/transcript_run_(\d+)\.jsonl/);
-          const mb = b.match(/transcript_run_(\d+)\.jsonl/);
-          const ra = ma ? parseInt(ma[1], 10) : 0;
-          const rb = mb ? parseInt(mb[1], 10) : 0;
-          return ra - rb;
-        });
+      const metaPath = path.join(latestRunDir, "metadata.json");
+      const metaRaw = await readFile(metaPath, "utf-8");
+      metadata = JSON.parse(metaRaw);
+    } catch (err) {
+      console.error("[scenario-gen] Failed to load run metadata:", err);
+    }
+  }
 
-      // Read all transcript files and aggregate debates
-      for (const fileName of transcriptFiles) {
-        const match = fileName.match(/transcript_run_(\d+)\.jsonl/);
-        if (!match) continue;
-        const runNumber = parseInt(match[1], 10);
+  // 2) Debate transcripts, with fallback to temp log
+  let debate: DebateMessage[] = [];
+  try {
+    const scenariosDir = latestRunDir ?? path.join(backendDir, "data", "scenarios");
+    const files = await readdir(scenariosDir);
+    const transcriptFiles = files
+      .filter((f) => /^transcript_run_\d+\.jsonl$/.test(f))
+      .sort((a, b) => {
+        const ma = a.match(/transcript_run_(\d+)\.jsonl/);
+        const mb = b.match(/transcript_run_(\d+)\.jsonl/);
+        const ra = ma ? parseInt(ma[1], 10) : 0;
+        const rb = mb ? parseInt(mb[1], 10) : 0;
+        return ra - rb;
+      });
+
+    for (const fileName of transcriptFiles) {
+      const match = fileName.match(/transcript_run_(\d+)\.jsonl/);
+      if (!match) continue;
+      const runNumber = parseInt(match[1], 10);
       const transcriptPath = path.join(scenariosDir, fileName);
       const jsonlText = await readFile(transcriptPath, "utf-8");
       let judgeNarrative: string | undefined;
@@ -478,82 +712,191 @@ export async function POST(req: Request) {
         const mdPath = transcriptPath.replace(/\.jsonl$/, ".md");
         const md = await readFile(mdPath, "utf-8");
         judgeNarrative = extractNarrativeFromMarkdown(md);
-      } catch {}
+      } catch {
+        // ignore missing MD
+      }
       const runDebate = extractLatestRoundFromTranscript(jsonlText, runNumber, judgeNarrative);
       debate.push(...runDebate);
     }
+  } catch (e) {
+    console.error(
+      "[scenario-gen] Error while trying to read transcript_run_*.jsonl; will fall back to temp.txt.",
+      e
+    );
+  }
+
+  if (!debate.length) {
+    try {
+      const tempLogPath = path.join(backendDir, "temp.txt");
+      const logText = await readFile(tempLogPath, "utf-8");
+      debate = extractLatestRoundFromLog(logText);
     } catch (e) {
       console.error(
-        "[scenario-gen] Error while trying to read transcript_run_*.jsonl; will fall back to temp.txt.",
+        "[scenario-gen] Could not read temp.txt for offline debate; returning empty debate.",
         e
       );
+      debate = [];
+    }
+  }
+
+  // Ensure at least one Judge message (synthesized if needed)
+  const hasJudge = debate.some((m) => m.role === "Judge");
+  if (!hasJudge && scenarios.length) {
+    const maxRound = debate.reduce((max, m) => (m.round > max ? m.round : max), 0);
+    const judgeRound = maxRound ? maxRound + 1 : 1;
+    const judgeText =
+      "Judge-selected scenarios:\n\n```json\n" +
+      JSON.stringify(scenarios, null, 2) +
+      "\n```";
+    debate.push({
+      role: "Judge",
+      text: judgeText,
+      round: judgeRound,
+      scenarios,
+    });
+  }
+
+  const judgeWithMatrix = debate
+    .filter(
+      (m) => m.role === "Judge" && Array.isArray((m as any).scenarios) && (m as any).scenarios.length
+    )
+    .sort((a, b) => {
+      const arun = typeof a.run === "number" ? a.run : 0;
+      const brun = typeof b.run === "number" ? b.run : 0;
+      if (arun !== brun) return arun - brun;
+      return (a.round ?? 0) - (b.round ?? 0);
+    });
+
+  if (judgeWithMatrix.length) {
+    const latestJudge = judgeWithMatrix[judgeWithMatrix.length - 1];
+    if (latestJudge.scenarios?.length) {
+      scenarios = latestJudge.scenarios;
+    }
+  }
+
+  return { debate, scenarios, metadata, runDirectory: latestRunDir };
+}
+
+export async function POST(req: Request) {
+  try {
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch {
+      body = {};
     }
 
-    if (!debate.length) {
-      try {
-        const tempLogPath = path.join(backendDir, "temp.txt");
-        const logText = await readFile(tempLogPath, "utf-8");
-        debate = extractLatestRoundFromLog(logText);
-      } catch (e) {
-        console.error(
-          "[scenario-gen] Could not read temp.txt for offline debate; returning empty debate.",
-          e
-        );
-        debate = [];
-      }
-    }
+    const {
+      portfolioName,
+      yaml,
+      debateRounds,
+      debaterAPrompt,
+      debaterBPrompt,
+      judgePrompt,
+      skipRun,
+    } = body || {};
 
-    // If there is no explicit JUDGE speaker in the transcript, synthesize a Judge
-    // message from the final scenarios so the UI always has a judge bubble.
-    const hasJudge = debate.some((m) => m.role === "Judge");
-    if (!hasJudge && scenarios.length) {
-      const maxRound = debate.reduce(
-        (max, m) => (m.round > max ? m.round : max),
-        0
-      );
-      const judgeRound = maxRound ? maxRound + 1 : 1;
+    const parsedRounds =
+      typeof debateRounds === "number" && Number.isFinite(debateRounds)
+        ? Math.max(1, Math.min(12, Math.floor(debateRounds)))
+        : undefined;
 
-      const judgeText =
-        "Judge-selected scenarios:\n\n```json\n" +
-        JSON.stringify(scenarios, null, 2) +
-        "\n```";
+    console.log("[scenario-gen] incoming params", {
+      portfolioName,
+      hasYaml: Boolean(typeof yaml === "string" && yaml.trim().length),
+      debateRounds: parsedRounds,
+      skipRun: Boolean(skipRun),
+    });
 
-      debate.push({
-        role: "Judge",
-        text: judgeText,
-        round: judgeRound,
-        scenarios,
-      });
-    }
+    const projectRoot = path.join(process.cwd(), "..");
+    const backendDir = path.join(projectRoot, "backend", "mad_debate");
+    const configPath = path.join(backendDir, "config.yaml");
+    const encoder = new TextEncoder();
 
-    const judgeWithMatrix = debate
-      .filter(
-        (m) =>
-          m.role === "Judge" &&
-          Array.isArray((m as any).scenarios) &&
-          (m as any).scenarios.length
-      )
-      .sort((a, b) => {
-        const arun = typeof a.run === "number" ? a.run : 0;
-        const brun = typeof b.run === "number" ? b.run : 0;
-        if (arun !== brun) return arun - brun;
-        return (a.round ?? 0) - (b.round ?? 0);
-      });
+    const stream = new ReadableStream({
+      start(controller) {
+        const perRunProgress = new Map<number, number>();
+        let knownTotalRuns: number | undefined;
+        const send = (payload: unknown) => {
+          const chunk = JSON.stringify(payload) + "\n";
+          controller.enqueue(encoder.encode(chunk));
+        };
+        const handleLine = (line: string, channel: LoggerChannel | "system") => {
+          if (!line) return;
+          send({ type: "log", channel, message: line });
+          const stage = parseMadStageLine(line);
+          if (stage) {
+            if (typeof stage.totalRuns === "number") {
+              knownTotalRuns = stage.totalRuns;
+            } else if (typeof knownTotalRuns === "number") {
+              stage.totalRuns = knownTotalRuns;
+            }
+            const totalForCalc = stage.totalRuns ?? knownTotalRuns ?? 1;
+            const enriched = enrichStageProgress(stage, perRunProgress, totalForCalc);
+            send({ type: "stage", data: enriched });
+          }
+        };
+        const processMessage = (message: string, channel: LoggerChannel | "system" = "stdout") => {
+          if (!message) return;
+          const lines = message.split(/\r?\n/);
+          for (const raw of lines) {
+            const trimmed = raw.trim();
+            if (trimmed) {
+              handleLine(trimmed, channel);
+            }
+          }
+        };
 
-    if (judgeWithMatrix.length) {
-      const latestJudge = judgeWithMatrix[judgeWithMatrix.length - 1];
-      if (latestJudge.scenarios?.length) {
-        scenarios = latestJudge.scenarios;
-      }
-    }
+        (async () => {
+          try {
+            if (!skipRun) {
+              await runMadDebateScript(
+                {
+                  backendDir,
+                  configPath,
+                  debateRounds: parsedRounds,
+                  portfolioName: typeof portfolioName === "string" ? portfolioName : undefined,
+                  yaml: typeof yaml === "string" ? yaml : undefined,
+                  debaterAPrompt: typeof debaterAPrompt === "string" ? debaterAPrompt : undefined,
+                  debaterBPrompt: typeof debaterBPrompt === "string" ? debaterBPrompt : undefined,
+                  judgePrompt: typeof judgePrompt === "string" ? judgePrompt : undefined,
+                },
+                {
+                  logger: (entry) => processMessage(entry.message, entry.channel),
+                }
+              );
+            } else {
+              processMessage("skipRun flag set — reusing existing MAD artifacts", "system");
+            }
 
-    // Shape: { debate, scenarios } — exactly what runScenarioGen on the UI expects
-    return NextResponse.json({ debate, scenarios });
+            processMessage("MAD script complete. Loading artifacts…", "system");
+            const payload = await loadMadArtifacts(backendDir);
+            send({ type: "result", data: payload });
+          } catch (err: any) {
+            const msg = `MAD scenario generation failed: ${String(err)}`;
+            console.error(msg);
+            send({ type: "error", message: msg });
+          } finally {
+            controller.close();
+          }
+        })();
+      },
+      cancel() {
+        console.log("[scenario-gen] client cancelled MAD stream");
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "application/x-ndjson",
+        "Cache-Control": "no-cache",
+      },
+    });
   } catch (err: any) {
-    console.error("Error in offline MAD scenario generation route:", err);
+    console.error("Error in MAD scenario generation route:", err);
     return NextResponse.json(
       {
-        error: "Failed to load offline MAD scenarios / debate",
+        error: "Failed to start MAD scenario generation",
         detail: String(err),
       },
       { status: 500 }
