@@ -1,0 +1,192 @@
+[
+  {
+    "Scenario": "Hawkish Fed and Bear Steepening",
+    "Description": "Fed aggressively raises rates, resulting in a bear steepening of the yield curve. Long-term rates increase, impacting asset valuations.",
+    "Probability": 0.22,
+    "Rationale": "Persistent inflation leads to a more aggressive monetary policy stance, affecting long-term interest rates and NII.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Curve (bear steepener)",
+      "NII"
+    ],
+    "Shocks": {
+      "move_index": 150,
+      "yield_curve": "bear steepener",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NII": 5
+    },
+    "TradeList": [
+      "Add $1bn in long-term Treasuries",
+      "Reduce MBS holdings by $500mn"
+    ],
+    "Assumptions": "Inflation remains above 3%, Fed raises rates by 75 bps in the next two meetings."
+  },
+  {
+    "Scenario": "Widening Credit Spreads Amid Economic Slowdown",
+    "Description": "Economic slowdown causes widening credit spreads, increasing funding costs and impacting LCR.",
+    "Probability": 0.18,
+    "Rationale": "Market risk aversion due to economic concerns leads to widening spreads.",
+    "ImpactChannels": [
+      "Credit OAS (25 bps)",
+      "Deposits/runoff (5%)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NII": -4
+    },
+    "TradeList": [
+      "Increase repo funding by $1bn",
+      "Reduce exposure to high-yield bonds by $500mn"
+    ],
+    "Assumptions": "GDP growth slows to 1% with rising unemployment rates."
+  },
+  {
+    "Scenario": "Resilient Consumer Spending with Controlled Inflation",
+    "Description": "Moderate inflation leads to increased consumer spending and robust loan demand.",
+    "Probability": 0.16,
+    "Rationale": "Economic indicators suggest manageable inflation, supporting stable growth in consumer spending and lending.",
+    "ImpactChannels": [
+      "Increased consumer lending demand",
+      "Improved NII"
+    ],
+    "Shocks": {
+      "move_index": 100,
+      "yield_curve": "bull flattening",
+      "credit_spreads": {
+        "ig_oas": -5,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NII": 5
+    },
+    "TradeList": [
+      "Increase exposure to consumer loans by $1bn",
+      "Add $500mn in Agency MBS"
+    ],
+    "Assumptions": "Inflation stabilizes around 2-3%, supporting consumer confidence and spending."
+  },
+  {
+    "Scenario": "Diversified Deposit Base Provides Stability",
+    "Description": "Strong retail deposit growth offsets potential outflows, maintaining liquidity metrics.",
+    "Probability": 0.14,
+    "Rationale": "BoA's diverse funding mix enhances resilience against economic fluctuations.",
+    "ImpactChannels": [
+      "Stable deposit levels",
+      "Enhanced LCR"
+    ],
+    "Shocks": {
+      "move_index": 95,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": -10
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 4,
+      "NII": 2
+    },
+    "TradeList": [
+      "Implement competitive deposit rates to retain retail deposits",
+      "Optimize funding strategies for liquidity management"
+    ],
+    "Assumptions": "Retail deposits grow by 3% despite economic pressures."
+  },
+  {
+    "Scenario": "Curve Bull-Steepener Benefits Long-Duration Assets",
+    "Description": "A bull-steepening yield curve increases the value of long-duration assets held by BoA.",
+    "Probability": 0.12,
+    "Rationale": "Demand for long-term securities rises in a falling rate environment, enhancing portfolio value.",
+    "ImpactChannels": [
+      "Increased asset valuations",
+      "Positive OCI"
+    ],
+    "Shocks": {
+      "move_index": 90,
+      "yield_curve": "bull steepening",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 4,
+      "NII": 3
+    },
+    "TradeList": [
+      "Add $1bn in long-term USTs",
+      "Rotate $500mn into high-quality munis"
+    ],
+    "Assumptions": "Market expectations shift towards lower future interest rates."
+  },
+  {
+    "Scenario": "Regulatory Adjustments Enhance Capital Flexibility",
+    "Description": "Potential regulatory changes provide relief, improving BoA's capital metrics.",
+    "Probability": 0.1,
+    "Rationale": "Ongoing discussions may lead to favorable regulatory adjustments for major banks, enhancing liquidity.",
+    "ImpactChannels": [
+      "Improved capital ratios",
+      "Greater funding flexibility"
+    ],
+    "Shocks": {
+      "move_index": 90,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": -5,
+        "hy_oas": -5
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NII": 2
+    },
+    "TradeList": [
+      "Prepare for capital deployment in higher-yielding assets",
+      "Adjust funding strategy for liquidity optimization"
+    ],
+    "Assumptions": "Regulatory bodies finalize adjustments favorably in the near term."
+  },
+  {
+    "Scenario": "Geopolitical Tensions and Safe-Haven Flows",
+    "Description": "Increased geopolitical tensions drive safe-haven flows to USTs, enhancing LCR but compressing NII.",
+    "Probability": 0.08,
+    "Rationale": "Geopolitical events lead to market volatility and a preference for safe-haven assets.",
+    "ImpactChannels": [
+      "Rates (25 bps)",
+      "NII"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "bull flattening",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 4,
+      "NII": -3
+    },
+    "TradeList": [
+      "Add $1bn in short-term Treasuries",
+      "Reduce corporate bond holdings by $500mn"
+    ],
+    "Assumptions": "Geopolitical tensions escalate, leading to significant capital flows into USTs."
+  }
+]

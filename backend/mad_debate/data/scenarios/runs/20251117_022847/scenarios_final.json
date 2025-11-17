@@ -1,0 +1,295 @@
+[
+  {
+    "Scenario": "Base Case: Anchored Inflation with Gradual Rate Cuts",
+    "Description": "Inflation moderates, allowing the Fed to cut rates by 25 bps. The curve bull flattens, credit spreads tighten modestly, and MBS basis improves. Liquidity and profitability metrics are stable.",
+    "Probability": 0.4,
+    "Rationale": "Disinflation continues, but growth remains positive. The Fed adopts a cautious easing stance, supporting risk assets and deposit stability.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -25,
+      "Curve": "bull_flattening",
+      "IG_OAS": -5,
+      "HY_OAS": -10,
+      "MBS_Basis": -5
+    },
+    "TradeList": [
+      "EXTEND duration in UST",
+      "ADD IG Credit"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 1.0,
+      "ΔNSFR": 0.5,
+      "ΔNII": 0.8
+    },
+    "Assumptions": "Inflation expectations are anchored; Fed signals gradualism; deposit flows are stable."
+  },
+  {
+    "Scenario": "Persistently High Inflation and Hawkish Fed Response",
+    "Description": "The Fed responds to persistent inflation with aggressive rate hikes, leading to increased funding costs, wider credit spreads, and MBS underperformance.",
+    "Probability": 0.35,
+    "Rationale": "Inflation remains above target due to supply chain issues and strong demand, prompting decisive Fed action. This scenario is plausible given recent inflation prints and central bank guidance.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits",
+      "Regulation"
+    ],
+    "Shocks": {
+      "Rates": 50,
+      "Curve": "bear_steepener",
+      "IG_OAS": 25,
+      "HY_OAS": 40,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "SELL 10y UST",
+      "SELL 30y MBS",
+      "BUY 1m T-Bill"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -4.0,
+      "ΔNSFR": -1.5,
+      "ΔNII": 2.1
+    },
+    "Assumptions": "Inflation persists above 3%; Fed prioritizes inflation control; deposit outflows accelerate modestly."
+  },
+  {
+    "Scenario": "Hawkish Shock: Persistent Inflation, Aggressive Fed Hikes",
+    "Description": "The Federal Reserve raises rates by 50 bps in response to persistent inflation. Yield curve bear steepens, credit spreads widen, and MBS basis is pressured. Liquidity metrics deteriorate as funding costs rise and deposit outflows accelerate.",
+    "Probability": 0.25,
+    "Rationale": "Inflation data remains elevated, forcing the Fed to tighten policy more aggressively than anticipated. Market participants price in recession risk, driving risk-off behavior and liquidity stress.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits",
+      "Regulation"
+    ],
+    "Shocks": {
+      "Rates": 50,
+      "Curve": "bear_steepener",
+      "IG_OAS": 25,
+      "HY_OAS": 50,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "BUY 2y UST",
+      "SELL 30y MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -4.0,
+      "ΔNSFR": -1.5,
+      "ΔNII": 2.1
+    },
+    "Assumptions": "Inflation persists above target; Fed remains hawkish; deposit betas rise; risk appetite falls."
+  },
+  {
+    "Scenario": "Persistent Inflation Shock",
+    "Description": "Inflation remains elevated, forcing the Fed into additional aggressive rate hikes. Credit spreads widen and MBS underperform as risk sentiment deteriorates.",
+    "Probability": 0.25,
+    "Rationale": "Recent inflation prints and sticky wage growth prompt the Fed to tighten further, driving up rates and risk premia.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": 50,
+      "Curve": "bear_steepener",
+      "IG_OAS": 20,
+      "HY_OAS": 40,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "SELL 30y MBS",
+      "BUY 2y UST"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -4.0,
+      "ΔNSFR": -1.5,
+      "ΔNII": 2.1
+    },
+    "Assumptions": "Inflation persists above target; Fed guidance turns more hawkish; deposit betas rise modestly."
+  },
+  {
+    "Scenario": "Risk-Off: Geopolitical Escalation and Credit Stress",
+    "Description": "A major geopolitical event triggers a flight to quality. Credit spreads widen sharply, MBS basis widens, and deposits decline as risk aversion spikes. Liquidity ratios deteriorate.",
+    "Probability": 0.2,
+    "Rationale": "Escalation in global tensions leads to a risk-off move, with investors reallocating to safe assets and banks facing funding pressure.",
+    "ImpactChannels": [
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": 0,
+      "Curve": "flat",
+      "IG_OAS": 20,
+      "HY_OAS": 40,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "BUY UST",
+      "REDUCE HY Credit"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -3.5,
+      "ΔNSFR": -2.0,
+      "ΔNII": -0.7
+    },
+    "Assumptions": "Geopolitical risk materializes; depositors seek safety; credit risk repriced."
+  },
+  {
+    "Scenario": "Geopolitical Tensions and Market Volatility",
+    "Description": "Escalating geopolitical tensions trigger risk-off flows, wider credit spreads, and a higher MBS basis as liquidity deteriorates.",
+    "Probability": 0.2,
+    "Rationale": "Recent geopolitical events have increased volatility and risk aversion, leading to wider spreads and reduced MBS demand.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": 10,
+      "Curve": "flat",
+      "IG_OAS": 20,
+      "HY_OAS": 30,
+      "MBS_Basis": 10
+    },
+    "TradeList": [
+      "BUY 2y UST",
+      "SELL MBS",
+      "INCREASE CASH"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -2.0,
+      "ΔNSFR": -1.0,
+      "ΔNII": 0.5
+    },
+    "Assumptions": "No direct domestic impact, but global risk aversion drives market moves; funding markets remain open."
+  },
+  {
+    "Scenario": "Gradual Disinflation with Anchored Expectations",
+    "Description": "Inflation gradually eases, allowing the Fed to pause or cut rates, supporting tighter credit spreads and improved MBS performance.",
+    "Probability": 0.2,
+    "Rationale": "Recent data suggest inflation is moderating and expectations remain anchored, enabling a more dovish policy stance.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -25,
+      "Curve": "bull_flattening",
+      "IG_OAS": -5,
+      "HY_OAS": -10,
+      "MBS_Basis": -3
+    },
+    "TradeList": [
+      "BUY 10y UST",
+      "BUY MBS",
+      "EXTEND DURATION"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 2.0,
+      "ΔNSFR": 1.0,
+      "ΔNII": -1.0
+    },
+    "Assumptions": "Inflation falls below 3%; Fed signals pause or cut; deposit flows stabilize."
+  },
+  {
+    "Scenario": "Stable Inflation with Gradual Rate Cuts",
+    "Description": "Inflation stabilizes, allowing the Fed to begin a slow, measured rate-cutting cycle. Credit spreads tighten and HQLA valuations improve.",
+    "Probability": 0.2,
+    "Rationale": "Anchored inflation expectations and softening labor market data allow for a dovish policy pivot.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS"
+    ],
+    "Shocks": {
+      "Rates": -25,
+      "Curve": "bull_flattener",
+      "IG_OAS": -10,
+      "HY_OAS": -5,
+      "MBS_Basis": -5
+    },
+    "TradeList": [
+      "BUY 10y UST",
+      "ADD Agency MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 3.0,
+      "ΔNSFR": 1.0,
+      "ΔNII": -1.2
+    },
+    "Assumptions": "Inflation remains near target; Fed signals gradual cuts; deposit outflows slow."
+  },
+  {
+    "Scenario": "Regulatory Tightening on Capital Requirements",
+    "Description": "Regulators announce stricter capital and liquidity requirements, increasing funding costs and prompting portfolio rebalancing.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing regulatory reviews and recent bank failures have increased the likelihood of tighter requirements.",
+    "ImpactChannels": [
+      "Regulation",
+      "Deposits",
+      "Rates",
+      "Credit"
+    ],
+    "Shocks": {
+      "Rates": 15,
+      "Curve": "bear_steepener",
+      "IG_OAS": 10,
+      "HY_OAS": 25,
+      "MBS_Basis": 5
+    },
+    "TradeList": [
+      "INCREASE CAPITAL RESERVES",
+      "REDUCE LEVEL 2 HQLA",
+      "BUY SHORT-TERM UST"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -3.0,
+      "ΔNSFR": -2.0,
+      "ΔNII": -0.5
+    },
+    "Assumptions": "New rules announced but not yet implemented; banks preemptively adjust balance sheets."
+  },
+  {
+    "Scenario": "Geopolitical Risk-Off Stress",
+    "Description": "Escalating geopolitical tensions trigger a flight to quality, deposit outflows, and sharp volatility in rates and credit.",
+    "Probability": 0.15,
+    "Rationale": "External shocks (e.g., conflict escalation, trade disruptions) drive risk aversion and funding stress.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits",
+      "MBS"
+    ],
+    "Shocks": {
+      "Rates": 25,
+      "Curve": "bear_steepener",
+      "IG_OAS": 30,
+      "HY_OAS": 60,
+      "MBS_Basis": 20
+    },
+    "TradeList": [
+      "INCREASE cash reserves",
+      "REDUCE HY credit"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -7.0,
+      "ΔNSFR": -2.5,
+      "ΔNII": 1.8
+    },
+    "Assumptions": "Sudden risk-off; deposit outflows from corporate and retail; market liquidity deteriorates."
+  }
+]

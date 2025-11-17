@@ -1,0 +1,144 @@
+[
+  {
+    "Scenario": "Interest Rate Shock with Bear Steepening",
+    "Description": "Short-term rates rise by 50 bps while long-term rates rise by 10 bps, causing a bear steepening of the yield curve.",
+    "Probability": 0.25,
+    "Rationale": "Reflects a likely outcome of Federal Reserve policy adjustments aimed at curbing inflation.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move": 50,
+      "slope_2s10s_bps": 40
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": 0,
+      "NII": 0.1
+    },
+    "TradeList": [
+      "Add $2bn 3-month T-bills via repo",
+      "Reduce $1bn in corporate bonds"
+    ],
+    "Assumptions": "Short-term borrowing costs increase, but NII improves due to higher lending rates."
+  },
+  {
+    "Scenario": "Widening Credit Spreads and Increased MBS Basis",
+    "Description": "IG OAS increases by 25 bps and HY OAS by 50 bps, reflecting deterioration in credit quality.",
+    "Probability": 0.18,
+    "Rationale": "A plausible outcome driven by macroeconomic stress and market sentiment.",
+    "ImpactChannels": [
+      "Credit",
+      "MBS"
+    ],
+    "Shocks": {
+      "ig_oas": 25,
+      "hy_oas": 50,
+      "mbs_basis": 20
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -1,
+      "NII": -0.05
+    },
+    "TradeList": [
+      "Sell $1bn of corporate bonds",
+      "Increase $1bn in USTs"
+    ],
+    "Assumptions": "Widening spreads lead to reduced valuations of corporate bonds."
+  },
+  {
+    "Scenario": "Regulatory Changes Impacting Liquidity Requirements",
+    "Description": "Stricter liquidity requirements increase LCR minimum to 120% and introduce a liquidity surcharge.",
+    "Probability": 0.12,
+    "Rationale": "Reflects ongoing regulatory scrutiny and potential changes in Basel requirements.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {
+      "LCR_min": 120
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -2,
+      "NII": -0.1
+    },
+    "TradeList": [
+      "Increase cash holdings by $3bn",
+      "Adjust HQLA stack by adding $1bn in agencies"
+    ],
+    "Assumptions": "Increased regulatory requirements necessitate a shift in asset allocation."
+  },
+  {
+    "Scenario": "Macro Resilience with Controlled Inflation",
+    "Description": "Gradual easing of inflation by 50 bps and strong consumer spending growth of 3% leads to stable economic growth.",
+    "Probability": 0.18,
+    "Rationale": "Consumer resilience supported by an unemployment rate below 4% and rising wages enhances economic stability.",
+    "ImpactChannels": [
+      "Macro",
+      "Deposits"
+    ],
+    "Shocks": {
+      "inflation": -0.5,
+      "consumer_spending_growth": 3
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NSFR": 2,
+      "NII": 0.2
+    },
+    "TradeList": [
+      "Add $2bn in Agency MBS",
+      "Rotate $1bn into long-term munis"
+    ],
+    "Assumptions": "Stable growth conditions improve credit quality and increase deposit inflows."
+  },
+  {
+    "Scenario": "Curve Flattening Opportunity",
+    "Description": "A shift to a flatter yield curve as the Fed signals a pause in rate hikes, leading to a 30 bps decrease in the 10-year yield.",
+    "Probability": 0.15,
+    "Rationale": "Market anticipates a stabilization of rate hikes, reducing borrowing costs for long-term loans.",
+    "ImpactChannels": [
+      "Curve",
+      "Funding"
+    ],
+    "Shocks": {
+      "2s10s_spread": -30
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1,
+      "NII": 0.1
+    },
+    "TradeList": [
+      "Sell $1bn in short-term T-bills",
+      "Add $1.5bn in 10-year USTs"
+    ],
+    "Assumptions": "A flatter curve supports decreased funding costs and stable income."
+  },
+  {
+    "Scenario": "Credit Spread Tightening",
+    "Description": "Tighter credit spreads lead to a 20 bps reduction in IG OAS and a 30 bps reduction in HY OAS, improving valuations.",
+    "Probability": 0.12,
+    "Rationale": "Positive economic indicators, such as GDP growth above 2%, lead to reduced risk premiums.",
+    "ImpactChannels": [
+      "Credit",
+      "Basis"
+    ],
+    "Shocks": {
+      "ig_oas": -20,
+      "hy_oas": -30
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1,
+      "NII": 0.05
+    },
+    "TradeList": [
+      "Increase $2bn in corporate bonds",
+      "Sell $1bn in higher risk assets"
+    ],
+    "Assumptions": "Improved credit conditions enhance portfolio valuations and liquidity."
+  }
+]

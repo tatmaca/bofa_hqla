@@ -1,0 +1,143 @@
+[
+  {
+    "Scenario": "Inflation Persistence Forces Further Rate Hikes",
+    "Description": "Persistent inflation pressures lead the Federal Reserve to implement an additional 50 bps rate hike, resulting in a bear steepening of the yield curve and wider credit spreads.",
+    "Probability": 0.25,
+    "Rationale": "Recent inflation data remains above target, forcing the Fed to tighten policy further. Higher rates increase funding costs and duration risk, pressuring LCR and NII.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits",
+      "Regulation"
+    ],
+    "Shocks": {
+      "Rates": 50,
+      "Curve": "bear_steepener",
+      "IG_OAS": 20,
+      "HY_OAS": 40,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "SELL 10y UST",
+      "SELL 30y MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -4.0,
+      "ΔNSFR": -1.5,
+      "ΔNII": 2.1
+    },
+    "Assumptions": "Inflation remains sticky; Fed prioritizes price stability over growth; deposit outflows as clients seek higher yields."
+  },
+  {
+    "Scenario": "Moderate Inflation with Anchored Expectations",
+    "Description": "Inflation stabilizes near 3%, allowing the Fed to pause and maintain current rates. The curve flattens modestly and credit spreads tighten slightly.",
+    "Probability": 0.3,
+    "Rationale": "Inflation expectations are anchored, and economic growth is steady. The Fed adopts a wait-and-see approach, supporting stable funding and moderate NII.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": 0,
+      "Curve": "bull_flattener",
+      "IG_OAS": -5,
+      "HY_OAS": -10,
+      "MBS_Basis": -3
+    },
+    "TradeList": [
+      "HOLD 2y UST",
+      "BUY IG Credit"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 1.0,
+      "ΔNSFR": 0.5,
+      "ΔNII": 0.8
+    },
+    "Assumptions": "Inflation moderates without new shocks; deposit base remains stable; no major regulatory changes."
+  },
+  {
+    "Scenario": "Geopolitical Tensions Escalate",
+    "Description": "Escalating geopolitical risks trigger a flight to quality, causing a sharp widening of MBS basis and modest deposit outflows.",
+    "Probability": 0.15,
+    "Rationale": "Market volatility rises as geopolitical events unfold. Investors move to USTs, but MBS valuations suffer and some clients withdraw deposits for liquidity.",
+    "ImpactChannels": [
+      "MBS",
+      "Deposits",
+      "Rates"
+    ],
+    "Shocks": {
+      "Rates": 0,
+      "Curve": "flat",
+      "IG_OAS": 10,
+      "HY_OAS": 25,
+      "MBS_Basis": 25
+    },
+    "TradeList": [
+      "BUY 2y UST",
+      "SELL MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -2.5,
+      "ΔNSFR": -0.5,
+      "ΔNII": -0.6
+    },
+    "Assumptions": "Geopolitical shocks drive risk-off sentiment; depositors seek liquidity; MBS underperform."
+  },
+  {
+    "Scenario": "Regulatory Clarity Enhances Liquidity",
+    "Description": "New regulatory guidance clarifies HQLA eligibility, allowing banks to optimize portfolios and improve liquidity metrics.",
+    "Probability": 0.15,
+    "Rationale": "Clearer rules reduce uncertainty, enabling more efficient HQLA allocation and supporting LCR/NSFR improvement.",
+    "ImpactChannels": [
+      "Regulation",
+      "Deposits",
+      "Rates"
+    ],
+    "Shocks": {
+      "Rates": 0,
+      "Curve": "bull_flattening",
+      "IG_OAS": -10,
+      "HY_OAS": -5,
+      "MBS_Basis": -3
+    },
+    "TradeList": [
+      "BUY UST",
+      "BUY Level 1 HQLA"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 2.5,
+      "ΔNSFR": 1.0,
+      "ΔNII": 0.3
+    },
+    "Assumptions": "Regulatory changes are well-communicated and phased in; no major market disruptions."
+  },
+  {
+    "Scenario": "Positive Economic Data Drive Market Optimism",
+    "Description": "Unexpectedly strong economic data boosts risk appetite, resulting in a bull steepening of the yield curve and tighter credit spreads.",
+    "Probability": 0.15,
+    "Rationale": "Robust growth surprises markets, supporting credit and equity markets. Deposit inflows increase as confidence rises.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -10,
+      "Curve": "bull_steepener",
+      "IG_OAS": -10,
+      "HY_OAS": -15,
+      "MBS_Basis": -5
+    },
+    "TradeList": [
+      "BUY HY Credit",
+      "SELL 2y UST"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 1.5,
+      "ΔNSFR": 0.7,
+      "ΔNII": 1.2
+    },
+    "Assumptions": "No inflation resurgence; Fed remains on hold; deposit base grows with economic optimism."
+  }
+]

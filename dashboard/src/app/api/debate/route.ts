@@ -11,11 +11,14 @@ type DebateRunParams = {
   backendDir: string;
   configPath: string;
   debateRounds?: number;
+  debateRuns?: number;
   portfolioName?: string;
   yaml?: string;
   debaterAPrompt?: string;
   debaterBPrompt?: string;
   judgePrompt?: string;
+  offlineSampleDir?: string;
+  newsContext?: string;
 };
 
 type LoggerChannel = "stdout" | "stderr";
@@ -53,10 +56,12 @@ type StageEvent = {
   speakerLabel?: string;
   phase: StagePhase;
   text: string;
+  scenarios?: any[];
 };
 
 type StageEventWithProgress = StageEvent & {
   progress?: number;
+  message?: string;
 };
 
 const SPEAKER_LABEL: Record<string, string> = {
@@ -84,6 +89,7 @@ function parseMadStageLine(line: string): StageEvent | null {
   const token = match[3]?.toUpperCase();
   const runLabel = totalRuns ? `Run ${run}/${totalRuns}` : `Run ${run}`;
   const trailing = extractTrailingText(line);
+  const containsPreview = /Output preview:/i.test(line);
 
   if (!token) {
     if (/starting debate/i.test(line)) {
@@ -114,6 +120,7 @@ function parseMadStageLine(line: string): StageEvent | null {
   }
 
   if (token === "JUDGE") {
+    if (!containsPreview) return null;
     return {
       run,
       totalRuns,
@@ -125,6 +132,7 @@ function parseMadStageLine(line: string): StageEvent | null {
 
   const speakerLetter = match[5]?.toUpperCase();
   if (speakerLetter) {
+    if (!containsPreview) return null;
     return {
       run,
       totalRuns,
@@ -138,6 +146,252 @@ function parseMadStageLine(line: string): StageEvent | null {
   }
 
   return null;
+}
+
+function parseStagePreviewTag(
+  line: string,
+  knownTotalRuns?: number
+): StageEvent | null {
+  const match = line.match(
+    /\[STAGE RUN#(\d+)\s+(?:R(\d+)-(PROPONENT|DEVIL|A|B)|JUDGE)]/i
+  );
+  if (!match) return null;
+  const run = Number(match[1]);
+  const totalRuns = knownTotalRuns;
+  const round = match[2] ? Number(match[2]) : undefined;
+  const token = match[3]?.toUpperCase();
+  if (!token) {
+    return {
+      run,
+      totalRuns,
+      round,
+      phase: "judge",
+      speakerLabel: "Judge",
+      text: "Judge",
+    };
+  }
+  if (token === "JUDGE") {
+    return {
+      run,
+      totalRuns,
+      round,
+      phase: "judge",
+      speakerLabel: "Judge",
+      text: "Judge",
+    };
+  }
+  const speakerLabel =
+    token === "PROPONENT"
+      ? "Proponent"
+      : token === "DEVIL"
+      ? "Devil's advocate"
+      : token === "A"
+      ? "Proponent"
+      : token === "B"
+      ? "Devil's advocate"
+      : `Debater ${token}`;
+  return {
+    run,
+    totalRuns,
+    round,
+    phase: "debater",
+    speakerLabel,
+    text: speakerLabel,
+  };
+}
+
+function cleanJsonish(text: string) {
+  return text.replace(/,\s*([}\]])/g, "$1");
+}
+
+function unwrapScenarioArray(payload: any, allowObjectFallback = true): any[] {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  if (typeof payload === "object") {
+    const candidateKeys = [
+      "scenarios",
+      "Scenarios",
+      "scenario_matrix",
+      "ScenarioMatrix",
+      "matrix",
+      "entries",
+      "rows",
+      "candidates",
+      "results",
+      "final_scenarios",
+    ];
+    for (const key of candidateKeys) {
+      const val = (payload as any)[key];
+      if (Array.isArray(val)) return val;
+      if (val && typeof val === "object") {
+        const nested = unwrapScenarioArray(val, false);
+        if (nested.length) return nested;
+      }
+    }
+    return allowObjectFallback ? [payload] : [];
+  }
+  return [];
+}
+
+function extractLooseJsonObjects(text: string): any[] {
+  const results: any[] = [];
+  if (!text) return results;
+
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escape = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inString) {
+      if (escape) {
+        escape = false;
+      } else if (ch === "\\") {
+        escape = true;
+      } else if (ch === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (ch === "{") {
+      if (depth === 0) start = i;
+      depth++;
+    } else if (ch === "}") {
+      depth = Math.max(depth - 1, 0);
+      if (depth === 0 && start !== -1) {
+        const candidate = text.slice(start, i + 1);
+        try {
+          const parsed = JSON.parse(cleanJsonish(candidate));
+          const rows = unwrapScenarioArray(parsed);
+          if (rows.length) {
+            results.push(...rows);
+          } else {
+            results.push(parsed);
+          }
+        } catch {
+          // Ignore malformed fragments
+        }
+        start = -1;
+      }
+    }
+  }
+
+  return results;
+}
+
+function tryParseScenarioPayload(payload: string): any[] {
+  if (!payload) return [];
+  const normalized = cleanJsonish(payload.trim());
+  if (!normalized) return [];
+  const attempts: string[] = [normalized];
+  if (!normalized.trim().startsWith("[") && /\}\s*\n\s*\{/.test(normalized)) {
+    attempts.push("[" + normalized.replace(/}\s*\n\s*{/g, "},{") + "]");
+  }
+  for (const attempt of attempts) {
+    try {
+      const parsed = JSON.parse(attempt);
+      const rows = unwrapScenarioArray(parsed);
+      if (rows.length) return rows;
+    } catch {
+      continue;
+    }
+  }
+  try {
+    const parsed = JSON.parse("[" + normalized + "]");
+    return unwrapScenarioArray(parsed);
+  } catch {
+    return extractLooseJsonObjects(normalized);
+  }
+}
+
+function collectJsonSegments(text: string): string[] {
+  const segments: string[] = [];
+  if (!text) return segments;
+
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escape = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inString) {
+      if (escape) {
+        escape = false;
+      } else if (ch === "\\") {
+        escape = true;
+      } else if (ch === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (ch === "{" || ch === "[") {
+      if (depth === 0) start = i;
+      depth++;
+    } else if (ch === "}" || ch === "]") {
+      depth = Math.max(depth - 1, 0);
+      if (depth === 0 && start !== -1) {
+        segments.push(text.slice(start, i + 1));
+        start = -1;
+      }
+    }
+  }
+
+  return segments;
+}
+
+function extractScenariosFromStage(text: string): any[] {
+  if (!text) return [];
+  const fenceRegex = /```[a-zA-Z0-9]*([\s\S]*?)```/g;
+  const buckets: any[] = [];
+  let match: RegExpExecArray | null;
+  while ((match = fenceRegex.exec(text)) !== null) {
+    const payload = match[1]?.trim();
+    if (payload) {
+      const rows = tryParseScenarioPayload(payload);
+      if (rows.length) buckets.push(...rows);
+    }
+  }
+  if (buckets.length) return buckets;
+  const labelRegex = /(revised\s+json|json)\s*:?\s*/i;
+  const labelMatch = text.match(labelRegex);
+  if (labelMatch && typeof labelMatch.index === "number") {
+    const after = text.slice(labelMatch.index + labelMatch[0].length).trim();
+    const rows = tryParseScenarioPayload(after);
+    if (rows.length) return rows;
+    const segments = collectJsonSegments(after);
+    if (segments.length) {
+      const collected: any[] = [];
+      for (const seg of segments) {
+        const segRows = tryParseScenarioPayload(seg);
+        if (segRows.length) collected.push(...segRows);
+      }
+      if (collected.length) return collected;
+    }
+  }
+  const segments = collectJsonSegments(text);
+  if (!segments.length) return [];
+  const parsed: any[] = [];
+  for (const segment of segments) {
+    const rows = tryParseScenarioPayload(segment);
+    if (rows.length) parsed.push(...rows);
+  }
+  return parsed;
 }
 
 function stageFraction(stage: StageEvent): number {
@@ -221,6 +475,12 @@ async function runMadDebateScript(params: DebateRunParams, options: RunOptions =
   if (typeof params.debateRounds === "number" && Number.isFinite(params.debateRounds)) {
     args.push("--rounds", String(params.debateRounds));
   }
+  if (typeof params.debateRuns === "number" && Number.isFinite(params.debateRuns)) {
+    args.push("--runs", String(params.debateRuns));
+  }
+  if (params.offlineSampleDir) {
+    args.push("--offline-sample", params.offlineSampleDir);
+  }
 
   const env = { ...process.env, PYTHONUNBUFFERED: "1" };
   const setEnv = (key: string, value?: string) => {
@@ -236,6 +496,8 @@ async function runMadDebateScript(params: DebateRunParams, options: RunOptions =
   setEnv("MAD_PROMPT_JUDGE", params.judgePrompt);
   setEnv("MAD_PORTFOLIO_NAME", params.portfolioName);
   setEnv("MAD_SHOCK_YAML", params.yaml);
+  setEnv("MAD_OFFLINE_SAMPLE_DIR", params.offlineSampleDir);
+  setEnv("MAD_NEWS_CONTEXT", params.newsContext);
 
   console.log("[scenario-gen] launching MAD script", {
     pythonCmd,
@@ -568,6 +830,12 @@ function safeParseScenarioJson(raw: string | undefined): any[] {
   if (!cleaned) return [];
   cleaned = cleaned.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
 
+  const labelRegex = /(revised\s+json|json)\s*:?\s*/i;
+  const labelMatch = cleaned.match(labelRegex);
+  if (labelMatch && typeof labelMatch.index === "number") {
+    cleaned = cleaned.slice(labelMatch.index + labelMatch[0].length).trim();
+  }
+
   const firstCurly = cleaned.indexOf("{");
   const firstBracket = cleaned.indexOf("[");
   const startIdx =
@@ -580,29 +848,17 @@ function safeParseScenarioJson(raw: string | undefined): any[] {
     cleaned = cleaned.slice(startIdx);
   }
 
-  const lastSq = cleaned.lastIndexOf("]");
-  const lastCurly = cleaned.lastIndexOf("}");
-  const endIdx = Math.max(lastSq, lastCurly);
-  if (endIdx !== -1) {
-    cleaned = cleaned.slice(0, endIdx + 1);
-  }
+  const primary = tryParseScenarioPayload(cleaned);
+  if (primary.length) return primary;
 
-  const attempts: string[] = [cleaned];
-  if (!cleaned.trim().startsWith("[") && /}\s*\n\s*{/.test(cleaned)) {
-    attempts.push("[" + cleaned.replace(/}\s*\n\s*{/g, "},{") + "]");
+  const segments = collectJsonSegments(cleaned);
+  if (!segments.length) return [];
+  const parsed: any[] = [];
+  for (const segment of segments) {
+    const rows = tryParseScenarioPayload(segment);
+    if (rows.length) parsed.push(...rows);
   }
-
-  for (const attempt of attempts) {
-    try {
-      const parsed = JSON.parse(attempt);
-      if (Array.isArray(parsed)) return parsed;
-      if (parsed && typeof parsed === "object") return [parsed];
-    } catch (err) {
-      continue;
-    }
-  }
-
-  return [];
+  return parsed;
 }
 
 function extractNarrativeFromMarkdown(md: string): string {
@@ -794,37 +1050,103 @@ export async function POST(req: Request) {
       debaterBPrompt,
       judgePrompt,
       skipRun,
+      offlineSample,
+      newsContext,
+      debateRuns,
     } = body || {};
 
     const parsedRounds =
       typeof debateRounds === "number" && Number.isFinite(debateRounds)
         ? Math.max(1, Math.min(12, Math.floor(debateRounds)))
         : undefined;
+    const parsedRuns =
+      typeof debateRuns === "number" && Number.isFinite(debateRuns)
+        ? Math.max(1, Math.min(8, Math.floor(debateRuns)))
+        : undefined;
 
     console.log("[scenario-gen] incoming params", {
       portfolioName,
       hasYaml: Boolean(typeof yaml === "string" && yaml.trim().length),
       debateRounds: parsedRounds,
+      debateRuns: parsedRuns,
       skipRun: Boolean(skipRun),
+      hasNewsContext: Boolean(
+        typeof newsContext === "string" && newsContext.trim()
+      ),
+      offlineSample: Boolean(offlineSample),
     });
 
     const projectRoot = path.join(process.cwd(), "..");
     const backendDir = path.join(projectRoot, "backend", "mad_debate");
     const configPath = path.join(backendDir, "config.yaml");
+    const defaultSampleDir = path.join(backendDir, "sample_outputs");
+    const offlineSampleDir =
+      offlineSample === true
+        ? defaultSampleDir
+        : typeof offlineSample === "string" && offlineSample.trim()
+        ? path.isAbsolute(offlineSample.trim())
+          ? offlineSample.trim()
+          : path.join(projectRoot, offlineSample.trim())
+        : undefined;
     const encoder = new TextEncoder();
+    const sanitizedNewsContext =
+      typeof newsContext === "string" && newsContext.trim().length
+        ? newsContext.trim()
+        : undefined;
 
     const stream = new ReadableStream({
       start(controller) {
         const perRunProgress = new Map<number, number>();
         let knownTotalRuns: number | undefined;
+        let pendingStage: StageEventWithProgress | null = null;
+        let pendingBuffer: string[] = [];
+        let controllerClosed = false;
         const send = (payload: unknown) => {
-          const chunk = JSON.stringify(payload) + "\n";
-          controller.enqueue(encoder.encode(chunk));
+          if (controllerClosed) return;
+          try {
+            const chunk = JSON.stringify(payload) + "\n";
+            controller.enqueue(encoder.encode(chunk));
+          } catch {
+            controllerClosed = true;
+          }
+        };
+        const flushPending = () => {
+          if (!pendingStage) return;
+          const message = pendingBuffer.join("\n").trim();
+          const scenarios = extractScenariosFromStage(message);
+          send({
+            type: "stage",
+            data: {
+              ...pendingStage,
+              message: message || pendingStage.text,
+              scenarios,
+            },
+          });
+          pendingStage = null;
+          pendingBuffer = [];
         };
         const handleLine = (line: string, channel: LoggerChannel | "system") => {
           if (!line) return;
-          send({ type: "log", channel, message: line });
-          const stage = parseMadStageLine(line);
+          const trimmedLine = line.trim();
+          if (trimmedLine === "[/STAGE]") {
+            flushPending();
+            return;
+          }
+          const previewStage = parseStagePreviewTag(trimmedLine, knownTotalRuns);
+          if (previewStage) {
+            flushPending();
+            const totalForCalc =
+              previewStage.totalRuns ?? knownTotalRuns ?? 1;
+            const enrichedPreview = enrichStageProgress(
+              previewStage,
+              perRunProgress,
+              totalForCalc
+            );
+            pendingStage = enrichedPreview;
+            pendingBuffer = [];
+            return;
+          }
+          const stage = parseMadStageLine(trimmedLine);
           if (stage) {
             if (typeof stage.totalRuns === "number") {
               knownTotalRuns = stage.totalRuns;
@@ -833,7 +1155,19 @@ export async function POST(req: Request) {
             }
             const totalForCalc = stage.totalRuns ?? knownTotalRuns ?? 1;
             const enriched = enrichStageProgress(stage, perRunProgress, totalForCalc);
-            send({ type: "stage", data: enriched });
+            if (enriched.phase === "debater" || enriched.phase === "judge") {
+              flushPending();
+              pendingStage = enriched;
+              pendingBuffer = [];
+            } else {
+              flushPending();
+              send({ type: "stage", data: enriched });
+            }
+            return;
+          }
+          send({ type: "log", channel, message: line });
+          if (pendingStage) {
+            pendingBuffer.push(line);
           }
         };
         const processMessage = (message: string, channel: LoggerChannel | "system" = "stdout") => {
@@ -855,11 +1189,14 @@ export async function POST(req: Request) {
                   backendDir,
                   configPath,
                   debateRounds: parsedRounds,
+                  debateRuns: parsedRuns,
                   portfolioName: typeof portfolioName === "string" ? portfolioName : undefined,
                   yaml: typeof yaml === "string" ? yaml : undefined,
                   debaterAPrompt: typeof debaterAPrompt === "string" ? debaterAPrompt : undefined,
                   debaterBPrompt: typeof debaterBPrompt === "string" ? debaterBPrompt : undefined,
                   judgePrompt: typeof judgePrompt === "string" ? judgePrompt : undefined,
+                  offlineSampleDir,
+                  newsContext: sanitizedNewsContext,
                 },
                 {
                   logger: (entry) => processMessage(entry.message, entry.channel),
@@ -877,7 +1214,14 @@ export async function POST(req: Request) {
             console.error(msg);
             send({ type: "error", message: msg });
           } finally {
-            controller.close();
+            flushPending();
+            if (!controllerClosed) {
+              try {
+                controller.close();
+              } finally {
+                controllerClosed = true;
+              }
+            }
           }
         })();
       },

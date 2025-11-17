@@ -14,7 +14,7 @@ Key improvements vs previous version:
 
 from __future__ import annotations
 
-import os, sys, json, argparse, copy, statistics, time, random, traceback, logging, textwrap, re
+import os, sys, json, argparse, copy, statistics, time, random, traceback, logging, textwrap, re, shutil
 from typing import List, Dict, Any, Optional
 
 import yaml
@@ -90,7 +90,7 @@ def chat(model: str,
          messages: List[Dict[str, str]],
          temperature: float = 0.7,
          top_p: float = 0.9,
-         max_tokens: int = 2000,
+         max_tokens: int = 10000,
          run_tag: str = "",
          round_tag: str = "",
          max_retries: int = 6) -> str:
@@ -318,22 +318,55 @@ def write_transcript(artifacts_dir: str, run_idx: int, transcript: List[Dict[str
 def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip: bool) -> List[Dict[str, Any]]:
     deb_models = cfg["debate"]["debater_models"]
     rounds = int(cfg["debate"]["rounds"])
-    sysA = cfg["prompts"]["system_debater"]
-    sysB = cfg["prompts"]["system_debater"]
+    prompts_cfg = cfg.get("prompts", {})
+    sysA = (
+        prompts_cfg.get("system_debater_a")
+        or prompts_cfg.get("system_debater")
+        or ""
+    )
+    sysB = (
+        prompts_cfg.get("system_debater_b")
+        or prompts_cfg.get("system_debater")
+        or ""
+    )
+    runtime_cfg = cfg.get("_runtime", {})
+    if "debater_prompt_a_effective" not in runtime_cfg:
+        runtime_cfg["debater_prompt_a_effective"] = sysA
+    if "debater_prompt_b_effective" not in runtime_cfg:
+        runtime_cfg["debater_prompt_b_effective"] = sysB
     run_tag = f"RUN#{run_idx + 1}"
 
     transcript: List[Dict[str, Any]] = []
 
-    seed_user = textwrap.dedent(f"""\
-        Portfolio: {cfg['inputs']['portfolio_snapshot']}
-        Constraints: {cfg['inputs']['constraints']}
-        Indicators: {cfg['inputs']['indicators']}
-        Priors: {cfg['inputs']['priors']}
+    inputs_cfg = cfg.get("inputs", {})
+    header_lines = []
+    portfolio_name = inputs_cfg.get("portfolio_name")
+    if portfolio_name:
+        header_lines.append(f"Portfolio Name: {portfolio_name}")
+    header_lines.append(f"Portfolio: {inputs_cfg.get('portfolio_snapshot')}")
+    header_lines.append(f"Constraints: {inputs_cfg.get('constraints')}")
+    header_lines.append(f"Indicators: {inputs_cfg.get('indicators')}")
+    header_lines.append(f"Priors: {inputs_cfg.get('priors')}")
+    header_lines.append(
+        "Institution Context: Bank of America — US G-SIB with ~$2.5T assets, "
+        "diversified deposits, and a HQLA stack anchored in USTs/Agencies/MBS. "
+        "Risk appetite prioritizes LCR ≥ target, NSFR stability, and tight OCI control."
+    )
+    shock_yaml = inputs_cfg.get("shock_yaml")
+    if shock_yaml:
+        shock_text = str(shock_yaml).strip()
+        if shock_text:
+            header_lines.append(f"Shock YAML:\n{shock_text}")
+    news_context = inputs_cfg.get("news_context")
+    if news_context:
+        header_lines.append("Latest news drivers:\n" + str(news_context).strip())
+    header_block = "\n".join([line for line in header_lines if line])
 
+    instructions = textwrap.dedent("""\
         Task:
-        Propose and DEFEND 3–5 distinct 6-month scenarios with quantitative shocks and probabilities that ~sum to 1.
-        Use finance-consistent channels: {{Rates (bps), Curve (bull/bear & steep/flat), Credit OAS (bps), MBS basis (bps),
-        Deposits/runoff (%), Reg changes (brief text)}}.
+        Propose and DEFEND *exactly five* distinct 6-month scenarios with quantitative shocks and probabilities that ~sum to 1.
+        Use finance-consistent channels: {Rates (bps), Curve (bull/bear & steep/flat), Credit OAS (bps), MBS basis (bps),
+        Deposits/runoff (%), Reg changes (brief text)}.
 
         Respond in TWO parts every time:
         (1) Reasoning: critique, assumptions, and why your shocks/probabilities make sense (NO JSON here).
@@ -341,14 +374,33 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
 
         Schema (top-level keys for each scenario):
         ["Scenario","Description","Probability","Rationale","ImpactChannels","Shocks","MetricsDelta","TradeList","Assumptions"]
+
+        EVERY element must include ALL schema keys with realistic values. Missing fields = invalid output.
+        Be specific: quantify shocks (bps, %, $bn), describe deposit behavior, and list concrete trades/liquidity actions.
     """)
 
+    seed_user = f"{header_block}\n\n{instructions}"
+
     hist: List[Dict[str, str]] = []
+    def emit_stage(label: str, content: str) -> None:
+        pretty_label = label
+        upper = label.upper()
+        if upper.startswith("R") and "-" in upper:
+            round_part, suffix = upper.split("-", 1)
+            role = "PROPONENT" if suffix == "A" else "DEVIL" if suffix == "B" else suffix
+            pretty_label = f"{round_part}-{role}"
+        elif upper == "JUDGE":
+            pretty_label = "JUDGE"
+        tag = f"[STAGE RUN#{run_idx + 1} {pretty_label}]"
+        print(tag)
+        print((content or "").strip())
+        print("[/STAGE]")
+        sys.stdout.flush()
     for r in range(rounds):
         # ----- A speaks -----
         round_tag = f"R{r + 1}-A"
         promptA = seed_user if r == 0 else textwrap.dedent("""\
-            Critique B's last JSON in words first (no numbers can be hand-wavy; be precise).
+            Critique the Devil's advocate's last JSON in words first (no numbers can be hand-wavy; be precise).
             Then produce: 
             Revised JSON: <STRICT JSON array per schema, no backticks, no prose after>
         """)
@@ -365,8 +417,9 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
         # If model ignored two-phase, fall back to extracting any JSON from entire output
         if not jsonA:
             jsonA = extract_json_block(outA) or outA
+        emit_stage(round_tag, outA)
         transcript.append({
-            "speaker": "A",
+            "speaker": "Proponent",
             "round": r + 1,
             "reasoning": reaA,
             "json": extract_json_block(jsonA) or jsonA,
@@ -382,7 +435,7 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
         # ----- B responds -----
         round_tag = f"R{r + 1}-B"
         promptB = textwrap.dedent("""\
-            Critique A's position in words first (focus on macro/flows, funding, basis, convexity).
+            Critique the Proponent's position in words first (focus on macro/flows, funding, basis, convexity). Never refer to them as "A" or "B".
             Then produce:
             Revised JSON: <STRICT JSON array per schema, no backticks, no prose after>
         """)
@@ -398,8 +451,9 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
         reaB, jsonB = split_reasoning_json(outB)
         if not jsonB:
             jsonB = extract_json_block(outB) or outB
+        emit_stage(round_tag, outB)
         transcript.append({
-            "speaker": "B",
+            "speaker": "Devil's advocate",
             "round": r + 1,
             "reasoning": reaB,
             "json": extract_json_block(jsonB) or jsonB,
@@ -413,7 +467,20 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
                 f.write(outB)
 
     # Judge merges/selects
-    judge_sys = cfg["prompts"]["system_judge"].format(**cfg["inputs"]["constraints"])
+    judge_template = cfg["prompts"].get("system_judge", "")
+    judge_constraints = cfg.get("inputs", {}).get("constraints", {})
+    judge_override = bool(runtime_cfg.get("judge_prompt_override"))
+    if judge_override:
+        judge_sys = judge_template
+    else:
+        try:
+            judge_sys = judge_template.format(**judge_constraints)
+        except Exception as exc:
+            logging.warning(
+                f"Judge prompt formatting failed ({type(exc).__name__}); using raw template."
+            )
+            judge_sys = judge_template
+    runtime_cfg.setdefault("judge_prompt_effective", judge_sys)
     judge_user = (
         "From the above A/B reasoning and JSON proposals, produce a FINAL merged JSON array of scenarios "
         "that EXACTLY matches the schema. Reject duplicates; ensure probabilities sum to ~1 across the set. "
@@ -425,9 +492,10 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
         messages=make_messages(judge_sys, judge_user, hist),
         temperature=cfg["debate"]["judge_temperature"],
         top_p=1.0,
-        max_tokens=int(cfg["debate"].get("judge_max_tokens", 2000)),
+        max_tokens=int(cfg["debate"].get("judge_max_tokens", 10000)),
         run_tag=run_tag, round_tag="JUDGE"
     )
+    emit_stage("JUDGE", judge_out)
 
     # For transcript: attempt to extract JSON block for judge as well
     judge_json_for_tx = extract_json_block(judge_out) or ""
@@ -501,6 +569,49 @@ def aggregate(runs_outputs: List[List[Dict[str, Any]]], keep_k: int = 10) -> Lis
     merged.sort(key=lambda x: x.get("Probability", 0), reverse=True)
     return merged[:keep_k]
 
+def run_offline_sample(sample_dir: str, dest_dir: str, out_path: str, output_format: str) -> List[Dict[str, Any]]:
+    logging.info(f"Offline mode enabled. Loading sample from {sample_dir}")
+    scenarios_path_json = os.path.join(sample_dir, "scenarios.json")
+    scenarios_path_jsonl = os.path.join(sample_dir, "scenarios.jsonl")
+    scenarios: List[Dict[str, Any]] = []
+    if os.path.exists(scenarios_path_json):
+        with open(scenarios_path_json, "r", encoding="utf-8") as f:
+            scenarios = json.load(f)
+    elif os.path.exists(scenarios_path_jsonl):
+        with open(scenarios_path_jsonl, "r", encoding="utf-8") as f:
+            scenarios = [json.loads(line) for line in f if line.strip()]
+    else:
+        raise FileNotFoundError(f"No scenarios.json or scenarios.jsonl found in {sample_dir}")
+
+    if not isinstance(scenarios, list):
+        raise ValueError("Sample scenarios file must contain a JSON array.")
+
+    os.makedirs(dest_dir, exist_ok=True)
+
+    # Copy transcript and artifact files if present
+    for name in os.listdir(sample_dir):
+        if any(name.startswith(prefix) for prefix in ["transcript_run_", "tmp_run_", "judge_raw_run_"]):
+            src = os.path.join(sample_dir, name)
+            dst = os.path.join(dest_dir, name)
+            shutil.copy2(src, dst)
+
+    # Write scenario outputs to requested format
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    if output_format == "json":
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(scenarios, f, ensure_ascii=False, indent=2)
+    else:
+        with open(out_path, "w", encoding="utf-8") as f:
+            for row in scenarios:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    final_copy_path = os.path.join(dest_dir, "scenarios_final.json")
+    with open(final_copy_path, "w", encoding="utf-8") as f:
+        json.dump(scenarios, f, ensure_ascii=False, indent=2)
+
+    logging.info(f"Offline sample copied to {dest_dir}")
+    return scenarios
+
 # =========================================================
 # Main
 # =========================================================
@@ -517,6 +628,8 @@ def main():
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--save-wip", action="store_true",
                         help="If set, save per-run judge_raw_*.txt and tmp_run_*.json artifacts")
+    parser.add_argument("--offline-sample", default=None,
+                        help="Path to a folder containing sample scenarios/transcripts for offline testing.")
     args = parser.parse_args()
 
     setup_logging(args.logdir, args.verbose)
@@ -529,9 +642,59 @@ def main():
     if args.rounds:
         cfg["debate"]["rounds"] = args.rounds
 
+    env_rounds = os.getenv("MAD_DEBATE_ROUNDS")
+    if env_rounds:
+        try:
+            cfg["debate"]["rounds"] = int(env_rounds)
+            logging.info(f"Override rounds via MAD_DEBATE_ROUNDS={env_rounds}")
+        except ValueError:
+            logging.warning(f"Ignoring invalid MAD_DEBATE_ROUNDS={env_rounds!r}")
+
+    prompts_cfg = cfg.setdefault("prompts", {})
+    runtime_cfg = cfg.setdefault("_runtime", {})
+    runtime_cfg["judge_prompt_override"] = False
+    env_prompt_a = os.getenv("MAD_PROMPT_DEBATER_A")
+    if env_prompt_a:
+        prompts_cfg["system_debater_a"] = env_prompt_a
+        logging.info("Override debater A prompt via MAD_PROMPT_DEBATER_A")
+    env_prompt_b = os.getenv("MAD_PROMPT_DEBATER_B")
+    if env_prompt_b:
+        prompts_cfg["system_debater_b"] = env_prompt_b
+        logging.info("Override debater B prompt via MAD_PROMPT_DEBATER_B")
+    env_judge = os.getenv("MAD_PROMPT_JUDGE")
+    if env_judge:
+        prompts_cfg["system_judge"] = env_judge
+        logging.info("Override judge prompt via MAD_PROMPT_JUDGE")
+        runtime_cfg["judge_prompt_override"] = True
+
+    inputs_cfg = cfg.setdefault("inputs", {})
+    env_portfolio = os.getenv("MAD_PORTFOLIO_NAME")
+    if env_portfolio:
+        inputs_cfg["portfolio_name"] = env_portfolio
+        logging.info("Override portfolio name via MAD_PORTFOLIO_NAME")
+    env_shock_yaml = os.getenv("MAD_SHOCK_YAML")
+    if env_shock_yaml:
+        inputs_cfg["shock_yaml"] = env_shock_yaml
+        logging.info("Attach user shock YAML via MAD_SHOCK_YAML")
+    env_news_context = os.getenv("MAD_NEWS_CONTEXT")
+    if env_news_context:
+        inputs_cfg["news_context"] = env_news_context
+        logging.info("Inject news context via MAD_NEWS_CONTEXT")
+
+    run_timestamp = time.strftime("%Y%m%d_%H%M%S")
+    artifacts_root = os.path.join("data", "scenarios")
+    runs_root = os.path.join(artifacts_root, "runs")
+    os.makedirs(runs_root, exist_ok=True)
+    current_run_dir = os.path.join(runs_root, run_timestamp)
+    os.makedirs(current_run_dir, exist_ok=True)
+    runtime_cfg["run_timestamp"] = run_timestamp
+    runtime_cfg["run_dir"] = current_run_dir
+
     runs = args.runs or cfg["debate"]["runs"]
     out_path = args.out or cfg["output"]["path"]
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
+
+    offline_sample_dir = args.offline_sample or os.getenv("MAD_OFFLINE_SAMPLE_DIR")
 
     # Show model/params summary
     logging.info(f"Debaters: {cfg['debate']['debater_models']} | Judge: {cfg['debate']['judge_model']}")
@@ -540,35 +703,83 @@ def main():
                  f"Top_p={cfg['debate']['top_p']} MaxTokens(deb)={cfg['debate']['max_tokens']} "
                  f"JudgeMaxTokens={cfg['debate'].get('judge_max_tokens', 2000)}")
 
-    artifacts_dir = os.path.join("data", "scenarios")
+    artifacts_dir = current_run_dir
     all_runs: List[List[Dict[str, Any]]] = []
+    final: List[Dict[str, Any]] = []
+    offline_mode = bool(offline_sample_dir)
 
     try:
-        for i in range(runs):
-            logging.info(f"[RUN#{i + 1}/{runs}] starting debate...")
-            try:
-                one = debate_once(cfg, i, artifacts_dir=artifacts_dir, save_wip=args.save_wip)
-                all_runs.append(one)
-                logging.info(f"[RUN#{i + 1}] finished; scenarios={len(one)}")
-            except KeyboardInterrupt:
-                logging.error(f"[RUN#{i + 1}] Interrupted by user.")
-                break
-            except Exception as e:
-                logging.error(f"[RUN#{i + 1}] FAILED with error: {type(e).__name__}: {e}")
-                logging.debug(traceback.format_exc())
+        if offline_mode:
+            final = run_offline_sample(offline_sample_dir, artifacts_dir, out_path, args.format)
+        else:
+            for i in range(runs):
+                logging.info(f"[RUN#{i + 1}/{runs}] starting debate...")
+                try:
+                    one = debate_once(cfg, i, artifacts_dir=artifacts_dir, save_wip=args.save_wip)
+                    all_runs.append(one)
+                    logging.info(f"[RUN#{i + 1}] finished; scenarios={len(one)}")
+                except KeyboardInterrupt:
+                    logging.error(f"[RUN#{i + 1}] Interrupted by user.")
+                    break
+                except Exception as e:
+                    logging.error(f"[RUN#{i + 1}] FAILED with error: {type(e).__name__}: {e}")
+                    logging.debug(traceback.format_exc())
 
-        final = aggregate(all_runs, keep_k=cfg["aggregation"]["keep_top_k"])
+            final = aggregate(all_runs, keep_k=cfg["aggregation"]["keep_top_k"])
 
         # Write final
-        if args.format == "json":
-            with open(out_path, "w", encoding="utf-8") as f:
-                json.dump(final, f, ensure_ascii=False, indent=2)
-        else:  # jsonl
-            with open(out_path, "w", encoding="utf-8") as f:
-                for row in final:
-                    f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        if not offline_mode:
+            if args.format == "json":
+                with open(out_path, "w", encoding="utf-8") as f:
+                    json.dump(final, f, ensure_ascii=False, indent=2)
+            else:  # jsonl
+                with open(out_path, "w", encoding="utf-8") as f:
+                    for row in final:
+                        f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-        logging.info(f"Wrote {len(final)} aggregated scenarios to {out_path}")
+            logging.info(f"Wrote {len(final)} aggregated scenarios to {out_path}")
+            try:
+                final_copy_path = os.path.join(current_run_dir, "scenarios_final.json")
+                with open(final_copy_path, "w", encoding="utf-8") as f:
+                    json.dump(final, f, ensure_ascii=False, indent=2)
+                logging.info(f"Wrote run-local scenario copy to {final_copy_path}")
+            except Exception as exc:
+                logging.warning(f"Failed to write run-local scenario copy: {type(exc).__name__}: {exc}")
+
+        completed_runs = len(all_runs) if not offline_mode else runs
+
+        metadata = {
+            "run_timestamp": run_timestamp,
+            "run_directory": os.path.abspath(current_run_dir),
+            "config_file": os.path.abspath(args.config),
+            "runs_requested": runs,
+            "runs_completed": completed_runs,
+            "rounds_per_run": cfg["debate"]["rounds"],
+            "portfolio_name": inputs_cfg.get("portfolio_name"),
+        "shock_yaml": inputs_cfg.get("shock_yaml"),
+        "news_context": inputs_cfg.get("news_context"),
+        "output_path": os.path.abspath(out_path),
+        "offline_sample_dir": offline_sample_dir,
+            "prompts": {
+                "debater_a": runtime_cfg.get("debater_prompt_a_effective") or prompts_cfg.get("system_debater") or "",
+                "debater_b": runtime_cfg.get("debater_prompt_b_effective") or prompts_cfg.get("system_debater") or "",
+                "judge": runtime_cfg.get("judge_prompt_effective") or prompts_cfg.get("system_judge") or "",
+            },
+        }
+        metadata_path = os.path.join(current_run_dir, "metadata.json")
+        try:
+            with open(metadata_path, "w", encoding="utf-8") as f:
+                json.dump(metadata, f, ensure_ascii=False, indent=2)
+            logging.info(f"Wrote run metadata to {metadata_path}")
+        except Exception as exc:
+            logging.warning(f"Failed to write run metadata: {type(exc).__name__}: {exc}")
+
+        latest_marker = os.path.join(runs_root, "latest.txt")
+        try:
+            with open(latest_marker, "w", encoding="utf-8") as f:
+                f.write(run_timestamp)
+        except Exception as exc:
+            logging.warning(f"Failed to update latest run marker: {type(exc).__name__}: {exc}")
 
     finally:
         logging.info("Done.")

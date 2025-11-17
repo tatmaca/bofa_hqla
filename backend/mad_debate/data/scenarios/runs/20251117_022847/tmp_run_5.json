@@ -1,0 +1,171 @@
+[
+  {
+    "Scenario": "Persistent Inflation Shock",
+    "Description": "Inflation remains elevated, forcing the Fed into additional aggressive rate hikes. Credit spreads widen and MBS underperform as risk sentiment deteriorates.",
+    "Probability": 0.25,
+    "Rationale": "Recent inflation prints and sticky wage growth prompt the Fed to tighten further, driving up rates and risk premia.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": 50,
+      "Curve": "bear_steepener",
+      "IG_OAS": 20,
+      "HY_OAS": 40,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "SELL 30y MBS",
+      "BUY 2y UST"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -4.0,
+      "ΔNSFR": -1.5,
+      "ΔNII": 2.1
+    },
+    "Assumptions": "Inflation persists above target; Fed guidance turns more hawkish; deposit betas rise modestly."
+  },
+  {
+    "Scenario": "Stable Inflation with Gradual Rate Cuts",
+    "Description": "Inflation stabilizes, allowing the Fed to begin a slow, measured rate-cutting cycle. Credit spreads tighten and HQLA valuations improve.",
+    "Probability": 0.2,
+    "Rationale": "Anchored inflation expectations and softening labor market data allow for a dovish policy pivot.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS"
+    ],
+    "Shocks": {
+      "Rates": -25,
+      "Curve": "bull_flattener",
+      "IG_OAS": -10,
+      "HY_OAS": -5,
+      "MBS_Basis": -5
+    },
+    "TradeList": [
+      "BUY 10y UST",
+      "ADD Agency MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 3.0,
+      "ΔNSFR": 1.0,
+      "ΔNII": -1.2
+    },
+    "Assumptions": "Inflation remains near target; Fed signals gradual cuts; deposit outflows slow."
+  },
+  {
+    "Scenario": "Geopolitical Risk-Off Stress",
+    "Description": "Escalating geopolitical tensions trigger a flight to quality, deposit outflows, and sharp volatility in rates and credit.",
+    "Probability": 0.15,
+    "Rationale": "External shocks (e.g., conflict escalation, trade disruptions) drive risk aversion and funding stress.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits",
+      "MBS"
+    ],
+    "Shocks": {
+      "Rates": 25,
+      "Curve": "bear_steepener",
+      "IG_OAS": 30,
+      "HY_OAS": 60,
+      "MBS_Basis": 20
+    },
+    "TradeList": [
+      "INCREASE cash reserves",
+      "REDUCE HY credit"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -7.0,
+      "ΔNSFR": -2.5,
+      "ΔNII": 1.8
+    },
+    "Assumptions": "Sudden risk-off; deposit outflows from corporate and retail; market liquidity deteriorates."
+  },
+  {
+    "Scenario": "Resilient Corporate Balance Sheets",
+    "Description": "Strong corporate earnings and cash flows support credit markets, keeping spreads tight and deposit inflows steady.",
+    "Probability": 0.15,
+    "Rationale": "Corporate sector strength underpins credit and deposit stability, supporting HQLA performance.",
+    "ImpactChannels": [
+      "Credit",
+      "Deposits",
+      "Rates"
+    ],
+    "Shocks": {
+      "Rates": -15,
+      "Curve": "flat",
+      "IG_OAS": -5,
+      "HY_OAS": -10,
+      "MBS_Basis": -3
+    },
+    "TradeList": [
+      "ADD IG Credit",
+      "HOLD MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 2.0,
+      "ΔNSFR": 0.5,
+      "ΔNII": -0.7
+    },
+    "Assumptions": "Corporate profitability remains robust; no major defaults; deposit base grows modestly."
+  },
+  {
+    "Scenario": "Regulatory Tightening",
+    "Description": "Supervisory scrutiny increases, with new or anticipated liquidity requirements prompting portfolio rebalancing.",
+    "Probability": 0.1,
+    "Rationale": "Regulators respond to recent market events by tightening liquidity standards, impacting HQLA composition.",
+    "ImpactChannels": [
+      "Regulation",
+      "Deposits",
+      "Rates"
+    ],
+    "Shocks": {
+      "Rates": 10,
+      "Curve": "flat",
+      "IG_OAS": 5,
+      "HY_OAS": 10,
+      "MBS_Basis": 0
+    },
+    "TradeList": [
+      "INCREASE Level 1 HQLA",
+      "REDUCE Level 2 MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -2.0,
+      "ΔNSFR": -0.8,
+      "ΔNII": 0.3
+    },
+    "Assumptions": "Regulatory guidance tightens; banks front-load HQLA upgrades; deposit mix shifts toward insured balances."
+  },
+  {
+    "Scenario": "Moderate Economic Growth with Limited Volatility",
+    "Description": "Steady economic growth and muted volatility support stable liquidity and capital metrics.",
+    "Probability": 0.15,
+    "Rationale": "No major shocks; economic indicators remain positive; funding and credit conditions benign.",
+    "ImpactChannels": [
+      "Deposits",
+      "Rates",
+      "Credit"
+    ],
+    "Shocks": {
+      "Rates": -10,
+      "Curve": "flat",
+      "IG_OAS": -5,
+      "HY_OAS": -5,
+      "MBS_Basis": -2
+    },
+    "TradeList": [
+      "MAINTAIN current HQLA mix"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 1.0,
+      "ΔNSFR": 0.2,
+      "ΔNII": -0.3
+    },
+    "Assumptions": "No significant policy or market changes; deposit base stable; credit losses low."
+  }
+]

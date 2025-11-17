@@ -1,0 +1,173 @@
+[
+  {
+    "Scenario": "Hawkish Fed Surprise",
+    "Description": "The Federal Reserve unexpectedly raises rates by 50 bps due to rising inflation, leading to a steeper yield curve.",
+    "Probability": 0.18,
+    "Rationale": "Higher interest rates would tighten credit conditions, impacting consumer and corporate borrowing, leading to a potential slowdown in economic activity.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Curve (bear steepener)",
+      "Credit OAS (IG +20 bps)",
+      "Deposits (1% increase in retail beta)"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "credit_spreads": {
+        "ig_oas": 20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $2bn USTs via repo",
+      "Adjust deposit rates to attract inflows"
+    ],
+    "Assumptions": "Retail deposit beta rises, corporate borrowing slows, and liquidity remains tight."
+  },
+  {
+    "Scenario": "Worsening Credit Conditions",
+    "Description": "A significant downturn in the corporate sector leads to widening credit spreads, particularly in high-yield debt.",
+    "Probability": 0.22,
+    "Rationale": "Widening credit spreads indicate increased risk aversion, impacting our capital ratios and liquidity metrics negatively.",
+    "ImpactChannels": [
+      "Credit (HY +50 bps, IG +30 bps)",
+      "MBS basis (increased by 25 bps)",
+      "Deposits (0.5% runoff in wealth management)"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "hy_oas": 50,
+        "ig_oas": 30
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Reduce exposure to high-yield bonds by $1bn",
+      "Shift $1.5bn into higher-quality MBS"
+    ],
+    "Assumptions": "Higher default rates in corporate bonds, increased risk premiums."
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Implementation of Basel Endgame regulations leads to higher capital and liquidity requirements for G-SIBs.",
+    "Probability": 0.13,
+    "Rationale": "Increased capital requirements would necessitate higher liquidity buffers, impacting the overall asset mix and potentially leading to reduced earnings.",
+    "ImpactChannels": [
+      "Regulation (new capital buffers)",
+      "Curve (flattening as investors seek safety)",
+      "Credit (spreads may tighten due to flight to quality)"
+    ],
+    "Shocks": {
+      "regulatory_changes": 2
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Allocate $3bn to cash and cash equivalents to meet regulatory requirements"
+    ],
+    "Assumptions": "Market reacts negatively to regulatory changes, leading to volatility."
+  },
+  {
+    "Scenario": "Resilient Economic Growth",
+    "Description": "Continued consumer spending and SME growth lead to stable economic conditions and controlled inflation.",
+    "Probability": 0.17,
+    "Rationale": "Resilient consumers and SMEs support economic growth, leading to stable deposit flows and reduced credit risk.",
+    "ImpactChannels": [
+      "Rates (stable)",
+      "Curve (bull flattening)",
+      "Credit OAS (IG -10 bps)",
+      "Deposits (increased growth)"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "credit_spreads": {
+        "ig_oas": -10
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Add $2bn Agency MBS",
+      "Rotate $1bn into high-quality corporates"
+    ],
+    "Assumptions": "Consumer spending remains robust, leading to stable credit conditions."
+  },
+  {
+    "Scenario": "Diversified Funding Stability",
+    "Description": "Strong inflows across various deposit categories stabilize funding sources and lower overall funding costs.",
+    "Probability": 0.13,
+    "Rationale": "A diversified funding stack mitigates risks from market volatility, enhancing liquidity management and ensuring compliance with LCR requirements.",
+    "ImpactChannels": [
+      "Funding costs (reduced)",
+      "Curve (bull flattening opportunity)",
+      "Deposits (increased stability)"
+    ],
+    "Shocks": {
+      "move_index": -10
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NSFR": 2
+    },
+    "TradeList": [
+      "Increase UST holdings by $1.5bn",
+      "Term out $1bn in wholesale funding"
+    ],
+    "Assumptions": "Stable market conditions favor diversified funding sources, enhancing overall liquidity."
+  },
+  {
+    "Scenario": "Commodity Price Surge",
+    "Description": "A surge in oil and commodity prices leads to inflationary pressures, impacting consumer spending and corporate margins.",
+    "Probability": 0.07,
+    "Rationale": "Higher commodity prices can lead to increased inflation, impacting consumer balance sheets and potentially leading to a recession.",
+    "ImpactChannels": [
+      "Rates (expected hikes)",
+      "Deposits (wealth runoff increases by 1%)"
+    ],
+    "Shocks": {
+      "move_index": 30
+    },
+    "MetricsDelta": {
+      "LCR": -4
+    },
+    "TradeList": [
+      "Increase liquidity reserves by $1bn via cash equivalents"
+    ],
+    "Assumptions": "Consumer spending drops as prices rise, leading to lower deposit growth."
+  },
+  {
+    "Scenario": "Geopolitical Tensions",
+    "Description": "Increased geopolitical tensions lead to a flight to quality, boosting UST demand and compressing credit spreads.",
+    "Probability": 0.1,
+    "Rationale": "A flight to quality would support our Level 1 assets but could lead to reduced NII due to lower yields.",
+    "ImpactChannels": [
+      "Rates (UST yields drop by 25 bps)",
+      "Curve (flattening)",
+      "Credit (spreads tighten by 10 bps)"
+    ],
+    "Shocks": {
+      "move_index": -25,
+      "credit_spreads": {
+        "ig_oas": -10
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NII": -5
+    },
+    "TradeList": [
+      "Increase UST holdings by $1bn",
+      "Reduce MBS holdings by $500m"
+    ],
+    "Assumptions": "Investors seek safe-haven assets, leading to lower yields."
+  }
+]

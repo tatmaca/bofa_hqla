@@ -1,0 +1,145 @@
+[
+  {
+    "Scenario": "Hawkish Shock: Persistent Inflation, Aggressive Fed Hikes",
+    "Description": "The Federal Reserve raises rates by 50 bps in response to persistent inflation. Yield curve bear steepens, credit spreads widen, and MBS basis is pressured. Liquidity metrics deteriorate as funding costs rise and deposit outflows accelerate.",
+    "Probability": 0.25,
+    "Rationale": "Inflation data remains elevated, forcing the Fed to tighten policy more aggressively than anticipated. Market participants price in recession risk, driving risk-off behavior and liquidity stress.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits",
+      "Regulation"
+    ],
+    "Shocks": {
+      "Rates": 50,
+      "Curve": "bear_steepener",
+      "IG_OAS": 25,
+      "HY_OAS": 50,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "BUY 2y UST",
+      "SELL 30y MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -4.0,
+      "ΔNSFR": -1.5,
+      "ΔNII": 2.1
+    },
+    "Assumptions": "Inflation persists above target; Fed remains hawkish; deposit betas rise; risk appetite falls."
+  },
+  {
+    "Scenario": "Base Case: Anchored Inflation with Gradual Rate Cuts",
+    "Description": "Inflation moderates, allowing the Fed to cut rates by 25 bps. The curve bull flattens, credit spreads tighten modestly, and MBS basis improves. Liquidity and profitability metrics are stable.",
+    "Probability": 0.4,
+    "Rationale": "Disinflation continues, but growth remains positive. The Fed adopts a cautious easing stance, supporting risk assets and deposit stability.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -25,
+      "Curve": "bull_flattening",
+      "IG_OAS": -5,
+      "HY_OAS": -10,
+      "MBS_Basis": -5
+    },
+    "TradeList": [
+      "EXTEND duration in UST",
+      "ADD IG Credit"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 1.0,
+      "ΔNSFR": 0.5,
+      "ΔNII": 0.8
+    },
+    "Assumptions": "Inflation expectations are anchored; Fed signals gradualism; deposit flows are stable."
+  },
+  {
+    "Scenario": "Risk-Off: Geopolitical Escalation and Credit Stress",
+    "Description": "A major geopolitical event triggers a flight to quality. Credit spreads widen sharply, MBS basis widens, and deposits decline as risk aversion spikes. Liquidity ratios deteriorate.",
+    "Probability": 0.2,
+    "Rationale": "Escalation in global tensions leads to a risk-off move, with investors reallocating to safe assets and banks facing funding pressure.",
+    "ImpactChannels": [
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": 0,
+      "Curve": "flat",
+      "IG_OAS": 20,
+      "HY_OAS": 40,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "BUY UST",
+      "REDUCE HY Credit"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -3.5,
+      "ΔNSFR": -2.0,
+      "ΔNII": -0.7
+    },
+    "Assumptions": "Geopolitical risk materializes; depositors seek safety; credit risk repriced."
+  },
+  {
+    "Scenario": "Benign: Positive Economic Surprise and Market Optimism",
+    "Description": "Stronger-than-expected economic data boosts sentiment. Rates fall modestly, credit spreads tighten, and MBS basis improves. Liquidity and profitability metrics rise.",
+    "Probability": 0.1,
+    "Rationale": "Upside surprises in growth and employment drive risk-on flows, supporting asset prices and deposit inflows.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -10,
+      "Curve": "bull_flattening",
+      "IG_OAS": -15,
+      "HY_OAS": -20,
+      "MBS_Basis": -5
+    },
+    "TradeList": [
+      "ADD HY Credit",
+      "EXTEND MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 2.0,
+      "ΔNSFR": 1.0,
+      "ΔNII": 1.5
+    },
+    "Assumptions": "Economic indicators beat forecasts; risk appetite increases; deposit growth resumes."
+  },
+  {
+    "Scenario": "Regulatory Tightening: Higher HQLA and Capital Requirements",
+    "Description": "Regulators announce new liquidity and capital rules, raising required HQLA and tightening Level 2 asset caps. Banks rebalance portfolios to comply, impacting liquidity and profitability.",
+    "Probability": 0.05,
+    "Rationale": "Ongoing regulatory review results in stricter requirements, forcing banks to increase liquid asset buffers and reduce risk-weighted assets.",
+    "ImpactChannels": [
+      "Regulation",
+      "Deposits",
+      "Rates"
+    ],
+    "Shocks": {
+      "Rates": 0,
+      "Curve": "flat",
+      "IG_OAS": 0,
+      "HY_OAS": 0,
+      "MBS_Basis": 0
+    },
+    "TradeList": [
+      "INCREASE UST",
+      "REDUCE Level 2 HQLA"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -6.0,
+      "ΔNSFR": -3.0,
+      "ΔNII": -1.2
+    },
+    "Assumptions": "Regulatory environment tightens; banks must adjust HQLA mix; Level 2 assets capped."
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "Scenario": "Persistently High Inflation and Hawkish Fed Response",
+    "Description": "The Fed responds to persistent inflation with aggressive rate hikes, leading to increased funding costs, wider credit spreads, and MBS underperformance.",
+    "Probability": 0.35,
+    "Rationale": "Inflation remains above target due to supply chain issues and strong demand, prompting decisive Fed action. This scenario is plausible given recent inflation prints and central bank guidance.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits",
+      "Regulation"
+    ],
+    "Shocks": {
+      "Rates": 50,
+      "Curve": "bear_steepener",
+      "IG_OAS": 25,
+      "HY_OAS": 40,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "SELL 10y UST",
+      "SELL 30y MBS",
+      "BUY 1m T-Bill"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -4.0,
+      "ΔNSFR": -1.5,
+      "ΔNII": 2.1
+    },
+    "Assumptions": "Inflation persists above 3%; Fed prioritizes inflation control; deposit outflows accelerate modestly."
+  },
+  {
+    "Scenario": "Geopolitical Tensions and Market Volatility",
+    "Description": "Escalating geopolitical tensions trigger risk-off flows, wider credit spreads, and a higher MBS basis as liquidity deteriorates.",
+    "Probability": 0.2,
+    "Rationale": "Recent geopolitical events have increased volatility and risk aversion, leading to wider spreads and reduced MBS demand.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": 10,
+      "Curve": "flat",
+      "IG_OAS": 20,
+      "HY_OAS": 30,
+      "MBS_Basis": 10
+    },
+    "TradeList": [
+      "BUY 2y UST",
+      "SELL MBS",
+      "INCREASE CASH"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -2.0,
+      "ΔNSFR": -1.0,
+      "ΔNII": 0.5
+    },
+    "Assumptions": "No direct domestic impact, but global risk aversion drives market moves; funding markets remain open."
+  },
+  {
+    "Scenario": "Regulatory Tightening on Capital Requirements",
+    "Description": "Regulators announce stricter capital and liquidity requirements, increasing funding costs and prompting portfolio rebalancing.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing regulatory reviews and recent bank failures have increased the likelihood of tighter requirements.",
+    "ImpactChannels": [
+      "Regulation",
+      "Deposits",
+      "Rates",
+      "Credit"
+    ],
+    "Shocks": {
+      "Rates": 15,
+      "Curve": "bear_steepener",
+      "IG_OAS": 10,
+      "HY_OAS": 25,
+      "MBS_Basis": 5
+    },
+    "TradeList": [
+      "INCREASE CAPITAL RESERVES",
+      "REDUCE LEVEL 2 HQLA",
+      "BUY SHORT-TERM UST"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -3.0,
+      "ΔNSFR": -2.0,
+      "ΔNII": -0.5
+    },
+    "Assumptions": "New rules announced but not yet implemented; banks preemptively adjust balance sheets."
+  },
+  {
+    "Scenario": "Gradual Disinflation with Anchored Expectations",
+    "Description": "Inflation gradually eases, allowing the Fed to pause or cut rates, supporting tighter credit spreads and improved MBS performance.",
+    "Probability": 0.2,
+    "Rationale": "Recent data suggest inflation is moderating and expectations remain anchored, enabling a more dovish policy stance.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -25,
+      "Curve": "bull_flattening",
+      "IG_OAS": -5,
+      "HY_OAS": -10,
+      "MBS_Basis": -3
+    },
+    "TradeList": [
+      "BUY 10y UST",
+      "BUY MBS",
+      "EXTEND DURATION"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 2.0,
+      "ΔNSFR": 1.0,
+      "ΔNII": -1.0
+    },
+    "Assumptions": "Inflation falls below 3%; Fed signals pause or cut; deposit flows stabilize."
+  },
+  {
+    "Scenario": "Stable Economic Growth with Controlled Inflation",
+    "Description": "The economy grows steadily with inflation under control, resulting in a stable yield curve and modest credit spread tightening.",
+    "Probability": 0.1,
+    "Rationale": "While less likely, a benign macro environment remains plausible if policy and external shocks are well-managed.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -10,
+      "Curve": "bull_flattening",
+      "IG_OAS": -5,
+      "HY_OAS": -10,
+      "MBS_Basis": -5
+    },
+    "TradeList": [
+      "HOLD CURRENT POSITIONS",
+      "MONITOR FUNDING FLOWS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 3.0,
+      "ΔNSFR": 1.5,
+      "ΔNII": -0.2
+    },
+    "Assumptions": "No major shocks; policy remains supportive; funding and credit conditions are stable."
+  }
+]
