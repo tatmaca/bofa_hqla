@@ -237,6 +237,7 @@ async def price_portfolio():
                 {
                     "name": inst.name,
                     "isin": inst.isin,
+                    "coupon": getattr(inst, "coupons", "Floating"),
                     "category": portfolio._category(inst),
                     "class": inst.__class__.__name__,
                     "dirty_price": inst.dirty_price,
@@ -244,7 +245,7 @@ async def price_portfolio():
                     "ytm": inst.ytm,
                     "quantity": inst.quantity,
                     "dv01": inst.dv01,
-                    "cs01": inst.cs01,
+                    "cs01": inst.cs01 if inst.cs01 != None else "-",
                     "duration": inst.duration,
                     "convexity": inst.convexity,
                 }

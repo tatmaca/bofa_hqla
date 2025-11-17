@@ -295,6 +295,7 @@ class Zero(HQLA_Asset):
             isRisky,
             grade,
         )
+        self.coupon = 0.0
         self.business_day_conv = business_day_conv
 
     def build_bond(

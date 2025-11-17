@@ -572,6 +572,7 @@ export default function HqlaE2EDashboard() {
                     <TableRow>
                       <TableHead>Instrument</TableHead>
                       <TableHead>ISIN</TableHead>
+                      <TableHead>Coupon</TableHead>
                       <TableHead>Clean Price</TableHead>
                       <TableHead>YTM</TableHead>
                       <TableHead>Quantity</TableHead>
@@ -588,12 +589,19 @@ export default function HqlaE2EDashboard() {
                       <TableRow key={i}>
                         <TableCell>{row.name}</TableCell>
                         <TableCell>{row.isin}</TableCell>
+                        <TableCell>
+                          {row.coupon != "Floating"
+                            ? `${(row.coupon * 100).toFixed(2)}%`
+                            : "Floating"}
+                        </TableCell>
                         <TableCell>{row.clean_price.toFixed(2)}</TableCell>
                         <TableCell>{row.ytm.toFixed(2)}%</TableCell>
                         <TableCell>{row.quantity}</TableCell>
                         <TableCell>{row.category}</TableCell>
                         <TableCell>{row.dv01?.toFixed(4)}</TableCell>
-                        <TableCell>{row.cs01?.toFixed(4)}</TableCell>
+                        <TableCell>
+                          {row.cs01 != "-" ? row.cs01?.toFixed(4) : "-"}
+                        </TableCell>
                         <TableCell>{row.duration?.toFixed(4)}</TableCell>
                         <TableCell>{row.convexity?.toFixed(4)}</TableCell>
                       </TableRow>
