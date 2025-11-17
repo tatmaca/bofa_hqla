@@ -4,12 +4,11 @@ hqla_portfolio.py
 Manages collections of HQLA instruments (Fixed, Floating, Discount)
 across Basel III liquidity levels.
 
-Author: Togay Atmaca (tatmaca)
-Updated: 2025-11-08
+Author: Togay Atmaca (tatmaca), Aryaa Gunavante
+Updated: 2025-11-17
 """
 
 from typing import Dict, List
-
 import QuantLib as ql
 
 import hqla_assets as HQLA

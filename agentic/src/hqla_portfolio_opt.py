@@ -16,6 +16,7 @@ import pandas as pd
 from scipy.optimize import minimize
 import QuantLib as ql
 from hqla_portfolio import Portfolio
+from hqla_scenarios import ScenarioGenerator
 
 
 class HQLA_Portfolio_Opt:
@@ -24,9 +25,11 @@ class HQLA_Portfolio_Opt:
     across Basel III liquidity levels by maxmizing expect returns given bounds.
     """
 
-    def __init__(self, portfolio: Portfolio):
+    def __init__(self, portfolio: Portfolio, net_cash_outflow: float, max_lcr: float):
         self.portfolio = portfolio
         self.assets = portfolio.assets
+        self.net_cash_outflow = net_cash_outflow
+        self.max_lcr = max_lcr
 
         # --- Build summary table of portfolio instruments ---
         rows = []
@@ -64,8 +67,13 @@ class HQLA_Portfolio_Opt:
         self.assets_summary = pd.DataFrame(rows)
         self.n_assets = len(self.assets_summary)
 
+    def _lcr_adjusted_value(self, weights):
+        """Compute total HQLA-adjusted value given weights"""
+        df = self.assets_summary
+        return np.sum(weights * self.net_cash_outflow * 1 - df["Haircut"].values)
 
-    def optimize(self):
+
+    def mean_optimize(self):
         """
         Maximizes expected return subject to:
           - sum(w_i) = 1
@@ -79,35 +87,25 @@ class HQLA_Portfolio_Opt:
 
         # Objective: maximize sum(mu_i * price_i * w_i)
         def objective(weights):
-            return -np.dot(weights, mu * prices)  # negative for maximization
+            return -np.dot(weights, mu) 
 
-        # Constraint: sum(weights) = 1
-        constraints = ({
-            "type": "eq",
-            "fun": lambda w: np.sum(w) - 1
-        })
-
-        # Non-negative bounds
-        bounds = [(0, 1) for _ in range(self.n_assets)]
+        # simple constraints on weights
+        eq_cons = {"type": "eq", "fun": lambda w: np.sum(w) - 1.0}
+        bounds = [(0.0, 1.0) for _ in range(self.n_assets)]
+        levels = df["Level"].values
 
         # Basel III composition constraints
         levels = df["Level"].values
 
-        def l1_min(weights):  # Level 1 ≥ 60%
-            return np.sum(weights[levels == "L1"]) - 0.6
-
-        def l2a_b_max(weights):  # Level 2A + 2B ≤ 40%
-            return 0.4 - np.sum(weights[levels != "L1"])
-
-        def l2b_max(weights):  # Level 2B ≤ 15%
-            return 0.15 - np.sum(weights[levels == "L2B"])
-
-        constraints = (
-            constraints,
-            {"type": "ineq", "fun": l1_min},
-            {"type": "ineq", "fun": l2a_b_max},
-            {"type": "ineq", "fun": l2b_max},
-        )
+        constraints = [
+            eq_cons,
+            {"type": "ineq", "fun": lambda w: np.sum(w[levels == "L1"]) - 0.6},
+            {"type": "ineq", "fun": lambda w: 0.4 - np.sum(w[levels != "L1"])},
+            {"type": "ineq", "fun": lambda w: 0.15 - np.sum(w[levels == "L2B"])},
+            # HQLA liquidity constraint: adjusted value / NCF ≥ 1 and ≤ max_lcr
+            {"type": "ineq", "fun": lambda w: self._lcr_adjusted_value(w) / self.net_cash_outflow - 1.0},
+            {"type": "ineq", "fun": lambda w: self.max_lcr - self._lcr_adjusted_value(w) / self.net_cash_outflow},
+        ]
 
         # Initial guess
         x0 = np.ones(self.n_assets) / self.n_assets
@@ -128,117 +126,75 @@ class HQLA_Portfolio_Opt:
         self.opt_result = result
         self.optimized_portfolio = df
 
-        return df, result
+         # Compute allocated amount
+        df["Allocated_Amount"] = np.round(df["Opt_Weight"] * self.net_cash_outflow, 3)
 
+        # Compute total portfolio value and expected return
+        total_value = df["Allocated_Amount"].sum()
+        expected_return = float(np.dot(df["Allocated_Amount"], df["YTM"].values) / total_value)
 
-if __name__ == "__main__":
-    import QuantLib as ql
-    from datetime import date
-    from hqla_assets import (
-        Level1Discount, Level1Floating, Level2AFixed, Level2BFloating
-    )
-    from hqla_portfolio import Portfolio
-    from hqla_portfolio_opt import HQLA_Portfolio_Opt  # your optimizer class
+        # Select only requested columns for output
+        output_df = df[["Name", "Level", "Price", "YTM", "Allocated_Amount"]]
 
-    # --- Set evaluation date ---
-    today = ql.Date(8, 11, 2025)
-    ql.Settings.instance().evaluationDate = today
+        return output_df, result, total_value, expected_return
 
-    # --- Define base yield curve ---
-    flat_rate = ql.SimpleQuote(0.05)
-    rate_handle = ql.QuoteHandle(flat_rate)
-    day_count = ql.Actual360()
-    continuous_comp = ql.Continuous
-    flat_yield_curve = ql.FlatForward(today, rate_handle, day_count, continuous_comp)
-    discount_curve_handle = ql.YieldTermStructureHandle(flat_yield_curve)
+    def mean_variance_optimize(self, lam: float = 0.5,
+                               base_curve_handle: ql.YieldTermStructureHandle = None,
+                               n_random: int = 500, bp_std: float = 0.01,
+                               use_mu: str = "ytm"):
+        if base_curve_handle is None:
+            raise ValueError("base_curve_handle required for scenario repricing.")
 
-    # --- Define SOFR curve (for floating bonds) ---
-    sofr_rate = 5 * 1e-4
-    sofr_term_structure = ql.FlatForward(today, rate_handle, day_count, ql.Continuous)
-    sofr_term_structure_handle = ql.YieldTermStructureHandle(sofr_term_structure)
-    sofr_index = ql.Sofr(sofr_term_structure_handle)
+        sg = ScenarioGenerator(self.portfolio)
+        scenarios = sg.generate_parallel_scenarios(n_random=n_random, bp_std=bp_std)
+        R, base_prices, inst_list = sg.compute_returns_matrix(base_curve_handle, scenarios)
+        Omega = sg.make_psd_cov(R)
 
-    # --- Dates ---
-    issue = ql.Date(8, 6, 2024)
-    maturity_1y = ql.Date(8, 11, 2026)
-    maturity_2y = ql.Date(8, 11, 2027)
-    maturity_3y = ql.Date(8, 11, 2028)
+        if use_mu == "ytm":
+            mu = np.array(self.assets_summary["YTM"].values, dtype=float)
+        else:
+            mu = R.mean(axis=0)
 
-    # --- Create a test portfolio ---
-    portfolio = Portfolio()
+        N = len(mu)
 
-    zero_l1 = Level1Discount(
-        issue_date=issue, maturity_date=maturity_1y,
-        face_value=100, quantity=10,
-        name="L1_Zero_1Y", isin="US0000000001"
-    )
-    zero_l1.build_bond()
-    portfolio.add_instrument(zero_l1)
+        def obj(w):
+            return -lam * float(w @ mu) + (1.0 - lam) * float(w @ (Omega @ w))
 
-    floating_l1 = Level1Floating(
-        issue_date=issue, maturity_date=maturity_2y,
-        face_value=100, quantity=5,
-        name="L1_Floating_2Y", isin="US0000000002"
-    )
-    floating_l1.build_bond(index=sofr_index)
-    portfolio.add_instrument(floating_l1)
+        eq_cons = {"type": "eq", "fun": lambda w: np.sum(w) - 1.0}
+        bounds = [(0.0, 1.0) for _ in range(N)]
+        levels = self.assets_summary["Level"].values
 
-    fixed_l2a = Level2AFixed(
-        issue_date=issue, maturity_date=maturity_2y,
-        face_value=100, coupons=[0.03], quantity=8,
-        name="L2A_Fixed_2Y", isin="US0000000003"
-    )
-    fixed_l2a.build_bond()
-    portfolio.add_instrument(fixed_l2a)
+        constraints = [
+            eq_cons,
+            {"type": "ineq", "fun": lambda w: np.sum(w[levels == "L1"]) - 0.6},
+            {"type": "ineq", "fun": lambda w: 0.4 - np.sum(w[levels != "L1"])},
+            {"type": "ineq", "fun": lambda w: 0.15 - np.sum(w[levels == "L2B"])},
+            {"type": "ineq", "fun": lambda w: self._lcr_adjusted_value(w) / self.net_cash_outflow - 1.0},
+            {"type": "ineq", "fun": lambda w: self.max_lcr - self._lcr_adjusted_value(w) / self.net_cash_outflow},
+        ]
 
-    floating_l2b = Level2BFloating(
-        issue_date=issue, maturity_date=maturity_3y,
-        face_value=100, quantity=12,
-        name="L2B_Floating_3Y", isin="US0000000004"
-    )
-    floating_l2b.build_bond(index=sofr_index)
-    portfolio.add_instrument(floating_l2b)
+        x0 = np.ones(N) / N
+        res = minimize(obj, x0=x0, bounds=bounds, constraints=constraints, method="SLSQP", options={"maxiter": 1000, "ftol": 1e-9, "disp": False})
 
-    # --- Update SOFR fixings ---
-    im = ql.IndexManager.instance()
-    im.clearHistory(sofr_index.name())
-    fixing_dates = list(floating_l2b.schedule)
-    calendar = sofr_index.fixingCalendar()
-    for d in fixing_dates:
-        sofr_index.addFixing(calendar.adjust(d, ql.Preceding), sofr_rate)
+        df = self.assets_summary.copy()
+        if not res.success:
+            print("Warning: mean-variance optimizer did not converge:", res.message)
 
-    # --- Price portfolio under base yield curve ---
-    portfolio.update_prices(yield_curve=discount_curve_handle)
+        df["Opt_Weight_MV"] = res.x
+        df["Allocated_Amount_MV"] = res.x * self.net_cash_outflow
 
-    print("\n====== INITIAL PORTFOLIO ======")
-    portfolio.summary()
-    print(f"\nTotal Value: {portfolio.total_value():.2f}")
-    print(f"Adjusted HQLA Value: {portfolio.adjusted_value():.2f}")
+        port_return = float(res.x @ mu)
+        port_var = float(res.x @ (Omega @ res.x))
 
-    # --- Optimize portfolio weights ---
-    print("\n====== RUNNING OPTIMIZATION ======")
-    optimizer = HQLA_Portfolio_Opt(portfolio)
-    opt_df, result = optimizer.optimize()
+        # Compute allocated amount
+        df["Allocated_Amount"] = np.round(df["Opt_Weight_MV"] * self.net_cash_outflow, 3)
+        
+        # Compute total portfolio value and expected return
+        total_value = df["Allocated_Amount"].sum()
+        expected_return = float(np.dot(df["Allocated_Amount"], df["YTM"].values) / total_value)
+        
+        # Select only requested columns for output
+        output_df = df[["Name", "Level", "Price", "YTM", "Allocated_Amount"]]
+        
+        return output_df, res, total_value, expected_return
 
-    print("\n====== OPTIMIZED PORTFOLIO ======")
-    print(opt_df[["Name", "Level", "YTM", "Price", "Opt_Weight", "Weighted_Return"]])
-    print(f"\nOptimized Objective (Expected Return): {-result.fun:.6f}")
-
-    # --- Simulate new scenario: upward shift in yield curve ---
-    print("\n====== YIELD CURVE SHIFT SCENARIO ======")
-    flat_rate.setValue(0.07)  # 200 bp increase
-    portfolio.update_prices(yield_curve=discount_curve_handle)
-
-    print("Repricing portfolio after 200bp upward shift...")
-    portfolio.summary()
-    print(f"New Total Value: {portfolio.total_value():.2f}")
-    print(f"New Adjusted Value: {portfolio.adjusted_value():.2f}")
-    
-    # --- Re-run optimization under new scenario ---
-    print("\n====== OPTIMIZING UNDER NEW SCENARIO ======")
-    optimizer = HQLA_Portfolio_Opt(portfolio)
-    opt_df, result = optimizer.optimize()
-
-    print("\n====== OPTIMIZED PORTFOLIO (NEW SCENARIO) ======")
-    print(opt_df[["Name", "Level", "YTM", "Price", "Opt_Weight", "Weighted_Return"]])
-    print(f"\nOptimized Objective (Expected Return): {-result.fun:.6f}")
