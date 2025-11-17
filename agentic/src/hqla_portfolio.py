@@ -55,11 +55,14 @@ class Portfolio:
     def update_prices(
         self,
         yield_curve: ql.YieldTermStructureHandle,
+        up_curve: ql.YieldTermStructureHandle,
+        down_curve: ql.YieldTermStructureHandle,
     ) -> None:
         """Reprice all instruments using QuantLib dirty price."""
         for group in self.assets.values():
             for inst in group:
                 inst.price_from_curve(yield_curve)
+                inst.bond_greeks(yield_curve, up_curve, down_curve)
 
     def total_value(self) -> float:
         """Total market (dirty) value of the portfolio."""

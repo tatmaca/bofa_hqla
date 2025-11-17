@@ -397,7 +397,7 @@ export default function HqlaE2EDashboard() {
         method: "POST",
         body: formData,
       });
-      await handlePricePortfolio(); // auto-price after upload
+      //await handlePricePortfolio(); // auto-price after upload
     } catch (err) {
       console.error(err);
     } finally {
@@ -566,28 +566,37 @@ export default function HqlaE2EDashboard() {
               <CardTitle>Portfolio Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Instrument</TableHead>
-                    <TableHead>ISIN</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead>Category</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {portfolioSummary.assets.map((row: any, i: number) => (
-                    <TableRow key={i}>
-                      <TableCell>{row.name}</TableCell>
-                      <TableCell>{row.isin}</TableCell>
-                      <TableCell>{row.dirty_price.toFixed(2)}</TableCell>
-                      <TableCell>{row.quantity}</TableCell>
-                      <TableCell>{row.category}</TableCell>
+              <div className="max-h-64 overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Instrument</TableHead>
+                      <TableHead>ISIN</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>DV01</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Convexity</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+
+                  <TableBody>
+                    {portfolioSummary.assets.map((row: any, i: number) => (
+                      <TableRow key={i}>
+                        <TableCell>{row.name}</TableCell>
+                        <TableCell>{row.isin}</TableCell>
+                        <TableCell>{row.dirty_price.toFixed(2)}</TableCell>
+                        <TableCell>{row.quantity}</TableCell>
+                        <TableCell>{row.category}</TableCell>
+                        <TableCell>{row.dv01?.toFixed(4)}</TableCell>
+                        <TableCell>{row.duration?.toFixed(4)}</TableCell>
+                        <TableCell>{row.convexity?.toFixed(4)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         )}

@@ -14,6 +14,8 @@ portfolio = Portfolio()
 # Global placeholder for the base curve
 base_curve = None
 base_curve_handle = None
+base_curve_up = None
+base_curve_down = None
 
 app.add_middleware(
     CORSMiddleware,
@@ -91,6 +93,8 @@ async def upload_yield_curve(file: UploadFile):
     """
     global base_curve
     global base_curve_handle
+    global base_curve_up
+    global base_curve_down
     df = pd.read_csv(file.file)
 
     today = ql.Date.todaysDate()
@@ -109,8 +113,18 @@ async def upload_yield_curve(file: UploadFile):
         rates.append(rate)
 
     # Build zero curve
-    base_curve = ql.ZeroCurve(dates, rates, ql.Actual360(), ql.TARGET())
+    base_curve = ql.CubicZeroCurve(dates, rates, ql.Actual360(), ql.TARGET())
     base_curve_handle = ql.YieldTermStructureHandle(base_curve)
+
+    interest_rate_bump_up = ql.QuoteHandle(ql.SimpleQuote(0.0001))
+    interest_rate_bump_down = ql.QuoteHandle(ql.SimpleQuote(-0.0001))
+
+    base_curve_up = ql.YieldTermStructureHandle(
+        ql.ZeroSpreadedTermStructure(base_curve_handle, interest_rate_bump_up)
+    )
+    base_curve_down = ql.YieldTermStructureHandle(
+        ql.ZeroSpreadedTermStructure(base_curve_handle, interest_rate_bump_down)
+    )
 
     return {"status": "Yield curve uploaded", "points": len(dates)}
 
@@ -129,7 +143,7 @@ async def price_portfolio():
         )
 
     # --- Reprice all instruments using the portfolio method ---
-    portfolio.update_prices(yield_curve=base_curve_handle)
+    portfolio.update_prices(base_curve_handle, base_curve_up, base_curve_down)
 
     # --- Build summary for API response ---
     summary = []
@@ -144,6 +158,9 @@ async def price_portfolio():
                     "dirty_price": inst.dirty_price,
                     "clean_price": inst.clean_price,
                     "quantity": inst.quantity,
+                    "dv01": inst.dv01,
+                    "duration": inst.duration,
+                    "convexity": inst.convexity,
                 }
             )
 

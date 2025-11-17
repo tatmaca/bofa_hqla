@@ -27,6 +27,10 @@ class HQLA_Asset(ABC):
         self.day_count = day_count
         self.dirty_price = None
         self.clean_price = None
+        self.dv01 = None
+        self.duration = None
+        self.convexity = None
+        self.gamma = None
         self.quantity = quantity
         self.name = name
         self.isin = isin
@@ -42,13 +46,44 @@ class HQLA_Asset(ABC):
         """
         pass
 
-    @abstractmethod
-    def price_from_curve(self, discount_curve: ql.YieldTermStructureHandle):
-        """
-        Abstract method to price the bond using a given discount curve.
-        Returns a float representing the present value.
-        """
-        pass
+    def price_from_curve(
+        self, discount_curve: ql.YieldTermStructureHandle, clean: bool = False
+    ):
+        if self.bond is None:
+            raise ValueError("Bond not built yet. Call build_bond first.")
+
+        engine = ql.DiscountingBondEngine(discount_curve)
+        self.bond.setPricingEngine(engine)
+        self.dirty_price = self.bond.dirtyPrice()
+        self.clean_price = self.bond.cleanPrice()
+        return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
+
+    def bond_greeks(
+        self,
+        discount_curve: ql.YieldTermStructureHandle,
+        up_curve: ql.YieldTermStructureHandle,
+        down_curve: ql.YieldTermStructureHandle,
+    ):
+        og_engine = ql.DiscountingBondEngine(discount_curve)
+        up_engine = ql.DiscountingBondEngine(up_curve)
+        down_engine = ql.DiscountingBondEngine(down_curve)
+
+        self.bond.setPricingEngine(up_engine)
+        up_price = self.bond.dirtyPrice()
+        self.bond.setPricingEngine(down_engine)
+        down_price = self.bond.dirtyPrice()
+        self.bond.setPricingEngine(og_engine)
+        base_price = self.dirty_price
+
+        dv01 = (down_price - up_price) / 2
+        duration = (dv01 / base_price) * 1e4
+        gamma_1bp = down_price - 2 * base_price + up_price
+        convexity = gamma_1bp * 1e8 / base_price
+
+        self.dv01 = dv01
+        self.duration = duration
+        self.gamma = gamma_1bp
+        self.convexity = convexity
 
 
 class Floating(HQLA_Asset):
@@ -109,18 +144,6 @@ class Floating(HQLA_Asset):
         )
         return self.bond
 
-    def price_from_curve(
-        self, discount_curve: ql.YieldTermStructureHandle, clean: bool = False
-    ):
-        if self.bond is None:
-            raise ValueError("Bond not built yet. Call build_bond first.")
-
-        engine = ql.DiscountingBondEngine(discount_curve)
-        self.bond.setPricingEngine(engine)
-        self.dirty_price = self.bond.dirtyPrice()
-        self.clean_price = self.bond.cleanPrice()
-        return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
-
 
 class Fixed(HQLA_Asset):
     """
@@ -178,18 +201,6 @@ class Fixed(HQLA_Asset):
         )
         return self.bond
 
-    def price_from_curve(
-        self, discount_curve: ql.YieldTermStructureHandle, clean: bool = False
-    ):
-        if self.bond is None:
-            raise ValueError("Bond not built yet. Call build_bond first.")
-
-        engine = ql.DiscountingBondEngine(discount_curve)
-        self.bond.setPricingEngine(engine)
-        self.dirty_price = self.bond.dirtyPrice()
-        self.clean_price = self.bond.cleanPrice()
-        return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
-
 
 class Zero(HQLA_Asset):
     """
@@ -231,18 +242,6 @@ class Zero(HQLA_Asset):
             paymentConvention=self.business_day_conv,
         )
         return self.bond
-
-    def price_from_curve(
-        self, discount_curve: ql.YieldTermStructureHandle, clean: bool = False
-    ):
-        if self.bond is None:
-            raise ValueError("Bond not built yet. Call build_bond first.")
-
-        engine = ql.DiscountingBondEngine(discount_curve)
-        self.bond.setPricingEngine(engine)
-        self.dirty_price = self.bond.dirtyPrice()
-        self.clean_price = self.bond.cleanPrice()
-        return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
 
 
 # Levels
