@@ -126,10 +126,14 @@ class HQLA_Asset(ABC):
         self.bond.setPricingEngine(og_engine)
         base_price = self.dirty_price
 
-        dv01 = (down_price - up_price) / 2
-        duration = (dv01 / base_price) * 1e4
-        gamma_1bp = down_price - 2 * base_price + up_price
-        convexity = gamma_1bp * 1e8 / base_price
+        try:
+            dv01 = (down_price - up_price) / 2
+            duration = (dv01 / base_price) * 1e4
+            gamma_1bp = down_price - 2 * base_price + up_price
+            convexity = gamma_1bp * 1e8 / base_price
+        except:
+            print(f"{ self.name } has issues")
+            return -1
 
         self.dv01 = dv01
         self.duration = duration
