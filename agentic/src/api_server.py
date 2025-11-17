@@ -30,6 +30,7 @@ app.add_middleware(
 async def upload_portfolio(file: UploadFile):
     """Upload portfolio CSV and build instrument objects."""
     global base_curve_handle
+    global sofr_term_structure_handle
     df = pd.read_csv(file.file)
     today = ql.Date.todaysDate()
     ql.Settings.instance().evaluationDate = today
@@ -52,6 +53,7 @@ async def upload_portfolio(file: UploadFile):
         cls = getattr(HQLA, f"Level{row['level']}{row['type']}")
         issue = ql.DateParser.parseISO(row["issue_date"])
         maturity = ql.DateParser.parseISO(row["maturity_date"])
+        grade = row.get("rating", "")
 
         kwargs = {
             "issue_date": issue,
@@ -60,6 +62,8 @@ async def upload_portfolio(file: UploadFile):
             "quantity": float(row.get("quantity", 0)),
             "name": row.get("name", ""),
             "isin": row.get("isin", ""),
+            "grade": grade,
+            "isRisky": False if pd.isna(grade) else True,
         }
 
         if row["type"] == "Fixed":
@@ -95,12 +99,14 @@ async def upload_yield_curve(file: UploadFile):
     global base_curve_handle
     global base_curve_up
     global base_curve_down
+    global survival_curves
     df = pd.read_csv(file.file)
 
     today = ql.Date.todaysDate()
     ql.Settings.instance().evaluationDate = today
 
     dates = [today]
+    tenors = []
     rates = [0.0]
 
     for _, row in df.iterrows():
@@ -108,6 +114,7 @@ async def upload_yield_curve(file: UploadFile):
         rate = float(row["rate"])
         # Convert tenor string to QuantLib period
         ql_period = ql.PeriodParser.parse(tenor)
+        tenors.append(ql_period)
         dt = today + ql_period
         dates.append(dt)
         rates.append(rate)
@@ -119,12 +126,57 @@ async def upload_yield_curve(file: UploadFile):
     interest_rate_bump_up = ql.QuoteHandle(ql.SimpleQuote(0.0001))
     interest_rate_bump_down = ql.QuoteHandle(ql.SimpleQuote(-0.0001))
 
-    base_curve_up = ql.YieldTermStructureHandle(
-        ql.ZeroSpreadedTermStructure(base_curve_handle, interest_rate_bump_up)
+    base_curve_up_handle = ql.ZeroSpreadedTermStructure(
+        base_curve_handle, interest_rate_bump_up
     )
-    base_curve_down = ql.YieldTermStructureHandle(
-        ql.ZeroSpreadedTermStructure(base_curve_handle, interest_rate_bump_down)
+    base_curve_up = ql.YieldTermStructureHandle(base_curve_up_handle)
+    base_curve_down_handle = ql.ZeroSpreadedTermStructure(
+        base_curve_handle, interest_rate_bump_down
     )
+    base_curve_down = ql.YieldTermStructureHandle(base_curve_down_handle)
+
+    # Build corresponding hazard rate curves
+    tenors = [ql.Period(y, ql.Years) for y in [1, 2, 3, 5, 7, 10]]
+    cds_spreads = {
+        "AAA": [10, 12, 13, 17, 18, 22],
+        "AA": [15, 17, 18, 25, 28, 35],
+        "A": [25, 28, 30, 45, 50, 65],
+        "BBB": [50, 55, 58, 85, 95, 110],
+    }
+
+    recovery_rates = {
+        "AAA": 0.741,
+        "AA": 0.621,
+        "A": 0.457,
+        "BBB": 0.381,
+    }
+
+    survival_curves = {}
+    for rating in recovery_rates.keys():
+        rr = recovery_rates[rating]
+        cds_spread = cds_spreads[rating]
+        cds_helpers = [
+            ql.SpreadCdsHelper(
+                (cds / 1000.0),
+                tenor,
+                1,
+                ql.TARGET(),
+                ql.Quarterly,
+                ql.Following,
+                ql.DateGeneration.TwentiethIMM,
+                ql.Actual360(),
+                rr,
+                base_curve_handle,
+            )
+            for (cds, tenor) in zip(cds_spread, tenors)
+        ]
+        hazard_rate_curve = ql.PiecewiseFlatHazardRate(
+            today, cds_helpers, ql.Actual360()
+        )
+        hazard_rate_curve.enableExtrapolation()
+        survival_curves[rating] = ql.DefaultProbabilityTermStructureHandle(
+            hazard_rate_curve
+        )
 
     return {"status": "Yield curve uploaded", "points": len(dates)}
 
@@ -143,7 +195,9 @@ async def price_portfolio():
         )
 
     # --- Reprice all instruments using the portfolio method ---
-    portfolio.update_prices(base_curve_handle, base_curve_up, base_curve_down)
+    portfolio.update_prices(
+        base_curve_handle, base_curve_up, base_curve_down, survival_curves
+    )
 
     # --- Build summary for API response ---
     summary = []

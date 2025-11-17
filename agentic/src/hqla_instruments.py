@@ -9,6 +9,13 @@ class HQLA_Asset(ABC):
     Child classes should implement build_bond and price_from_curve.
     """
 
+    RECOVERY_BY_RATING = {
+        "AAA": 0.741,
+        "AA": 0.621,
+        "A": 0.457,
+        "BBB": 0.381,
+    }
+
     def __init__(
         self,
         issue_date: ql.Date,
@@ -19,6 +26,8 @@ class HQLA_Asset(ABC):
         quantity: float = 0,
         name: str = "No Name Assigned",
         isin: str = "No ISIN Provided",
+        isRisky: bool = False,
+        grade: str = None,
     ):
         self.issue_date = issue_date
         self.maturity_date = maturity_date
@@ -27,6 +36,7 @@ class HQLA_Asset(ABC):
         self.day_count = day_count
         self.dirty_price = None
         self.clean_price = None
+        self.ytm = None
         self.dv01 = None
         self.duration = None
         self.convexity = None
@@ -34,6 +44,8 @@ class HQLA_Asset(ABC):
         self.quantity = quantity
         self.name = name
         self.isin = isin
+        self.isRisky = isRisky
+        self.grade = grade
 
         # Placeholder for the QuantLib bond object
         self.bond = None
@@ -47,15 +59,31 @@ class HQLA_Asset(ABC):
         pass
 
     def price_from_curve(
-        self, discount_curve: ql.YieldTermStructureHandle, clean: bool = False
+        self,
+        discount_curve: ql.YieldTermStructureHandle,
+        survival_curve: ql.YieldTermStructureHandle = None,
+        clean: bool = False,
     ):
         if self.bond is None:
             raise ValueError("Bond not built yet. Call build_bond first.")
 
-        engine = ql.DiscountingBondEngine(discount_curve)
+        if self.isRisky:
+            rr = self.RECOVERY_BY_RATING[self.grade]
+            engine = ql.RiskyBondEngine(survival_curve, rr, discount_curve)
+        else:
+            engine = ql.DiscountingBondEngine(discount_curve)
         self.bond.setPricingEngine(engine)
-        self.dirty_price = self.bond.dirtyPrice()
         self.clean_price = self.bond.cleanPrice()
+        self.dirty_price = self.bond.dirtyPrice()
+        self.ytm = (
+            self.bond.bondYield(
+                self.clean_price,
+                ql.Thirty360(ql.Thirty360.USA),
+                ql.Compounded,
+                ql.Semiannual,
+            )
+            * 100
+        )
         return self.bond.cleanPrice() if clean else self.bond.dirtyPrice()
 
     def bond_greeks(
@@ -63,10 +91,17 @@ class HQLA_Asset(ABC):
         discount_curve: ql.YieldTermStructureHandle,
         up_curve: ql.YieldTermStructureHandle,
         down_curve: ql.YieldTermStructureHandle,
+        survival_curve: ql.YieldTermStructureHandle = None,
     ):
-        og_engine = ql.DiscountingBondEngine(discount_curve)
-        up_engine = ql.DiscountingBondEngine(up_curve)
-        down_engine = ql.DiscountingBondEngine(down_curve)
+        if self.isRisky:
+            rr = self.RECOVERY_BY_RATING[self.grade]
+            og_engine = ql.RiskyBondEngine(survival_curve, rr, discount_curve)
+            up_engine = ql.RiskyBondEngine(survival_curve, rr, up_curve)
+            down_engine = ql.RiskyBondEngine(survival_curve, rr, down_curve)
+        else:
+            og_engine = ql.DiscountingBondEngine(discount_curve)
+            up_engine = ql.DiscountingBondEngine(up_curve)
+            down_engine = ql.DiscountingBondEngine(down_curve)
 
         self.bond.setPricingEngine(up_engine)
         up_price = self.bond.dirtyPrice()
@@ -102,6 +137,8 @@ class Floating(HQLA_Asset):
         quantity: float = 0,
         name: str = "No Name Assigned",
         isin: str = "No ISIN Provided",
+        isRisky: bool = False,
+        grade: str = "AAA",
     ):
         super().__init__(
             issue_date,
@@ -112,6 +149,8 @@ class Floating(HQLA_Asset):
             quantity,
             name,
             isin,
+            isRisky,
+            grade,
         )
         self.coupon_frequency = coupon_frequency
         self.business_day_conv = business_day_conv
@@ -162,6 +201,8 @@ class Fixed(HQLA_Asset):
         quantity: float = 0,
         name: str = "No Name Assigned",
         isin: str = "No ISIN Provided",
+        isRisky: bool = False,
+        grade: str = "AAA",
     ):
         super().__init__(
             issue_date,
@@ -172,6 +213,8 @@ class Fixed(HQLA_Asset):
             quantity,
             name,
             isin,
+            isRisky,
+            grade,
         )
         self.coupon_frequency = coupon_frequency
         self.business_day_conv = business_day_conv
@@ -217,6 +260,8 @@ class Zero(HQLA_Asset):
         quantity: float = 0,
         name: str = "No Name Assigned",
         isin: str = "No ISIN Provided",
+        isRisky: bool = False,
+        grade: str = "AAA",
     ):
         super().__init__(
             issue_date,
@@ -227,6 +272,8 @@ class Zero(HQLA_Asset):
             quantity,
             name,
             isin,
+            isRisky,
+            grade,
         )
         self.business_day_conv = business_day_conv
 
