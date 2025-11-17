@@ -1,0 +1,145 @@
+[
+  {
+    "Scenario": "Hawkish Fed Response to Persistent Inflation",
+    "Description": "Stubborn inflation above target compels the Fed to hike rates aggressively, triggering a bear steepening of the yield curve and broad credit spread widening. Deposit outflows accelerate as funding costs rise and risk sentiment deteriorates.",
+    "Probability": 0.28,
+    "Rationale": "Recent CPI prints and wage growth remain elevated. The Fed signals further tightening to anchor expectations, increasing market volatility and funding stress.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits",
+      "MBS"
+    ],
+    "Shocks": {
+      "Rates": 50,
+      "Curve": "bear_steepener",
+      "IG_OAS": 30,
+      "HY_OAS": 60,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "SELL 30y MBS",
+      "BUY 2y UST"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -4.0,
+      "ΔNSFR": -1.5,
+      "ΔNII": 2.1
+    },
+    "Assumptions": "Deposit beta rises; 5% deposit outflow; MBS underperform Treasuries; LCR remains above regulatory minimum."
+  },
+  {
+    "Scenario": "Economic Slowdown and Risk Aversion",
+    "Description": "Growth slows as tighter policy and fading fiscal support dampen demand. The Fed pauses and signals possible cuts. Credit spreads widen, especially in high yield. Deposits decline moderately as businesses retrench.",
+    "Probability": 0.25,
+    "Rationale": "Leading indicators (PMIs, consumer sentiment) weaken. The Fed pivots to a more cautious stance, but risk appetite remains subdued.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -25,
+      "Curve": "bear_flatener",
+      "IG_OAS": 20,
+      "HY_OAS": 45,
+      "MBS_Basis": 10
+    },
+    "TradeList": [
+      "BUY 5y UST",
+      "HOLD cash"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 1.5,
+      "ΔNSFR": 0.5,
+      "ΔNII": -0.8
+    },
+    "Assumptions": "3% deposit outflow; moderate credit migration; HQLA composition unchanged."
+  },
+  {
+    "Scenario": "Regulatory Tightening on Capital and Liquidity",
+    "Description": "Global and domestic regulators announce higher capital and liquidity requirements for large banks, forcing balance sheet adjustments and asset sales. Credit spreads widen on reduced market liquidity.",
+    "Probability": 0.17,
+    "Rationale": "Recent bank failures and market volatility prompt pre-emptive regulatory action, increasing HQLA demand and funding costs.",
+    "ImpactChannels": [
+      "Regulation",
+      "Credit",
+      "Rates"
+    ],
+    "Shocks": {
+      "Rates": 10,
+      "Curve": "bear_steepener",
+      "IG_OAS": 50,
+      "HY_OAS": 70,
+      "MBS_Basis": 5
+    },
+    "TradeList": [
+      "SELL Level 2 HQLA",
+      "BUY short UST"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -6.0,
+      "ΔNSFR": -2.0,
+      "ΔNII": -1.2
+    },
+    "Assumptions": "Level 2 cap binding; forced asset rotation; LCR maintained at or above minimum."
+  },
+  {
+    "Scenario": "Geopolitical Shock Drives Risk-Off",
+    "Description": "A major geopolitical event (e.g., escalation in a conflict zone) triggers a flight to quality. Rates rise modestly on supply fears, but deposits increase as clients seek safety. MBS basis widens sharply.",
+    "Probability": 0.13,
+    "Rationale": "Sudden external shock increases volatility and risk aversion. Investors reallocate to cash and government securities.",
+    "ImpactChannels": [
+      "Rates",
+      "MBS",
+      "Deposits",
+      "Credit"
+    ],
+    "Shocks": {
+      "Rates": 30,
+      "Curve": "bear_flatener",
+      "IG_OAS": 40,
+      "HY_OAS": 80,
+      "MBS_Basis": 20
+    },
+    "TradeList": [
+      "INCREASE cash",
+      "SELL MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 2.0,
+      "ΔNSFR": 0.8,
+      "ΔNII": -0.5
+    },
+    "Assumptions": "Deposit inflows of 2%; HQLA composition tilts toward Level 1; LCR comfortably above minimum."
+  },
+  {
+    "Scenario": "Benign Disinflation and Soft Landing",
+    "Description": "Inflation moderates and growth stabilizes. The Fed signals patience, rates drift lower, and credit spreads tighten. Deposits are stable and HQLA valuations improve.",
+    "Probability": 0.17,
+    "Rationale": "Supply chain normalization and easing wage pressures allow for a soft landing. Market volatility subsides and risk assets recover.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits",
+      "MBS"
+    ],
+    "Shocks": {
+      "Rates": -20,
+      "Curve": "bull_flattening",
+      "IG_OAS": -10,
+      "HY_OAS": -5,
+      "MBS_Basis": -3
+    },
+    "TradeList": [
+      "BUY 10y UST",
+      "ADD IG Credit"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 3.0,
+      "ΔNSFR": 1.2,
+      "ΔNII": -1.0
+    },
+    "Assumptions": "Deposit base stable; HQLA mark-to-market gains; no regulatory constraint binding."
+  }
+]

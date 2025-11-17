@@ -1,112 +1,142 @@
 [
   {
-    "Scenario": "Rate Hike Surprise",
-    "Description": "A sudden increase in rates by 50 bps due to unexpectedly strong economic data.",
-    "Probability": 0.3,
-    "Rationale": "Central banks may react to strong economic indicators, leading to rate hikes.",
-    "ImpactChannels": [
-      "Rates",
-      "Curve",
-      "Credit OAS"
-    ],
-    "Shocks": {
-      "Rate": 50,
-      "Curve": "bear steepening",
-      "Credit OAS": 50
-    },
-    "MetricsDelta": {
-      "level1_tsys_pct": -1.5,
-      "level2a_agency_mbs_pct": -0.5,
-      "level2b_corp_munis_pct": -1
-    },
-    "TradeList": [
-      "Short 10-year Treasuries using futures",
-      "Long MBS through TBA contracts"
-    ],
-    "Assumptions": "Economic indicators such as GDP growth and employment figures show unexpected strength."
-  },
-  {
-    "Scenario": "Credit Market Deterioration",
-    "Description": "Increase in corporate defaults widens IG and HY spreads.",
+    "Scenario": "Persistent Inflation and Hawkish Fed",
+    "Description": "Inflation remains stubbornly high, forcing the Fed to hike rates and maintain a hawkish stance. Credit spreads widen and HQLA valuations decline, stressing liquidity metrics.",
     "Probability": 0.25,
-    "Rationale": "Rising rates lead to increased credit risk as companies struggle.",
-    "ImpactChannels": [
-      "Credit OAS"
-    ],
-    "Shocks": {
-      "IG OAS": 50,
-      "HY OAS": 100
-    },
-    "MetricsDelta": {
-      "level2b_corp_munis_pct": -2
-    },
-    "TradeList": [
-      "Reduce exposure to BBB-rated corporate bonds by selling specific holdings"
-    ],
-    "Assumptions": "Economic slowdown leads to higher default rates among lower-rated corporations."
-  },
-  {
-    "Scenario": "MBS Basis Contraction",
-    "Description": "Tightening of the MBS basis by 25 bps improves MBS valuations.",
-    "Probability": 0.2,
-    "Rationale": "Improved liquidity leads to better pricing for MBS assets.",
-    "ImpactChannels": [
-      "MBS basis"
-    ],
-    "Shocks": {
-      "MBS Basis": -25
-    },
-    "MetricsDelta": {
-      "level2a_agency_mbs_pct": 0.75
-    },
-    "TradeList": [
-      "Increase holdings in Agency MBS through direct purchases"
-    ],
-    "Assumptions": "Investor sentiment shifts towards MBS due to increased demand for safer assets."
-  },
-  {
-    "Scenario": "Regulatory Changes Favorable to Liquidity",
-    "Description": "A regulatory easing that temporarily raises the Level 2 cap to 50%.",
-    "Probability": 0.15,
-    "Rationale": "Regulatory bodies may consider easing in response to economic challenges.",
-    "ImpactChannels": [
-      "Reg changes"
-    ],
-    "Shocks": {
-      "Level 2 Cap": 50
-    },
-    "MetricsDelta": {
-      "level2a_agency_mbs_pct": 1,
-      "level2b_corp_munis_pct": 0.5
-    },
-    "TradeList": [
-      "Rebalance towards Level 2 assets within new regulatory limits"
-    ],
-    "Assumptions": "Temporary regulatory relief is enacted to support bank liquidity."
-  },
-  {
-    "Scenario": "Stable Economic Conditions",
-    "Description": "Economic conditions remain stable, leading to no significant changes in rates or spreads.",
-    "Probability": 0.1,
-    "Rationale": "Despite volatility, a period of stability is possible as markets digest prior moves.",
+    "Rationale": "Ongoing inflationary pressures and restrictive monetary policy increase funding costs and risk-off sentiment, negatively impacting liquidity and capital ratios.",
     "ImpactChannels": [
       "Rates",
-      "Credit OAS",
-      "MBS basis"
+      "Credit",
+      "Deposits"
     ],
     "Shocks": {
-      "Rate": 0,
-      "Credit OAS": 0,
-      "MBS Basis": 0
-    },
-    "MetricsDelta": {
-      "level1_tsys_pct": 0,
-      "level2a_agency_mbs_pct": 0,
-      "level2b_corp_munis_pct": 0
+      "Rates": 25,
+      "Curve": "bear_steepener",
+      "IG_OAS": 20,
+      "HY_OAS": 45,
+      "MBS_Basis": 10
     },
     "TradeList": [
-      "Maintain current HQLA allocations"
+      "SELL 10y UST",
+      "REDUCE MBS holdings"
     ],
-    "Assumptions": "No material macro or regulatory shocks occur over the next 6 months."
+    "MetricsDelta": {
+      "ΔLCR": -10.0,
+      "ΔNSFR": -5.0,
+      "ΔNII": 1.0
+    },
+    "Assumptions": "Inflation remains above target; Fed continues rate hikes; deposit outflows increase modestly."
+  },
+  {
+    "Scenario": "Geopolitical Tensions Escalate",
+    "Description": "Escalating geopolitical risks trigger market volatility and a flight to quality. Credit spreads widen sharply and deposit outflows stress liquidity.",
+    "Probability": 0.15,
+    "Rationale": "Market uncertainty from geopolitical events drives risk aversion, wider spreads, and potential deposit flight, impacting HQLA and regulatory ratios.",
+    "ImpactChannels": [
+      "Credit",
+      "Deposits",
+      "Rates"
+    ],
+    "Shocks": {
+      "Rates": 15,
+      "Curve": "bear_steepener",
+      "IG_OAS": 30,
+      "HY_OAS": 50,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "BUY 2y UST",
+      "MONITOR deposit outflows"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -15.0,
+      "ΔNSFR": -10.0,
+      "ΔNII": -1.5
+    },
+    "Assumptions": "Geopolitical escalation leads to risk-off flows and increased funding stress."
+  },
+  {
+    "Scenario": "Gradual Disinflation with Anchored Expectations",
+    "Description": "Inflation trends downward slowly while expectations remain anchored, allowing for gradual rate cuts and stable HQLA demand.",
+    "Probability": 0.3,
+    "Rationale": "Moderate disinflation and anchored expectations support stable flows into HQLA, maintaining liquidity and capital ratios.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -15,
+      "Curve": "bull_flattener",
+      "IG_OAS": -10,
+      "HY_OAS": -5,
+      "MBS_Basis": -5
+    },
+    "TradeList": [
+      "BUY 5y UST",
+      "ADD MBS exposure"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 3.0,
+      "ΔNSFR": 1.0,
+      "ΔNII": -0.5
+    },
+    "Assumptions": "Disinflation occurs gradually; consumer and business confidence remain stable."
+  },
+  {
+    "Scenario": "Strong Corporate Balance Sheets and Fiscal Support",
+    "Description": "Robust corporate fundamentals and fiscal stimulus keep credit spreads tight and support HQLA valuations.",
+    "Probability": 0.15,
+    "Rationale": "Strong balance sheets and government support reinforce market confidence, enhancing HQLA and regulatory ratios.",
+    "ImpactChannels": [
+      "Credit",
+      "MBS",
+      "Rates"
+    ],
+    "Shocks": {
+      "Rates": -10,
+      "Curve": "bull_flattener",
+      "IG_OAS": -15,
+      "HY_OAS": -10,
+      "MBS_Basis": -3
+    },
+    "TradeList": [
+      "BUY IG Credit",
+      "ADD Agency MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 2.0,
+      "ΔNSFR": 1.5,
+      "ΔNII": 0.8
+    },
+    "Assumptions": "Corporate earnings remain strong; fiscal support is enacted."
+  },
+  {
+    "Scenario": "Regulatory Tightening and Market Volatility",
+    "Description": "Unexpected regulatory changes tighten liquidity requirements, increasing funding costs and market volatility.",
+    "Probability": 0.15,
+    "Rationale": "Tighter regulations and market volatility drive risk-off behavior, wider spreads, and pressure on HQLA ratios.",
+    "ImpactChannels": [
+      "Regulation",
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": 20,
+      "Curve": "bear_steepener",
+      "IG_OAS": 25,
+      "HY_OAS": 50,
+      "MBS_Basis": 12
+    },
+    "TradeList": [
+      "INCREASE cash reserves",
+      "REDUCE Level 2 HQLA"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -8.0,
+      "ΔNSFR": -3.0,
+      "ΔNII": -1.2
+    },
+    "Assumptions": "Regulatory changes are implemented with short notice; market reacts with risk aversion."
   }
 ]

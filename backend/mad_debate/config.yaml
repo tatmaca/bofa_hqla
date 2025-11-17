@@ -34,7 +34,7 @@ debate:
   top_p: 0.9
   rounds: 4
   runs: 5
-  max_tokens: 900
+  max_tokens: 10000
   seed: 42
 
 prompts:

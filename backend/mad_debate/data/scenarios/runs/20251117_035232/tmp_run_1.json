@@ -1,0 +1,193 @@
+[
+  {
+    "Scenario": "Bear Steepening with Rising Spreads",
+    "Description": "A bear steepening yield curve occurs, with the 10-year yield rising by 50bps while the 2-year yield rises by only 10bps. IG spreads widen by 15bps and HY spreads widen by 45bps.",
+    "Probability": 0.18,
+    "Rationale": "Inflationary pressures and Fed policy shifts could lead to a bear steepening, increasing borrowing costs and widening credit spreads due to heightened risk aversion.",
+    "ImpactChannels": [
+      "Rates (50bps)",
+      "Curve (bear steepener)",
+      "Credit OAS (IG +15, HY +45)"
+    ],
+    "Shocks": {
+      "move": 50,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $2bn in 10-year USTs",
+      "Reduce $1bn in HY corporates"
+    ],
+    "Assumptions": "Consumer credit risk increases, leading to higher defaults in high-yield sectors."
+  },
+  {
+    "Scenario": "Regulatory Policy Changes",
+    "Description": "New regulatory requirements are introduced, increasing TLAC and liquidity add-ons, resulting in a 20bps increase in capital requirements.",
+    "Probability": 0.15,
+    "Rationale": "Regulatory discussions suggest potential changes could be implemented, affecting capital and liquidity ratios for G-SIBs.",
+    "ImpactChannels": [
+      "Reg changes (TLAC increase)",
+      "Credit OAS (stable)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "stable",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Increase capital reserves by $5bn",
+      "Reduce wholesale funding by $2bn"
+    ],
+    "Assumptions": "Regulatory clarity increases, leading to immediate adjustments in capital structure."
+  },
+  {
+    "Scenario": "Stable Rates with Deposit Runoff",
+    "Description": "Interest rates remain stable, but we experience a 5% runoff in retail and wealth deposits due to consumers adapting to economic pressures.",
+    "Probability": 0.12,
+    "Rationale": "Stable rates coupled with economic stress could lead to a decline in deposits as consumers prioritize liquidity.",
+    "ImpactChannels": [
+      "Deposits run-off (5%)",
+      "Rates (stable)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "stable",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -4
+    },
+    "TradeList": [
+      "Add $1bn in short-term funding via repo",
+      "Increase marketing for retail deposits"
+    ],
+    "Assumptions": "Consumer spending tightens, impacting deposit balances significantly."
+  },
+  {
+    "Scenario": "Controlled Inflation with Gradual Easing",
+    "Description": "Inflation stabilizes around 3%, leading to a gradual easing of monetary policy. The 10-year yield declines by 25bps while the 2-year yield remains unchanged.",
+    "Probability": 0.18,
+    "Rationale": "Controlled inflation and resilient consumer behavior support a gradual easing, benefiting the bank's long-term assets and improving net interest income.",
+    "ImpactChannels": [
+      "Rates (10Y -25bps)",
+      "Curve (bull flattening)",
+      "Credit OAS (tightening)"
+    ],
+    "Shocks": {
+      "move": -25,
+      "yield_curve": "bull_flattening",
+      "credit_spreads": {
+        "ig_oas": -10,
+        "hy_oas": -5
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 3
+    },
+    "TradeList": [
+      "Add $2bn in Agency MBS",
+      "Rotate $1bn into munis"
+    ],
+    "Assumptions": "Consumer spending remains strong, with SMEs showing resilience and inflation pressures easing."
+  },
+  {
+    "Scenario": "Tighter Spreads with Economic Recovery",
+    "Description": "An unexpected economic recovery leads to tightening credit spreads of 15bps in IG and 25bps in HY, improving overall market sentiment.",
+    "Probability": 0.15,
+    "Rationale": "Improved economic indicators could lead to a rally in credit markets, benefiting Bank of America's HQLA and overall profitability.",
+    "ImpactChannels": [
+      "Credit OAS (IG -15, HY -25)",
+      "Rates (stable)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "stable",
+      "credit_spreads": {
+        "ig_oas": -15,
+        "hy_oas": -25
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 7,
+      "NSFR": 4
+    },
+    "TradeList": [
+      "Increase $1.5bn in high-quality corporate bonds",
+      "Reduce $500mn in USTs"
+    ],
+    "Assumptions": "Corporate earnings surpass expectations, leading to reduced default fears and increased investor confidence."
+  },
+  {
+    "Scenario": "Stable Rates with Diversified Deposits",
+    "Description": "Interest rates remain stable, while Bank of America sees a 3% growth in its diversified deposit base, enhancing liquidity.",
+    "Probability": 0.12,
+    "Rationale": "A stable rate environment and diversified funding sources can support liquidity and net interest income, offsetting potential outflows.",
+    "ImpactChannels": [
+      "Deposits growth (3%)",
+      "Rates (stable)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "stable",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 6,
+      "NSFR": 2
+    },
+    "TradeList": [
+      "Expand retail deposit incentives",
+      "Add $1bn in short-term government securities"
+    ],
+    "Assumptions": "Consumer confidence remains high, driving deposit growth, and the competitive landscape remains stable."
+  },
+  {
+    "Scenario": "Market Volatility with Flight to Quality",
+    "Description": "Increased market volatility leads to a temporary flight to quality, tightening spreads by 10bps in IG and 15bps in HY.",
+    "Probability": 0.1,
+    "Rationale": "Heightened uncertainty may create opportunities for safe-haven assets, benefiting BoA's HQLA and improving liquidity ratios.",
+    "ImpactChannels": [
+      "Credit OAS (IG -10, HY -15)",
+      "Rates (stable)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "stable",
+      "credit_spreads": {
+        "ig_oas": -10,
+        "hy_oas": -15
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 4,
+      "NSFR": 3
+    },
+    "TradeList": [
+      "Increase holdings in USTs by $1bn",
+      "Add $500mn in Agency MBS"
+    ],
+    "Assumptions": "Market conditions fluctuate but ultimately favor high-quality liquid assets, leading to increased demand."
+  }
+]

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image"; // (Optional) Next Image for real logos
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,15 +17,28 @@ import { motion } from "framer-motion";
 // --- Replace these with real API calls / events wired to your Python backend --- //
 function fakeWait(ms:number) { return new Promise(r => setTimeout(r, ms)); }
 
+function cleanStageLine(line?: string | null) {
+  if (!line) return "";
+  let txt = line.replace(/^\d{2}:\d{2}:\d{2}\s*/,"");
+  txt = txt.replace(/^\[[A-Z]+\]\s*/,"");
+  txt = txt.replace(/^\[[^\]]+\]\s*/,"");
+  txt = txt.replace(/\[INFO]\s*/i,"");
+  txt = txt.replace(/Output preview:\s*/i,"");
+  return txt.trim();
+}
+
 async function runScenarioGen(
   setter:(s:any)=>void,
   params: {
     portfolioName: string;
     yaml: string;
     debateRounds: number;
+    debateRuns?: number;
     debaterAPrompt: string;
     debaterBPrompt: string;
     judgePrompt: string;
+    offlineSample?: boolean;
+    newsContext?: string;
   }
 ){
   const {
@@ -33,9 +46,14 @@ async function runScenarioGen(
     yaml,
     debateRounds,
     debaterAPrompt,
+    debateRuns,
     debaterBPrompt,
     judgePrompt,
+    offlineSample,
+    newsContext,
   } = params;
+  const totalMessages =
+    Math.max(1, (debateRuns || 1) * ((debateRounds || 1) * 2 + 1));
 
   // Reset state, clear old debate + scenarios
   setter((s:any)=>({
@@ -43,11 +61,18 @@ async function runScenarioGen(
     status:"running",
     pct:10,
     liveStage:null,
-    totalRuns:null,
+    totalRuns: debateRuns || null,
     logs:[
       ...s.logs,
-      `Calling MAD backend for "${portfolioName}" (${debateRounds} rounds)…`,
+      `Calling MAD backend for "${portfolioName}" (${debateRounds} rounds${offlineSample ? ", offline sample" : ""}${
+        newsContext ? ", news context applied" : ""
+      })…`,
     ],
+    liveDebate: {},
+    liveRunOrder: [],
+    activeLiveRun: null,
+    expectedMessages: totalMessages,
+    seenMessages: 0,
     output:{
       ...(s.output || {}),
       debate: [],
@@ -72,18 +97,74 @@ async function runScenarioGen(
 
   const applyStage = (stage: any) => {
     if (!stage || typeof stage !== "object") return;
-    const stageText = typeof stage.text === "string" ? stage.text : null;
-    const totalRuns = typeof stage.totalRuns === "number" ? stage.totalRuns : undefined;
-    const progress = typeof stage.progress === "number" ? Math.round(stage.progress * 100) : undefined;
-    setter((s:any)=>({
-      ...s,
-      liveStage: stageText || s.liveStage,
-      totalRuns: totalRuns ?? s.totalRuns,
-      pct:
-        s.status === "running" && typeof progress === "number"
-          ? Math.max(s.pct, Math.min(progress, 98))
-          : s.pct,
-    }));
+    setter((s:any)=>{
+      const rawStageText = typeof stage.text === "string" ? stage.text : "";
+      const stageMessage = typeof stage.message === "string" ? stage.message : "";
+      const parsedStage = extractScenariosAndStripJson(stageMessage || rawStageText);
+      const stageText = parsedStage.cleanText || cleanStageLine(rawStageText);
+      const rawSegments = collectJsonSegments(stageMessage || rawStageText);
+      const rawMatrixText = rawSegments.length ? rawSegments.join("\n\n") : undefined;
+      let entryScenarios =
+        (Array.isArray(stage.scenarios) && stage.scenarios.length
+          ? stage.scenarios
+          : parsedStage.scenarios) || [];
+      if (!entryScenarios.length && rawSegments.length) {
+        const fallback = rawSegments.flatMap((segment) =>
+          tryParseScenarioPayload(segment)
+        );
+        if (fallback.length) {
+          entryScenarios = fallback;
+        }
+      }
+      const totalRuns = typeof stage.totalRuns === "number" ? stage.totalRuns : undefined;
+      const expected = s.expectedMessages || 0;
+      const increment =
+        stage.phase === "debater" || stage.phase === "judge" ? 1 : 0;
+      const newSeen = Math.min((s.seenMessages || 0) + increment, expected || Number.MAX_SAFE_INTEGER);
+      const progressFromMessages =
+        expected > 0 ? Math.min(98, Math.round((newSeen / expected) * 90) + 5) : s.pct;
+      const runKey =
+        typeof stage.run === "number" && Number.isFinite(stage.run)
+          ? stage.run
+          : 1;
+      const baseLiveDebate =
+        Array.isArray(s.liveDebate)
+          ? { 1: s.liveDebate }
+          : s.liveDebate && typeof s.liveDebate === "object"
+          ? { ...s.liveDebate }
+          : {};
+      const existingRunDebate = Array.isArray(baseLiveDebate[runKey])
+        ? baseLiveDebate[runKey]
+        : [];
+      const entryText = stageMessage || cleanStageLine(rawStageText);
+      if (entryText && (stage.speakerLabel || stage.phase)) {
+        const entry = {
+          role: stage.speakerLabel || (stage.phase ? stage.phase.toUpperCase() : "Update"),
+          text: entryText,
+          round: stage.round ?? null,
+          run: stage.run ?? null,
+          scenarios: entryScenarios,
+          rawMatrixText,
+          matrixId: entryScenarios.length ? `${runKey}-${stage.round ?? 0}-${Date.now()}` : undefined,
+        };
+        baseLiveDebate[runKey] = [...existingRunDebate, entry].slice(-40);
+      }
+      let liveRunOrder = Array.isArray(s.liveRunOrder) ? [...s.liveRunOrder] : [];
+      if (!liveRunOrder.includes(runKey)) {
+        liveRunOrder = [...liveRunOrder, runKey];
+      }
+      return {
+        ...s,
+        liveStage: stageText || s.liveStage,
+        totalRuns: totalRuns ?? s.totalRuns,
+        pct: Math.max(s.pct, progressFromMessages),
+        liveDebate: baseLiveDebate,
+        liveRunOrder,
+        activeLiveRun: runKey,
+        expectedMessages: expected,
+        seenMessages: newSeen,
+      };
+    });
   };
 
   const applyResult = (data: any) => {
@@ -145,6 +226,11 @@ async function runScenarioGen(
       pct:100,
       logs:[...s.logs, "Loaded live MAD debate + scenarios."],
       liveStage:"MAD judge consolidated scenarios.",
+      liveDebate: {},
+      liveRunOrder: [],
+      activeLiveRun: null,
+      expectedMessages: 0,
+      seenMessages: 0,
       output:{
         ...(s.output || {}),
         debate: sortedDebate,
@@ -165,9 +251,12 @@ async function runScenarioGen(
         portfolioName,
         yaml,
         debateRounds,
+        debateRuns,
         debaterAPrompt,
         debaterBPrompt,
         judgePrompt,
+        offlineSample: offlineSample ? true : undefined,
+        newsContext,
       }),
     });
 
@@ -227,6 +316,11 @@ async function runScenarioGen(
       status:"idle",
       pct:0,
       liveStage:`MAD run failed.`,
+      liveDebate: {},
+      liveRunOrder: [],
+      activeLiveRun: null,
+      expectedMessages: 0,
+      seenMessages: 0,
       logs:[
         ...s.logs,
         `Scenario generation failed: ${String(err?.message || err)}`,
@@ -249,8 +343,9 @@ async function runImpact(setter:(s:any)=>void, scenarioMatrix:any[] = []){
   await fakeWait(600);
 
   const matrix = Array.isArray(scenarioMatrix) ? scenarioMatrix : [];
+  const sliceCount = matrix.length > 12 ? 12 : matrix.length;
   const metrics = matrix.length
-    ? matrix.slice(0, 6).map((sc:any, idx:number) => {
+    ? matrix.slice(0, sliceCount).map((sc:any, idx:number) => {
         const name = sc.Scenario || sc.name || `Scenario ${idx + 1}`;
         const probRaw =
           typeof sc.Probability === "number"
@@ -341,33 +436,42 @@ async function runOptimize(setter:(s:any)=>void, scenarioMatrix:any[] = [], focu
 }
 
 async function runMonitor(setter:(s:any)=>void, scenarioMatrix:any[] = []){
-  setter((s:any)=>({...s,status:"running", pct:18, logs:[...s.logs,"Scraping FOMC/Fed-speak, UST auction, geopolitics…"] }));
-  await fakeWait(600);
-  setter((s:any)=>({...s, pct:70, logs:[...s.logs,"Classified: headlines mapped to judge scenarios"] }));
-  await fakeWait(600);
-
-  const matrix = Array.isArray(scenarioMatrix) ? scenarioMatrix : [];
-  const stories = matrix.slice(0, 3).map((sc:any, idx:number) => {
-    const name = sc.Scenario || sc.name || `Scenario ${idx + 1}`;
-    const desc =
-      sc.Description ||
-      sc.Rationale ||
-      sc.Assumptions ||
-      "Monitoring ongoing drivers.";
-    return `• ${name}: ${desc}`;
-  });
-  const summary = matrix.length
-    ? `News focus tracks the top judge scenarios (${matrix
-        .slice(0, 2)
-        .map((sc:any) => sc.Scenario || sc.name)
-        .filter(Boolean)
-        .join(", ")}).`
-    : "News focus unchanged; run scenario generation for fresh signals.";
-  const brief = [summary, ...stories].join("\n");
-
-  setter((s:any)=>({...s,status:"done", pct:100, logs:[...s.logs,"Briefing drafted + alerts queued"],
-    output:{brief}
+  setter((s:any)=>({
+    ...s,
+    status:"running",
+    pct:18,
+    logs:[...s.logs,"Running news cycle + bucket analysis…"],
   }));
+  try {
+    const res = await fetch("/api/news", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      cache:"no-store",
+      body: JSON.stringify({ scenarioMatrix }),
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const headline = data?.summary?.headline || "News cycle refreshed.";
+    setter((s:any)=>({
+      ...s,
+      status:"done",
+      pct:100,
+      logs:[...s.logs, headline],
+      output:data,
+    }));
+    return data;
+  } catch (err:any) {
+    console.error("runMonitor error", err);
+    setter((s:any)=>({
+      ...s,
+      status:"idle",
+      pct:0,
+      logs:[...s.logs, `News cycle failed: ${String(err?.message || err)}`],
+    }));
+    return null;
+  }
 }
 
 const Step = ({index, title, desc, status}:{index:number;title:string;desc:string;status:"idle"|"running"|"done"}) => {
@@ -394,166 +498,61 @@ export default function HqlaE2EDashboard(){
   const [portfolioName, setPortfolioName] = useState("Example HQLA Portfolio");
   const [yaml, setYaml] = useState("# shocks.yaml\nmove_index: 110\nyield_curve: bear_steepener\ncredit_spreads: { ig_oas: +15, hy_oas: +45 }\n");
 
-  const [scenario, setScenario] = useState({status:"idle", pct:0, logs:[], output:null, liveStage:null, totalRuns:null} as any);
+  const [scenario, setScenario] = useState({status:"idle", pct:0, logs:[], output:null, liveStage:null, totalRuns:null, liveDebate:{}, liveRunOrder:[], activeLiveRun:null, expectedMessages:0, seenMessages:0} as any);
   const [impact, setImpact] = useState({status:"idle", pct:0, logs:[], output:null} as any);
   const [opt, setOpt] = useState({status:"idle", pct:0, logs:[], output:null} as any);
   const [mon, setMon] = useState({status:"idle", pct:0, logs:[], output:null} as any);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
   const [selectedDebateRun, setSelectedDebateRun] = useState<number | null>(null);
+  const [offlineMode, setOfflineMode] = useState(false);
+  const [activeNewsArticle, setActiveNewsArticle] = useState<any | null>(null);
 
   // Debate configuration (mirrors Python MAD config high-level knobs)
   const [debateRounds, setDebateRounds] = useState(3);
+  const [debateRuns, setDebateRuns] = useState(5);
   const [debaterAPrompt, setDebaterAPrompt] = useState(
-  `You are a **Senior Bank Risk Strategist** on a global HQLA (High-Quality Liquid Assets) oversight team.
-  Your task is to generate **plausible 6-month forward scenarios** that materially affect the bank’s HQLA portfolio.  
-  You must think like a **hawkish macro strategist** focused on downside protection, funding stress, and policy tightening risks.  
-
-  Follow these instructions carefully:
+  `You are a **Senior Treasury Strategist at Bank of America (BoA)**.  BoA is a US G-SIB with ~$2.5T assets, $1T+ deposits, diversified consumer/commercial franchises, and global markets desks across USD/EUR/GBP/LatAm/Asia.  The HQLA stack spans USTs, Agencies/MBS, munis, GBP/EUR sovereigns, and cash, funded via retail/wealth deposits, wholesale term debt, FHLB, repo, and CP.  Protect BoA’s LCR ≥ internal targets, NSFR stability, OCI, and earnings-at-risk.
 
   1. **Objective:**  
-    Propose a set of distinct, finance-consistent macro, market, and regulatory scenarios that could plausibly unfold in the next six months.  
-    Each scenario should meaningfully affect HQLA valuations, capital ratios, or liquidity metrics (LCR, NSFR, OCI).
+    Propose 3–5 distinct 6-month scenarios that materially affect BoA’s HQLA valuations, capital ratios, liquidity metrics, or NII.
 
-  2. **Shocks:**  
-    For every scenario, specify **quantitative shocks** with explicit magnitudes and directions:  
-    - **Interest Rates:** Level shift in bp (+/–) and slope change (bear/bull steepener/flattener).  
-    - **Credit Spreads:** Change in Investment-Grade (IG) and High-Yield (HY) OAS, in bp.  
-    - **MBS Basis:** Change in MBS spread vs Treasuries.  
-    - **Deposits / Funding:** Net outflow % and runoff factor adjustment.  
-    - **Regulatory / Policy:** Announced or expected policy actions that directly influence liquidity or capital rules.  
+  2. **Shocks (ALL quantitative):**  
+    - Interest-rate level and curve moves (USD focus; cite cross-currency spillovers when relevant).  
+    - Credit spreads (IG/HY/financials), MBS basis, sovereign spreads.  
+    - Deposits/funding: retail beta, wealth runoff, wholesale spread moves, secured funding costs.  
+    - Regulatory/policy actions: Basel Endgame, GSIB surcharge, TLAC, liquidity add-ons.
 
-  3. **Rationale:**  
-    For each scenario, provide a concise but rigorous explanation of **why** it could occur, referring to plausible macro drivers (e.g., inflation persistence, fiscal issuance, central bank stance, geopolitical shocks, market sentiment).  
-    Cite at least one **transmission channel** such as Rates, Curve, Credit OAS, MBS basis, Deposits, or Regulation.
+  3. **Rationale & Channels:**  
+    Tie each scenario to BoA-relevant drivers (consumer balance sheets, CRE, commodities, geopolitics, Treasury issuance).  Cite at least one channel from Rates/Curve/Credit/MBS/Deposits/Regulation/Commodity Prices.
 
   4. **Probabilities:**  
-    Assign each scenario a probability between 0 and 1 such that **probabilities sum to ~1.0 across all scenarios in this round.**  
-    Probabilities should be coherent and grounded in relative likelihoods given current macro conditions.
+    Assign probabilities summing to ~1 across the set with justification.
 
   5. **Portfolio Awareness:**  
-    Assume full visibility into the bank’s HQLA positions (USTs, MBS, Agencies, cash).  
-    Explicitly consider portfolio sensitivities: duration buckets, convexity, Level 2 asset caps, and liquidity runoff assumptions.
+    Reference BoA’s Level 1/2 mix, duration/convexity, Level 2 caps, OCI sensitivity, and funding stack.
 
   6. **Formatting:**  
-    Always output a valid JSON array. Each element must include the following keys:  
-    \`\`\`json
-    [
-      {
-        "Scenario": "string",
-        "Description": "string",
-        "Probability": float (0–1),
-        "Rationale": "string",
-        "ImpactChannels": ["Rates", "Credit", "MBS", "Deposits", "Regulation"],
-        "Shocks": {"Rates": +25, "Curve": "bear_steepener", "IG_OAS": +20, "HY_OAS": +45, "MBS_Basis": +10},
-        "Assumptions": "string"
-      }
-    ]
-    \`\`\`
-
-  7. **Style:**  
-    Be rigorous, concise, and internally consistent. No generic language.  
-    Prioritize scenarios that stress LCR/NSFR and capital without breaking realism.  
-    Respond as a domain expert to be reviewed by the Judge model.`
+    Output a strict JSON array. Every element must include: ["Scenario","Description","Probability","Rationale","ImpactChannels","Shocks","MetricsDelta","TradeList","Assumptions"].  Shocks/Metrics must be numeric; TradeList must list concrete BoA actions (e.g., "Add $1bn bills via repo").`
   );
   const [debaterBPrompt, setDebaterBPrompt] = useState(
-  `You are the **Devil’s Advocate** (macro dove / soft-landing strategist) responding to the Proponent’s scenarios.  
-  Your role is to **propose, challenge, and refine** 6-month forward HQLA scenarios that emphasize **benign macro conditions**, resilient funding, and controlled inflation.  
+  `You are the **Devil’s Advocate / soft-landing strategist for Bank of America**.  Respond to the Proponent by emphasizing benign outcomes while still referencing BoA’s HQLA exposures and funding stack.
 
-  Instructions:
+  1. **Counter-Framing:** Challenge risk-off cases by highlighting controlled inflation, gradual easing, resilient consumers/SMEs, and diversification of BoA’s deposits/trading flows.
 
-  1. **Counter-Framing:**  
-    For every aggressive or risk-off scenario proposed by the Proponent, challenge its assumptions.  
-    Argue for softer macro outcomes such as:  
-    - Slower disinflation but anchored expectations.  
-    - Gradual rate cuts or curve flattening from easing policy.  
-    - Stable credit spreads supported by fiscal and corporate balance sheets.  
-    - Positive carry and inflows into short-duration Treasuries.
+  2. **Constructive Scenarios:** Provide your own quantified scenarios (same schema) that favor curve bull-steepeners/flatteners, tighter spreads, stable deposit betas, or regulatory relief that benefits BoA’s Level 1/2 mix.
 
-  2. **Constructive Scenarios:**  
-    Present your own set of scenarios that could plausibly result in a **benign or constructive** market environment for HQLA.  
-    Quantify the same shock dimensions as the Proponent, but with directionally opposite or moderated magnitudes.
+  3. **Portfolio Impact:** Show how BoA can redeploy liquidity (e.g., add Agency MBS, rotate into munis/sovereigns, term out wholesale funding) while protecting OCI/NII.
 
-  3. **Portfolio Impact Awareness:**  
-    Consider how stable or falling rates, tighter spreads, and ample liquidity support the bank’s HQLA composition.  
-    Highlight cases where Level 1 assets outperform, carry improves, or NII benefits from reinvestment opportunities.
-
-  4. **Probabilities:**  
-    Assign coherent probabilities summing to ~1.0 across your scenarios.  
-    Ensure each probability reflects a realistic assessment of macro stabilization vs risk escalation.
-
-  5. **Formatting:**  
-    Return a **JSON array** identical in structure to the Proponent’s, ensuring compatibility for the Judge:
-    \`\`\`json
-    [
-      {
-        "Scenario": "string",
-        "Description": "string",
-        "Probability": float,
-        "Rationale": "string",
-        "ImpactChannels": ["Rates", "Credit", "MBS", "Deposits", "Regulation"],
-        "Shocks": {"Rates": -25, "Curve": "bull_flattener", "IG_OAS": -5, "HY_OAS": -10, "MBS_Basis": -5},
-        "Assumptions": "string"
-      }
-    ]
-    \`\`\`
-
-  6. **Tone:**  
-    Remain analytical, quantitative, and evidence-based.  
-    You are not dismissing risk — you are reframing it through a softer lens, emphasizing funding stability and market resilience.`
+  4. **Formatting:** Return a JSON array identical to the Proponent’s structure with concrete BoA trades/funding actions in TradeList.`
   );
   const [judgePrompt, setJudgePrompt] = useState(
-  `You are the **Chief Risk Officer** and **Chair of the HQLA Risk Committee**.  
-  Your task is to **review, adjudicate, and merge** the outputs from the Proponent and Devil’s Advocate debates.  
-  You must apply **prudence, plausibility, and regulatory discipline** to select a final set of scenarios that will feed into capital, liquidity, and NII modeling.
+  `You are the **Chief Risk Officer for Bank of America’s HQLA Committee**.  
+  Review the Proponent and Devil’s Advocate submissions and publish the final scenario set BoA will use for capital, liquidity, and NII modeling.
 
-  Follow these steps:
-
-  1. **Evaluate Submissions:**  
-    - Compare each side’s scenarios for realism, distinctness, and internal consistency.  
-    - Discard scenarios that violate time horizon (beyond 6 months), lack quantitative shocks, or duplicate another scenario’s drivers.  
-    - Penalize overly vague rationales or probability sets that do not sum to ~1.
-
-  2. **Merge Logic:**  
-    - Retain or synthesize **3–6 final scenarios** that represent a balanced distribution across macro outcomes: hawkish, neutral, and dovish.  
-    - Ensure coverage of at least one risk-off (stress), one base, and one benign case.  
-    - Normalize total probabilities to sum to 1.0.
-
-  3. **Regulatory Constraints:**  
-    Enforce internal risk guardrails:  
-    - Liquidity Coverage Ratio (LCR) ≥ {lcr_min_pct}%.  
-    - Level 2 assets ≤ {level2_cap_pct}% of total HQLA.  
-    - Ensure all shocks are interpretable in the context of Basel liquidity stress testing.
-
-  4. **Scoring Criteria:**  
-    For each candidate scenario, assess:  
-    - **Plausibility** (macroeconomic coherence).  
-    - **Distinctness** (adds unique information).  
-    - **Decision-usefulness** (guides portfolio actions).  
-    - **Impact Breadth** (affects multiple channels, not isolated).  
-
-  5. **Output:**  
-    Produce a **STRICT JSON array** containing the final adjudicated scenarios, each formatted as:  
-    \`\`\`json
-    [
-      {
-        "Scenario": "string",
-        "Description": "string",
-        "Probability": float,
-        "Rationale": "string",
-        "ImpactChannels": ["Rates", "Credit", "MBS", "Deposits", "Regulation"],
-        "Shocks": {"Rates": +50, "Curve": "bear_steepener", "IG_OAS": +20, "HY_OAS": +40, "MBS_Basis": +15},
-        "TradeList": ["BUY 2y UST", "SELL 30y MBS"],
-        "MetricsDelta": {"ΔLCR": -4.0, "ΔNSFR": -1.5, "ΔNII": +2.1},
-        "Assumptions": "string"
-      }
-    ]
-    \`\`\`
-    Ensure the output is valid JSON parsable by downstream systems (no extra commentary).  
-
-  6. **Voice:**  
-    Speak as a disciplined risk chair — impartial, quantitative, concise.  
-    Do not speculate; evaluate.  
-    Your final decision represents the bank’s consensus risk view to be used for HQLA optimization.`
+  - Enforce realism (6-month horizon, quantitative shocks, probabilities ≈ 1).  
+  - Keep 3–6 scenarios spanning stress/base/benign outcomes and touching BoA-relevant channels (Rates, Curve, Credit, MBS, Deposits, Regulation, Commodity Prices).  
+  - Ensure TradeList items are feasible for BoA (balance sheet, funding mix, regulatory constraints).  
+  - Output ONLY the strict JSON array matching the schema (no commentary, no markdown).`
   );
 
   // Popups
@@ -563,7 +562,7 @@ export default function HqlaE2EDashboard(){
   const [openOpt, setOpenOpt] = useState(false);
   const [openMon, setOpenMon] = useState(false);
   const [openDebateParams, setOpenDebateParams] = useState(false);
-  const [matrixModal, setMatrixModal] = useState<{ title: string; scenarios: any[] } | null>(null);
+  const [matrixModal, setMatrixModal] = useState<{ title: string; scenarios: any[]; prevScenarios?: any[]; rawMatrixText?: string } | null>(null);
 
   const pipelinePct = useMemo(()=>{
     const pcs = [scenario.pct||0, impact.pct||0, opt.pct||0, mon.pct||0];
@@ -581,15 +580,119 @@ export default function HqlaE2EDashboard(){
 
   // Debate run selection logic
   const debateMessages = (scenario.output?.debate || []) as any[];
-  const availableRuns = Array.from(
-    new Set(debateMessages.map((m) => (typeof m.run === "number" ? m.run : 1)))
+  const historicalRuns = Array.from(
+    new Set(
+      debateMessages.map((m) => (typeof m.run === "number" ? m.run : 1))
+    )
   ).sort((a, b) => a - b);
-  const defaultRun = availableRuns.length ? availableRuns[availableRuns.length - 1] : null;
+  const liveRunOrder = Array.isArray(scenario.liveRunOrder)
+    ? scenario.liveRunOrder.filter((r: any) => typeof r === "number")
+    : [];
+  const runSet = new Set<number>();
+  historicalRuns.forEach((r) => runSet.add(r));
+  liveRunOrder.forEach((r: number) => {
+    if (typeof r === "number") runSet.add(r);
+  });
+  if (typeof scenario.activeLiveRun === "number") {
+    runSet.add(scenario.activeLiveRun);
+  }
+  const availableRuns = Array.from(runSet).sort((a, b) => a - b);
+  const defaultRun =
+    scenario.status === "running" && typeof scenario.activeLiveRun === "number"
+      ? scenario.activeLiveRun
+      : availableRuns.length
+      ? availableRuns[availableRuns.length - 1]
+      : null;
   const activeRun = selectedDebateRun ?? defaultRun;
-  const activeDebate = activeRun == null
-    ? debateMessages
-    : debateMessages.filter((m) => (typeof m.run === "number" ? m.run : 1) === activeRun);
+  const liveDebateByRun =
+    Array.isArray(scenario.liveDebate)
+      ? { 1: scenario.liveDebate }
+      : scenario.liveDebate && typeof scenario.liveDebate === "object"
+      ? scenario.liveDebate
+      : {};
+  const liveDebateForRun =
+    activeRun != null && Array.isArray(liveDebateByRun[activeRun])
+      ? liveDebateByRun[activeRun]
+      : [];
+  const activeDebate =
+    activeRun == null
+      ? debateMessages
+      : debateMessages.filter(
+          (m) => (typeof m.run === "number" ? m.run : 1) === activeRun
+        );
+  const previewDebate =
+    scenario.status === "running" && liveDebateForRun.length
+      ? liveDebateForRun
+      : activeDebate;
+  const newsOutput = mon.output;
+  const newsSummary = newsOutput?.summary;
+  const newsBuckets = Array.isArray(newsOutput?.buckets) ? newsOutput.buckets : [];
+  const newsArticles = Array.isArray(newsOutput?.articles) ? newsOutput.articles.slice(0, 6) : [];
+  const scenarioCsvSnapshot = newsOutput?.scenarioCsv;
+  const scenarioMetadata = scenario.output?.metadata;
+  const scenarioRunLabel =
+    scenarioMetadata?.run_timestamp ||
+    scenarioMetadata?.run_directory ||
+    scenarioMetadata?.runDirectory ||
+    null;
+  useEffect(()=>{
+    if (newsArticles.length) {
+      setActiveNewsArticle(newsArticles[0]);
+    } else {
+      setActiveNewsArticle(null);
+    }
+  },[newsOutput]);
 
+  const launchScenarioGen = async (options:any) => {
+    setSelectedScenario(null);
+    setSelectedDebateRun(null);
+    return runScenarioGen(setScenario, options);
+  };
+
+  const buildNewsContext = (news:any) => {
+    if (!news) return "";
+    const lines:string[] = [];
+    if (news.summary?.headline) lines.push(`Headline: ${news.summary.headline}`);
+    if (news.summary?.detail) lines.push(`Detail: ${news.summary.detail}`);
+    if (news.summary?.reason) lines.push(`Recommendation: ${news.summary.reason}`);
+    const uncovered = Array.isArray(news.buckets)
+      ? news.buckets
+          .filter((bucket:any)=>bucket.uncovered)
+          .map((bucket:any)=>`${bucket.label} (${bucket.count} stories)`)
+      : [];
+    if (uncovered.length) {
+      lines.push("Buckets lacking coverage: " + uncovered.join("; "));
+    }
+    if (Array.isArray(news.articles) && news.articles.length) {
+      lines.push("Representative headlines:");
+      news.articles.slice(0, 3).forEach((article:any) => {
+        lines.push(`- ${article.bucketLabel}: ${article.title}`);
+      });
+    }
+    return lines.join("\n");
+  };
+
+  const handleNewsUpdate = async () => {
+    if (!newsOutput) return;
+    const context = buildNewsContext(newsOutput);
+    const scenarioResult = await launchScenarioGen({
+      portfolioName,
+      yaml,
+      debateRounds,
+      debateRuns,
+      debaterAPrompt,
+      debaterBPrompt,
+      judgePrompt,
+      offlineSample: offlineMode,
+      newsContext: context,
+    });
+    const scenarioMatrix =
+      scenarioResult?.scenarioMatrix ||
+      scenario.output?.scenarioMatrix ||
+      [];
+    await runImpact(setImpact, scenarioMatrix);
+    await runOptimize(setOpt, scenarioMatrix);
+  };
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
       <header className="sticky top-0 z-10 backdrop-blur bg-white/70 border-b">
@@ -610,13 +713,15 @@ export default function HqlaE2EDashboard(){
           <div className="flex items-center gap-2">
             <Button variant="outline"><Download className="h-4 w-4 mr-2"/>Export Brief</Button>
             <Button onClick={async()=>{
-              const scenarioResult = await runScenarioGen(setScenario, {
+              const scenarioResult = await launchScenarioGen({
                 portfolioName,
                 yaml,
                 debateRounds,
+                debateRuns,
                 debaterAPrompt,
                 debaterBPrompt,
                 judgePrompt,
+                offlineSample: offlineMode,
               });
               const scenarioMatrix =
                 scenarioResult?.scenarioMatrix ||
@@ -683,9 +788,11 @@ export default function HqlaE2EDashboard(){
                       <div className="text-[11px] text-slate-500">
                         ← Portfolio input feeds MAD debate and scenario generation
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-[11px] text-slate-500">
-                          Rounds: <span className="font-medium">{debateRounds}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="text-[11px] text-slate-500 flex items-center gap-2">
+                          <span>Runs × <span className="font-medium">{debateRuns}</span></span>
+                          <span>•</span>
+                          <span>Rounds × <span className="font-medium">{debateRounds}</span></span>
                         </div>
                         {availableRuns.length > 0 && (
                           <div className="flex items-center gap-1">
@@ -702,15 +809,27 @@ export default function HqlaE2EDashboard(){
                                 <option key={r} value={r}>
                                   {r}
                                 </option>
-                              ))}
-                            </select>
-                          </div>
+                            ))}
+                          </select>
+                        </div>
                         )}
+                        <label className="flex items-center gap-1 text-[11px] text-slate-600">
+                          <input
+                            type="checkbox"
+                            className="h-3.5 w-3.5"
+                            checked={offlineMode}
+                            onChange={(e)=>setOfflineMode(e.target.checked)}
+                          />
+                          Offline sample
+                        </label>
                       </div>
                     </div>
                     <DebatePreview
-                      debate={activeDebate.slice(0, 4)}
-                      maxChars={400}
+                      debate={previewDebate}
+                      maxChars={1200}
+                      runOptions={availableRuns}
+                      activeRun={activeRun}
+                      onSelectRun={(run) => setSelectedDebateRun(run)}
                       onShowMatrix={(payload)=>setMatrixModal(payload)}
                     />
                     <div className="mt-2 text-[11px] text-slate-600">
@@ -731,13 +850,15 @@ export default function HqlaE2EDashboard(){
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={()=>runScenarioGen(setScenario, {
+                        onClick={()=>launchScenarioGen({
                           portfolioName,
                           yaml,
                           debateRounds,
+                          debateRuns,
                           debaterAPrompt,
                           debaterBPrompt,
                           judgePrompt,
+                          offlineSample: offlineMode,
                         })}
                       >
                         <PlayCircle className="h-4 w-4 mr-1"/>Run
@@ -750,8 +871,16 @@ export default function HqlaE2EDashboard(){
 
                 {/* Scenario Matrix */}
                 <div className="min-w-[380px] flex-1">
-                  <Step index={2} title="Scenario Matrix" desc="6 candidates → probs + channels" status={scenario.status as any}/>
+                  <Step index={2} title="Scenario Matrix" desc="Judge matrix (probabilities + channels)" status={scenario.status as any}/>
                   <div className="mt-2 rounded-lg border p-2">
+                    <div className="text-[11px] text-slate-500 mb-1">
+                      {scenarioRunLabel ? `Run timestamp: ${scenarioRunLabel}` : "Run MAD to populate this matrix."}
+                    </div>
+                    {scenarioMetadata?.news_context && (
+                      <div className="text-[11px] text-slate-400 mb-1">
+                        News context applied.
+                      </div>
+                    )}
                     <ScenarioMiniTable
                       data={scenario.output?.scenarios||[]}
                       onSelect={(name)=>setSelectedScenario(name)}
@@ -795,12 +924,114 @@ export default function HqlaE2EDashboard(){
                 <div className="min-w-[320px] flex-1">
                   <Step index={4} title="News Feedback" desc="Find news relevant to scenarios; closes the loop" status={mon.status as any}/>
                   <div className="mt-2 rounded-lg border p-2">
-                    <div className="rounded-lg border p-3 text-sm text-muted-foreground min-h-[100px]">
-                      {mon.output?.brief || "No news brief yet. Click Run Monitor."}
+                    <div className="rounded-lg border p-3 bg-white/70 space-y-3">
+                      {newsOutput ? (
+                        <>
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                            <div>
+                              <p className="font-semibold text-sm">{newsSummary?.headline || "News cycle refreshed."}</p>
+                              <p className="text-xs text-muted-foreground">{newsSummary?.detail || "Latest headlines bucketed by macro driver."}</p>
+                              {newsSummary?.reason && (
+                                <p className="text-[11px] text-slate-500 mt-1">{newsSummary.reason}</p>
+                              )}
+                              {newsSummary?.date && (
+                                <p className="text-[11px] text-slate-400 mt-0.5">Snapshot: {newsSummary.date}</p>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <Badge variant={newsSummary?.shouldUpdate ? "destructive" : "secondary"}>
+                                {newsSummary?.shouldUpdate ? "Update scenarios" : "In sync"}
+                              </Badge>
+                              {newsOutput?.metadata?.date_range && (
+                                <Badge variant="outline" className="text-[11px]">
+                                  {newsOutput.metadata.date_range.start} → {newsOutput.metadata.date_range.end}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {newsBuckets.map((bucket:any) => (
+                              <div key={bucket.name} className="border rounded-md p-2 space-y-1">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div>
+                                    <p className="text-[11px] uppercase text-slate-500 tracking-wide">{bucket.label}</p>
+                                    <p className="text-xl font-semibold">{bucket.count}</p>
+                                  </div>
+                                  <Badge variant={bucket.uncovered ? "destructive" : "outline"}>
+                                    {bucket.uncovered ? "Needs coverage" : "Covered"}
+                                  </Badge>
+                                </div>
+                                <p className="text-[11px] text-muted-foreground">{bucket.description}</p>
+                                {bucket.coverage?.length ? (
+                                  <p className="text-[11px] text-emerald-600">Scenarios: {bucket.coverage.join(", ")}</p>
+                                ) : (
+                                  <p className="text-[11px] text-rose-600">No judge scenarios mapped</p>
+                                )}
+                                {bucket.topHeadlines?.[0]?.title && (
+                                  <p className="text-[11px] text-slate-600 truncate">Top: {bucket.topHeadlines[0].title}</p>
+                                )}
+                              </div>
+                            ))}
+                            {!newsBuckets.length && (
+                              <div className="text-sm text-muted-foreground">No categorized news found in the selected window.</div>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-slate-500">
+                            Covered = at least one judge scenario references this bucket (based on channels & keywords). Uncovered buckets lack explicit scenario coverage and may require a MAD refresh.
+                          </p>
+                          {newsArticles.length > 0 && (
+                            <div className="grid gap-2 sm:grid-cols-5">
+                              <div className="sm:col-span-2">
+                                <p className="text-xs font-medium text-slate-600">Headlines</p>
+                                <ul className="mt-1 space-y-1 text-xs">
+                                  {newsArticles.map((article:any, idx:number) => (
+                                    <li key={`${article.bucket}-${idx}`}>
+                                      <button
+                                        className={`text-left w-full rounded px-2 py-1 ${activeNewsArticle===article ? "bg-slate-200" : "text-muted-foreground hover:text-slate-800"}`}
+                                        onClick={()=>setActiveNewsArticle(article)}
+                                      >
+                                        <span className="font-semibold text-slate-600">{article.bucketLabel}:</span>{" "}
+                                        {article.title}
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                              <div className="sm:col-span-3 border rounded-md p-3 bg-slate-50 space-y-2 text-xs text-slate-700 min-h-[120px]">
+                                {activeNewsArticle ? (
+                                  <>
+                                    <div className="flex items-center justify-between gap-2">
+                                      <p className="text-sm font-semibold text-slate-800">{activeNewsArticle.title}</p>
+                                      {activeNewsArticle.source && (<span className="text-[11px] text-slate-500">{activeNewsArticle.source}</span>)}
+                                    </div>
+                                    <p>{activeNewsArticle.summary || "No summary available."}</p>
+                                    {activeNewsArticle.url && (
+                                      <a href={activeNewsArticle.url} target="_blank" rel="noreferrer" className="text-sky-600 underline text-[11px]">Open article</a>
+                                    )}
+                                  </>
+                                ) : (
+                                  <p className="text-muted-foreground">Select a headline to view its summary.</p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-sm text-muted-foreground min-h-[90px] flex items-center justify-center">
+                          No news brief yet. Click Run Monitor.
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                       <Button variant="outline" size="sm" onClick={()=>runMonitor(setMon, scenario.output?.scenarioMatrix||[])}><PlayCircle className="h-4 w-4 mr-1"/>Run Monitor</Button>
-                      <Button variant="ghost" size="sm" title="Use news to update scenarios"><RefreshCw className="h-4 w-4 mr-1"/>Update Scenarios</Button>
+                      <Button variant="ghost" size="sm" title="Use news to refresh MAD scenarios" onClick={handleNewsUpdate}>
+                        <RefreshCw className="h-4 w-4 mr-1"/>Update Scenarios
+                      </Button>
+                      {scenarioCsvSnapshot && (
+                        <Button variant="ghost" size="sm" onClick={()=>downloadTextFile("scenario_snapshot.csv", scenarioCsvSnapshot)}>
+                          <Download className="h-4 w-4 mr-1"/>Scenario CSV
+                        </Button>
+                      )}
                       <Button variant="ghost" size="sm" onClick={()=>setOpenMon(true)}>Details</Button>
                     </div>
                   </div>
@@ -843,8 +1074,38 @@ export default function HqlaE2EDashboard(){
                   <p className="text-xs text-muted-foreground">
                     Mirrors <code className="font-mono text-[10px]">cfg[&quot;debate&quot;][&quot;rounds&quot;]</code> in the Python MAD script.
                   </p>
+                  <label className="flex items-center gap-2 text-sm mt-2">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={offlineMode}
+                      onChange={(e)=>setOfflineMode(e.target.checked)}
+                    />
+                    Offline sample (no OpenAI calls)
+                  </label>
+                </div>
+                <div className="col-span-1 space-y-2">
+                  <label className="text-sm font-medium leading-none">Runs</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={8}
+                    className="w-28"
+                    value={debateRuns}
+                    onChange={(e)=>{
+                      const n = Number(e.target.value);
+                      setDebateRuns(Number.isFinite(n) && n > 0 ? n : 1);
+                    }}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Controls how many complete debates execute per request.
+                  </p>
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground">
+                <strong>Rounds</strong> = number of Proponent/Devil exchanges per run (each round has A, B, and a Judge decision).{" "}
+                <strong>Runs</strong> = how many full debates execute per request (the judge aggregates across them).
+              </p>
 
               <div className="space-y-4">
                 <div className="space-y-2 rounded-lg border bg-slate-50/40 p-3">
@@ -925,8 +1186,11 @@ export default function HqlaE2EDashboard(){
               </div>
               <div className="rounded-lg border p-3">
                 <DebatePreview
-                  debate={activeDebate}
+                  debate={previewDebate}
                   maxChars={20000}
+                  runOptions={availableRuns}
+                  activeRun={activeRun}
+                  onSelectRun={(run) => setSelectedDebateRun(run)}
                   onShowMatrix={(payload)=>setMatrixModal(payload)}
                 />
               </div>
@@ -1030,7 +1294,11 @@ export default function HqlaE2EDashboard(){
               <DialogTitle>News Feedback</DialogTitle>
             </DialogHeader>
             <div className="rounded-lg border p-4 text-sm text-muted-foreground min-h-[120px] max-w-full max-h-[68vh] overflow-auto">
-              {mon.output?.brief || "No briefing yet. Run the step."}
+              {newsOutput ? (
+                <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(newsOutput, null, 2)}</pre>
+              ) : (
+                "No briefing yet. Run the step."
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -1040,20 +1308,53 @@ export default function HqlaE2EDashboard(){
             <DialogHeader>
               <DialogTitle>{matrixModal?.title || "Scenario matrix"}</DialogTitle>
             </DialogHeader>
-            <div className="max-h-[74vh] overflow-auto">
-              {matrixModal?.scenarios?.length ? (
+            <div className="max-h-[74vh] overflow-auto space-y-4">
+              {matrixModal?.prevScenarios?.length ? (
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-sm font-semibold mb-1 text-slate-600">Previous matrix</p>
+                    <ScenarioBubbleTable data={matrixModal.prevScenarios} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold mb-1 text-slate-600">Current matrix</p>
+                    {matrixModal?.scenarios?.length ? (
+                      <ScenarioBubbleTable data={matrixModal.scenarios} />
+                    ) : matrixModal?.rawMatrixText ? (
+                      <pre className="rounded-md border bg-slate-50 p-3 text-xs whitespace-pre-wrap">
+                        {matrixModal.rawMatrixText}
+                      </pre>
+                    ) : (
+                      <div className="text-muted-foreground text-sm">
+                        No structured JSON detected in this message.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : matrixModal?.scenarios?.length ? (
                 <ScenarioBubbleTable data={matrixModal.scenarios} />
+              ) : matrixModal?.rawMatrixText ? (
+                <pre className="rounded-md border bg-slate-50 p-3 text-xs whitespace-pre-wrap">
+                  {matrixModal.rawMatrixText}
+                </pre>
               ) : (
                 <div className="text-muted-foreground text-sm">
                   No structured JSON detected in this message.
                 </div>
               )}
+              {matrixModal?.prevScenarios?.length ? (
+                <ScenarioDiffView current={matrixModal.scenarios} previous={matrixModal.prevScenarios} />
+              ) : null}
+              {!matrixModal?.scenarios?.length && matrixModal?.rawMatrixText ? (
+                <div className="text-[11px] text-slate-500">
+                  Raw matrix text shown because structured JSON could not be parsed during streaming.
+                </div>
+              ) : null}
             </div>
           </DialogContent>
         </Dialog>
 
         <footer className="pb-10 pt-2 text-center text-xs text-muted-foreground">
-          Built for the HQLA Project Lab • This is a mock UI. Wire the Run buttons to your back-end scripts.
+          Built for the HQLA Project Lab
         </footer>
       </main>
     </div>
@@ -1224,6 +1525,19 @@ function renderMarkdown(text: string): React.ReactNode {
   });
 }
 
+function downloadTextFile(filename: string, content: string) {
+  if (!content) return;
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}
+
 
 // --- Helpers for extracting judge JSON and showing it as a mini matrix ---
 
@@ -1239,8 +1553,10 @@ function extractScenariosAndStripJson(
 ): { cleanText: string; scenarios: any[] } {
   if (!text) return { cleanText: "", scenarios: [] };
 
+  const original = text;
+
   // Remove explicit JSON labels so they don't show up in the rendered prose.
-  const labelStripped = text
+  const labelStripped = original
     .split("\n")
     .filter((line) => !/^JSON\s*:?\s*$/i.test(line.trim()))
     .join("\n");
@@ -1254,7 +1570,7 @@ function extractScenariosAndStripJson(
     if (body) fencedPayloads.push(body);
   }
 
-  // Remove fences from the visible prose.
+  // Remove fences from the visible prose so the rendered text stays lightweight.
   let cleaned = labelStripped.replace(fenceRegex, "");
   cleaned = cleaned.replace(/(\u2026|\.\.\.)\[trunc(ated)?\]/gi, "");
 
@@ -1266,15 +1582,25 @@ function extractScenariosAndStripJson(
     return { cleanText: cleaned.trim(), scenarios: scenariosFromFences };
   }
 
-  // Fallback: look for the first JSON-looking block in the remaining text (no fences present).
-  const firstCurly = cleaned.indexOf("{");
-  const firstBracket = cleaned.indexOf("[");
-  const firstIdx =
-    firstCurly === -1
-      ? firstBracket
-      : firstBracket === -1
-      ? firstCurly
-      : Math.min(firstCurly, firstBracket);
+  const locateJsonStart = (body: string): number => {
+    const labelRegex = /(revised\s+json|strict\s+json|json)\s*:?\s*/i;
+    const match = body.match(labelRegex);
+    if (match && typeof match.index === "number") {
+      const afterLabel = match.index + match[0].length;
+      const afterBody = body.slice(afterLabel);
+      const braceIdx = afterBody.search(/[{[]/);
+      if (braceIdx !== -1) {
+        return afterLabel + braceIdx;
+      }
+      return afterLabel;
+    }
+    const firstCurly = body.indexOf("{");
+    const firstBracket = body.indexOf("[");
+    if (firstCurly === -1) return firstBracket;
+    if (firstBracket === -1) return firstCurly;
+    return Math.min(firstCurly, firstBracket);
+  };
+  const firstIdx = locateJsonStart(cleaned);
 
   if (firstIdx === -1) {
     return { cleanText: cleaned.trim(), scenarios: [] };
@@ -1288,7 +1614,24 @@ function extractScenariosAndStripJson(
   else if (lastCurly !== -1) jsonPart = jsonPart.slice(0, lastCurly + 1);
 
   const scenarios = tryParseScenarioPayload(jsonPart);
-  return { cleanText: prefixText.trim(), scenarios };
+  if (scenarios.length) {
+    return { cleanText: prefixText.trim(), scenarios };
+  }
+
+  const segments = collectJsonSegments(cleaned);
+  if (segments.length) {
+    const rows: any[] = [];
+    for (const segment of segments) {
+      const parsed = tryParseScenarioPayload(segment);
+      if (parsed.length) rows.push(...parsed);
+    }
+    if (rows.length) {
+      return { cleanText: prefixText.trim(), scenarios: rows };
+    }
+  }
+
+  // Parsing failed—keep the original text intact so the user can still read the raw matrix.
+  return { cleanText: original.trim(), scenarios: [] };
 }
 
 function unwrapScenarioArray(payload: any, allowObjectFallback = true): any[] {
@@ -1407,6 +1750,49 @@ function extractLooseJsonObjects(text: string): any[] {
   return results;
 }
 
+function collectJsonSegments(text: string): string[] {
+  const segments: string[] = [];
+  if (!text) return segments;
+
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escape = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inString) {
+      if (escape) {
+        escape = false;
+      } else if (ch === "\\") {
+        escape = true;
+      } else if (ch === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (ch === "{" || ch === "[") {
+      if (depth === 0) start = i;
+      depth++;
+    } else if (ch === "}" || ch === "]") {
+      depth = Math.max(depth - 1, 0);
+      if (depth === 0 && start !== -1) {
+        segments.push(text.slice(start, i + 1));
+        start = -1;
+      }
+    }
+  }
+
+  return segments;
+}
+
 function formatScenarioField(key: string, value: any): string {
   if (value == null) return "";
   if (key === "Probability" && typeof value === "number") {
@@ -1518,6 +1904,9 @@ function DebatePreview({
   debate,
   maxChars = 800,
   onShowMatrix,
+  runOptions = [],
+  activeRun = null,
+  onSelectRun,
 }: {
   debate: {
     role: string;
@@ -1525,21 +1914,45 @@ function DebatePreview({
     round?: number | null;
     run?: number | null;
     scenarios?: any[];
+    rawMatrixText?: string;
+    matrixId?: string;
   }[];
   maxChars?: number;
-  onShowMatrix?: (payload: { title: string; scenarios: any[] }) => void;
+  onShowMatrix?: (payload: { title: string; scenarios: any[]; prevScenarios?: any[]; rawMatrixText?: string }) => void;
+  runOptions?: number[];
+  activeRun?: number | null;
+  onSelectRun?: (run: number | null) => void;
 }) {
-  if (!debate?.length) {
-    return (
-      <div className="text-muted-foreground text-sm">
-        No debate yet — run Scenario.
-      </div>
-    );
-  }
+  const safeDebate = Array.isArray(debate) ? debate : [];
+  const runList = Array.isArray(runOptions)
+    ? Array.from(new Set(runOptions.filter((r) => typeof r === "number")))
+    : [];
+  const resolvedActiveRun =
+    typeof activeRun === "number"
+      ? activeRun
+      : runList.length
+      ? runList[runList.length - 1]
+      : null;
+  const activeIdx = resolvedActiveRun != null ? runList.indexOf(resolvedActiveRun) : -1;
+  const prevRun =
+    activeIdx > 0 && activeIdx < runList.length ? runList[activeIdx - 1] : null;
+  const showRunNav = runList.length > 1;
+  const hasDebate = safeDebate.length > 0;
 
-  let judgeMatrixPayload: { title: string; scenarios: any[] } | null = null;
+  const judgeMatrixCandidates: { title: string; scenarios: any[]; prevScenarios?: any[] }[] = [];
+  const prevByRun = new Map<number, any[]>();
 
-  const renderedMessages = debate.map((m, i) => {
+  const normalizeSpeakerRefs = (value: string) =>
+    value
+      .replace(/\bA's\b/gi, "Proponent's")
+      .replace(/\bB's\b/gi, "Devil's advocate's")
+      .replace(/\bProponent's advocate\b/gi, "Devil's advocate")
+      .replace(/\bDebater\s*A\b/gi, "Proponent")
+      .replace(/\bDebater\s*B\b/gi, "Devil's advocate")
+      .replace(/\bProponent\s+position\b/gi, "Proponent's position")
+      .replace(/\bDevil'?s advocate's\s+position\b/gi, "Devil's advocate's position");
+
+  const renderedMessages = safeDebate.map((m, i) => {
     const roleLower = (m.role || "").toLowerCase();
     const isProponent = roleLower.includes("proponent");
     const isDevil = roleLower.includes("devil");
@@ -1561,19 +1974,33 @@ function DebatePreview({
     const firstPass = extractScenariosAndStripJson(displayText);
     displayText = firstPass.cleanText;
     const providedScenarios = Array.isArray(m.scenarios) ? m.scenarios : [];
-    const localScenarios = providedScenarios.length ? providedScenarios : firstPass.scenarios;
+    let localScenarios = providedScenarios.length ? providedScenarios : firstPass.scenarios;
+    if (!localScenarios.length && typeof m.rawMatrixText === "string" && m.rawMatrixText.trim()) {
+      const fallback = tryParseScenarioPayload(m.rawMatrixText);
+      if (fallback.length) {
+        localScenarios = fallback;
+      }
+    }
     const hasMatrix = localScenarios.length > 0;
-    let matrixPayload: { title: string; scenarios: any[] } | null = null;
-    if (hasMatrix) {
+    const hasRawMatrix = typeof m.rawMatrixText === "string" && m.rawMatrixText.trim().length > 0;
+    let matrixPayload: { title: string; scenarios: any[]; prevScenarios?: any[]; rawMatrixText?: string } | null = null;
+    const runKey = typeof m.run === "number" ? m.run : 0;
+    const prevForRun = prevByRun.get(runKey) || null;
+    if (hasMatrix || hasRawMatrix) {
       const labels: string[] = [m.role];
       if (typeof m.round === "number") labels.push(`Round ${m.round}`);
       if (typeof m.run === "number") labels.push(`Run ${m.run}`);
       matrixPayload = {
         title: labels.join(" · "),
         scenarios: localScenarios,
+        prevScenarios: prevForRun || undefined,
+        rawMatrixText: typeof m.rawMatrixText === "string" ? m.rawMatrixText : undefined,
       };
-      if (isJudge) {
-        judgeMatrixPayload = matrixPayload;
+      if (hasMatrix) {
+        if (isJudge) {
+          judgeMatrixCandidates.push(matrixPayload);
+        }
+        prevByRun.set(runKey, localScenarios);
       }
     }
 
@@ -1584,7 +2011,9 @@ function DebatePreview({
     }
 
     // If there's nothing left after stripping JSON, don't render unless we have scenarios
-    if (!displayText && !localScenarios.length) {
+    displayText = normalizeSpeakerRefs(displayText);
+
+    if (!displayText && !matrixPayload) {
       return null;
     }
 
@@ -1602,8 +2031,8 @@ function DebatePreview({
               (message truncated)
             </div>
           )}
-          {matrixPayload && isJudge && (
-            <div className="mt-2 border-t border-slate-200 pt-2 space-y-2">
+          {matrixPayload && (
+            <div className="mt-2 border-t border-slate-200 pt-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="text-[10px] font-semibold uppercase tracking-wide opacity-70">
                   Scenarios attached
@@ -1614,37 +2043,29 @@ function DebatePreview({
                     variant="outline"
                     className="h-7 text-[11px] px-3"
                     onClick={() => {
-                      if (matrixPayload) onShowMatrix(matrixPayload);
+                      onShowMatrix(matrixPayload!);
                     }}
                   >
                     View matrix
                   </Button>
                 )}
               </div>
-              {isJudge && (
-                <div className="rounded-md border border-slate-200 bg-white/80 px-1 py-1 max-h-64 overflow-auto">
-                  <ScenarioBubbleTable data={localScenarios} bare />
-                </div>
-              )}
-            </div>
-          )}
-          {matrixPayload && !isJudge && onShowMatrix && (
-            <div className="mt-2 border-t border-slate-200 pt-2">
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-[10px] font-semibold uppercase tracking-wide opacity-70">
-                  Scenarios attached
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-[11px] px-3"
-                  onClick={() => {
-                    if (matrixPayload) onShowMatrix(matrixPayload);
-                  }}
-                >
-                  View matrix
-                </Button>
+              <div className="rounded-md border border-slate-200 bg-white/80 px-1 py-1 max-h-64 overflow-auto mt-2">
+                {matrixPayload.scenarios?.length ? (
+                  <ScenarioBubbleTable data={matrixPayload.scenarios} bare />
+                ) : matrixPayload.rawMatrixText ? (
+                  <pre className="text-[11px] whitespace-pre-wrap text-slate-700">
+                    {matrixPayload.rawMatrixText}
+                  </pre>
+                ) : (
+                  <div className="text-[11px] text-slate-500">Awaiting structured JSON…</div>
+                )}
               </div>
+              {matrixPayload.prevScenarios?.length ? (
+                <div className="text-[10px] text-slate-500 mt-1">
+                  Diff vs previous matrix available.
+                </div>
+              ) : null}
             </div>
           )}
         </div>
@@ -1654,13 +2075,52 @@ function DebatePreview({
 
   return (
     <div className="space-y-3 text-[15px] leading-6">
-      {renderedMessages.filter(Boolean)}
-      {judgeMatrixPayload && onShowMatrix && (
+      {showRunNav && (
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wide text-slate-500">
+          <div className="flex flex-wrap gap-1">
+            {runList.map((run) => {
+              const isActive =
+                resolvedActiveRun != null ? resolvedActiveRun === run : run === runList[runList.length - 1];
+              return (
+                <button
+                  key={`run-${run}`}
+                  type="button"
+                  onClick={() => onSelectRun?.(run)}
+                  className={`px-2 py-1 rounded-full border transition ${
+                    isActive
+                      ? "bg-slate-900 text-white border-slate-900"
+                      : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
+                  }`}
+                >
+                  Run {run}
+                </button>
+              );
+            })}
+          </div>
+          {prevRun != null && (
+            <button
+              type="button"
+              onClick={() => onSelectRun?.(prevRun)}
+              className="text-[11px] text-slate-600 hover:text-slate-900 transition flex items-center gap-1"
+            >
+              ← Back to Run {prevRun}
+            </button>
+          )}
+        </div>
+      )}
+      {hasDebate ? (
+        renderedMessages.filter(Boolean)
+      ) : (
+        <div className="text-muted-foreground text-sm">
+          No debate yet — run Scenario.
+        </div>
+      )}
+      {judgeMatrixCandidates.length > 0 && onShowMatrix && (
         <div className="flex justify-end pt-2">
           <Button
             size="sm"
             variant="secondary"
-            onClick={() => onShowMatrix(judgeMatrixPayload!)}
+            onClick={() => onShowMatrix(judgeMatrixCandidates[judgeMatrixCandidates.length - 1])}
           >
             View judge matrix
           </Button>
@@ -1674,6 +2134,118 @@ function FlowArrow(){
   return (
     <div className="flex items-center">
       <ArrowRight className="h-5 w-5 text-slate-400"/>
+    </div>
+  );
+}
+
+function ScenarioDiffView({ current = [], previous = [] }: { current: any[]; previous: any[] }) {
+  if (!previous?.length) return null;
+  const formatProb = (value: any) => {
+    const prob =
+      typeof value === "number"
+        ? value
+        : typeof value === "string"
+        ? Number(value)
+        : null;
+    if (prob == null || Number.isNaN(prob)) return "";
+    if (prob <= 1) return `${(prob * 100).toFixed(0)}%`;
+    return `${prob.toFixed(1)}%`;
+  };
+  const getProb = (sc: any) =>
+    typeof sc?.Probability === "number"
+      ? sc.Probability
+      : typeof sc?.p === "number"
+      ? sc.p
+      : null;
+  const prevMap = new Map<string, any>();
+  previous.forEach((sc: any, idx: number) => {
+    const key =
+      (sc?.Scenario || sc?.name || `prev-${idx}`).toString().toLowerCase();
+    prevMap.set(key, sc);
+  });
+
+  const rows: { type: "added" | "removed" | "changed" | "unchanged"; name: string; current?: any; previous?: any }[] = [];
+
+  current.forEach((sc: any, idx: number) => {
+    const name = sc?.Scenario || sc?.name || `Scenario ${idx + 1}`;
+    const key = name.toString().toLowerCase();
+    if (prevMap.has(key)) {
+      const prev = prevMap.get(key);
+      const changed = JSON.stringify(prev) !== JSON.stringify(sc);
+      rows.push({
+        type: changed ? "changed" : "unchanged",
+        name,
+        current: sc,
+        previous: prev,
+      });
+      prevMap.delete(key);
+    } else {
+      rows.push({ type: "added", name, current: sc });
+    }
+  });
+
+  prevMap.forEach((prev, key) => {
+    const name = prev?.Scenario || prev?.name || key;
+    rows.push({ type: "removed", name, previous: prev });
+  });
+
+  const badgeClass = (type: string) =>
+    type === "added"
+      ? "bg-emerald-100 text-emerald-700"
+      : type === "removed"
+      ? "bg-rose-100 text-rose-700"
+      : type === "changed"
+      ? "bg-amber-100 text-amber-700"
+      : "bg-slate-100 text-slate-700";
+  const nameClass = (type: string) =>
+    type === "added"
+      ? "text-emerald-700"
+      : type === "removed"
+      ? "text-rose-700 line-through"
+      : type === "changed"
+      ? "text-slate-700"
+      : "text-slate-500";
+
+  return (
+    <div className="mt-4 rounded-md border border-slate-200 bg-white/70 p-3 space-y-2">
+      <p className="text-sm font-semibold text-slate-700">
+        Changes vs previous matrix
+      </p>
+      <div className="space-y-2 max-h-64 overflow-auto text-xs">
+        {rows.map((row, idx) => (
+          <div
+            key={`${row.name}-${idx}`}
+            className="flex items-start gap-2 border border-slate-100 rounded-md p-2"
+          >
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${badgeClass(row.type)}`}>
+              {row.type.toUpperCase()}
+            </span>
+            <div className="flex-1">
+              <p className={`font-semibold ${nameClass(row.type)}`}>{row.name}</p>
+              {row.type === "changed" && (
+                <div className="text-[11px] space-y-0.5">
+                  <p className="text-rose-600 line-through">
+                    Prev prob {formatProb(getProb(row.previous))}
+                  </p>
+                  <p className="text-emerald-600">
+                    New prob {formatProb(getProb(row.current))}
+                  </p>
+                </div>
+              )}
+              {row.type === "removed" && row.previous && (
+                <p className="text-[11px] text-rose-600 line-through">
+                  Removed (prob {formatProb(getProb(row.previous))})
+                </p>
+              )}
+              {row.type === "added" && row.current && (
+                <p className="text-[11px] text-emerald-600">
+                  Added (prob {formatProb(getProb(row.current))})
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
