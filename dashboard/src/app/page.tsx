@@ -1309,27 +1309,14 @@ export default function HqlaE2EDashboard(){
               <DialogTitle>{matrixModal?.title || "Scenario matrix"}</DialogTitle>
             </DialogHeader>
             <div className="max-h-[74vh] overflow-auto space-y-4">
-              {matrixModal?.prevScenarios?.length ? (
-                <div className="grid md:grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-sm font-semibold mb-1 text-slate-600">Previous matrix</p>
-                    <ScenarioBubbleTable data={matrixModal.prevScenarios} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold mb-1 text-slate-600">Current matrix</p>
-                    {matrixModal?.scenarios?.length ? (
-                      <ScenarioBubbleTable data={matrixModal.scenarios} />
-                    ) : matrixModal?.rawMatrixText ? (
-                      <pre className="rounded-md border bg-slate-50 p-3 text-xs whitespace-pre-wrap">
-                        {matrixModal.rawMatrixText}
-                      </pre>
-                    ) : (
-                      <div className="text-muted-foreground text-sm">
-                        No structured JSON detected in this message.
-                      </div>
-                    )}
-                  </div>
-                </div>
+              {matrixModal?.prevScenarios?.length && matrixModal?.scenarios?.length ? (
+                <>
+                  <ScenarioDiffMatrix
+                    current={matrixModal.scenarios}
+                    previous={matrixModal.prevScenarios}
+                  />
+                  <ScenarioDiffSummary current={matrixModal.scenarios} previous={matrixModal.prevScenarios} />
+                </>
               ) : matrixModal?.scenarios?.length ? (
                 <ScenarioBubbleTable data={matrixModal.scenarios} />
               ) : matrixModal?.rawMatrixText ? (
@@ -1341,14 +1328,6 @@ export default function HqlaE2EDashboard(){
                   No structured JSON detected in this message.
                 </div>
               )}
-              {matrixModal?.prevScenarios?.length ? (
-                <ScenarioDiffView current={matrixModal.scenarios} previous={matrixModal.prevScenarios} />
-              ) : null}
-              {!matrixModal?.scenarios?.length && matrixModal?.rawMatrixText ? (
-                <div className="text-[11px] text-slate-500">
-                  Raw matrix text shown because structured JSON could not be parsed during streaming.
-                </div>
-              ) : null}
             </div>
           </DialogContent>
         </Dialog>
@@ -1804,11 +1783,7 @@ function formatScenarioField(key: string, value: any): string {
   return String(value);
 }
 
-function ScenarioBubbleTable({ data, bare = false }: { data: any[]; bare?: boolean }) {
-  if (!data?.length) return null;
-
-  // Canonical scenario columns we always want to show,
-  // even if the JSON objects are missing some of them.
+function buildScenarioTableColumns(data: any[]) {
   const baseColumns = [
     "Scenario",
     "Description",
@@ -1821,7 +1796,6 @@ function ScenarioBubbleTable({ data, bare = false }: { data: any[]; bare?: boole
     "Assumptions",
   ];
 
-  // Compute union of all keys, but seed with the canonical columns first
   const keysSet = new Set<string>(baseColumns);
   data.forEach((s: any) => {
     Object.keys(s || {}).forEach((k) => keysSet.add(k));
@@ -1843,6 +1817,7 @@ function ScenarioBubbleTable({ data, bare = false }: { data: any[]; bare?: boole
     if (ib === -1) return -1;
     return ia - ib;
   });
+
   const columnWidthMap: Record<string, number> = {
     Scenario: 220,
     Description: 360,
@@ -1859,6 +1834,13 @@ function ScenarioBubbleTable({ data, bare = false }: { data: any[]; bare?: boole
   };
 
   const getColumnWidth = (key: string) => columnWidthMap[key] ?? 240;
+  return { keys, getColumnWidth };
+}
+
+function ScenarioBubbleTable({ data, bare = false }: { data: any[]; bare?: boolean }) {
+  if (!data?.length) return null;
+
+  const { keys, getColumnWidth } = buildScenarioTableColumns(data);
 
   const containerClass = bare
     ? "overflow-auto"
@@ -1890,6 +1872,109 @@ function ScenarioBubbleTable({ data, bare = false }: { data: any[]; bare?: boole
                   style={{ width: getColumnWidth(k), maxWidth: getColumnWidth(k) }}
                 >
                   {formatScenarioField(k, s[k])}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+function renderDiffValue(key: string, previous: any, current: any) {
+  const prevText = previous !== undefined && previous !== null ? formatScenarioField(key, previous) : "";
+  const currText = current !== undefined && current !== null ? formatScenarioField(key, current) : "";
+  if (!prevText && !currText) return "";
+  if (prevText && currText) {
+    if (prevText === currText) return currText;
+    return (
+      <div className="space-y-0.5">
+        <div className="text-rose-600 line-through">{prevText}</div>
+        <div className="text-emerald-700">{currText}</div>
+      </div>
+    );
+  }
+  if (currText) {
+    return <span className="text-emerald-700">{currText}</span>;
+  }
+  return <span className="text-rose-600 line-through">{prevText}</span>;
+}
+
+function ScenarioDiffMatrix({ current = [], previous = [] }: { current: any[]; previous: any[] }) {
+  const combined = [...current, ...previous];
+  if (!combined.length) return null;
+
+  type DiffRow = {
+    key: string;
+    displayName: string;
+    current?: any;
+    previous?: any;
+    order: number;
+  };
+
+  const rowsMap = new Map<string, DiffRow>();
+
+  const normalizeName = (sc: any, idx: number) => {
+    const name = (sc?.Scenario || sc?.name || `Scenario ${idx + 1}`).toString();
+    return { normalized: name.toLowerCase(), display: name };
+  };
+
+  current.forEach((sc, idx) => {
+    const { normalized, display } = normalizeName(sc, idx);
+    const existing = rowsMap.get(normalized) || { key: normalized, displayName: display, order: idx };
+    existing.current = sc;
+    existing.displayName = display;
+    if (typeof existing.order !== "number") existing.order = idx;
+    rowsMap.set(normalized, existing);
+  });
+
+  const currentCount = current.length;
+  previous.forEach((sc, idx) => {
+    const { normalized, display } = normalizeName(sc, idx);
+    if (rowsMap.has(normalized)) {
+      const existing = rowsMap.get(normalized)!;
+      existing.previous = sc;
+      if (!existing.displayName) existing.displayName = display;
+    } else {
+      rowsMap.set(normalized, {
+        key: normalized,
+        displayName: display,
+        previous: sc,
+        order: currentCount + idx,
+      });
+    }
+  });
+
+  const rows = Array.from(rowsMap.values()).sort((a, b) => a.order - b.order);
+  const { keys, getColumnWidth } = buildScenarioTableColumns(combined);
+
+  return (
+    <div className="rounded-md border border-slate-200 bg-white/70 overflow-auto">
+      <Table className="w-full text-[12px]">
+        <TableHeader>
+          <TableRow>
+            {keys.map((k) => (
+              <TableHead
+                key={k}
+                className="py-2 px-3 font-semibold text-slate-800 text-[13px]"
+                style={{ width: getColumnWidth(k), maxWidth: getColumnWidth(k) }}
+              >
+                {k}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row, idx) => (
+            <TableRow key={row.key + idx}>
+              {keys.map((k) => (
+                <TableCell
+                  key={k}
+                  className="py-1.5 px-2 align-top whitespace-pre-wrap break-words"
+                  style={{ width: getColumnWidth(k), maxWidth: getColumnWidth(k) }}
+                >
+                  {renderDiffValue(k, row.previous ? row.previous[k] : undefined, row.current ? row.current[k] : undefined)}
                 </TableCell>
               ))}
             </TableRow>
@@ -2138,7 +2223,7 @@ function FlowArrow(){
   );
 }
 
-function ScenarioDiffView({ current = [], previous = [] }: { current: any[]; previous: any[] }) {
+function ScenarioDiffSummary({ current = [], previous = [] }: { current: any[]; previous: any[] }) {
   if (!previous?.length) return null;
   const formatProb = (value: any) => {
     const prob =
@@ -2189,63 +2274,55 @@ function ScenarioDiffView({ current = [], previous = [] }: { current: any[]; pre
     rows.push({ type: "removed", name, previous: prev });
   });
 
-  const badgeClass = (type: string) =>
-    type === "added"
-      ? "bg-emerald-100 text-emerald-700"
-      : type === "removed"
-      ? "bg-rose-100 text-rose-700"
-      : type === "changed"
-      ? "bg-amber-100 text-amber-700"
-      : "bg-slate-100 text-slate-700";
-  const nameClass = (type: string) =>
-    type === "added"
-      ? "text-emerald-700"
-      : type === "removed"
-      ? "text-rose-700 line-through"
-      : type === "changed"
-      ? "text-slate-700"
-      : "text-slate-500";
+  const interesting = rows.filter((row) => row.type !== "unchanged");
+  if (!interesting.length) return null;
 
   return (
     <div className="mt-4 rounded-md border border-slate-200 bg-white/70 p-3 space-y-2">
       <p className="text-sm font-semibold text-slate-700">
-        Changes vs previous matrix
+        TL;DR of matrix changes
       </p>
-      <div className="space-y-2 max-h-64 overflow-auto text-xs">
-        {rows.map((row, idx) => (
-          <div
-            key={`${row.name}-${idx}`}
-            className="flex items-start gap-2 border border-slate-100 rounded-md p-2"
-          >
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${badgeClass(row.type)}`}>
-              {row.type.toUpperCase()}
-            </span>
-            <div className="flex-1">
-              <p className={`font-semibold ${nameClass(row.type)}`}>{row.name}</p>
-              {row.type === "changed" && (
-                <div className="text-[11px] space-y-0.5">
-                  <p className="text-rose-600 line-through">
-                    Prev prob {formatProb(getProb(row.previous))}
-                  </p>
-                  <p className="text-emerald-600">
-                    New prob {formatProb(getProb(row.current))}
-                  </p>
-                </div>
-              )}
-              {row.type === "removed" && row.previous && (
-                <p className="text-[11px] text-rose-600 line-through">
-                  Removed (prob {formatProb(getProb(row.previous))})
-                </p>
-              )}
-              {row.type === "added" && row.current && (
-                <p className="text-[11px] text-emerald-600">
-                  Added (prob {formatProb(getProb(row.current))})
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      <ul className="list-disc pl-4 text-xs text-slate-600 space-y-1 max-h-64 overflow-auto">
+        {interesting.map((row, idx) => {
+          let summary: React.ReactNode = null;
+          if (row.type === "added" && row.current) {
+            summary = (
+              <>
+                <span className="text-emerald-700 font-semibold">{row.name}</span> added
+                {getProb(row.current) != null && (
+                  <> (prob {formatProb(getProb(row.current))})</>
+                )}
+              </>
+            );
+          } else if (row.type === "removed" && row.previous) {
+            summary = (
+              <>
+                <span className="text-rose-700 font-semibold line-through">{row.name}</span> removed
+                {getProb(row.previous) != null && (
+                  <> (prev prob {formatProb(getProb(row.previous))})</>
+                )}
+              </>
+            );
+          } else if (row.type === "changed") {
+            summary = (
+              <>
+                <span className="font-semibold text-slate-700">{row.name}</span> updated
+                {getProb(row.previous) != null || getProb(row.current) != null ? (
+                  <>
+                    {" "}
+                    (prob {formatProb(getProb(row.previous)) || "?"} →{" "}
+                    <span className="text-emerald-700">
+                      {formatProb(getProb(row.current)) || "?"}
+                    </span>
+                    )
+                  </>
+                ) : null}
+              </>
+            );
+          }
+          return <li key={`${row.name}-${idx}`}>{summary}</li>;
+        })}
+      </ul>
     </div>
   );
 }
