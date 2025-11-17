@@ -38,6 +38,7 @@ class HQLA_Asset(ABC):
         self.clean_price = None
         self.ytm = None
         self.dv01 = None
+        self.cs01 = None
         self.duration = None
         self.convexity = None
         self.gamma = None
@@ -92,10 +93,25 @@ class HQLA_Asset(ABC):
         up_curve: ql.YieldTermStructureHandle,
         down_curve: ql.YieldTermStructureHandle,
         survival_curve: ql.YieldTermStructureHandle = None,
+        survival_curve_up: ql.YieldTermStructureHandle = None,
+        survival_curve_down: ql.YieldTermStructureHandle = None,
     ):
         if self.isRisky:
             rr = self.RECOVERY_BY_RATING[self.grade]
+            # first, get cs01
             og_engine = ql.RiskyBondEngine(survival_curve, rr, discount_curve)
+            up_engine = ql.RiskyBondEngine(survival_curve_up, rr, discount_curve)
+            down_engine = ql.RiskyBondEngine(survival_curve_down, rr, discount_curve)
+
+            self.bond.setPricingEngine(up_engine)
+            up_price = self.bond.dirtyPrice()
+            self.bond.setPricingEngine(down_engine)
+            down_price = self.bond.dirtyPrice()
+
+            cs01 = (down_price - up_price) / 2
+            self.cs01 = cs01
+
+            # then, set up dv01 calc
             up_engine = ql.RiskyBondEngine(survival_curve, rr, up_curve)
             down_engine = ql.RiskyBondEngine(survival_curve, rr, down_curve)
         else:

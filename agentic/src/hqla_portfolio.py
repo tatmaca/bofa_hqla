@@ -58,14 +58,25 @@ class Portfolio:
         up_curve: ql.YieldTermStructureHandle,
         down_curve: ql.YieldTermStructureHandle,
         survival_curves: Dict[str, ql.DefaultProbabilityTermStructureHandle],
+        survival_curves_up: Dict[str, ql.DefaultProbabilityTermStructureHandle],
+        survival_curves_down: Dict[str, ql.DefaultProbabilityTermStructureHandle],
     ) -> None:
         """Reprice all instruments using QuantLib dirty price."""
         for group in self.assets.values():
             for inst in group:
                 if inst.isRisky:
-                    grade = survival_curves[inst.grade]
-                    inst.price_from_curve(yield_curve, grade)
-                    inst.bond_greeks(yield_curve, up_curve, down_curve, grade)
+                    survival_curve = survival_curves[inst.grade]
+                    survival_curve_up = survival_curves_up[inst.grade]
+                    survival_curve_down = survival_curves_down[inst.grade]
+                    inst.price_from_curve(yield_curve, survival_curve)
+                    inst.bond_greeks(
+                        yield_curve,
+                        up_curve,
+                        down_curve,
+                        survival_curve,
+                        survival_curve_up,
+                        survival_curve_down,
+                    )
                 else:
                     inst.price_from_curve(yield_curve)
                     inst.bond_greeks(yield_curve, up_curve, down_curve)

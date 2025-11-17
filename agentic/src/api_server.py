@@ -100,6 +100,8 @@ async def upload_yield_curve(file: UploadFile):
     global base_curve_up
     global base_curve_down
     global survival_curves
+    global survival_curves_up
+    global survival_curves_down
     df = pd.read_csv(file.file)
 
     today = ql.Date.todaysDate()
@@ -123,8 +125,9 @@ async def upload_yield_curve(file: UploadFile):
     base_curve = ql.CubicZeroCurve(dates, rates, ql.Actual360(), ql.TARGET())
     base_curve_handle = ql.YieldTermStructureHandle(base_curve)
 
-    interest_rate_bump_up = ql.QuoteHandle(ql.SimpleQuote(0.0001))
-    interest_rate_bump_down = ql.QuoteHandle(ql.SimpleQuote(-0.0001))
+    bump = 0.0001
+    interest_rate_bump_up = ql.QuoteHandle(ql.SimpleQuote(bump))
+    interest_rate_bump_down = ql.QuoteHandle(ql.SimpleQuote(-bump))
 
     base_curve_up_handle = ql.ZeroSpreadedTermStructure(
         base_curve_handle, interest_rate_bump_up
@@ -152,31 +155,36 @@ async def upload_yield_curve(file: UploadFile):
     }
 
     survival_curves = {}
+    survival_curves_up = {}
+    survival_curves_down = {}
+    crv_dicts = [survival_curves, survival_curves_up, survival_curves_down]
+    changes = [0, bump, -bump]
     for rating in recovery_rates.keys():
-        rr = recovery_rates[rating]
-        cds_spread = cds_spreads[rating]
-        cds_helpers = [
-            ql.SpreadCdsHelper(
-                (cds / 1000.0),
-                tenor,
-                1,
-                ql.TARGET(),
-                ql.Quarterly,
-                ql.Following,
-                ql.DateGeneration.TwentiethIMM,
-                ql.Actual360(),
-                rr,
-                base_curve_handle,
+        for change, crv_dict in zip(changes, crv_dicts):
+            rr = recovery_rates[rating]
+            cds_spread = cds_spreads[rating]
+            cds_helpers = [
+                ql.SpreadCdsHelper(
+                    (cds / 1000.0) + change,
+                    tenor,
+                    1,
+                    ql.TARGET(),
+                    ql.Quarterly,
+                    ql.Following,
+                    ql.DateGeneration.TwentiethIMM,
+                    ql.Actual360(),
+                    rr,
+                    base_curve_handle,
+                )
+                for (cds, tenor) in zip(cds_spread, tenors)
+            ]
+            hazard_rate_curve = ql.PiecewiseFlatHazardRate(
+                today, cds_helpers, ql.Actual360()
             )
-            for (cds, tenor) in zip(cds_spread, tenors)
-        ]
-        hazard_rate_curve = ql.PiecewiseFlatHazardRate(
-            today, cds_helpers, ql.Actual360()
-        )
-        hazard_rate_curve.enableExtrapolation()
-        survival_curves[rating] = ql.DefaultProbabilityTermStructureHandle(
-            hazard_rate_curve
-        )
+            hazard_rate_curve.enableExtrapolation()
+            crv_dict[rating] = ql.DefaultProbabilityTermStructureHandle(
+                hazard_rate_curve
+            )
 
     return {"status": "Yield curve uploaded", "points": len(dates)}
 
@@ -196,7 +204,12 @@ async def price_portfolio():
 
     # --- Reprice all instruments using the portfolio method ---
     portfolio.update_prices(
-        base_curve_handle, base_curve_up, base_curve_down, survival_curves
+        base_curve_handle,
+        base_curve_up,
+        base_curve_down,
+        survival_curves,
+        survival_curves_up,
+        survival_curves_down,
     )
 
     # --- Build summary for API response ---
@@ -213,6 +226,7 @@ async def price_portfolio():
                     "clean_price": inst.clean_price,
                     "quantity": inst.quantity,
                     "dv01": inst.dv01,
+                    "cs01": inst.cs01,
                     "duration": inst.duration,
                     "convexity": inst.convexity,
                 }

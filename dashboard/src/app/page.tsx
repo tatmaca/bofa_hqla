@@ -576,6 +576,7 @@ export default function HqlaE2EDashboard() {
                       <TableHead>Quantity</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>DV01</TableHead>
+                      <TableHead>CS01</TableHead>
                       <TableHead>Duration</TableHead>
                       <TableHead>Convexity</TableHead>
                     </TableRow>
@@ -590,6 +591,7 @@ export default function HqlaE2EDashboard() {
                         <TableCell>{row.quantity}</TableCell>
                         <TableCell>{row.category}</TableCell>
                         <TableCell>{row.dv01?.toFixed(4)}</TableCell>
+                        <TableCell>{row.cs01?.toFixed(4)}</TableCell>
                         <TableCell>{row.duration?.toFixed(4)}</TableCell>
                         <TableCell>{row.convexity?.toFixed(4)}</TableCell>
                       </TableRow>
