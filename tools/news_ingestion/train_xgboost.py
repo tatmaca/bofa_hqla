@@ -149,11 +149,22 @@ def train_models(X: np.ndarray, y: Dict[str, np.ndarray], dates: List[str],
         # Further split training set for validation
         val_split_idx = int(len(X_train) * 0.8)
         X_train_final, X_val = X_train[:val_split_idx], X_train[val_split_idx:]
+        
+        # Store split indices for y arrays
+        train_end_idx = val_split_idx
+        val_end_idx = split_idx
     else:
         # Standard random split
-        X_train_final, X_test = train_test_split(X, test_size=test_size, random_state=42)
-        val_split_idx = int(len(X_train_final) * 0.8)
-        X_train_final, X_val = X_train_final[:val_split_idx], X_train_final[val_split_idx:]
+        X_train_val, X_test = train_test_split(
+            X, test_size=test_size, random_state=42
+        )
+        val_split_idx = int(len(X_train_val) * 0.8)
+        X_train_final, X_val = X_train_val[:val_split_idx], X_train_val[val_split_idx:]
+        
+        # For random split, track indices differently
+        train_end_idx = val_split_idx
+        val_end_idx = len(X_train_val)
+        split_idx = len(X) - len(X_test)
     
     print(f"[TRAIN] Training set: {len(X_train_final)}, Validation: {len(X_val)}, Test: {len(X_test)}")
     
@@ -161,14 +172,17 @@ def train_models(X: np.ndarray, y: Dict[str, np.ndarray], dates: List[str],
         print(f"\n[TRAIN] Training XGBoost model for {target_name}")
         
         y_target = y[target_name]
-        if use_time_split:
-            y_train = y_target[:split_idx][:val_split_idx]
-            y_val = y_target[:split_idx][val_split_idx:]
+        if use_time_split and len(X) > 10:
+            y_train = y_target[:train_end_idx]
+            y_val = y_target[train_end_idx:val_end_idx]
             y_test = y_target[split_idx:]
         else:
-            y_train, y_test = train_test_split(y_target, test_size=test_size, random_state=42)
-            val_split_idx = int(len(y_train) * 0.8)
-            y_train, y_val = y_train[:val_split_idx], y_train[val_split_idx:]
+            # For random split, need to split y consistently
+            y_train_val, y_test = train_test_split(
+                y_target, test_size=test_size, random_state=42
+            )
+            y_train = y_train_val[:train_end_idx]
+            y_val = y_train_val[train_end_idx:]
         
         # Train model
         model, metrics = train_xgboost_model(X_train_final, y_train, X_val, y_val, target_name)

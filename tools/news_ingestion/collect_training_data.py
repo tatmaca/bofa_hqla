@@ -80,8 +80,18 @@ def get_actual_yield_changes(date: str) -> Optional[Dict]:
         print(f"[WARN] Failed to load actual changes for {date}: {e}")
         return None
 
-def collect_training_data(start_date: str, end_date: str) -> List[Dict]:
-    """Collect training data for date range."""
+def collect_training_data(start_date: str, end_date: str, 
+                          filter_significance: bool = True,
+                          threshold_std: float = 2.0) -> List[Dict]:
+    """
+    Collect training data for date range.
+    
+    Args:
+        start_date: Start date (YYYY-MM-DD)
+        end_date: End date (YYYY-MM-DD)
+        filter_significance: If True, only include dates with significant moves
+        threshold_std: Standard deviation threshold for significance
+    """
     dates = get_available_dates(start_date, end_date)
     training_data = []
     
@@ -125,6 +135,21 @@ def collect_training_data(start_date: str, end_date: str) -> List[Dict]:
         if not actual:
             missing_snapshots.append(date)
             continue
+        
+        # Check significance if filtering enabled
+        if filter_significance:
+            try:
+                from yield_movement_thresholds import should_train_on_date
+                should_train, sig_info = should_train_on_date(date, threshold_std, min_significant_tenors=1)
+                if not should_train:
+                    # Skip dates without significant moves
+                    continue
+            except ImportError:
+                # Module not available, skip filtering
+                pass
+            except Exception:
+                # Error in significance check, continue without filtering
+                pass
         
         # Extract features
         llm_features = extract_llm_features(llm_pred)

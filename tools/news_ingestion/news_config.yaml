@@ -11,7 +11,7 @@ timezone: "America/Chicago"
 strict_24h: false  # Changed to false - collect articles even without dates (we can filter later)
 
 # OpenAI API key for LLM bucketing and analysis (optional, can also use env var OPENAI_API_KEY)
-openai_api_key: null
+openai_api_key: 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
 
 # Domains where we only keep metadata (title/url/published_at); no full-text fetch
 # (prevents paywall scraping, keeps items usable for LLM rationales)
@@ -83,4 +83,330 @@ sitemaps:
 max_links_per_front: 50  # Reduced for faster processing
 max_urls_per_sitemap: 100  # Reduced for faster processing
 max_total_urls: 200  # Maximum total URLs to process per run (keeps crawl fast)
+
+# ============================================================================
+# Linear Online Learning Model (ONYL) - Cold-Start Coefficients
+# ============================================================================
+# Expert priors for linear model: B_k,f in bps per +1 unit factor
+# Format: {factor_name: {tenor: bps_value}}
+# Tenors: 3M, 2Y, 5Y, 10Y, 30Y
+# These are starting guesses that get updated daily via online learning
+# ============================================================================
+
+linear_model_cold_start:
+  # Hyperparameters
+  learning_rate: 0.05  # η: how fast to learn
+  forgetting_factor: 0.98  # λ: slowly forget old errors
+  max_daily_coef_change: 0.8  # ΔB_max: max change in bps/(unit factor) per day
+  smoothing_gamma: 0.2  # γ: smoothing across maturities
+  
+  # 1) Monetary Policy & Communication
+  FED_TONE:  # Hawkish↔dovish pressers/speeches
+    3M: 8
+    2Y: 10
+    5Y: 7
+    10Y: 5
+    30Y: 3
+  
+  FED_PATH_SURPRISE:  # Dots/forward guidance surprise
+    3M: 4
+    2Y: 8
+    5Y: 7
+    10Y: 6
+    30Y: 5
+  
+  POLICY_RATE_SURPRISE:  # Target change vs pricing (rare outside FOMC)
+    3M: 12
+    2Y: 9
+    5Y: 3
+    10Y: 1
+    30Y: 0
+  
+  BAL_SHEET_QT_QE:  # QT/QE emphasis, RRP/IOER tweaks (QT positive → higher yields)
+    3M: 0
+    2Y: 2
+    5Y: 4
+    10Y: 5
+    30Y: 5
+  
+  # 2) Inflation & Growth Data (surprises vs consensus)
+  CPI_CORE_SURP:  # Per +1 standardized surprise
+    3M: 5
+    2Y: 8
+    5Y: 8
+    10Y: 7
+    30Y: 6
+  
+  CPI_HEAD_SURP:
+    3M: 4
+    2Y: 7
+    5Y: 7
+    10Y: 6
+    30Y: 5
+  
+  PCE_CORE_SURP:
+    3M: 4
+    2Y: 6
+    5Y: 6
+    10Y: 5
+    30Y: 4
+  
+  NFP_SURP:  # Nonfarm payrolls
+    3M: 3
+    2Y: 6
+    5Y: 6
+    10Y: 5
+    30Y: 4
+  
+  WAGE_SURP:  # Average hourly earnings
+    3M: 2
+    2Y: 5
+    5Y: 6
+    10Y: 5
+    30Y: 4
+  
+  UNEMPLOYMENT_RATE_SURP:
+    3M: -2
+    2Y: -4
+    5Y: -5
+    10Y: -4
+    30Y: -3
+  
+  ISM_SURP:  # Manufacturing/Services
+    3M: 1
+    2Y: 4
+    5Y: 5
+    10Y: 4
+    30Y: 3
+  
+  RETAIL_SALES_SURP:
+    3M: 1
+    2Y: 3
+    5Y: 4
+    10Y: 3
+    30Y: 2
+  
+  GDP_SURP:
+    3M: 2
+    2Y: 4
+    5Y: 5
+    10Y: 4
+    30Y: 3
+  
+  PRODUCTIVITY_SURP:
+    3M: 1
+    2Y: 2
+    5Y: 3
+    10Y: 3
+    30Y: 2
+  
+  INFL_EXP_SURP:  # UMich 5y, inflation expectations (hits long end more)
+    3M: 2
+    2Y: 4
+    5Y: 5
+    10Y: 6
+    30Y: 6
+  
+  # 3) Treasury Supply / Fiscal / Term Premium
+  SUPPLY_LONG:  # 10-30y refunding/auction size ↑/↓
+    3M: 0
+    2Y: 2
+    5Y: 4
+    10Y: 6
+    30Y: 7
+  
+  SUPPLY_BILLS:  # Bill supply / TGA rebuild
+    3M: 3
+    2Y: 2
+    5Y: 0
+    10Y: 0
+    30Y: 0
+  
+  FISCAL_DEFICIT_NEWS:  # Deficit trajectory, shutdown risk
+    3M: 0
+    2Y: 2
+    5Y: 3
+    10Y: 5
+    30Y: 6
+  
+  TERM_PREMIUM_NEWS:  # Research notes/officials flagging higher TP
+    3M: 0
+    2Y: 1
+    5Y: 3
+    10Y: 5
+    30Y: 6
+  
+  # 4) Risk & Cross-Asset Regime
+  RISK_OFF:  # Equities down, credit wider, safe-haven bid (negative on yields)
+    3M: -4
+    2Y: -5
+    5Y: -6
+    10Y: -8
+    30Y: -9
+  
+  RISK_ON:  # Equities up, credit tighter (positive on yields)
+    3M: 3
+    2Y: 4
+    5Y: 5
+    10Y: 6
+    30Y: 6
+  
+  MOVE_SHIFT:  # Rates vol regime change (vol ↑ lifts premia, esp. long end)
+    3M: 0
+    2Y: 1
+    5Y: 2
+    10Y: 3
+    30Y: 4
+  
+  # 5) Energy, Housing, Convexity, Funding
+  OIL_SHOCK_UP:
+    3M: 2
+    2Y: 3
+    5Y: 4
+    10Y: 5
+    30Y: 5
+  
+  OIL_SHOCK_DOWN:
+    3M: -2
+    2Y: -3
+    5Y: -4
+    10Y: -5
+    30Y: -5
+  
+  MBS_CONVEXITY:  # Widening hedging pressure
+    3M: 0
+    2Y: 0
+    5Y: 2
+    10Y: 4
+    30Y: 5
+  
+  HOUSING_TURN:  # Stronger housing → term premia modest
+    3M: 0
+    2Y: 1
+    5Y: 2
+    10Y: 3
+    30Y: 3
+  
+  FUNDING_STRESS:  # Front-end up, rest down
+    3M: 6
+    2Y: 2
+    5Y: -2
+    10Y: -3
+    30Y: -3
+  
+  # 6) Global Spillovers (directionally consistent)
+  ECB_TONE:
+    3M: 1
+    2Y: 2
+    5Y: 3
+    10Y: 4
+    30Y: 4
+  
+  ECB_RATE_SURP:
+    3M: 1
+    2Y: 2
+    5Y: 3
+    10Y: 4
+    30Y: 4
+  
+  BOE_TONE:
+    3M: 1
+    2Y: 2
+    5Y: 3
+    10Y: 3
+    30Y: 3
+  
+  BOE_RATE_SURP:
+    3M: 1
+    2Y: 2
+    5Y: 3
+    10Y: 3
+    30Y: 3
+  
+  YCC_JGB_SHIFT:  # Band widen → UST long ↑
+    3M: 0
+    2Y: 0
+    5Y: 2
+    10Y: 4
+    30Y: 5
+  
+  CHINA_GROWTH_NEWS:  # Risk-on via global
+    3M: 0
+    2Y: 1
+    5Y: 2
+    10Y: 3
+    30Y: 3
+  
+  EU_GROWTH_NEWS:
+    3M: 0
+    2Y: 1
+    5Y: 2
+    10Y: 3
+    30Y: 3
+  
+  GEO_EVENT:  # Escalations/cease-fires with clear rates linkage (risk-off)
+    3M: -2
+    2Y: -3
+    5Y: -4
+    10Y: -6
+    30Y: -7
+
+# Sign guards: Economic constraints (factors that must have certain signs)
+# Format: {factor_name: {min: value, max: value}} or {factor_name: "non_negative" | "non_positive"}
+linear_model_sign_guards:
+  # Inflation/growth/supply/term-premium factors should be ≥ 0
+  CPI_CORE_SURP: "non_negative"
+  CPI_HEAD_SURP: "non_negative"
+  PCE_CORE_SURP: "non_negative"
+  NFP_SURP: "non_negative"
+  WAGE_SURP: "non_negative"
+  ISM_SURP: "non_negative"
+  RETAIL_SALES_SURP: "non_negative"
+  GDP_SURP: "non_negative"
+  PRODUCTIVITY_SURP: "non_negative"
+  INFL_EXP_SURP: "non_negative"
+  SUPPLY_LONG: "non_negative"
+  SUPPLY_BILLS: "non_negative"
+  FISCAL_DEFICIT_NEWS: "non_negative"
+  TERM_PREMIUM_NEWS: "non_negative"
+  # Risk-off should be ≤ 0
+  RISK_OFF: "non_positive"
+  # Oil down should be ≤ 0
+  OIL_SHOCK_DOWN: "non_positive"
+  # Funding stress: front-end > 0, long end ≤ 0
+  FUNDING_STRESS:
+    3M: {min: 0}
+    2Y: {min: 0}
+    5Y: {max: 0}
+    10Y: {max: 0}
+    30Y: {max: 0}
+
+# ============================================================================
+# Yield Movement Thresholds
+# ============================================================================
+# Configuration for filtering significant yield curve movements
+# Only significant moves (>threshold_std standard deviations) are used for:
+# - Model training (linear and XGBoost)
+# - Monitoring/alerts
+# - Analysis focus
+# ============================================================================
+
+yield_movement_thresholds:
+  # Statistical threshold: number of standard deviations from mean
+  threshold_std: 2.0  # Default: 2.0σ (captures ~95% of significant moves)
+  
+  # Absolute fallback threshold (bps) - used when insufficient historical data
+  absolute_threshold_bps: 5.0  # 5 bps default
+  
+  # Rolling window for statistics calculation
+  rolling_window_days: 60  # 60 days rolling window
+  
+  # Minimum samples required for valid statistics
+  min_samples: 20  # Need at least 20 days of data
+  
+  # Enable significance filtering for training
+  filter_training: true  # Only train on significant moves
+  
+  # Minimum number of significant tenors required to train
+  min_significant_tenors: 1  # At least 1 tenor must have significant move
 
