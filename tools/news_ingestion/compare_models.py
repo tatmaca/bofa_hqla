@@ -1,213 +1,272 @@
 #!/usr/bin/env python3
 """
-Model Comparison Utility
-Compares linear online learning model vs XGBoost model predictions.
+Model Comparison and Alignment Analysis
+Compares linear model coefficients with XGBoost SHAP values to understand
+connections and differences between the two approaches.
 """
 
 import os
-import sys
 import json
-import datetime as dt
+import numpy as np
+from typing import Dict, List, Optional, Tuple
 from pathlib import Path
-from typing import Dict, List, Optional
-import argparse
+import sys
+from collections import defaultdict
+
+try:
+    from scipy.stats import spearmanr
+    HAS_SCIPY = True
+except ImportError:
+    HAS_SCIPY = False
+    print("[WARN] scipy not available. Rank correlation will not be computed.")
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from db import get_conn
-from train_linear_online import predict_yield_changes, initialize_coefficients, get_daily_factor_scores, get_intercepts
+from train_linear_online import (
+    initialize_coefficients,
+    get_daily_factor_scores,
+    TENORS
+)
+from train_xgboost import MODEL_DIR
 
-def get_linear_predictions(date: str) -> Optional[Dict[str, float]]:
-    """Get linear model predictions for a date."""
-    try:
-        coefficients = initialize_coefficients(date)
-        factor_scores = get_daily_factor_scores(date)
-        intercepts = get_intercepts(date)
+TENOR_MAP = {"2y": "2Y", "5y": "5Y", "10y": "10Y", "30y": "30Y", 
+             "2Y": "2Y", "5Y": "5Y", "10Y": "10Y", "30Y": "30Y"}
+
+def load_xgb_metadata() -> Optional[Dict]:
+    """Load latest XGBoost model metadata."""
+    metadata_files = sorted(MODEL_DIR.glob("xgb_metadata_*.json"), reverse=True)
+    if not metadata_files:
+        return None
+
+    with open(metadata_files[0]) as f:
+        return json.load(f)
+
+def extract_factor_shap_importance(shap_importance: Dict[str, float]) -> Dict[str, float]:
+    """
+    Extract factor-related features from SHAP importance.
+    Returns {factor_name: mean_abs_shap_value} for features starting with 'factor_'
+    """
+    factor_shap = {}
+    for feat_name, shap_val in shap_importance.items():
+        if feat_name.startswith('factor_'):
+            factor_name = feat_name.replace('factor_', '')
+            factor_shap[factor_name] = shap_val
+    return factor_shap
+
+def compute_alignment_metrics(linear_coefs: Dict[str, float],
+                             shap_importance: Dict[str, float]) -> Dict:
+    """
+    Compute alignment metrics between linear coefficients and SHAP importance.
+    
+    Returns:
+        Dictionary with alignment metrics:
+        - common_factors: List of factors present in both
+        - correlation: Pearson correlation of absolute values
+        - rank_correlation: Spearman rank correlation
+        - top_overlap: Number of top-10 factors that overlap
+    """
+    # Get absolute values for comparison
+    linear_abs = {name: abs(coef) for name, coef in linear_coefs.items()}
+    shap_abs = {name: abs(val) for name, val in shap_importance.items()}
+    
+    # Find common factors
+    common_factors = set(linear_abs.keys()) & set(shap_abs.keys())
+    
+    if len(common_factors) < 2:
+        return {
+            "common_factors": list(common_factors),
+            "correlation": None,
+            "rank_correlation": None,
+            "top_overlap": 0,
+            "alignment_score": 0.0
+        }
+    
+    # Get values for common factors
+    linear_vals = [linear_abs[f] for f in common_factors]
+    shap_vals = [shap_abs[f] for f in common_factors]
+    
+    # Compute correlation
+    if len(linear_vals) > 1:
+        correlation = np.corrcoef(linear_vals, shap_vals)[0, 1]
+    else:
+        correlation = None
+    
+    # Compute rank correlation
+    rank_corr = None
+    if HAS_SCIPY:
+        try:
+            rank_corr, _ = spearmanr(linear_vals, shap_vals)
+        except:
+            rank_corr = None
+    
+    # Top overlap: check how many of top-10 factors overlap
+    linear_top10 = sorted(linear_abs.items(), key=lambda x: x[1], reverse=True)[:10]
+    shap_top10 = sorted(shap_abs.items(), key=lambda x: x[1], reverse=True)[:10]
+    
+    linear_top10_set = set(f[0] for f in linear_top10)
+    shap_top10_set = set(f[0] for f in shap_top10)
+    top_overlap = len(linear_top10_set & shap_top10_set)
+    
+    # Alignment score: weighted combination
+    alignment_score = 0.0
+    if correlation is not None:
+        alignment_score += 0.4 * max(0, correlation)  # Positive correlation
+    if rank_corr is not None:
+        alignment_score += 0.4 * max(0, rank_corr)  # Positive rank correlation
+    alignment_score += 0.2 * (top_overlap / 10.0)  # Top overlap
+    
+    return {
+        "common_factors": sorted(common_factors),
+        "num_common": len(common_factors),
+        "correlation": float(correlation) if correlation is not None else None,
+        "rank_correlation": float(rank_corr) if rank_corr is not None else None,
+        "top_overlap": top_overlap,
+        "alignment_score": float(alignment_score),
+        "linear_top10": [f[0] for f in linear_top10],
+        "shap_top10": [f[0] for f in shap_top10]
+    }
+
+def compare_all_tenors(date: str) -> Dict:
+    """
+    Compare linear model and XGBoost SHAP for all tenors.
+    
+    Args:
+        date: Date string for linear model coefficients
+    
+    Returns:
+        Dictionary with comparison results for each tenor
+    """
+    print(f"[COMPARE] Comparing models for date {date}")
+    
+    # Load linear model
+    coefficients = initialize_coefficients(date)
+    factor_scores = get_daily_factor_scores(date)
+    
+    if not factor_scores:
+        print(f"[WARN] No factor scores found for {date}")
+        return {}
+    
+    # Load XGBoost metadata
+    xgb_metadata = load_xgb_metadata()
+    if not xgb_metadata:
+        print("[WARN] No XGBoost metadata found")
+        return {}
+    
+    results = {}
+    
+    # For each target in XGBoost, find matching tenor in linear model
+    for target in xgb_metadata.get("targets", []):
+        model_info = xgb_metadata.get("model_info", {}).get(target, {})
         
-        if not factor_scores:
-            return None
+        # Get SHAP importance ranking
+        shap_top_features = model_info.get("top_features_shap", [])
         
-        predictions = predict_yield_changes(date, coefficients, factor_scores, intercepts)
-        return predictions
-    except Exception as e:
-        print(f"[WARN] Failed to get linear predictions: {e}")
-        return None
-
-def get_xgboost_predictions(date: str) -> Optional[Dict[str, float]]:
-    """Get XGBoost model predictions for a date (if available)."""
-    # XGBoost predictions are stored in LLM analysis or can be computed from models
-    # For now, return None if not available
-    # This can be enhanced to load XGBoost models and make predictions
-    return None
-
-def get_actual_changes(date: str) -> Optional[Dict[str, float]]:
-    """Get actual yield changes from database."""
-    conn = get_conn()
-    c = conn.cursor()
-    
-    row = c.execute("""
-        SELECT delta_zeros_pct
-        FROM yield_curve_daily
-        WHERE date = ?
-    """, (date,)).fetchone()
-    
-    conn.close()
-    
-    if not row:
-        return None
-    
-    try:
-        delta_zeros = json.loads(row["delta_zeros_pct"])
-        # Convert to our format (handle both "3M" and "3m", "2y" and "2Y", etc.)
-        actuals = {}
-        for key, value in delta_zeros.items():
-            key_upper = key.upper()
-            if key_upper == "3M":
-                actuals["3M"] = float(value) * 100  # Convert to bps
-            elif key_upper in ["2Y", "5Y", "10Y", "30Y"]:
-                actuals[key_upper] = float(value) * 100
-            elif key_upper.replace("Y", "Y") in ["2Y", "5Y", "10Y", "30Y"]:
-                actuals[key_upper.replace("Y", "Y")] = float(value) * 100
+        if not shap_top_features:
+            continue
         
-        return actuals
-    except:
-        return None
+        # Map target to tenor
+        tenor = TENOR_MAP.get(target, target.upper())
+        
+        if tenor not in coefficients:
+            continue
+        
+        # Get linear coefficients for this tenor
+        linear_coefs = coefficients[tenor]
+        
+        # Extract factor-related SHAP features
+        # Create a simple importance dict from ranking (higher rank = more important)
+        shap_importance = {}
+        for i, feat_name in enumerate(shap_top_features):
+            if feat_name.startswith('factor_'):
+                factor_name = feat_name.replace('factor_', '')
+                # Inverse rank (first = highest importance)
+                shap_importance[factor_name] = len(shap_top_features) - i
+        
+        # Compute alignment
+        alignment = compute_alignment_metrics(linear_coefs, shap_importance)
+        
+        results[target] = {
+            "tenor": tenor,
+            "alignment": alignment,
+            "linear_coefficients": {name: float(coef) for name, coef in linear_coefs.items()},
+            "shap_importance": shap_importance
+        }
+    
+    return results
 
-def compare_models_for_date(date: str) -> Dict:
-    """Compare linear and XGBoost models for a single date."""
-    linear_preds = get_linear_predictions(date)
-    xgb_preds = get_xgboost_predictions(date)
-    actuals = get_actual_changes(date)
+def generate_comparison_report(date: str, output_path: Optional[Path] = None) -> Dict:
+    """
+    Generate comprehensive comparison report.
     
-    if not actuals:
-        return None
+    Args:
+        date: Date string
+        output_path: Optional path to save report
     
-    comparison = {
+    Returns:
+        Dictionary with comparison results
+    """
+    if output_path is None:
+        output_path = Path(__file__).parent / "attribution_analysis" / f"model_comparison_{date}.json"
+    
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    comparison = compare_all_tenors(date)
+    
+    # Add summary statistics
+    alignment_scores = [r["alignment"]["alignment_score"] for r in comparison.values() 
+                       if r["alignment"]["alignment_score"] is not None]
+    correlations = [r["alignment"]["correlation"] for r in comparison.values() 
+                   if r["alignment"].get("correlation") is not None]
+    
+    summary = {
         "date": date,
-        "actuals": actuals,
-        "linear": {},
-        "xgboost": {},
-        "metrics": {}
+        "num_tenors_compared": len(comparison),
+        "mean_alignment_score": float(np.mean(alignment_scores)) if alignment_scores else None,
+        "mean_correlation": float(np.mean(correlations)) if correlations else None,
+        "comparison_by_tenor": comparison
     }
     
-    if linear_preds:
-        comparison["linear"] = linear_preds
-        # Compute errors
-        linear_errors = {}
-        linear_mae = 0.0
-        linear_count = 0
-        for tenor in ["3M", "2Y", "5Y", "10Y", "30Y"]:
-            if tenor in actuals and tenor in linear_preds:
-                error = actuals[tenor] - linear_preds[tenor]
-                linear_errors[tenor] = error
-                linear_mae += abs(error)
-                linear_count += 1
-        comparison["linear"]["errors"] = linear_errors
-        if linear_count > 0:
-            comparison["metrics"]["linear_mae"] = linear_mae / linear_count
+    # Save report
+    with open(output_path, "w") as f:
+        json.dump(summary, f, indent=2)
     
-    if xgb_preds:
-        comparison["xgboost"] = xgb_preds
+    print(f"[COMPARE] Saved comparison report to {output_path}")
     
-    return comparison
-
-def compare_models_date_range(start_date: str, end_date: str) -> List[Dict]:
-    """Compare models across a date range."""
-    comparisons = []
+    # Print summary
+    print(f"\n[COMPARE] Summary:")
+    print(f"  Tenors compared: {summary['num_tenors_compared']}")
+    if summary['mean_alignment_score'] is not None:
+        print(f"  Mean alignment score: {summary['mean_alignment_score']:.3f}")
+    if summary['mean_correlation'] is not None:
+        print(f"  Mean correlation: {summary['mean_correlation']:.3f}")
     
-    start = dt.datetime.strptime(start_date, "%Y-%m-%d").date()
-    end = dt.datetime.strptime(end_date, "%Y-%m-%d").date()
+    for target, result in comparison.items():
+        align = result["alignment"]
+        print(f"\n  {target} ({result['tenor']}):")
+        print(f"    Alignment score: {align['alignment_score']:.3f}")
+        if align.get('correlation') is not None:
+            print(f"    Correlation: {align['correlation']:.3f}")
+        print(f"    Top-10 overlap: {align['top_overlap']}/10")
+        print(f"    Common factors: {align.get('num_common', 0)}")
     
-    current = start
-    while current <= end:
-        if current.weekday() < 5:  # Business days only
-            date_str = current.isoformat()
-            comparison = compare_models_for_date(date_str)
-            if comparison:
-                comparisons.append(comparison)
-        current += dt.timedelta(days=1)
-    
-    return comparisons
-
-def print_comparison(comparison: Dict):
-    """Print a formatted comparison."""
-    print(f"\n{'='*70}")
-    print(f"Model Comparison - {comparison['date']}")
-    print(f"{'='*70}")
-    
-    print(f"\nActual Changes (bps):")
-    for tenor in ["3M", "2Y", "5Y", "10Y", "30Y"]:
-        if tenor in comparison["actuals"]:
-            print(f"  {tenor}: {comparison['actuals'][tenor]:+.2f}")
-    
-    if comparison["linear"]:
-        print(f"\nLinear Model Predictions (bps):")
-        for tenor in ["3M", "2Y", "5Y", "10Y", "30Y"]:
-            if tenor in comparison["linear"]:
-                pred = comparison["linear"][tenor]
-                actual = comparison["actuals"].get(tenor, 0.0)
-                error = actual - pred
-                print(f"  {tenor}: {pred:+.2f} (error: {error:+.2f})")
-        
-        if "metrics" in comparison and "linear_mae" in comparison["metrics"]:
-            print(f"\nLinear Model MAE: {comparison['metrics']['linear_mae']:.2f} bps")
-    
-    if comparison["xgboost"]:
-        print(f"\nXGBoost Predictions (bps):")
-        for tenor in comparison["xgboost"]:
-            print(f"  {tenor}: {comparison['xgboost'][tenor]:+.2f}")
+    return summary
 
 def main():
-    ap = argparse.ArgumentParser(description="Compare linear and XGBoost model predictions")
-    ap.add_argument("--date", type=str, help="Single date (YYYY-MM-DD) to compare")
-    ap.add_argument("--start-date", type=str, help="Start date for range comparison")
-    ap.add_argument("--end-date", type=str, help="End date for range comparison")
-    ap.add_argument("--output", type=str, help="Output JSON file for comparison results")
+    import argparse
+    ap = argparse.ArgumentParser(description="Compare linear model and XGBoost SHAP importance")
+    ap.add_argument("--date", type=str, help="Date (YYYY-MM-DD) for linear model, defaults to today")
+    ap.add_argument("--output", type=str, help="Output file path")
     args = ap.parse_args()
     
-    if args.date:
-        comparison = compare_models_for_date(args.date)
-        if comparison:
-            print_comparison(comparison)
-            if args.output:
-                with open(args.output, "w") as f:
-                    json.dump(comparison, f, indent=2)
-        else:
-            print(f"[WARN] No comparison data available for {args.date}")
+    from datetime import datetime
+    date = args.date if args.date else datetime.now().strftime("%Y-%m-%d")
     
-    elif args.start_date and args.end_date:
-        comparisons = compare_models_date_range(args.start_date, args.end_date)
-        
-        if comparisons:
-            # Print summary
-            print(f"\n{'='*70}")
-            print(f"Model Comparison Summary")
-            print(f"{'='*70}")
-            print(f"Date range: {args.start_date} to {args.end_date}")
-            print(f"Dates compared: {len(comparisons)}")
-            
-            # Aggregate metrics
-            linear_maes = [c["metrics"].get("linear_mae", 0.0) for c in comparisons if "linear_mae" in c.get("metrics", {})]
-            if linear_maes:
-                avg_mae = sum(linear_maes) / len(linear_maes)
-                print(f"Average Linear Model MAE: {avg_mae:.2f} bps")
-            
-            if args.output:
-                with open(args.output, "w") as f:
-                    json.dump(comparisons, f, indent=2)
-                print(f"\n[OK] Comparison results saved to {args.output}")
-        else:
-            print(f"[WARN] No comparison data available for date range")
+    output_path = Path(args.output) if args.output else None
     
-    else:
-        # Default: compare today
-        today = dt.date.today().isoformat()
-        comparison = compare_models_for_date(today)
-        if comparison:
-            print_comparison(comparison)
-        else:
-            print(f"[WARN] No comparison data available for {today}")
+    report = generate_comparison_report(date, output_path)
+    
+    if report:
+        print(f"\n[SUCCESS] Comparison report generated")
 
 if __name__ == "__main__":
     main()
-

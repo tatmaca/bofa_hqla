@@ -9,7 +9,7 @@ import sys
 import json
 from pathlib import Path
 from datetime import datetime, date, timedelta
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 import sqlite3
 
 # Add parent directories to path
@@ -243,6 +243,16 @@ def api_stats(date_str):
         stats["prediction_summary"] = analysis.get("analysis", {}).get("overall_summary", "")
     
     return jsonify(stats)
+
+@app.route('/manifest.json')
+def manifest():
+    """Serve PWA manifest."""
+    return send_from_directory('static', 'manifest.json', mimetype='application/manifest+json')
+
+@app.route('/service-worker.js')
+def service_worker():
+    """Serve service worker."""
+    return send_from_directory('static', 'service-worker.js', mimetype='application/javascript')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8888)

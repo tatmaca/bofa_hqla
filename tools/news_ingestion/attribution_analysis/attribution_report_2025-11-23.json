@@ -1,0 +1,64 @@
+{
+  "date": "2025-11-23",
+  "attribution": {
+    "3M": {
+      "FED_TONE": 20.0,
+      "RISK_OFF": 10.0,
+      "CPI_HEAD_SURP": -3.2,
+      "GEO_EVENT": 2.7,
+      "INFL_EXP_SURP": 1.4,
+      "ECB_TONE": 1.35,
+      "UNEMPLOYMENT_RATE_SURP": 0.7,
+      "FISCAL_DEFICIT_NEWS": 0.0,
+      "MOVE_SHIFT": -0.0
+    },
+    "2Y": {
+      "FED_TONE": 25.0,
+      "RISK_OFF": 12.5,
+      "CPI_HEAD_SURP": -5.6000000000000005,
+      "GEO_EVENT": 4.050000000000001,
+      "INFL_EXP_SURP": 2.8,
+      "ECB_TONE": 2.7,
+      "FISCAL_DEFICIT_NEWS": 2.5,
+      "UNEMPLOYMENT_RATE_SURP": 1.4,
+      "MOVE_SHIFT": -0.7
+    },
+    "5Y": {
+      "FED_TONE": 17.5,
+      "RISK_OFF": 15.0,
+      "CPI_HEAD_SURP": -5.6000000000000005,
+      "GEO_EVENT": 5.4,
+      "ECB_TONE": 4.050000000000001,
+      "FISCAL_DEFICIT_NEWS": 3.75,
+      "INFL_EXP_SURP": 3.5,
+      "UNEMPLOYMENT_RATE_SURP": 1.75,
+      "MOVE_SHIFT": -1.4
+    },
+    "10Y": {
+      "RISK_OFF": 20.0,
+      "FED_TONE": 12.5,
+      "GEO_EVENT": 8.100000000000001,
+      "FISCAL_DEFICIT_NEWS": 6.25,
+      "ECB_TONE": 5.4,
+      "CPI_HEAD_SURP": -4.800000000000001,
+      "INFL_EXP_SURP": 4.199999999999999,
+      "MOVE_SHIFT": -2.0999999999999996,
+      "UNEMPLOYMENT_RATE_SURP": 1.4
+    },
+    "30Y": {
+      "RISK_OFF": 22.5,
+      "GEO_EVENT": 9.450000000000001,
+      "FISCAL_DEFICIT_NEWS": 7.5,
+      "FED_TONE": 7.5,
+      "ECB_TONE": 5.4,
+      "INFL_EXP_SURP": 4.199999999999999,
+      "CPI_HEAD_SURP": -4.0,
+      "MOVE_SHIFT": -2.8,
+      "UNEMPLOYMENT_RATE_SURP": 1.0499999999999998
+    }
+  },
+  "visualizations": {
+    "factor_attribution": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_attribution_2025-11-23.png",
+    "factor_heatmap": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_heatmap_2025-11-23.png"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "date": "2025-11-21",
+  "attribution": {
+    "3M": {
+      "FED_TONE": 20.0,
+      "RISK_OFF": 10.0,
+      "CPI_HEAD_SURP": 7.6000000000000005,
+      "GEO_EVENT": 5.0,
+      "UNEMPLOYMENT_RATE_SURP": 5.0,
+      "OIL_SHOCK_UP": 3.2,
+      "OIL_SHOCK_DOWN": 2.7,
+      "NFP_SURP": -2.4000000000000004,
+      "WAGE_SURP": -0.6999999999999997,
+      "RETAIL_SALES_SURP": 0.25
+    },
+    "2Y": {
+      "FED_TONE": 25.0,
+      "CPI_HEAD_SURP": 13.3,
+      "RISK_OFF": 12.5,
+      "UNEMPLOYMENT_RATE_SURP": 10.0,
+      "GEO_EVENT": 7.5,
+      "FISCAL_DEFICIT_NEWS": 5.0,
+      "NFP_SURP": -4.800000000000001,
+      "OIL_SHOCK_UP": 4.800000000000001,
+      "OIL_SHOCK_DOWN": 4.050000000000001,
+      "WAGE_SURP": -1.7499999999999993
+    },
+    "5Y": {
+      "FED_TONE": 17.5,
+      "RISK_OFF": 15.0,
+      "CPI_HEAD_SURP": 13.3,
+      "UNEMPLOYMENT_RATE_SURP": 12.5,
+      "GEO_EVENT": 10.0,
+      "FISCAL_DEFICIT_NEWS": 7.5,
+      "OIL_SHOCK_UP": 6.4,
+      "OIL_SHOCK_DOWN": 5.4,
+      "NFP_SURP": -4.800000000000001,
+      "SUPPLY_LONG": 2.8
+    },
+    "10Y": {
+      "RISK_OFF": 20.0,
+      "GEO_EVENT": 15.0,
+      "FED_TONE": 12.5,
+      "FISCAL_DEFICIT_NEWS": 12.5,
+      "CPI_HEAD_SURP": 11.4,
+      "UNEMPLOYMENT_RATE_SURP": 10.0,
+      "OIL_SHOCK_UP": 8.0,
+      "OIL_SHOCK_DOWN": 6.75,
+      "SUPPLY_LONG": 4.199999999999999,
+      "HOUSING_TURN": -4.050000000000001
+    },
+    "30Y": {
+      "RISK_OFF": 22.5,
+      "GEO_EVENT": 17.5,
+      "FISCAL_DEFICIT_NEWS": 15.0,
+      "CPI_HEAD_SURP": 9.5,
+      "OIL_SHOCK_UP": 8.0,
+      "FED_TONE": 7.5,
+      "UNEMPLOYMENT_RATE_SURP": 7.5,
+      "OIL_SHOCK_DOWN": 6.75,
+      "SUPPLY_LONG": 4.8999999999999995,
+      "HOUSING_TURN": -4.050000000000001
+    }
+  },
+  "visualizations": {
+    "factor_attribution": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_attribution_2025-11-21.png",
+    "factor_heatmap": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_heatmap_2025-11-21.png"
+  }
+}

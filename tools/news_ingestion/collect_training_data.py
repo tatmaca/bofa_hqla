@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from db import get_conn
 from bucket_news import get_bucket_counts, BUCKETS
 from analyze_yield_impact import load_curve_snapshot, extract_llm_features
+from train_linear_online import get_daily_factor_scores
 
 DB_PATH = os.environ.get("NEWS_DB_PATH", "news.db")
 ANALYSES_DIR = Path(__file__).parent / "analyses"
@@ -154,7 +155,10 @@ def collect_training_data(start_date: str, end_date: str,
         # Extract features
         llm_features = extract_llm_features(llm_pred)
         
-        # Build feature vector: bucket counts + LLM predictions
+        # Get factor scores from linear model (connect the two steps)
+        factor_scores = get_daily_factor_scores(date)
+        
+        # Build feature vector: bucket counts + LLM predictions + factor scores
         features = {}
         
         # News bucket features
@@ -167,6 +171,10 @@ def collect_training_data(start_date: str, end_date: str,
         
         # Add LLM prediction features
         features.update(llm_features)
+        
+        # Add factor scores (connect linear model to XGBoost)
+        for factor_name, factor_score in factor_scores.items():
+            features[f"factor_{factor_name}"] = factor_score
         
         # Store training example
         training_data.append({

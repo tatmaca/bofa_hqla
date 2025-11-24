@@ -1,0 +1,113 @@
+/* Mobile-specific styles for iPhone */
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    header {
+        padding: 15px 20px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .date-selector {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .date-selector select,
+    .date-selector button {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .chart-card {
+        padding: 20px;
+    }
+    
+    .chart-card canvas {
+        max-height: 250px;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .content-card {
+        padding: 20px;
+    }
+    
+    /* Touch-friendly buttons */
+    button, .news-item a {
+        min-height: 44px; /* iOS touch target minimum */
+        touch-action: manipulation;
+    }
+    
+    /* Safe area for iPhone X and later */
+    .container {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    /* Swipe-friendly news items */
+    .news-item {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+    
+    /* Better scrolling */
+    body {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* iPhone-specific optimizations */
+@supports (-webkit-touch-callout: none) {
+    /* iOS Safari specific */
+    .stat-card,
+    .chart-card,
+    .content-card {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    input, select, textarea {
+        font-size: 16px; /* Prevents zoom on focus */
+    }
+}
+
+/* Landscape mode adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .charts-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+

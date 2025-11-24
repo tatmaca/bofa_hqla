@@ -470,6 +470,63 @@ def save_predictions(date: str, predictions: Dict[str, float],
     conn.commit()
     conn.close()
 
+def compute_factor_attribution(date: str, 
+                                coefficients: Optional[Dict[str, Dict[str, float]]] = None,
+                                factor_scores: Optional[Dict[str, float]] = None) -> Dict[str, Dict[str, float]]:
+    """
+    Compute attribution: which factors contribute most to yield changes.
+    
+    For each tenor, computes: Contribution_f,k = B_k,f × x_t,f
+    
+    Args:
+        date: Date string
+        coefficients: {tenor: {factor_name: coefficient_bps}} (if None, loads from DB)
+        factor_scores: {factor_name: factor_score} (if None, loads from DB)
+    
+    Returns:
+        {tenor: {factor_name: contribution_bps}} - sorted by absolute contribution
+    """
+    if coefficients is None:
+        coefficients = initialize_coefficients(date)
+    
+    if factor_scores is None:
+        factor_scores = get_daily_factor_scores(date)
+    
+    attribution = {tenor: {} for tenor in TENORS}
+    
+    for tenor in TENORS:
+        for factor_name, factor_score in factor_scores.items():
+            if factor_name in coefficients.get(tenor, {}):
+                coef = coefficients[tenor][factor_name]
+                contribution = coef * factor_score
+                attribution[tenor][factor_name] = contribution
+    
+    # Sort by absolute contribution for each tenor
+    sorted_attribution = {}
+    for tenor in TENORS:
+        factors = attribution[tenor]
+        sorted_factors = sorted(
+            factors.items(),
+            key=lambda x: abs(x[1]),
+            reverse=True
+        )
+        sorted_attribution[tenor] = dict(sorted_factors)
+    
+    return sorted_attribution
+
+def get_top_factors_by_tenor(attribution: Dict[str, Dict[str, float]], 
+                             top_n: int = 5) -> Dict[str, List[Tuple[str, float]]]:
+    """
+    Get top N factors by absolute contribution for each tenor.
+    
+    Returns:
+        {tenor: [(factor_name, contribution_bps), ...]}
+    """
+    top_factors = {}
+    for tenor, factors in attribution.items():
+        top_factors[tenor] = list(factors.items())[:top_n]
+    return top_factors
+
 def train_linear_model_for_date(date: str, check_significance: bool = True, 
                                 threshold_std: float = 2.0) -> bool:
     """

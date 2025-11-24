@@ -23,6 +23,14 @@ except (ImportError, AttributeError) as e:
     print(f"[WARN] XGBoost not available: {e}")
     print("[WARN] Install with: pip install 'numpy<2.0' xgboost")
 
+try:
+    import shap
+    HAS_SHAP = True
+except ImportError:
+    HAS_SHAP = False
+    shap = None
+    print("[WARN] SHAP not available. Install with: pip install shap")
+
 TENORS = ["2y", "5y", "10y", "30y"]
 SPREADS = ["2s10s", "2s30s"]
 TARGETS = TENORS + SPREADS
@@ -66,10 +74,91 @@ def load_training_data(data_path: Path) -> Tuple[np.ndarray, Dict[str, np.ndarra
     print(f"[LOAD] Loaded {len(X)} examples with {len(feature_names)} features")
     return X, y, dates
 
+def compute_shap_values(model, X_sample: np.ndarray, feature_names: List[str], 
+                        max_samples: int = 100, timeout_seconds: Optional[int] = None) -> Tuple[Optional[np.ndarray], Optional[Dict]]:
+    """
+    Compute SHAP values for model interpretability.
+    
+    Args:
+        model: Trained XGBoost model
+        X_sample: Sample of features to explain (subset of training/validation data)
+        feature_names: List of feature names
+        max_samples: Maximum number of samples to use for SHAP (for performance)
+        timeout_seconds: Optional timeout in seconds for SHAP computation
+    
+    Returns:
+        (shap_values, importance_ranking)
+        - shap_values: Array of SHAP values (n_samples, n_features)
+        - importance_ranking: List of (feature_name, mean_abs_shap_value) sorted by importance
+    """
+    if not HAS_SHAP or shap is None:
+        return None, None
+    
+    # Limit sample size for performance (especially for small datasets)
+    if len(X_sample) > max_samples:
+        indices = np.random.choice(len(X_sample), max_samples, replace=False)
+        X_sample = X_sample[indices]
+    elif len(X_sample) == 0:
+        return None, None
+    
+    try:
+        # For very small datasets, use even fewer samples
+        if len(X_sample) > 5:
+            X_sample = X_sample[:min(10, len(X_sample))]
+        
+        # Use TreeExplainer for XGBoost (fast and exact)
+        explainer = shap.TreeExplainer(model)
+        
+        # Apply timeout if specified
+        if timeout_seconds:
+            import signal
+            
+            def timeout_handler(signum, frame):
+                raise TimeoutError("SHAP computation timed out")
+            
+            old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(timeout_seconds)
+        
+        try:
+            shap_values = explainer.shap_values(X_sample)
+            
+            if timeout_seconds:
+                signal.alarm(0)
+                signal.signal(signal.SIGALRM, old_handler)
+            
+            # Compute mean absolute SHAP value per feature
+            mean_abs_shap = np.abs(shap_values).mean(0)
+            
+            # Create ranking
+            importance_ranking = sorted(
+                zip(feature_names, mean_abs_shap),
+                key=lambda x: x[1],
+                reverse=True
+            )
+            
+            return shap_values, dict(importance_ranking)
+        except TimeoutError:
+            if timeout_seconds:
+                signal.alarm(0)
+                signal.signal(signal.SIGALRM, old_handler)
+            print(f"[WARN] SHAP computation timed out after {timeout_seconds}s")
+            return None, None
+    except Exception as e:
+        print(f"[WARN] SHAP computation failed: {e}")
+        return None, None
+
 def train_xgboost_model(X_train: np.ndarray, y_train: np.ndarray,
                        X_val: np.ndarray, y_val: np.ndarray,
-                       target_name: str) -> Tuple[Optional[object], Dict]:
-    """Train XGBoost model for a single target."""
+                       target_name: str, feature_names: Optional[List[str]] = None) -> Tuple[Optional[object], Dict, Optional[Dict]]:
+    """
+    Train XGBoost model for a single target.
+    
+    Returns:
+        (model, metrics, shap_info)
+        - model: Trained XGBoost model
+        - metrics: Performance metrics
+        - shap_info: Dict with SHAP values and importance ranking (if available)
+    """
     if not HAS_XGBOOST or xgb is None:
         raise ImportError("XGBoost not available")
     
@@ -129,9 +218,26 @@ def train_xgboost_model(X_train: np.ndarray, y_train: np.ndarray,
         "best_iteration": model.best_iteration if hasattr(model, 'best_iteration') else params['n_estimators']
     }
     
-    return model, metrics
+    # Compute SHAP values if available (with timeout for small datasets)
+    shap_info = None
+    if HAS_SHAP and feature_names is not None:
+        # Use validation set for SHAP (smaller and representative)
+        # Use shorter timeout for small datasets
+        timeout = 60 if len(X_val) < 10 else 120
+        shap_values, importance_ranking = compute_shap_values(
+            model, X_val, feature_names, max_samples=min(20, len(X_val)), timeout_seconds=timeout
+        )
+        if shap_values is not None:
+            shap_info = {
+                "shap_values": shap_values.tolist() if isinstance(shap_values, np.ndarray) else shap_values,
+                "importance_ranking": importance_ranking,
+                "top_features": list(importance_ranking.items())[:10] if importance_ranking else []
+            }
+    
+    return model, metrics, shap_info
 
 def train_models(X: np.ndarray, y: Dict[str, np.ndarray], dates: List[str],
+                feature_names: List[str],
                 test_size: float = 0.2, use_time_split: bool = True) -> Dict[str, Dict]:
     """Train XGBoost models for all targets."""
     if not HAS_XGBOOST:
@@ -185,7 +291,9 @@ def train_models(X: np.ndarray, y: Dict[str, np.ndarray], dates: List[str],
             y_val = y_train_val[train_end_idx:]
         
         # Train model
-        model, metrics = train_xgboost_model(X_train_final, y_train, X_val, y_val, target_name)
+        model, metrics, shap_info = train_xgboost_model(
+            X_train_final, y_train, X_val, y_val, target_name, feature_names
+        )
         
         # Test set evaluation
         y_pred_test = model.predict(X_test)
@@ -197,14 +305,19 @@ def train_models(X: np.ndarray, y: Dict[str, np.ndarray], dates: List[str],
         metrics["test_mae"] = float(test_mae)
         metrics["test_r2"] = float(test_r2)
         
-        # Feature importance
+        # Feature importance (built-in XGBoost)
         feature_importance = model.feature_importances_.tolist()
         
         results[target_name] = {
             "model": model,
             "metrics": metrics,
-            "feature_importance": feature_importance
+            "feature_importance": feature_importance,
+            "shap_info": shap_info
         }
+        
+        # Print SHAP top features if available
+        if shap_info and shap_info.get("top_features"):
+            print(f"  Top SHAP features: {', '.join([f[0] for f in shap_info['top_features'][:5]])}")
         
         print(f"  Train R²: {metrics['train_r2']:.3f}, Val R²: {metrics['val_r2']:.3f}, Test R²: {metrics['test_r2']:.3f}")
         print(f"  Test MAE: {metrics['test_mae']:.4f} bps, Test RMSE: {np.sqrt(metrics['test_mse']):.4f} bps")
@@ -218,6 +331,30 @@ def save_models(models: Dict[str, Dict], feature_names: List[str], date: str):
         with open(model_path, "wb") as f:
             pickle.dump(model_info["model"], f)
         print(f"[SAVE] Saved {target_name} model to {model_path}")
+        
+        # Save SHAP values if available (for later analysis)
+        if model_info.get("shap_info") and model_info["shap_info"]:
+            shap_path = MODEL_DIR / f"xgb_{target_name}_{date}_shap.json"
+            # Convert numpy types to native Python types for JSON serialization
+            shap_values = model_info["shap_info"].get("shap_values")
+            if shap_values is not None:
+                if isinstance(shap_values, list):
+                    shap_values = [[float(x) for x in row] for row in shap_values]
+                elif hasattr(shap_values, 'tolist'):
+                    shap_values = shap_values.tolist()
+            
+            importance_ranking = model_info["shap_info"].get("importance_ranking")
+            if importance_ranking:
+                importance_ranking = {k: float(v) for k, v in importance_ranking.items()}
+            
+            shap_data = {
+                "shap_values": shap_values,
+                "importance_ranking": importance_ranking,
+                "feature_names": feature_names
+            }
+            with open(shap_path, "w") as f:
+                json.dump(shap_data, f, indent=2)
+            print(f"[SAVE] Saved SHAP data for {target_name} to {shap_path}")
     
     # Save metadata
     metadata = {
@@ -228,10 +365,15 @@ def save_models(models: Dict[str, Dict], feature_names: List[str], date: str):
         "model_info": {
             target: {
                 "metrics": info["metrics"],
-                "top_features": [
+                "top_features_xgb": [
                     feature_names[i] 
                     for i in np.argsort(info["feature_importance"])[-10:][::-1]
-                ]
+                ],
+                "top_features_shap": (
+                    list(info.get("shap_info", {}).get("importance_ranking", {}).keys())[:10]
+                    if info.get("shap_info") and info["shap_info"].get("importance_ranking")
+                    else []
+                )
             }
             for target, info in models.items()
         }
@@ -313,7 +455,7 @@ def main():
     feature_names = sorted(data[0]["features"].keys())
     
     print(f"[TRAIN] Training XGBoost models...")
-    models = train_models(X, y, dates, test_size=args.test_size, 
+    models = train_models(X, y, dates, feature_names, test_size=args.test_size, 
                          use_time_split=not args.no_time_split)
     
     if not models:
