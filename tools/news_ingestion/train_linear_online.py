@@ -455,7 +455,7 @@ def save_predictions(date: str, predictions: Dict[str, float],
         error = actual - pred
         
         c.execute("""
-            INSERT INTO linear_model_predictions
+            INSERT OR REPLACE INTO linear_model_predictions
             (date, tenor, predicted_delta_bps, actual_delta_bps, error_bps, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (
@@ -546,24 +546,6 @@ def train_linear_model_for_date(date: str, check_significance: bool = True,
     """
     print(f"[LINEAR] Training linear model for {date}")
     
-    # Check significance if enabled
-    if check_significance:
-        try:
-            from yield_movement_thresholds import should_train_on_date
-            should_train, sig_info = should_train_on_date(date, threshold_std, min_significant_tenors=1)
-            
-            if not should_train:
-                print(f"[SKIP] Date {date} has no significant moves (threshold: {threshold_std}σ)")
-                print(f"[SKIP] Significant tenors: {len(sig_info.get('significant_tenors', []))}")
-                return False
-            
-            sig_tenors = sig_info.get("significant_tenors", [])
-            print(f"[INFO] Significant moves detected: {', '.join(sig_tenors)}")
-        except ImportError:
-            print("[WARN] yield_movement_thresholds not available, training without significance check")
-        except Exception as e:
-            print(f"[WARN] Significance check failed: {e}, continuing with training")
-    
     # Load or initialize coefficients
     coefficients = initialize_coefficients(date)
     
@@ -576,39 +558,80 @@ def train_linear_model_for_date(date: str, check_significance: bool = True,
     # Get intercepts
     intercepts = get_intercepts(date)
     
-    # Predict
+    # Predict (always generate predictions, even if we don't train)
     predictions = predict_yield_changes(date, coefficients, factor_scores, intercepts)
     
     # Get actuals
     actuals = get_actual_yield_changes(date)
     if not actuals:
         print(f"[WARN] No actual yield changes for {date}")
+        # Still save predictions even without actuals (for future comparison)
+        try:
+            save_predictions(date, predictions, {})
+        except Exception as e:
+            print(f"[WARN] Failed to save predictions: {e}")
         return False
     
-    # Compute errors
-    errors = {tenor: actuals.get(tenor, 0.0) - predictions.get(tenor, 0.0) for tenor in TENORS}
+    # Always save predictions (even if training is skipped)
+    try:
+        save_predictions(date, predictions, actuals)
+        print(f"[LINEAR] Saved predictions for {date}")
+    except Exception as e:
+        print(f"[WARN] Failed to save predictions: {e}")
+        import traceback
+        traceback.print_exc()
     
-    # Update coefficients
-    updated_coefficients = update_coefficients(
-        date, coefficients, factor_scores, actuals, predictions
-    )
+    # Check significance if enabled (only affects whether we update coefficients)
+    should_update = True
+    if check_significance:
+        try:
+            from yield_movement_thresholds import should_train_on_date
+            should_train, sig_info = should_train_on_date(date, threshold_std, min_significant_tenors=1)
+            
+            if not should_train:
+                print(f"[SKIP] Date {date} has no significant moves (threshold: {threshold_std}σ)")
+                print(f"[SKIP] Significant tenors: {len(sig_info.get('significant_tenors', []))}")
+                print(f"[INFO] Predictions saved but coefficients not updated (no significant moves)")
+                should_update = False
+            else:
+                sig_tenors = sig_info.get("significant_tenors", [])
+                print(f"[INFO] Significant moves detected: {', '.join(sig_tenors)}")
+        except ImportError:
+            print("[WARN] yield_movement_thresholds not available, training without significance check")
+        except Exception as e:
+            print(f"[WARN] Significance check failed: {e}, continuing with training")
     
-    # Update intercepts
-    config = load_config()
-    cold_start = config.get("linear_model_cold_start", {})
-    learning_rate = cold_start.get("learning_rate", 0.05)
-    updated_intercepts = update_intercepts(date, intercepts, errors, learning_rate)
-    
-    # Save everything
-    save_coefficients(date, updated_coefficients)
-    save_intercepts(date, updated_intercepts)
-    save_predictions(date, predictions, actuals)
-    
-    # Print summary
-    print(f"[LINEAR] Updated coefficients for {date}")
-    print(f"[LINEAR] Predictions: {predictions}")
-    print(f"[LINEAR] Actuals: {actuals}")
-    print(f"[LINEAR] Errors: {errors}")
+    # Only update coefficients if we should train
+    if should_update:
+        # Compute errors
+        errors = {tenor: actuals.get(tenor, 0.0) - predictions.get(tenor, 0.0) for tenor in TENORS}
+        
+        # Update coefficients
+        updated_coefficients = update_coefficients(
+            date, coefficients, factor_scores, actuals, predictions
+        )
+        
+        # Update intercepts
+        config = load_config()
+        cold_start = config.get("linear_model_cold_start", {})
+        learning_rate = cold_start.get("learning_rate", 0.05)
+        updated_intercepts = update_intercepts(date, intercepts, errors, learning_rate)
+        
+        # Save everything
+        save_coefficients(date, updated_coefficients)
+        save_intercepts(date, updated_intercepts)
+        
+        # Print summary
+        print(f"[LINEAR] Updated coefficients for {date}")
+        print(f"[LINEAR] Predictions: {predictions}")
+        print(f"[LINEAR] Actuals: {actuals}")
+        print(f"[LINEAR] Errors: {errors}")
+    else:
+        # Print summary even when coefficients weren't updated
+        print(f"[LINEAR] Predictions saved for {date} (coefficients not updated - no significant moves)")
+        if actuals:
+            print(f"[LINEAR] Predictions: {predictions}")
+            print(f"[LINEAR] Actuals: {actuals}")
     
     return True
 

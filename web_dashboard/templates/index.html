@@ -83,6 +83,19 @@
                 <div id="risks-list"></div>
             </div>
         </div>
+
+        <div class="attribution-grid">
+            <div class="content-card">
+                <h2>Linear Model: Factor Attribution</h2>
+                <p class="subtitle">Top factors driving yield changes (ranked by contribution)</p>
+                <div id="factor-attribution"></div>
+            </div>
+            <div class="content-card">
+                <h2>Nonlinear Model: XGBoost Predictions</h2>
+                <p class="subtitle">Enhanced predictions using historical patterns</p>
+                <div id="xgboost-predictions"></div>
+            </div>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>

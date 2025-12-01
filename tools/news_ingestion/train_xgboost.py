@@ -163,20 +163,59 @@ def train_xgboost_model(X_train: np.ndarray, y_train: np.ndarray,
         raise ImportError("XGBoost not available")
     
     # XGBoost parameters - tuned for financial time series
-    params = {
-        'objective': 'reg:squarederror',
-        'n_estimators': 200,
-        'max_depth': 6,
-        'learning_rate': 0.05,
-        'subsample': 0.8,
-        'colsample_bytree': 0.8,
-        'min_child_weight': 3,
-        'gamma': 0.1,
-        'reg_alpha': 0.1,
-        'reg_lambda': 1.0,
-        'random_state': 42,
-        'n_jobs': -1
-    }
+    # Adjust for small datasets to prevent overfitting
+    n_samples = len(X_train)
+    
+    if n_samples < 15:
+        # Very small dataset - use conservative parameters to prevent overfitting
+        params = {
+            'objective': 'reg:squarederror',
+            'n_estimators': 50,
+            'max_depth': 3,
+            'learning_rate': 0.1,
+            'subsample': 1.0,
+            'colsample_bytree': 1.0,
+            'min_child_weight': 1,
+            'gamma': 0.0,
+            'reg_alpha': 0.5,
+            'reg_lambda': 1.5,
+            'random_state': 42,
+            'n_jobs': -1
+        }
+        print(f"  [PARAMS] Using conservative parameters for small dataset ({n_samples} samples)")
+    elif n_samples < 30:
+        # Small dataset - moderate regularization
+        params = {
+            'objective': 'reg:squarederror',
+            'n_estimators': 100,
+            'max_depth': 4,
+            'learning_rate': 0.08,
+            'subsample': 0.9,
+            'colsample_bytree': 0.9,
+            'min_child_weight': 2,
+            'gamma': 0.05,
+            'reg_alpha': 0.2,
+            'reg_lambda': 1.2,
+            'random_state': 42,
+            'n_jobs': -1
+        }
+        print(f"  [PARAMS] Using moderate regularization for small dataset ({n_samples} samples)")
+    else:
+        # Normal dataset - standard parameters
+        params = {
+            'objective': 'reg:squarederror',
+            'n_estimators': 200,
+            'max_depth': 6,
+            'learning_rate': 0.05,
+            'subsample': 0.8,
+            'colsample_bytree': 0.8,
+            'min_child_weight': 3,
+            'gamma': 0.1,
+            'reg_alpha': 0.1,
+            'reg_lambda': 1.0,
+            'random_state': 42,
+            'n_jobs': -1
+        }
     
     model = xgb.XGBRegressor(**params)
     
@@ -246,49 +285,80 @@ def train_models(X: np.ndarray, y: Dict[str, np.ndarray], dates: List[str],
     
     results = {}
     
+    # Adjust splits for small datasets
+    if len(X) < 10:
+        # Very small dataset - use minimal test set
+        test_size = 0.1
+        val_size = 0.3
+    elif len(X) < 20:
+        # Small dataset - use smaller test set
+        test_size = 0.15
+        val_size = 0.25
+    else:
+        # Normal dataset - use standard splits
+        val_size = 0.2
+    
     # Use time series split to respect temporal order
-    if use_time_split and len(X) > 10:
+    if use_time_split and len(X) > 5:
         split_idx = int(len(X) * (1 - test_size))
         X_train, X_test = X[:split_idx], X[split_idx:]
         dates_train, dates_test = dates[:split_idx], dates[split_idx:]
         
         # Further split training set for validation
-        val_split_idx = int(len(X_train) * 0.8)
+        val_split_idx = int(len(X_train) * (1 - val_size))
         X_train_final, X_val = X_train[:val_split_idx], X_train[val_split_idx:]
         
         # Store split indices for y arrays
         train_end_idx = val_split_idx
         val_end_idx = split_idx
     else:
-        # Standard random split
-        X_train_val, X_test = train_test_split(
-            X, test_size=test_size, random_state=42
-        )
-        val_split_idx = int(len(X_train_val) * 0.8)
-        X_train_final, X_val = X_train_val[:val_split_idx], X_train_val[val_split_idx:]
-        
-        # For random split, track indices differently
-        train_end_idx = val_split_idx
-        val_end_idx = len(X_train_val)
-        split_idx = len(X) - len(X_test)
+        # For very small datasets, use all data
+        if len(X) >= 8:
+            X_train_val, X_test = train_test_split(
+                X, test_size=test_size, random_state=42
+            )
+            val_split_idx = int(len(X_train_val) * (1 - val_size))
+            X_train_final, X_val = X_train_val[:val_split_idx], X_train_val[val_split_idx:]
+            train_end_idx = val_split_idx
+            val_end_idx = len(X_train_val)
+            split_idx = len(X) - len(X_test)
+        else:
+            # Too small - use all for training/validation
+            X_train_final = X
+            X_val = X[:max(1, len(X)//3)]
+            X_test = X
+            train_end_idx = len(X_train_final)
+            val_end_idx = len(X_val)
+            split_idx = 0
     
     print(f"[TRAIN] Training set: {len(X_train_final)}, Validation: {len(X_val)}, Test: {len(X_test)}")
+    if len(X) < 15:
+        print(f"[WARN] Small dataset detected ({len(X)} samples) - using conservative model parameters")
     
     for target_name in TARGETS:
         print(f"\n[TRAIN] Training XGBoost model for {target_name}")
         
         y_target = y[target_name]
-        if use_time_split and len(X) > 10:
+        if use_time_split and len(X) > 5:
             y_train = y_target[:train_end_idx]
             y_val = y_target[train_end_idx:val_end_idx]
-            y_test = y_target[split_idx:]
+            if split_idx > 0:
+                y_test = y_target[split_idx:]
+            else:
+                y_test = y_target  # Use all as test for very small datasets
         else:
-            # For random split, need to split y consistently
-            y_train_val, y_test = train_test_split(
-                y_target, test_size=test_size, random_state=42
-            )
-            y_train = y_train_val[:train_end_idx]
-            y_val = y_train_val[train_end_idx:]
+            # For random split or very small datasets, need to split y consistently
+            if len(X) >= 8:
+                y_train_val, y_test = train_test_split(
+                    y_target, test_size=test_size, random_state=42
+                )
+                y_train = y_train_val[:train_end_idx]
+                y_val = y_train_val[train_end_idx:]
+            else:
+                # Very small - use all
+                y_train = y_target[:train_end_idx]
+                y_val = y_target[train_end_idx:val_end_idx]
+                y_test = y_target
         
         # Train model
         model, metrics, shap_info = train_xgboost_model(

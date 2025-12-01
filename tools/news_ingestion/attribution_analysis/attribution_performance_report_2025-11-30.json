@@ -1,0 +1,97 @@
+{
+  "analysis_date": "2025-11-30T14:23:48.008850",
+  "reports_analyzed": 9,
+  "time_period": {
+    "earliest": "2025-11-21",
+    "latest": "2025-11-30"
+  },
+  "performance_history": [
+    {
+      "date": "2025-11-21",
+      "num_tenors": 5,
+      "total_factors": 50,
+      "mean_abs_contribution": 8.967,
+      "max_contribution": 25.0,
+      "mean_error": 84.588,
+      "max_error": 100.07
+    },
+    {
+      "date": "2025-11-22",
+      "num_tenors": 5,
+      "total_factors": 40,
+      "mean_abs_contribution": 4.1375,
+      "max_contribution": 14.0,
+      "mean_error": null,
+      "max_error": null
+    },
+    {
+      "date": "2025-11-23",
+      "num_tenors": 5,
+      "total_factors": 45,
+      "mean_abs_contribution": 6.304444444444445,
+      "max_contribution": 25.0,
+      "mean_error": null,
+      "max_error": null
+    },
+    {
+      "date": "2025-11-25",
+      "num_tenors": 5,
+      "total_factors": 35,
+      "mean_abs_contribution": 9.242857142857142,
+      "max_contribution": 25.0,
+      "mean_error": 48.397999999999996,
+      "max_error": 56.17999999999999
+    },
+    {
+      "date": "2025-11-26",
+      "num_tenors": 5,
+      "total_factors": 50,
+      "mean_abs_contribution": 6.62,
+      "max_contribution": 25.0,
+      "mean_error": 50.494,
+      "max_error": 56.629999999999995
+    },
+    {
+      "date": "2025-11-27",
+      "num_tenors": 5,
+      "total_factors": 50,
+      "mean_abs_contribution": 6.639,
+      "max_contribution": 22.5,
+      "mean_error": null,
+      "max_error": null
+    },
+    {
+      "date": "2025-11-28",
+      "num_tenors": 5,
+      "total_factors": 45,
+      "mean_abs_contribution": 4.067777777777778,
+      "max_contribution": 19.35,
+      "mean_error": 10.292000000000003,
+      "max_error": 19.870000000000005
+    },
+    {
+      "date": "2025-11-29",
+      "num_tenors": 5,
+      "total_factors": 5,
+      "mean_abs_contribution": 2.16,
+      "max_contribution": 2.7,
+      "mean_error": null,
+      "max_error": null
+    },
+    {
+      "date": "2025-11-30",
+      "num_tenors": 5,
+      "total_factors": 25,
+      "mean_abs_contribution": 3.8320000000000003,
+      "max_contribution": 8.400000000000002,
+      "mean_error": null,
+      "max_error": null
+    }
+  ],
+  "trends": {
+    "factor_count_change": 20,
+    "contribution_change": 1.6720000000000002,
+    "error_change": null,
+    "improving": null
+  }
+}

@@ -322,6 +322,33 @@ def run_daily_pipeline(date: str = None):
         import traceback
         traceback.print_exc()
     
+    # Step 5b: Linear Model Factor Attribution
+    print("\n[5b/8] Linear Model Factor Attribution...")
+    try:
+        from train_linear_online import compute_factor_attribution, get_daily_factor_scores, initialize_coefficients
+        from visualize_attribution import generate_attribution_report
+        
+        # Check if we have factor scores (required for attribution)
+        factor_scores = get_daily_factor_scores(date)
+        if factor_scores:
+            # Generate attribution report (includes visualizations)
+            report = generate_attribution_report(date)
+            if report:
+                print("[OK] Factor attribution computed and visualizations generated")
+                if report.get("visualizations"):
+                    viz_count = len(report["visualizations"])
+                    print(f"[OK] Generated {viz_count} visualization(s)")
+            else:
+                print("[INFO] Attribution report generation skipped (insufficient data)")
+        else:
+            print("[INFO] No factor scores available - attribution skipped")
+    except ImportError as e:
+        print(f"[INFO] Attribution analysis not available: {e}")
+    except Exception as e:
+        print(f"[WARN] Attribution analysis failed: {e}")
+        import traceback
+        traceback.print_exc()
+    
     # Step 6: LLM Yield Impact Analysis (with look-ahead bias prevention)
     print("\n[6/8] LLM Yield Impact Analysis...")
     try:
@@ -399,21 +426,35 @@ def run_daily_pipeline(date: str = None):
         from update_models_rolling import update_models_with_rolling_window
         
         # Try with 30 days first, then fall back to smaller windows if needed
+        # Start without significance filtering to get more training data
         success = False
+        last_error = None
         for window_days in [30, 14, 7]:
             print(f"[TRAIN] Attempting model training with {window_days}-day window...")
-            success = update_models_with_rolling_window(days=window_days, threshold_mae=3.0)
-            if success:
-                print(f"[SUCCESS] Models trained successfully with {window_days}-day window")
-                break
-            elif window_days == 7:
-                # Last attempt - provide detailed feedback
-                print(f"[INFO] Model training requires at least 7 days of complete training data")
-                print(f"[INFO] Complete data means: news buckets + valid LLM predictions + yield curve snapshots")
-                print(f"[INFO] Continue running daily pipeline to accumulate more training data")
+            try:
+                # Try without significance filtering first (more data)
+                success = update_models_with_rolling_window(days=window_days, threshold_mae=3.0, filter_significance=False)
+                if success:
+                    print(f"[SUCCESS] Models trained successfully with {window_days}-day window")
+                    break
+                elif window_days == 7:
+                    # Last attempt - provide detailed feedback
+                    print(f"[INFO] Model training requires at least 5 days of complete training data")
+                    print(f"[INFO] Complete data means: news buckets + valid LLM predictions + yield curve snapshots")
+                    print(f"[INFO] Continue running daily pipeline to accumulate more training data")
+            except Exception as e:
+                last_error = e
+                print(f"[WARN] Training failed with {window_days}-day window: {e}")
+                if window_days == 7:
+                    import traceback
+                    traceback.print_exc()
+                continue
         
         if not success:
-            print("[INFO] Model update skipped - insufficient data or dependencies")
+            if last_error:
+                print(f"[ERROR] Model training failed: {last_error}")
+            else:
+                print("[INFO] Model update skipped - insufficient data or dependencies")
     except ImportError as e:
         print(f"[INFO] Model training skipped - dependencies not available: {e}")
         print(f"[INFO] Install XGBoost: pip install 'numpy<2.0' xgboost scikit-learn")

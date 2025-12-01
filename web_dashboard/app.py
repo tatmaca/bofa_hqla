@@ -24,6 +24,8 @@ UST_CURVE_DIR = ROOT / "tools" / "ust_curve" / "llm"
 NEWS_DIR = ROOT / "tools" / "news_ingestion"
 SNAPSHOTS_DIR = UST_CURVE_DIR / "snapshots"
 ANALYSES_DIR = NEWS_DIR / "analyses"
+ATTRIBUTION_DIR = NEWS_DIR / "attribution_analysis"
+MODELS_DIR = NEWS_DIR / "models"
 NEWS_DB = NEWS_DIR / "news.db"
 
 def get_latest_snapshot_date():
@@ -51,6 +53,53 @@ def load_analysis(date_str):
         with open(analysis_path) as f:
             return json.load(f)
     return None
+
+def load_attribution_report(date_str):
+    """Load attribution report for a date."""
+    report_path = ATTRIBUTION_DIR / f"attribution_report_{date_str}.json"
+    if report_path.exists():
+        with open(report_path) as f:
+            return json.load(f)
+    return None
+
+def load_enhanced_prediction(date_str):
+    """Load enhanced (XGBoost) prediction for a date."""
+    enhanced_path = ANALYSES_DIR / f"enhanced_yield_impact_{date_str}.json"
+    if enhanced_path.exists():
+        with open(enhanced_path) as f:
+            return json.load(f)
+    return None
+
+def get_linear_model_predictions(date_str):
+    """Get linear model predictions from database."""
+    if not NEWS_DB.exists():
+        return None
+    
+    conn = sqlite3.connect(NEWS_DB)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    
+    rows = c.execute("""
+        SELECT tenor, predicted_delta_bps, actual_delta_bps, error_bps
+        FROM linear_model_predictions
+        WHERE date = ?
+        ORDER BY tenor
+    """, (date_str,)).fetchall()
+    
+    conn.close()
+    
+    if not rows:
+        return None
+    
+    predictions = {}
+    for row in rows:
+        predictions[row["tenor"]] = {
+            "predicted_bps": row["predicted_delta_bps"],
+            "actual_bps": row["actual_delta_bps"],
+            "error_bps": row["error_bps"]
+        }
+    
+    return predictions
 
 def get_top_news_articles(date_str, limit=5):
     """Get top news articles for a date, ranked by impact."""
@@ -243,6 +292,51 @@ def api_stats(date_str):
         stats["prediction_summary"] = analysis.get("analysis", {}).get("overall_summary", "")
     
     return jsonify(stats)
+
+@app.route('/api/attribution/<date_str>')
+def api_attribution(date_str):
+    """Get linear model factor attribution for a date."""
+    report = load_attribution_report(date_str)
+    if not report:
+        return jsonify({"error": "Attribution report not found"}), 404
+    
+    # Return attribution data (top factors per tenor)
+    return jsonify({
+        "date": date_str,
+        "attribution": report.get("attribution", {})
+    })
+
+@app.route('/api/xgboost/<date_str>')
+def api_xgboost(date_str):
+    """Get XGBoost (nonlinear) predictions for a date."""
+    enhanced = load_enhanced_prediction(date_str)
+    if not enhanced:
+        return jsonify({"error": "Enhanced prediction not found"}), 404
+    
+    # Extract XGBoost predictions
+    enhanced_pred = enhanced.get("enhanced_prediction", {})
+    predictions = enhanced_pred.get("predictions", {})
+    spreads = enhanced_pred.get("spreads", {})
+    
+    return jsonify({
+        "date": date_str,
+        "predictions": predictions,
+        "spreads": spreads,
+        "enhancement_method": enhanced_pred.get("enhancement_method", "unknown"),
+        "model_date": enhanced_pred.get("model_date", "unknown")
+    })
+
+@app.route('/api/linear-prediction/<date_str>')
+def api_linear_prediction(date_str):
+    """Get linear model predictions from database."""
+    predictions = get_linear_model_predictions(date_str)
+    if not predictions:
+        return jsonify({"error": "Linear model predictions not found"}), 404
+    
+    return jsonify({
+        "date": date_str,
+        "predictions": predictions
+    })
 
 @app.route('/manifest.json')
 def manifest():

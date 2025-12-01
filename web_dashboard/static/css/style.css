@@ -155,6 +155,20 @@ header h1 {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.attribution-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.subtitle {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 15px;
+    font-style: italic;
+}
+
 .content-card h2 {
     color: #667eea;
     margin-bottom: 20px;
@@ -261,12 +275,178 @@ header h1 {
     margin: 10px 0;
 }
 
+/* Attribution Styles */
+.attribution-tenors {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.tenor-attribution {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.tenor-attribution h3 {
+    color: #667eea;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 5px;
+}
+
+.factor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.factor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: transform 0.2s;
+}
+
+.factor-item:hover {
+    transform: translateX(3px);
+}
+
+.factor-item.positive {
+    background: #d4edda;
+    border-left: 3px solid #28a745;
+}
+
+.factor-item.negative {
+    background: #f8d7da;
+    border-left: 3px solid #dc3545;
+}
+
+.factor-name {
+    font-weight: 600;
+    color: #333;
+    flex: 1;
+}
+
+.factor-contribution {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.factor-item.positive .factor-contribution {
+    color: #28a745;
+}
+
+.factor-item.negative .factor-contribution {
+    color: #dc3545;
+}
+
+/* XGBoost Predictions Styles */
+.xgboost-info {
+    background: #e3f2fd;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.xgboost-info p {
+    margin: 5px 0;
+}
+
+.xgboost-predictions, .xgboost-spreads {
+    margin-bottom: 20px;
+}
+
+.xgboost-predictions h4, .xgboost-spreads h4 {
+    color: #667eea;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 5px;
+}
+
+.prediction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: transform 0.2s;
+}
+
+.prediction-item:hover {
+    transform: translateX(3px);
+}
+
+.prediction-item.positive {
+    background: #d4edda;
+    border-left: 3px solid #28a745;
+}
+
+.prediction-item.negative {
+    background: #f8d7da;
+    border-left: 3px solid #dc3545;
+}
+
+.prediction-item.neutral {
+    background: #f8f9fa;
+    border-left: 3px solid #6c757d;
+}
+
+.prediction-tenor {
+    font-weight: 700;
+    color: #333;
+    min-width: 60px;
+}
+
+.prediction-direction {
+    font-weight: 600;
+    color: #555;
+    flex: 1;
+    text-align: center;
+}
+
+.prediction-magnitude {
+    font-weight: 700;
+    font-size: 1rem;
+    min-width: 80px;
+    text-align: right;
+}
+
+.prediction-item.positive .prediction-magnitude {
+    color: #28a745;
+}
+
+.prediction-item.negative .prediction-magnitude {
+    color: #dc3545;
+}
+
+.prediction-item.neutral .prediction-magnitude {
+    color: #6c757d;
+}
+
 @media (max-width: 768px) {
     .charts-grid {
         grid-template-columns: 1fr;
     }
     
     .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .attribution-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .attribution-tenors {
         grid-template-columns: 1fr;
     }
     

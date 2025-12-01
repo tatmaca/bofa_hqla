@@ -40,12 +40,15 @@ async function loadDates() {
 async function loadData(date) {
     try {
         // Load all data in parallel
-        const [curveData, analysisData, statsData, newsData, predictionData] = await Promise.all([
+        const [curveData, analysisData, statsData, newsData, predictionData, attributionData, xgboostData, linearPredData] = await Promise.all([
             fetch(`/api/curve/${date}`).then(r => r.json()),
             fetch(`/api/analysis/${date}`).then(r => r.json()).catch(() => null),
             fetch(`/api/stats/${date}`).then(r => r.json()),
             fetch(`/api/news/top/${date}?limit=5`).then(r => r.json()),
-            fetch(`/api/prediction/${date}`).then(r => r.json()).catch(() => null)
+            fetch(`/api/prediction/${date}`).then(r => r.json()).catch(() => null),
+            fetch(`/api/attribution/${date}`).then(r => r.json()).catch(() => null),
+            fetch(`/api/xgboost/${date}`).then(r => r.json()).catch(() => null),
+            fetch(`/api/linear-prediction/${date}`).then(r => r.json()).catch(() => null)
         ]);
         
         updateStats(statsData);
@@ -58,6 +61,17 @@ async function loadData(date) {
         updateNews(newsData.articles || []);
         updatePredictionSummary(analysisData);
         updateRisks(curveData.risks || []);
+        
+        // Update new modules
+        if (attributionData && !attributionData.error) {
+            updateFactorAttribution(attributionData);
+        }
+        if (xgboostData && !xgboostData.error) {
+            updateXGBoostPredictions(xgboostData);
+        }
+        if (linearPredData && !linearPredData.error) {
+            // Can be used for comparison if needed
+        }
         
     } catch (error) {
         console.error('Error loading data:', error);
@@ -372,6 +386,114 @@ function updateRisks(risks) {
             <div class="risk-why">${escapeHtml(risk.why)}</div>
         </div>
     `).join('');
+}
+
+function updateFactorAttribution(attributionData) {
+    const container = document.getElementById('factor-attribution');
+    
+    if (!attributionData || !attributionData.attribution) {
+        container.innerHTML = '<div class="loading">No attribution data available for this date.</div>';
+        return;
+    }
+    
+    const attribution = attributionData.attribution;
+    const tenors = ['2Y', '5Y', '10Y', '30Y'];
+    
+    let html = '<div class="attribution-tenors">';
+    
+    for (const tenor of tenors) {
+        const factors = attribution[tenor] || {};
+        if (Object.keys(factors).length === 0) {
+            continue;
+        }
+        
+        html += `<div class="tenor-attribution">
+            <h3>${tenor}</h3>
+            <div class="factor-list">`;
+        
+        // Get top 5 factors
+        const topFactors = Object.entries(factors).slice(0, 5);
+        for (const [factor, contribution] of topFactors) {
+            const isPositive = contribution >= 0;
+            const colorClass = isPositive ? 'positive' : 'negative';
+            const sign = contribution >= 0 ? '+' : '';
+            
+            html += `
+                <div class="factor-item ${colorClass}">
+                    <span class="factor-name">${escapeHtml(factor)}</span>
+                    <span class="factor-contribution">${sign}${contribution.toFixed(1)} bps</span>
+                </div>
+            `;
+        }
+        
+        html += `</div></div>`;
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function updateXGBoostPredictions(xgboostData) {
+    const container = document.getElementById('xgboost-predictions');
+    
+    if (!xgboostData || !xgboostData.predictions) {
+        container.innerHTML = '<div class="loading">No XGBoost predictions available for this date.</div>';
+        return;
+    }
+    
+    const predictions = xgboostData.predictions;
+    const spreads = xgboostData.spreads || {};
+    const modelDate = xgboostData.model_date || 'unknown';
+    
+    let html = `<div class="xgboost-info">
+        <p><strong>Model Date:</strong> ${escapeHtml(modelDate)}</p>
+        <p><strong>Method:</strong> ${escapeHtml(xgboostData.enhancement_method || 'xgboost')}</p>
+    </div>`;
+    
+    html += '<div class="xgboost-predictions">';
+    html += '<h4>Tenor Predictions</h4>';
+    
+    const tenors = ['2y', '5y', '10y', '30y'];
+    for (const tenor of tenors) {
+        const pred = predictions[tenor];
+        if (!pred) continue;
+        
+        const direction = pred.direction || 'flat';
+        const magnitude = pred.magnitude_bps || 0;
+        const directionClass = direction === 'up' ? 'positive' : (direction === 'down' ? 'negative' : 'neutral');
+        const sign = magnitude >= 0 ? '+' : '';
+        
+        html += `
+            <div class="prediction-item ${directionClass}">
+                <span class="prediction-tenor">${tenor.toUpperCase()}</span>
+                <span class="prediction-direction">${direction.toUpperCase()}</span>
+                <span class="prediction-magnitude">${sign}${magnitude.toFixed(1)} bps</span>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    
+    if (Object.keys(spreads).length > 0) {
+        html += '<div class="xgboost-spreads"><h4>Spread Predictions</h4>';
+        for (const [spread, pred] of Object.entries(spreads)) {
+            const direction = pred.direction || 'flat';
+            const magnitude = pred.magnitude_bps || 0;
+            const directionClass = direction === 'steepen' ? 'positive' : (direction === 'flatten' ? 'negative' : 'neutral');
+            const sign = magnitude >= 0 ? '+' : '';
+            
+            html += `
+                <div class="prediction-item ${directionClass}">
+                    <span class="prediction-tenor">${escapeHtml(spread)}</span>
+                    <span class="prediction-direction">${direction.toUpperCase()}</span>
+                    <span class="prediction-magnitude">${sign}${magnitude.toFixed(1)} bps</span>
+                </div>
+            `;
+        }
+        html += '</div>';
+    }
+    
+    container.innerHTML = html;
 }
 
 function escapeHtml(text) {
