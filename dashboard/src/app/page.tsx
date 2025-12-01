@@ -3,6 +3,15 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image"; // (Optional) Next Image for real logos
 import {
+  LineChart,
+  Line,
+  Legend,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -325,6 +334,33 @@ export default function HqlaE2EDashboard() {
   const [yaml, setYaml] = useState(
     "# shocks.yaml\nmove_index: 110\nyield_curve: bear_steepener\ncredit_spreads: { ig_oas: +15, hy_oas: +45 }\n",
   );
+  const [yieldCurve, setYieldCurve] = useState([]);
+
+  const scenarioCurves = useMemo(() => {
+    if (!yieldCurve || yieldCurve.length === 0) return {};
+
+    const n = yieldCurve.length;
+    const midIndex = Math.floor(n / 2);
+
+    // Compute mean rate
+    const meanRate = yieldCurve.reduce((sum, p) => sum + p.rate, 0) / n;
+
+    return {
+      "level-up": yieldCurve.map((p) => ({ ...p, rate: p.rate + 0.01 })),
+      "level-down": yieldCurve.map((p) => ({ ...p, rate: p.rate - 0.01 })),
+
+      steepening: yieldCurve.map((p, i) => {
+        const factor = (i - midIndex) / (n - 1);
+        return { ...p, rate: p.rate + factor * 0.01 };
+      }),
+
+      flattening: yieldCurve.map((p) => {
+        // nudge each rate toward the mean by a fixed fraction
+        const adjustment = (meanRate - p.rate) * 0.5; // 0.5 = 50% of difference
+        return { ...p, rate: p.rate + adjustment };
+      }),
+    };
+  }, [yieldCurve]);
 
   const [scenario, setScenario] = useState({
     status: "idle",
@@ -415,6 +451,9 @@ export default function HqlaE2EDashboard() {
         method: "POST",
         body: formData,
       });
+      const c = await fetch("http://localhost:8000/yield-curve/current");
+      const curveData = await c.json();
+      setYieldCurve(curveData.curve);
       await handlePricePortfolio(); // auto-price after curve upload
     } catch (err) {
       console.error(err);
@@ -572,6 +611,7 @@ export default function HqlaE2EDashboard() {
                     <TableRow>
                       <TableHead>Instrument</TableHead>
                       <TableHead>ISIN</TableHead>
+                      <TableHead>Rating</TableHead>
                       <TableHead>Coupon</TableHead>
                       <TableHead>Clean Price</TableHead>
                       <TableHead>YTM</TableHead>
@@ -589,6 +629,7 @@ export default function HqlaE2EDashboard() {
                       <TableRow key={i}>
                         <TableCell>{row.name}</TableCell>
                         <TableCell>{row.isin}</TableCell>
+                        <TableCell>{row.rating}</TableCell>
                         <TableCell>
                           {row.coupon != "Floating"
                             ? `${(row.coupon * 100).toFixed(2)}%`
@@ -609,6 +650,62 @@ export default function HqlaE2EDashboard() {
                   </TableBody>
                 </Table>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* === INSERT YIELD CURVE PLOT HERE === */}
+        {yieldCurve && (
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle>Yield Curve</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2 mb-2">
+                <button
+                  className={`px-2 py-1 border rounded ${selectedScenario === null ? "bg-blue-500 text-white" : ""}`}
+                  onClick={() => setSelectedScenario(null)}
+                >
+                  Realized Only
+                </button>
+                {Object.keys(scenarioCurves).map((sc) => (
+                  <button
+                    key={sc}
+                    className={`px-2 py-1 border rounded ${selectedScenario === sc ? "bg-blue-500 text-white" : ""}`}
+                    onClick={() => setSelectedScenario(sc)}
+                  >
+                    {sc.replace("-", " ")}
+                  </button>
+                ))}
+              </div>
+              <LineChart data={yieldCurve} width={600} height={300}>
+                <XAxis dataKey="tenor" />
+                <YAxis
+                  dataKey="rate"
+                  domain={[0, 0.1]}
+                  tickFormatter={(rate) => `${(rate * 100).toFixed(2)}%`}
+                />
+                <CartesianGrid strokeDasharray="3 3" />
+                <Tooltip
+                  formatter={(value) => `${(value * 100).toFixed(2)}%`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="rate"
+                  stroke="#007bff"
+                  name="Realized"
+                />
+                {selectedScenario && scenarioCurves[selectedScenario] && (
+                  <Line
+                    type="monotone"
+                    data={scenarioCurves[selectedScenario]}
+                    dataKey="rate"
+                    stroke="#ff4136"
+                    name={`Scenario: ${selectedScenario}`}
+                  />
+                )}
+                <Legend />
+              </LineChart>
             </CardContent>
           </Card>
         )}

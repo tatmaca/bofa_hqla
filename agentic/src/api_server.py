@@ -1,4 +1,5 @@
 # api_server.py
+import numpy as np
 import pandas as pd
 import QuantLib as ql
 from fastapi import FastAPI, Form, UploadFile
@@ -12,6 +13,7 @@ app = FastAPI()
 portfolio = Portfolio()
 
 # Global placeholder for the base curve
+base_curve_tenor_strs = None
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,7 +63,8 @@ async def upload_portfolio(file: UploadFile):
         cls = getattr(HQLA, f"Level{row['level']}{row['type']}")
         issue = ql.DateParser.parseISO(row["issue_date"])
         maturity = ql.DateParser.parseISO(row["maturity_date"])
-        grade = row.get("rating", "")
+        grade = row.get("rating", "-")
+        grade = "-" if pd.isna(grade) else grade
 
         kwargs = {
             "issue_date": issue,
@@ -71,7 +74,7 @@ async def upload_portfolio(file: UploadFile):
             "name": row.get("name", ""),
             "isin": row.get("isin", ""),
             "grade": grade,
-            "isRisky": False if pd.isna(grade) else True,
+            "isRisky": False if grade == "-" else True,
         }
 
         if row["type"] == "Fixed":
@@ -88,9 +91,6 @@ async def upload_portfolio(file: UploadFile):
         else:  # Zero coupon
             inst = cls(**kwargs)
             inst.build_bond()
-
-        #        if base_curve_handle:
-        #            inst.price_from_curve(base_curve_handle)
 
         portfolio.add_instrument(inst)
 
@@ -110,6 +110,8 @@ async def upload_yield_curve(file: UploadFile):
     global survival_curves
     global survival_curves_up
     global survival_curves_down
+    global base_curve_tenor_strs
+    base_curve_tenor_strs = []
 
     # Reset all old curve objects before constructing new ones
     base_curve = None
@@ -131,6 +133,8 @@ async def upload_yield_curve(file: UploadFile):
     for _, row in df.iterrows():
         tenor = row["tenor"].strip()
         rate = float(row["rate"])
+        # Store tenor strings for plotting purposes
+        base_curve_tenor_strs.append(tenor)
         # Convert tenor string to QuantLib period
         ql_period = ql.PeriodParser.parse(tenor)
         tenors.append(ql_period)
@@ -206,6 +210,34 @@ async def upload_yield_curve(file: UploadFile):
     return {"status": "Yield curve uploaded", "points": len(dates)}
 
 
+@app.get("/yield-curve/current")
+async def get_current_curve():
+    if base_curve is None:
+        return JSONResponse(
+            status_code=400, content={"error": "No yield curve uploaded"}
+        )
+
+    if base_curve_tenor_strs is None:
+        return JSONResponse(status_code=500, content={"error": "Tenor list missing"})
+
+    today = ql.Date.todaysDate()
+    dc = base_curve.dayCounter()
+
+    points = []
+
+    for tenor_str in base_curve_tenor_strs:
+        ql_period = ql.PeriodParser.parse(tenor_str)
+        dt = today + ql_period
+
+        z = base_curve.zeroRate(dt, dc, ql.Continuous).rate()
+        z = np.round(z, 4)
+
+        points.append({"tenor": tenor_str, "rate": z})
+    print(points)
+
+    return {"curve": points}
+
+
 @app.get("/price-portfolio/")
 async def price_portfolio():
     """Return current portfolio prices using base curve."""
@@ -238,6 +270,7 @@ async def price_portfolio():
                     "name": inst.name,
                     "isin": inst.isin,
                     "coupon": getattr(inst, "coupons", "Floating"),
+                    "rating": inst.grade,
                     "category": portfolio._category(inst),
                     "class": inst.__class__.__name__,
                     "dirty_price": inst.dirty_price,

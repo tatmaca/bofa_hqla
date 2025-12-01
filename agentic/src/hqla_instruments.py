@@ -27,7 +27,7 @@ class HQLA_Asset(ABC):
         name: str = "No Name Assigned",
         isin: str = "No ISIN Provided",
         isRisky: bool = False,
-        grade: str = None,
+        grade: str = "-",
     ):
         self.issue_date = issue_date
         self.maturity_date = maturity_date
