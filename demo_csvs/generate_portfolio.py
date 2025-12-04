@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 # Settings
-num_instruments = 5000
+num_instruments = 1000
 today = datetime.today()
 
 # Level mapping and attributes
@@ -86,5 +86,5 @@ for _ in range(num_instruments):
 
 # Convert to DataFrame and save
 df = pd.DataFrame(portfolio)
-df.to_csv("simulated_portfolio.csv", index=False)
+df.to_csv("simulated_portfolio_2.csv", index=False)
 print("Portfolio CSV generated:", len(df), "rows")
