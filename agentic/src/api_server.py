@@ -1,8 +1,10 @@
 # api_server.py
+import io
+
 import numpy as np
 import pandas as pd
 import QuantLib as ql
-from fastapi import FastAPI, Form, UploadFile
+from fastapi import FastAPI, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -14,6 +16,7 @@ portfolio = Portfolio()
 
 # Global placeholder for the base curve
 base_curve_tenor_strs = None
+realized_portfolio_summary = None
 
 app.add_middleware(
     CORSMiddleware,
@@ -98,7 +101,7 @@ async def upload_portfolio(file: UploadFile):
 
 
 @app.post("/upload-yield-curve/")
-async def upload_yield_curve(file: UploadFile):
+async def upload_yield_curve(file: UploadFile = None, request: Request = None):
     """
     Upload a yield curve CSV.
     Expected columns: 'tenor' (e.g., '1Y'), 'rate' (decimal or %)
@@ -121,7 +124,17 @@ async def upload_yield_curve(file: UploadFile):
     survival_curves = {}
     survival_curves_up = {}
     survival_curves_down = {}
-    df = pd.read_csv(file.file)
+
+    if file:
+        df = pd.read_csv(file.file)
+    else:
+        try:
+            payload = await request.json()
+            df = pd.DataFrame(payload)
+        except Exception as e:
+            return JSONResponse(
+                status_code=400, content={"error": f"Invalid input: {e}"}
+            )
 
     today = ql.Date.todaysDate()
     ql.Settings.instance().evaluationDate = today
@@ -239,7 +252,7 @@ async def get_current_curve():
 
 
 @app.get("/price-portfolio/")
-async def price_portfolio():
+async def price_portfolio(is_scenario: bool = False):
     """Return current portfolio prices using base curve."""
     if not any(portfolio.assets.values()):
         return JSONResponse(
@@ -250,6 +263,8 @@ async def price_portfolio():
         return JSONResponse(
             status_code=400, content={"error": "No yield curve uploaded"}
         )
+
+    global realized_portfolio_summary
 
     # --- Reprice all instruments using the portfolio method ---
     portfolio.update_prices(
@@ -284,6 +299,12 @@ async def price_portfolio():
                 }
             )
 
-    portfolio.summary()
-
-    return {"assets": summary, "status": "priced"}
+    if not is_scenario:
+        realized_portfolio_summary = summary
+        return {"assets": summary, "status": "priced"}
+    else:
+        return {
+            "realized": realized_portfolio_summary,
+            "scenario": summary,
+            "status": "scenario_priced",
+        }

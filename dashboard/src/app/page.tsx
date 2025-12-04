@@ -3,13 +3,14 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image"; // (Optional) Next Image for real logos
 import {
+  ResponsiveContainer,
   LineChart,
   Line,
-  Legend,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
 } from "recharts";
 import {
   Card,
@@ -334,7 +335,7 @@ export default function HqlaE2EDashboard() {
   const [yaml, setYaml] = useState(
     "# shocks.yaml\nmove_index: 110\nyield_curve: bear_steepener\ncredit_spreads: { ig_oas: +15, hy_oas: +45 }\n",
   );
-  const [yieldCurve, setYieldCurve] = useState([]);
+  const [yieldCurve, setYieldCurve] = useState([]); // Prepare table data safely before rendering
 
   const scenarioCurves = useMemo(() => {
     if (!yieldCurve || yieldCurve.length === 0) return {};
@@ -417,11 +418,15 @@ export default function HqlaE2EDashboard() {
   const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
   const [yieldCurveFile, setYieldCurveFile] = useState<File | null>(null);
   const [portfolioSummary, setPortfolioSummary] = useState<any>(null);
+  const [scenarioSummary, setScenarioSummary] = useState<any>(null);
   const [loadingPortfolio, setLoadingPortfolio] = useState(false);
   const [loadingCurve, setLoadingCurve] = useState(false);
   const allDone = [scenario, impact, opt, mon].every(
     (s) => s.status === "done",
   );
+  const tableData = scenarioSummary
+    ? scenarioSummary.scenario // scenario selected
+    : portfolioSummary?.assets; // realized onlyieldCurve] = useState([]);
 
   async function handleUploadPortfolio() {
     if (!portfolioFile) return;
@@ -467,6 +472,50 @@ export default function HqlaE2EDashboard() {
     if (!res.ok) return console.error(await res.json());
     const data = await res.json();
     setPortfolioSummary(data);
+  }
+
+  // Function to handle scenario pricing
+  async function handleScenarioPricing(selectedScenarioKey: string | null) {
+    if (selectedScenarioKey === null) {
+      // Realized selected: reset scenario summary
+      setScenarioSummary(null);
+      console.log("Realized curve selected — using original pricing");
+      return;
+    }
+
+    // 1. Get the shocked yield curve
+    const shockedCurve = scenarioCurves[selectedScenarioKey];
+    if (!shockedCurve || shockedCurve.length === 0) return;
+
+    try {
+      // 2. Upload scenario curve to backend
+      const uploadRes = await fetch(
+        "http://localhost:8000/upload-yield-curve/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(shockedCurve),
+        },
+      );
+      const uploadData = await uploadRes.json();
+      console.log("Scenario curve upload:", uploadData);
+
+      // 3. Price portfolio using scenario curve
+      const priceRes = await fetch(
+        "http://localhost:8000/price-portfolio?is_scenario=true",
+      );
+      if (!priceRes.ok) {
+        console.error(await priceRes.json());
+        return;
+      }
+      const priceData = await priceRes.json();
+      console.log("Scenario portfolio pricing:", priceData);
+
+      // 4. Store scenario portfolio summary separately
+      setScenarioSummary(priceData);
+    } catch (err) {
+      console.error("Scenario pricing error:", err);
+    }
   }
 
   return (
@@ -625,28 +674,103 @@ export default function HqlaE2EDashboard() {
                   </TableHeader>
 
                   <TableBody>
-                    {portfolioSummary.assets.map((row: any, i: number) => (
-                      <TableRow key={i}>
-                        <TableCell>{row.name}</TableCell>
-                        <TableCell>{row.isin}</TableCell>
-                        <TableCell>{row.rating}</TableCell>
-                        <TableCell>
-                          {row.coupon != "Floating"
-                            ? `${(row.coupon * 100).toFixed(2)}%`
-                            : "Floating"}
-                        </TableCell>
-                        <TableCell>{row.clean_price.toFixed(2)}</TableCell>
-                        <TableCell>{row.ytm.toFixed(2)}%</TableCell>
-                        <TableCell>{row.quantity}</TableCell>
-                        <TableCell>{row.category}</TableCell>
-                        <TableCell>{row.dv01?.toFixed(4)}</TableCell>
-                        <TableCell>
-                          {row.cs01 != "-" ? row.cs01?.toFixed(4) : "-"}
-                        </TableCell>
-                        <TableCell>{row.duration?.toFixed(4)}</TableCell>
-                        <TableCell>{row.convexity?.toFixed(4)}</TableCell>
-                      </TableRow>
-                    ))}
+                    {tableData.map((row: any, i: number) => {
+                      const realizedRow = portfolioSummary.assets[i];
+                      const scenarioRow =
+                        scenarioSummary?.scenario[i] ?? realizedRow;
+
+                      // Compute deltas
+                      const deltaCleanPrice =
+                        scenarioRow.clean_price - realizedRow.clean_price;
+                      const deltaYtm = scenarioRow.ytm - realizedRow.ytm;
+                      const deltaDv01 = scenarioRow.dv01 - realizedRow.dv01;
+                      const deltaCs01 =
+                        scenarioRow.cs01 === "-" || realizedRow.cs01 === "-"
+                          ? 0
+                          : scenarioRow.cs01 - realizedRow.cs01;
+                      const deltaDuration =
+                        scenarioRow.duration - realizedRow.duration;
+                      const deltaConvexity =
+                        scenarioRow.convexity - realizedRow.convexity;
+
+                      // Helper to render delta with arrow
+                      const renderDelta = (
+                        delta: number,
+                        isPercent: boolean = false,
+                      ) => {
+                        if (delta === 0) return null;
+                        const formattedDelta = isPercent
+                          ? (delta * 100).toFixed(2)
+                          : delta.toFixed(4);
+                        return (
+                          <span
+                            className={`ml-1 ${delta > 0 ? "text-green-600" : "text-red-600"}`}
+                          >
+                            {delta > 0 ? "▲" : "▼"} {formattedDelta}
+                          </span>
+                        );
+                      };
+
+                      return (
+                        <TableRow key={i}>
+                          <TableCell>{row.name}</TableCell>
+                          <TableCell>{row.isin}</TableCell>
+                          <TableCell>{row.rating}</TableCell>
+                          <TableCell>
+                            {row.coupon !== "Floating"
+                              ? `${(row.coupon * 100).toFixed(2)}%`
+                              : "Floating"}
+                          </TableCell>
+
+                          {/* Clean Price */}
+                          <TableCell>
+                            {scenarioRow.clean_price.toFixed(2)}
+                            {scenarioSummary && renderDelta(deltaCleanPrice)}
+                          </TableCell>
+
+                          {/* YTM */}
+                          <TableCell>
+                            {scenarioRow.ytm.toFixed(2)}%
+                            {scenarioSummary && renderDelta(deltaYtm, true)}
+                          </TableCell>
+
+                          {/* Quantity */}
+                          <TableCell>{row.quantity}</TableCell>
+
+                          {/* Category */}
+                          <TableCell>{row.category}</TableCell>
+
+                          {/* DV01 */}
+                          <TableCell>
+                            {scenarioRow.dv01?.toFixed(4)}
+                            {scenarioSummary && renderDelta(deltaDv01)}
+                          </TableCell>
+
+                          {/* CS01 */}
+                          <TableCell>
+                            {scenarioRow.cs01 !== "-"
+                              ? scenarioRow.cs01?.toFixed(4)
+                              : "-"}
+                            {scenarioSummary &&
+                              scenarioRow.cs01 !== "-" &&
+                              realizedRow.cs01 !== "-" &&
+                              renderDelta(deltaCs01)}
+                          </TableCell>
+
+                          {/* Duration */}
+                          <TableCell>
+                            {scenarioRow.duration?.toFixed(4)}
+                            {scenarioSummary && renderDelta(deltaDuration)}
+                          </TableCell>
+
+                          {/* Convexity */}
+                          <TableCell>
+                            {scenarioRow.convexity?.toFixed(4)}
+                            {scenarioSummary && renderDelta(deltaConvexity)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -655,7 +779,7 @@ export default function HqlaE2EDashboard() {
         )}
 
         {/* === INSERT YIELD CURVE PLOT HERE === */}
-        {yieldCurve && (
+        {yieldCurve?.length > 0 && (
           <Card className="shadow-sm">
             <CardHeader>
               <CardTitle>Yield Curve</CardTitle>
@@ -664,7 +788,10 @@ export default function HqlaE2EDashboard() {
               <div className="flex gap-2 mb-2">
                 <button
                   className={`px-2 py-1 border rounded ${selectedScenario === null ? "bg-blue-500 text-white" : ""}`}
-                  onClick={() => setSelectedScenario(null)}
+                  onClick={() => {
+                    setSelectedScenario(null);
+                    handleScenarioPricing(null);
+                  }}
                 >
                   Realized Only
                 </button>
@@ -672,44 +799,50 @@ export default function HqlaE2EDashboard() {
                   <button
                     key={sc}
                     className={`px-2 py-1 border rounded ${selectedScenario === sc ? "bg-blue-500 text-white" : ""}`}
-                    onClick={() => setSelectedScenario(sc)}
+                    onClick={() => {
+                      setSelectedScenario(sc);
+                      handleScenarioPricing(sc);
+                    }}
                   >
                     {sc.replace("-", " ")}
                   </button>
                 ))}
               </div>
-              <LineChart data={yieldCurve} width={600} height={300}>
-                <XAxis dataKey="tenor" />
-                <YAxis
-                  dataKey="rate"
-                  domain={[0, 0.1]}
-                  tickFormatter={(rate) => `${(rate * 100).toFixed(2)}%`}
-                />
-                <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip
-                  formatter={(value) => `${(value * 100).toFixed(2)}%`}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="rate"
-                  stroke="#007bff"
-                  name="Realized"
-                />
-                {selectedScenario && scenarioCurves[selectedScenario] && (
+
+              {/* Wrap chart in ResponsiveContainer */}
+              <ResponsiveContainer width="50%" height={300}>
+                <LineChart data={yieldCurve}>
+                  <XAxis dataKey="tenor" />
+                  <YAxis
+                    dataKey="rate"
+                    domain={[0, 0.1]}
+                    tickFormatter={(rate) => `${(rate * 100).toFixed(2)}%`}
+                  />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <Tooltip
+                    formatter={(value) => `${(value * 100).toFixed(2)}%`}
+                  />
                   <Line
                     type="monotone"
-                    data={scenarioCurves[selectedScenario]}
                     dataKey="rate"
-                    stroke="#ff4136"
-                    name={`Scenario: ${selectedScenario}`}
+                    stroke="#007bff"
+                    name="Realized"
                   />
-                )}
-                <Legend />
-              </LineChart>
+                  {selectedScenario && scenarioCurves[selectedScenario] && (
+                    <Line
+                      type="monotone"
+                      data={scenarioCurves[selectedScenario]}
+                      dataKey="rate"
+                      stroke="#ff4136"
+                      name={`Scenario: ${selectedScenario}`}
+                    />
+                  )}
+                  <Legend />
+                </LineChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         )}
-
         {/* Pipeline */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
