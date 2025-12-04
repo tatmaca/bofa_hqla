@@ -8,18 +8,20 @@ Author: Aryaa Gunavante (agunavante)
 Updated: 2025-11-17
 """
 
-from hqla_portfolio import Portfolio
+from typing import Dict, List
+
 import numpy as np
 import QuantLib as ql
 import scipy.linalg as la
 
+from . import hqla_portfolio as HQLA
+
 
 class ScenarioGenerator:
-    def __init__(self, portfolio: Portfolio):
+    def __init__(self, portfolio: HQLA.Portfolio):
         self.portfolio = portfolio
 
     def generate_parallel_scenarios(self, n_random=500, bp_std=1):
-
         """
         Return array of scenario shifts (decimal). Mix of deterministic small bumps
         and random parallel shocks (normal(0, bp_std)).
@@ -58,7 +60,6 @@ class ScenarioGenerator:
         eval_date = ql.Settings.instance().evaluationDate
         one_year_later = eval_date + ql.Period(1, ql.Years)
 
-
         for cf in inst.bond.cashflows():
             # count only positive cashflows that occur <= one year ahead
             try:
@@ -71,7 +72,16 @@ class ScenarioGenerator:
                     coupon_in_next_year += float(amt)
         return bumped_clean, coupon_in_next_year
 
-    def compute_returns_matrix(self, base_curve_handle, scenarios):
+    def compute_returns_matrix(
+        self,
+        base_curve_handle,
+        scenarios,
+        up_curve: ql.YieldTermStructureHandle,
+        down_curve: ql.YieldTermStructureHandle,
+        survival_curves: Dict[str, ql.DefaultProbabilityTermStructureHandle],
+        survival_curves_up: Dict[str, ql.DefaultProbabilityTermStructureHandle],
+        survival_curves_down: Dict[str, ql.DefaultProbabilityTermStructureHandle],
+    ):
         """
         Scenarios: 1D array of parallel shifts (decimal).
         Returns R matrix shape (S, N) where each entry is total return over 1yr:
@@ -79,7 +89,14 @@ class ScenarioGenerator:
         and also returns base_prices vector.
         """
         # ensure portfolio base prices are set
-        self.portfolio.update_prices(yield_curve=base_curve_handle)
+        self.portfolio.update_prices(
+            base_curve_handle,
+            up_curve,
+            down_curve,
+            survival_curves,
+            survival_curves_up,
+            survival_curves_down,
+        )
 
         # flatten instruments into list (order must match assets_summary)
         inst_list = []
@@ -99,7 +116,9 @@ class ScenarioGenerator:
 
         for s_idx, shift in enumerate(scenarios):
             for i, inst in enumerate(inst_list):
-                bumped_p, coupons = self.reprice_under_parallel_shift(inst, base_curve_handle, shift)
+                bumped_p, coupons = self.reprice_under_parallel_shift(
+                    inst, base_curve_handle, shift
+                )
                 r = (bumped_p + coupons - base_prices[i]) / base_prices[i]
                 R[s_idx, i] = r
 
@@ -115,6 +134,5 @@ class ScenarioGenerator:
         # numeric stabilization
         eps = 1e-12
         Omega_psd += eps * np.eye(Omega_psd.shape[0])
-        #print(Omega_psd)
+        # print(Omega_psd)
         return Omega_psd
-    
