@@ -1097,17 +1097,6 @@ export default function HqlaE2EDashboard() {
                     {loadingCurve ? "Uploading..." : "Upload Yield Curve"}
                   </Button>
                 </div>
-
-                <div className="col-span-2 space-y-2">
-                  <label className="text-sm font-medium leading-none">
-                    Shock YAML
-                  </label>
-                  <Textarea
-                    className="min-h-[72px] font-mono"
-                    value={yaml}
-                    onChange={(e) => setYaml(e.target.value)}
-                  />
-                </div>
               </div>
             </CardContent>
           </Card>
