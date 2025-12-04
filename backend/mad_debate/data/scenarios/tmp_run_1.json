@@ -1,0 +1,142 @@
+[
+  {
+    "Scenario": "Persistent Inflation Forces Aggressive Fed Tightening",
+    "Description": "High inflation persists, prompting the Fed to hike rates by 50 bps, causing bear steepening of the yield curve and widening credit spreads. Deposit outflows increase as funding conditions tighten.",
+    "Probability": 0.25,
+    "Rationale": "Recent inflation data and Fed communication indicate a commitment to aggressive tightening, impacting liquidity and credit conditions across the portfolio.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": 50,
+      "Curve": "bear_steepener",
+      "IG_OAS": 20,
+      "HY_OAS": 40,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "SELL 30y MBS",
+      "SELL IG Credit"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -4.0,
+      "ΔNSFR": -1.5,
+      "ΔNII": 2.1
+    },
+    "Assumptions": "Inflation remains above target; Fed prioritizes inflation control over growth; moderate deposit outflows."
+  },
+  {
+    "Scenario": "Geopolitical Tensions Escalate, Impacting Market Sentiment",
+    "Description": "Escalation in geopolitical tensions triggers a risk-off move, driving Treasury yields lower and widening credit spreads as investors seek safety.",
+    "Probability": 0.2,
+    "Rationale": "Current geopolitical climate presents a plausible risk of market destabilization and flight to quality.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "MBS"
+    ],
+    "Shocks": {
+      "Rates": -20,
+      "Curve": "bull_steepener",
+      "IG_OAS": 30,
+      "HY_OAS": 50,
+      "MBS_Basis": 15
+    },
+    "TradeList": [
+      "BUY 2y UST",
+      "HOLD CASH"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 2.0,
+      "ΔNSFR": 0.5,
+      "ΔNII": -0.5
+    },
+    "Assumptions": "Geopolitical risks remain elevated; risk aversion dominates flows."
+  },
+  {
+    "Scenario": "Slower Disinflation with Anchored Expectations",
+    "Description": "Inflation moderates gradually, allowing for stable rates and a gradual easing of monetary policy, resulting in a bull flattening of the yield curve.",
+    "Probability": 0.2,
+    "Rationale": "Disinflation trends are evident, but persistent inflationary pressures suggest a cautious approach to rate cuts.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -20,
+      "Curve": "bull_flattening",
+      "IG_OAS": -8,
+      "HY_OAS": -12,
+      "MBS_Basis": -4
+    },
+    "TradeList": [
+      "BUY 10y UST",
+      "ADD MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 1.5,
+      "ΔNSFR": 1.0,
+      "ΔNII": -0.2
+    },
+    "Assumptions": "Fed remains cautious; inflation moderates but does not undershoot target."
+  },
+  {
+    "Scenario": "Stable Credit Spreads Amid Positive Corporate Fundamentals",
+    "Description": "Strong corporate balance sheets and fiscal support lead to stable or tighter credit spreads, despite ongoing macro uncertainties.",
+    "Probability": 0.2,
+    "Rationale": "Fiscal stimulus and resilient corporate earnings support credit markets, though risks remain from potential economic slowdowns.",
+    "ImpactChannels": [
+      "Credit",
+      "MBS",
+      "Deposits"
+    ],
+    "Shocks": {
+      "Rates": -10,
+      "Curve": "flat",
+      "IG_OAS": -3,
+      "HY_OAS": -5,
+      "MBS_Basis": -2
+    },
+    "TradeList": [
+      "BUY IG Credit",
+      "ADD MBS"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": 0.5,
+      "ΔNSFR": 0.3,
+      "ΔNII": 0.8
+    },
+    "Assumptions": "Corporate fundamentals remain robust; fiscal measures provide ongoing support."
+  },
+  {
+    "Scenario": "Regulatory Changes Enhance Liquidity Standards",
+    "Description": "New regulations increase LCR requirements, forcing portfolio adjustments and impacting valuations of Level 2 assets.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing regulatory discussions could lead to higher liquidity requirements, necessitating HQLA rebalancing.",
+    "ImpactChannels": [
+      "Regulation",
+      "Deposits",
+      "MBS"
+    ],
+    "Shocks": {
+      "Rates": 0,
+      "Curve": "flat",
+      "IG_OAS": 10,
+      "HY_OAS": 15,
+      "MBS_Basis": 10
+    },
+    "TradeList": [
+      "SELL Level 2 MBS",
+      "BUY UST"
+    ],
+    "MetricsDelta": {
+      "ΔLCR": -6.0,
+      "ΔNSFR": -2.0,
+      "ΔNII": -0.8
+    },
+    "Assumptions": "Regulators raise LCR minimum; forced asset sales; Level 2 cap enforced."
+  }
+]

@@ -1,0 +1,138 @@
+[
+  {
+    "Scenario": "Lingering Inflation + Fed on Hold",
+    "Description": "Core PCE stalls at 2.8% and services inflation re-accelerates, forcing the Fed to keep rates at 5.50% into late 2025.",
+    "Probability": 0.32,
+    "Rationale": "Sticky shelter and wage prints keep financial conditions tight; curve bear-flattens as short rates stay anchored.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve",
+      "Deposits"
+    ],
+    "Shocks": {
+      "rates_parallel_bps": 35,
+      "curve_2s10s_bps": -15,
+      "ig_oas_bps": 10,
+      "hy_oas_bps": 40,
+      "mbs_basis_bps": 12,
+      "deposit_outflow_pct": 3.0,
+      "reg_change_note": "Fed pauses balance sheet normalization"
+    },
+    "MetricsDelta": {
+      "dLCR_pct": -2.5,
+      "dNSFR_pct": -1.4,
+      "dNII_bps": 18,
+      "dur_change_years": -0.2
+    },
+    "TradeList": [
+      "Add $1.2bn front-end USTs via repo to rebuild HQLA buffer",
+      "Trim $800mm 10y MBS to reduce convexity drag"
+    ],
+    "Assumptions": [
+      "Money-market inflows plateau",
+      "FDIC special assessment sunsets mid-year"
+    ]
+  },
+  {
+    "Scenario": "Bull Steepener on Growth Scare",
+    "Description": "Payrolls roll over and small-business surveys collapse, forcing an early Fed cut sequence.",
+    "Probability": 0.28,
+    "Rationale": "Recession odds rise; front-end rallies ~80 bps while long-end lags on issuance risk.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve",
+      "Credit"
+    ],
+    "Shocks": {
+      "rates_parallel_bps": -45,
+      "curve_2s10s_bps": 35,
+      "ig_oas_bps": 25,
+      "hy_oas_bps": 75,
+      "mbs_basis_bps": 5,
+      "deposit_outflow_pct": -1.0,
+      "reg_change_note": "Counter-cyclical buffer paused"
+    },
+    "MetricsDelta": {
+      "dLCR_pct": 3.0,
+      "dNSFR_pct": 1.2,
+      "dNII_bps": -22,
+      "dur_change_years": 0.4
+    },
+    "TradeList": [
+      "Rotate $600mm from bills into 5y UST to capture steepening",
+      "Add $400mm TIPS as disinflation hedge"
+    ],
+    "Assumptions": [
+      "Fiscal impulse fades",
+      "Commercial real estate stress broadens"
+    ]
+  },
+  {
+    "Scenario": "Geopolitical Shock + Commodity Spike",
+    "Description": "Energy supply disruption lifts Brent above $110, rekindling breakevens and widening MBS basis.",
+    "Probability": 0.22,
+    "Rationale": "Flight-to-quality meets higher inflation risk; curve bear-steepens and liquidity premiums widen.",
+    "ImpactChannels": [
+      "Commodity Prices",
+      "Rates",
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "rates_parallel_bps": 20,
+      "curve_2s10s_bps": 25,
+      "ig_oas_bps": 30,
+      "hy_oas_bps": 90,
+      "mbs_basis_bps": 18,
+      "deposit_outflow_pct": 4.5,
+      "reg_change_note": "Treasury boosts bill issuance to fund SPR release"
+    },
+    "MetricsDelta": {
+      "dLCR_pct": -3.7,
+      "dNSFR_pct": -2.1,
+      "dNII_bps": 24,
+      "dur_change_years": -0.3
+    },
+    "TradeList": [
+      "Increase HQLA cash buffer by $500mm via FHLB advances",
+      "Short belly futures to hedge rate beta"
+    ],
+    "Assumptions": [
+      "USD funding spreads widen 15 bps",
+      "Retail deposits beta jumps 0.15"
+    ]
+  },
+  {
+    "Scenario": "Reg Relief / Capital Recalibration",
+    "Description": "Agencies finalize Endgame tweaks that soften G-SIB surcharge and Level 2 caps for HQLA.",
+    "Probability": 0.18,
+    "Rationale": "Political compromise post-elections reduces capital drag; banks redeploy excess cash into spread assets.",
+    "ImpactChannels": [
+      "Regulatory",
+      "Market Sentiment"
+    ],
+    "Shocks": {
+      "rates_parallel_bps": 5,
+      "curve_2s10s_bps": 5,
+      "ig_oas_bps": -8,
+      "hy_oas_bps": -20,
+      "mbs_basis_bps": -7,
+      "deposit_outflow_pct": -0.5,
+      "reg_change_note": "TLAC calibration delayed; LIQ add-ons eased"
+    },
+    "MetricsDelta": {
+      "dLCR_pct": 4.1,
+      "dNSFR_pct": 3.3,
+      "dNII_bps": 8,
+      "dur_change_years": 0.1
+    },
+    "TradeList": [
+      "Add $900mm Agency MBS down-in-credit",
+      "Deploy $400mm to Level 2A corporates within cap"
+    ],
+    "Assumptions": [
+      "Deposit runoff stabilizes",
+      "Repo markets remain liquid"
+    ]
+  }
+]

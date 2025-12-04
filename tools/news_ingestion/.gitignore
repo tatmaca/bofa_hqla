@@ -1,0 +1,17 @@
+# Database files
+*.db
+*.db-journal
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Analysis outputs
+analyses/
+models/
+
+# Logs
+*.log
+

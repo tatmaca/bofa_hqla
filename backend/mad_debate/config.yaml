@@ -1,0 +1,79 @@
+project: HQLA-MAD-Scenarios
+horizon_months: 6
+num_scenarios_target: 8
+
+inputs:
+  portfolio_snapshot:
+    level1_tsys_pct: 62
+    level2a_agency_mbs_pct: 28
+    level2b_corp_munis_pct: 10
+    dur_years: 3.4
+    convexity: -0.8
+  constraints:
+    lcr_min_pct: 110
+    level2_cap_pct: 40
+    nsfr_min_pct: 110
+  indicators:
+    move: 120
+    vix: 16
+    slope_2s10s_bps: -35  
+    ig_oas_bps: 120
+    hy_oas_bps: 410
+    mbs_basis_bps: 35
+    depo_beta_note: "stable but rising; SMEs sensitive"
+  priors:
+    macro: 0.5
+    regulatory: 0.2
+    market_micro: 0.3
+
+debate:
+  debater_models: ["gpt-4o-mini", "gpt-4o-mini"]
+  judge_model: "gpt-4.1"
+  debater_temperature: 0.7
+  judge_temperature: 0.2
+  top_p: 0.9
+  rounds: 4
+  runs: 5
+  max_tokens: 10000
+  seed: 42
+
+prompts:
+  system_debater: |
+    You are a senior bank risk strategist generating plausible 6-month scenarios that impact HQLA portfolios.
+    Use only finance-consistent reasoning. Propose concrete SHOCKS with magnitudes (bps/%), tie to channels:
+    {Rates, Curve (bull/bear, steep/flat), Credit OAS, MBS basis, Deposits/runoff, Reg changes}.
+    Give internally consistent probabilities that sum to ~100% across the set in each run.
+    Always produce JSON that matches the schema the judge expects.
+  system_judge: |
+    You are a strict risk committee chair. Select/merge winning scenarios maximizing plausibility, distinctness,
+    and decision-usefulness under constraints (LCR≥{lcr_min_pct}%, Level2≤{level2_cap_pct}% of HQLA).
+    Reject hand-wavy claims. Enforce 6-month horizon and quantitative shocks. Return STRICT JSON array.
+
+schema:
+  fields:
+    - Scenario: str
+    - Description: str
+    - Probability: float  # 0..1
+    - Rationale: str
+    - ImpactChannels: [ "Rates","Curve","Credit","MBS","Deposits","Regulatory" ]
+    - Shocks:
+        rates_parallel_bps: int
+        curve_2s10s_bps: int
+        ig_oas_bps: int
+        hy_oas_bps: int
+        mbs_basis_bps: int
+        deposit_outflow_pct: float
+        reg_change_note: str
+    - MetricsDelta:
+        dLCR_pct: float
+        dNSFR_pct: float
+        dNII_bps: float
+        dur_change_years: float
+    - TradeList: [ str ]  # concrete HQLA trades within constraints
+    - Assumptions: [ str ]
+aggregation:
+  probability_pooling: median
+  dedupe_similarity_threshold: 0.7
+  keep_top_k: 10
+output:
+  path: data/scenarios/out.jsonl

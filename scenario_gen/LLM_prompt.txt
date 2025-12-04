@@ -1,0 +1,52 @@
+You are assisting the Scenario Generation team for a bank’s HQLA program. 
+Produce a 6-month Scenario Matrix that is strictly formatted as a GitHub-flavored Markdown table with 5 columns:
+Scenario | Description | Probability | Rationale | Impact Channels
+
+## As-of
+2025-10-24 08:27 UTC
+
+## Inputs (do not invent or change these)
+### A) Scenario Probabilities (30d & 90d)
+P30:credit/mild=0.0711,       P90:credit/mild=0.1985           (Mild Credit Tightening)
+P30:credit/severe=0.0274,   P90:credit/severe=0.0800       (Severe Credit Shock)
+P30:credit/compress=0.1003, P90:credit/compress=0.2718 (Spread Compression)
+P30:liquidity/stress=0.1542,   P90:liquidity/stress=0.3949       (Liquidity Stress)
+P30:interest_rate/bear_steepen=0.0929, P90:interest_rate/bear_steepen=0.2536 (Bear Steepening)
+P30:interest_rate/bull_flatten=0.0354, P90:interest_rate/bull_flatten=0.1025 (Bull Flattening)
+
+### B) Shock Vectors (from YAML; do not change magnitudes)
+credit/mild: {IG_OAS_bp: 30.0, HY_OAS_bp: 70.0}
+credit/severe: {IG_OAS_bp: 80.0, HY_OAS_bp: 200.0}
+credit/compress: {IG_OAS_bp: -20.0, HY_OAS_bp: -50.0}
+liquidity/stress: {MOVE_pts: 25.0, SLOPE_2s10s_bps: -20.0, funding_spread_bp: 15.0}
+interest_rate/bear_steepen: {DGS2_bp: 10.0, DGS10_bp: 30.0, SLOPE_2s10s_bps: 20.0}
+interest_rate/bull_flatten: {DGS2_bp: -25.0, DGS10_bp: -10.0, SLOPE_2s10s_bps: -15.0}
+
+### C) Correlation Cues (21-day changes; use as rationale context, not to change probabilities)
+IG_OAS_chg_21d ↔ HY_OAS_chg_21d = +0.89
+IG_OAS_chg_21d ↔ MOVE_chg_21d   = +nan
+HY_OAS_chg_21d ↔ MOVE_chg_21d   = +nan
+SLOPE_2s10s_bps_chg_21d ↔ IG_OAS_chg_21d = -0.01
+SLOPE_2s10s_bps_chg_21d ↔ MOVE_chg_21d   = +nan
+
+### D) Optional context snapshot (plain text)
+- IG OAS=0.8bp (z=-0.67, 1mΔ=0.1); HY OAS=3.0bp (z=-0.10, 1mΔ=0.3)
+- MOVE=nan (z=nan, 1mΔ=nan); 2s10s slope=53.0bp (z=0.76, 1mΔ=-1.0)
+
+## Output requirements (strict)
+1) Output only one GitHub-flavored Markdown table. No prose, no headings, no code fences.
+2) Columns: Scenario | Description | Probability | Rationale | Impact Channels
+3) 4–6 rows; include at least one from Credit, Liquidity, and Interest Rate.
+4) For Probability, use the 90d value provided above, as a single percent with one decimal (e.g., 27.3 %).
+5) Keep cells ≤ 2 lines; reference shocks and correlation cues in Rationale and Impact Channels.
+6) Do not invent probabilities or scenarios beyond the provided keys.
+
+## Friendly names for the “Scenario” column
+- credit/mild → Mild Credit Tightening
+- credit/severe → Severe Credit Shock
+- credit/compress → Credit Spread Compression
+- liquidity/stress → Liquidity Stress
+- interest_rate/bear_steepen → Bear Steepening
+- interest_rate/bull_flatten → Bull Flattening
+
+Now generate the table.
