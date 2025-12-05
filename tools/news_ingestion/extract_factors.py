@@ -287,20 +287,28 @@ def save_article_factors(article_id: int, date: str, factors: List[Dict]):
     conn.commit()
     conn.close()
 
-def aggregate_daily_factor_scores(date: str) -> Dict[str, float]:
+def aggregate_daily_factor_scores(date: str) -> Tuple[Dict[str, float], Dict[str, int]]:
     """
     Aggregate article factors to daily factor scores.
     Formula: factor_score = sum(c * s) clipped to [-2.5, +2.5]
+    Only includes factors from articles published before market close to prevent look-ahead bias.
     """
+    from lookahead_bias_utils import get_market_close_time
+    
+    market_close = get_market_close_time(dt.datetime.strptime(date, "%Y-%m-%d").date())
+    market_close_iso = market_close.isoformat()
+    
     conn = get_conn()
     c = conn.cursor()
     
-    # Get all factors for this date
+    # Get all factors for this date, but only from articles published before market close
     rows = c.execute("""
-        SELECT factor_name, intensity, confidence
-        FROM article_factors
-        WHERE date = ?
-    """, (date,)).fetchall()
+        SELECT af.factor_name, af.intensity, af.confidence
+        FROM article_factors af
+        JOIN articles a ON af.article_id = a.id
+        WHERE af.date = ?
+          AND (a.published_at IS NULL OR a.published_at < ?)
+    """, (date, market_close_iso)).fetchall()
     
     conn.close()
     
@@ -372,6 +380,12 @@ def extract_factors_for_date(date: str, api_key: Optional[str] = None) -> int:
         return 0
 
     # Get articles for this date that haven't been factor-extracted
+    # Only include articles published before market close to prevent look-ahead bias
+    from lookahead_bias_utils import get_market_close_time
+    
+    market_close = get_market_close_time(dt.datetime.strptime(date, "%Y-%m-%d").date())
+    market_close_iso = market_close.isoformat()
+    
     conn = get_conn()
     c = conn.cursor()
     
@@ -381,10 +395,11 @@ def extract_factors_for_date(date: str, api_key: Optional[str] = None) -> int:
         WHERE DATE(COALESCE(published_at, fetched_at)) = DATE(?)
           AND title IS NOT NULL
           AND title != ''
+          AND (published_at IS NULL OR published_at < ?)
           AND id NOT IN (
               SELECT DISTINCT article_id FROM article_factors WHERE date = ?
           )
-    """, (date, date)).fetchall()
+    """, (date, market_close_iso, date)).fetchall()
     
     conn.close()
     

@@ -484,6 +484,96 @@ def run_daily_pipeline(date: str = None):
     except Exception as e:
         print(f"[WARN] Lagged training data collection failed: {e}")
     
+    # Step 9: Generate Scenario-Based Predictions (optional)
+    print("\n[9/10] Generating Scenario-Based Predictions...")
+    try:
+        from generate_scenario_predictions import generate_all_scenario_curves
+        from load_scenarios import get_default_scenarios_path
+        
+        # Try to find scenarios file
+        scenarios_path = get_default_scenarios_path()
+        if scenarios_path and scenarios_path.exists():
+            print(f"[SCENARIO] Using scenarios from: {scenarios_path}")
+            curves = generate_all_scenario_curves(date, str(scenarios_path), combine_with_news=False)
+            
+            if curves:
+                output_dir = Path(__file__).parent / "scenario_predictions"
+                output_dir.mkdir(exist_ok=True)
+                output_path = output_dir / f"scenario_curves_{date}.json"
+                
+                with open(output_path, 'w') as f:
+                    json.dump(curves, f, indent=2)
+                
+                num_scenarios = len([k for k in curves.keys() if k not in ["date", "base_date", "prediction_date", "baseline"]])
+                print(f"[OK] Generated {num_scenarios + 1} scenario curves (1 baseline + {num_scenarios} scenarios)")
+                print(f"[OK] Saved to {output_path}")
+            else:
+                print("[WARN] Scenario curve generation returned no results")
+        else:
+            print("[INFO] Scenarios file not found - skipping scenario predictions")
+            print(f"[INFO] Expected location: backend/mad_debate/data/scenarios/out.jsonl")
+    except ImportError as e:
+        print(f"[INFO] Scenario prediction generation not available: {e}")
+    except Exception as e:
+        print(f"[WARN] Scenario prediction generation failed: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    # Step 10: Calculate Accuracy for Previous Day's Predictions
+    print("\n[10/10] Calculating Prediction Accuracy...")
+    try:
+        from calculate_prediction_accuracy import calculate_accuracy_for_scenario_curves
+        from train_linear_online import get_actual_yield_changes
+        import datetime as dt
+        
+        # Calculate accuracy for previous day's predictions (if actuals are available)
+        # Previous day = date - 1 business day
+        date_obj = dt.datetime.strptime(date, "%Y-%m-%d").date()
+        prev_date_obj = date_obj - dt.timedelta(days=1)
+        # Find previous business day (skip weekends)
+        while prev_date_obj.weekday() >= 5:  # Saturday=5, Sunday=6
+            prev_date_obj -= dt.timedelta(days=1)
+        prev_date = prev_date_obj.isoformat()
+        
+        # Check if we have scenario curves for previous day
+        scenario_file = Path(__file__).parent / "scenario_predictions" / f"scenario_curves_{prev_date}.json"
+        if scenario_file.exists():
+            # Check if actuals are available for the prediction_date
+            with open(scenario_file) as f:
+                prev_curves = json.load(f)
+            
+            prediction_date = prev_curves.get("prediction_date")
+            if prediction_date:
+                actuals = get_actual_yield_changes(prediction_date)
+                if actuals:
+                    print(f"[ACCURACY] Calculating accuracy for {prev_date}'s predictions (actual date: {prediction_date})...")
+                    results = calculate_accuracy_for_scenario_curves(prev_date)
+                    
+                    if results:
+                        num_scenarios = len(results)
+                        print(f"[OK] Calculated accuracy for {num_scenarios} scenarios")
+                        
+                        # Show baseline summary
+                        baseline_metrics = results.get("baseline", {})
+                        if baseline_metrics.get("mae_bps") is not None:
+                            print(f"[ACCURACY] Baseline MAE: {baseline_metrics['mae_bps']:.2f} bps")
+                            if baseline_metrics.get("r2") is not None:
+                                print(f"[ACCURACY] Baseline R²: {baseline_metrics['r2']:.3f}")
+                    else:
+                        print(f"[WARN] No accuracy calculated for {prev_date}")
+                else:
+                    print(f"[INFO] Actual yield data not yet available for {prediction_date} (will calculate when available)")
+            else:
+                print(f"[INFO] No prediction_date in scenario curves for {prev_date}")
+        else:
+            print(f"[INFO] No scenario curves found for {prev_date} (first day or not generated)")
+    except ImportError as e:
+        print(f"[INFO] Accuracy calculation not available: {e}")
+    except Exception as e:
+        print(f"[WARN] Accuracy calculation failed: {e}")
+        import traceback
+        traceback.print_exc()
+    
     print(f"\n{'='*60}")
     print(f"PIPELINE COMPLETE - {date}")
     print(f"{'='*60}\n")

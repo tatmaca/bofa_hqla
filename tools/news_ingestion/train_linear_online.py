@@ -11,6 +11,21 @@ Algorithm:
 - Clip: |ΔB_k,f| ≤ ΔB_max (0.8 bps)
 - Sign guards: Enforce economic constraints
 - Smoothing: B_k,f ← (1-γ)×B_k,f + (γ/2)×(B_k-1,f + B_k+1,f) where γ=0.2
+
+IMPORTANT: Overnight Move Handling
+-----------------------------------
+Yield curve delta for day t includes:
+- Overnight moves: from day t-1 close to day t open
+- Intraday moves: from day t open to day t close
+
+To account for this:
+- TRAINING: Uses previous day's (t-1) news to predict day t delta
+  (since delta includes overnight moves that t-1 news can explain)
+- PREDICTION: Uses same day's (t) news to predict day t+1 delta
+  (correct for forecasting future moves)
+
+This ensures the model learns the relationship between news and yield changes
+while maintaining correct forecasting behavior.
 """
 
 import os
@@ -27,9 +42,10 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from db import get_conn
 
-# Tenors: [3M, 2Y, 5Y, 10Y, 30Y]
-TENORS = ["3M", "2Y", "5Y", "10Y", "30Y"]
-TENOR_ORDER = {"3M": 0, "2Y": 1, "5Y": 2, "10Y": 3, "30Y": 4}
+# Tenors: All available tenors from Treasury data
+# Treasury provides: 1M, 3M, 6M, 1Y, 2Y, 3Y, 5Y, 7Y, 10Y, 20Y, 30Y
+TENORS = ["1M", "3M", "6M", "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "20Y", "30Y"]
+TENOR_ORDER = {"1M": 0, "3M": 1, "6M": 2, "1Y": 3, "2Y": 4, "3Y": 5, "5Y": 6, "7Y": 7, "10Y": 8, "20Y": 9, "30Y": 10}
 
 CONFIG_PATH = Path(__file__).parent / "news_config.yaml"
 
@@ -94,7 +110,14 @@ def initialize_coefficients(date: Optional[str] = None) -> Dict[str, Dict[str, f
     return coefficients
 
 def get_daily_factor_scores(date: str) -> Dict[str, float]:
-    """Get daily factor scores for a given date."""
+    """
+    Get daily factor scores for a given date.
+    
+    Note: This function reads from the daily_factor_scores table, which should be
+    populated by aggregate_daily_factor_scores() that filters by market close time
+    to prevent look-ahead bias. The scores only include factors from articles
+    published before market close (4 PM ET) on the given date.
+    """
     conn = get_conn()
     c = conn.cursor()
     
@@ -114,8 +137,12 @@ def predict_yield_changes(date: str, coefficients: Dict[str, Dict[str, float]],
     """
     Predict yield changes using linear model: Δy_t,k = Σ(B_k,f × x_t,f) + b_k
     
+    Note: This function uses same-day news to predict next-day yield changes,
+    which is correct for forecasting. For training, the train_linear_model_for_date
+    function uses previous-day news to account for overnight moves in the delta.
+    
     Args:
-        date: Date string
+        date: Date string (news date - predicts yield change for date+1)
         coefficients: {tenor: {factor_name: coefficient_bps}}
         factor_scores: {factor_name: factor_score} (if None, loads from DB)
         intercepts: {tenor: intercept_bps} (if None, loads from DB)
@@ -164,31 +191,39 @@ def get_actual_yield_changes(date: str) -> Optional[Dict[str, float]]:
         # Convert to our tenor format
         # Note: delta_zeros_pct is in percentage points (0.01 = 1 bp), so multiply by 100 to get bps
         actuals = {}
-        for key, value in delta_zeros.items():
-            # Handle different key formats
-            key_upper = key.upper()
-            
-            # Map to our tenor format
-            if key_upper == "3M":
-                actuals["3M"] = float(value) * 100  # Convert % points to bps
-            elif key_upper == "2Y" or (key_upper == "2Y" and "2y" in key.lower()):
-                actuals["2Y"] = float(value) * 100
-            elif key_upper == "5Y" or (key_upper == "5Y" and "5y" in key.lower()):
-                actuals["5Y"] = float(value) * 100
-            elif key_upper == "10Y" or (key_upper == "10Y" and "10y" in key.lower()):
-                actuals["10Y"] = float(value) * 100
-            elif key_upper == "30Y" or (key_upper == "30Y" and "30y" in key.lower()):
-                actuals["30Y"] = float(value) * 100
-            elif key.lower() == "2y":
-                actuals["2Y"] = float(value) * 100
-            elif key.lower() == "5y":
-                actuals["5Y"] = float(value) * 100
-            elif key.lower() == "10y":
-                actuals["10Y"] = float(value) * 100
-            elif key.lower() == "30y":
-                actuals["30Y"] = float(value) * 100
         
-        # Note: 3M may not be in old snapshots - that's OK, model will use available tenors
+        # Mapping from database keys to our standardized tenor format
+        # Database may use: 1M, 3M, 6M, 1y, 2y, 3y, 5y, 7y, 10y, 20y, 30y
+        # We standardize to: 1M, 3M, 6M, 1Y, 2Y, 3Y, 5Y, 7Y, 10Y, 20Y, 30Y
+        tenor_mapping = {
+            "1M": "1M", "1m": "1M",
+            "3M": "3M", "3m": "3M",
+            "6M": "6M", "6m": "6M",
+            "1Y": "1Y", "1y": "1Y",
+            "2Y": "2Y", "2y": "2Y",
+            "3Y": "3Y", "3y": "3Y",
+            "5Y": "5Y", "5y": "5Y",
+            "7Y": "7Y", "7y": "7Y",
+            "10Y": "10Y", "10y": "10Y",
+            "20Y": "20Y", "20y": "20Y",
+            "30Y": "30Y", "30y": "30Y",
+        }
+        
+        for key, value in delta_zeros.items():
+            key_upper = key.upper()
+            key_lower = key.lower()
+            
+            # Try exact match first
+            if key in tenor_mapping:
+                tenor = tenor_mapping[key]
+                actuals[tenor] = float(value) * 100
+            elif key_upper in tenor_mapping:
+                tenor = tenor_mapping[key_upper]
+                actuals[tenor] = float(value) * 100
+            elif key_lower in tenor_mapping:
+                tenor = tenor_mapping[key_lower]
+                actuals[tenor] = float(value) * 100
+        
         return actuals
     except:
         return None
@@ -530,13 +565,23 @@ def get_top_factors_by_tenor(attribution: Dict[str, Dict[str, float]],
 def train_linear_model_for_date(date: str, check_significance: bool = True, 
                                 threshold_std: float = 2.0) -> bool:
     """
-    Train linear model for a single date:
+    Train linear model for a single date.
+    
+    IMPORTANT: This function handles the overnight move issue:
+    - Yield delta for day t includes overnight moves (from t-1 close to t open) 
+      plus intraday moves (from t open to t close)
+    - For TRAINING: Uses previous day's (t-1) news to predict day t delta
+      (since delta includes overnight moves that t-1 news can explain)
+    - For PREDICTION: Uses same day's (t) news to predict day t+1 delta
+      (correct for forecasting future moves)
+    
+    Steps:
     1. Check if move is significant (optional)
     2. Load coefficients (or initialize from cold-start)
-    3. Get factor scores
-    4. Predict yield changes
+    3. Get factor scores (for prediction: same day, for training: previous day)
+    4. Predict yield changes (using same-day news for forecasting)
     5. Get actual yield changes
-    6. Update coefficients
+    6. Update coefficients (using previous-day news to account for overnight moves)
     7. Save everything
     
     Args:
@@ -546,20 +591,37 @@ def train_linear_model_for_date(date: str, check_significance: bool = True,
     """
     print(f"[LINEAR] Training linear model for {date}")
     
+    # Calculate previous business day for training
+    date_obj = dt.datetime.strptime(date, "%Y-%m-%d").date()
+    prev_date_obj = date_obj - dt.timedelta(days=1)
+    # Find previous business day (skip weekends)
+    while prev_date_obj.weekday() >= 5:  # Saturday=5, Sunday=6
+        prev_date_obj -= dt.timedelta(days=1)
+    prev_date = prev_date_obj.isoformat()
+    
     # Load or initialize coefficients
     coefficients = initialize_coefficients(date)
     
-    # Get factor scores
-    factor_scores = get_daily_factor_scores(date)
-    if not factor_scores:
-        print(f"[WARN] No factor scores for {date}")
+    # Get factor scores for PREDICTION (same day - correct for forecasting)
+    factor_scores_pred = get_daily_factor_scores(date)
+    if not factor_scores_pred:
+        print(f"[WARN] No factor scores for {date} (prediction)")
         return False
+    
+    # Get factor scores for TRAINING (previous day - accounts for overnight moves)
+    factor_scores_train = get_daily_factor_scores(prev_date)
+    if not factor_scores_train:
+        print(f"[WARN] No factor scores for previous day {prev_date} (training)")
+        print(f"[INFO] Will use same-day factor scores for training (may include overnight move bias)")
+        factor_scores_train = factor_scores_pred
+    else:
+        print(f"[INFO] Using previous day ({prev_date}) news for training to account for overnight moves")
     
     # Get intercepts
     intercepts = get_intercepts(date)
     
-    # Predict (always generate predictions, even if we don't train)
-    predictions = predict_yield_changes(date, coefficients, factor_scores, intercepts)
+    # Predict (always generate predictions using same-day news - correct for forecasting)
+    predictions = predict_yield_changes(date, coefficients, factor_scores_pred, intercepts)
     
     # Get actuals
     actuals = get_actual_yield_changes(date)
@@ -603,12 +665,16 @@ def train_linear_model_for_date(date: str, check_significance: bool = True,
     
     # Only update coefficients if we should train
     if should_update:
-        # Compute errors
-        errors = {tenor: actuals.get(tenor, 0.0) - predictions.get(tenor, 0.0) for tenor in TENORS}
+        # For training: use previous day's news to predict today's delta
+        # This accounts for overnight moves in the delta
+        training_predictions = predict_yield_changes(date, coefficients, factor_scores_train, intercepts)
         
-        # Update coefficients
+        # Compute errors using training predictions (previous day news vs actual delta)
+        errors = {tenor: actuals.get(tenor, 0.0) - training_predictions.get(tenor, 0.0) for tenor in TENORS}
+        
+        # Update coefficients using previous day's factor scores
         updated_coefficients = update_coefficients(
-            date, coefficients, factor_scores, actuals, predictions
+            date, coefficients, factor_scores_train, actuals, training_predictions
         )
         
         # Update intercepts
@@ -623,9 +689,11 @@ def train_linear_model_for_date(date: str, check_significance: bool = True,
         
         # Print summary
         print(f"[LINEAR] Updated coefficients for {date}")
-        print(f"[LINEAR] Predictions: {predictions}")
+        print(f"[LINEAR] Training used previous day ({prev_date}) news to account for overnight moves")
+        print(f"[LINEAR] Predictions (for forecasting): {predictions}")
+        print(f"[LINEAR] Training predictions: {training_predictions}")
         print(f"[LINEAR] Actuals: {actuals}")
-        print(f"[LINEAR] Errors: {errors}")
+        print(f"[LINEAR] Errors (training): {errors}")
     else:
         # Print summary even when coefficients weren't updated
         print(f"[LINEAR] Predictions saved for {date} (coefficients not updated - no significant moves)")
