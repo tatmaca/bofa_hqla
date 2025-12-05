@@ -20,7 +20,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from db import get_conn
 
-TENORS = ["3M", "2Y", "5Y", "10Y", "30Y"]
+# All available tenors from Treasury data
+TENORS = ["1M", "3M", "6M", "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "20Y", "30Y"]
 
 # Treasury data sources
 YEARLY_CSV_TMPL = "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/{year}/all?_format=csv&type=daily_treasury_yield_curve&field_tdr_date_value={year}"

@@ -69,14 +69,38 @@ def get_actual_yield_changes(date: str) -> Optional[Dict]:
         zeros = delta.get("zeros_pct", {})
         spreads = delta.get("spreads_pct", {})
         
-        return {
-            "2y": zeros.get("2y", 0.0),
-            "5y": zeros.get("5y", 0.0),
-            "10y": zeros.get("10y", 0.0),
-            "30y": zeros.get("30y", 0.0),
-            "2s10s": spreads.get("2s10s", 0.0),
-            "2s30s": spreads.get("2s30s", 0.0),
+        # Map all available tenors from database
+        # Database uses: 1M, 3M, 6M, 1y, 2y, 3y, 5y, 7y, 10y, 20y, 30y
+        # We standardize to lowercase: 1m, 3m, 6m, 1y, 2y, 3y, 5y, 7y, 10y, 20y, 30y
+        tenor_mapping = {
+            "1M": "1m", "1m": "1m",
+            "3M": "3m", "3m": "3m",
+            "6M": "6m", "6m": "6m",
+            "1Y": "1y", "1y": "1y",
+            "2Y": "2y", "2y": "2y",
+            "3Y": "3y", "3y": "3y",
+            "5Y": "5y", "5y": "5y",
+            "7Y": "7y", "7y": "7y",
+            "10Y": "10y", "10y": "10y",
+            "20Y": "20y", "20y": "20y",
+            "30Y": "30y", "30y": "30y",
         }
+        
+        result = {}
+        # Map all available tenors
+        for db_key, std_key in tenor_mapping.items():
+            if db_key in zeros:
+                result[std_key] = zeros[db_key]
+            elif db_key.lower() in zeros:
+                result[std_key] = zeros[db_key.lower()]
+            else:
+                result[std_key] = 0.0
+        
+        # Add spreads
+        result["2s10s"] = spreads.get("2s10s", 0.0)
+        result["2s30s"] = spreads.get("2s30s", 0.0)
+        
+        return result
     except Exception as e:
         print(f"[WARN] Failed to load actual changes for {date}: {e}")
         return None

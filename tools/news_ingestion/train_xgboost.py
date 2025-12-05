@@ -31,7 +31,8 @@ except ImportError:
     shap = None
     print("[WARN] SHAP not available. Install with: pip install shap")
 
-TENORS = ["2y", "5y", "10y", "30y"]
+# All available tenors (lowercase for consistency with database)
+TENORS = ["1m", "3m", "6m", "1y", "2y", "3y", "5y", "7y", "10y", "20y", "30y"]
 SPREADS = ["2s10s", "2s30s"]
 TARGETS = TENORS + SPREADS
 

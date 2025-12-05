@@ -153,9 +153,9 @@ predicted_full[tenor] = intercept[tenor] + Σ(Contribution_f)
   - Market noise vs. signal
 
 **Trend:**
-- 📈 **Improving**: 79.6% reduction from 2025-11-26 to 2025-11-28
-- 📈 Model is learning and improving over time
-- 📈 Attribution accuracy is stabilizing
+- **Improving**: 79.6% reduction from 2025-11-26 to 2025-11-28
+- Model is learning and improving over time
+- Attribution accuracy is stabilizing
 
 ---
 

@@ -61,7 +61,9 @@ def plot_factor_attribution_by_tenor(attribution: Dict[str, Dict[str, float]],
     Returns:
         Path to saved figure
     """
-    fig, axes = plt.subplots(1, len(TENORS), figsize=(20, 6))
+    # Adjust figure size based on number of tenors
+    fig_width = max(20, len(TENORS) * 2.5)
+    fig, axes = plt.subplots(1, len(TENORS), figsize=(fig_width, 6))
     if len(TENORS) == 1:
         axes = [axes]
     
@@ -401,8 +403,12 @@ def generate_attribution_report(date: str,
                         shap_importance = {feat: len(shap_ranking) - i for i, feat in enumerate(shap_ranking)}
                         
                         # Compare with linear model for matching tenor
-                        tenor_map = {"2y": "2Y", "5y": "5Y", "10y": "10Y", "30y": "30Y"}
-                        linear_tenor = tenor_map.get(target, target.upper())
+                        tenor_map = {
+                            "1m": "1M", "3m": "3M", "6m": "6M",
+                            "1y": "1Y", "2y": "2Y", "3y": "3Y",
+                            "5y": "5Y", "7y": "7Y", "10y": "10Y", "20y": "20Y", "30y": "30Y"
+                        }
+                        linear_tenor = tenor_map.get(target.lower(), target.upper())
                         
                         if linear_tenor in attribution:
                             linear_coefs = {name: coefficients.get(linear_tenor, {}).get(name, 0.0) 

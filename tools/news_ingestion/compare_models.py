@@ -29,8 +29,20 @@ from train_linear_online import (
 )
 from train_xgboost import MODEL_DIR
 
-TENOR_MAP = {"2y": "2Y", "5y": "5Y", "10y": "10Y", "30y": "30Y", 
-             "2Y": "2Y", "5Y": "5Y", "10Y": "10Y", "30Y": "30Y"}
+# Map XGBoost targets (lowercase) to linear model tenors (uppercase)
+TENOR_MAP = {
+    "1m": "1M", "1M": "1M",
+    "3m": "3M", "3M": "3M",
+    "6m": "6M", "6M": "6M",
+    "1y": "1Y", "1Y": "1Y",
+    "2y": "2Y", "2Y": "2Y",
+    "3y": "3Y", "3Y": "3Y",
+    "5y": "5Y", "5Y": "5Y",
+    "7y": "7Y", "7Y": "7Y",
+    "10y": "10Y", "10Y": "10Y",
+    "20y": "20Y", "20Y": "20Y",
+    "30y": "30Y", "30Y": "30Y",
+}
 
 def load_xgb_metadata() -> Optional[Dict]:
     """Load latest XGBoost model metadata."""
