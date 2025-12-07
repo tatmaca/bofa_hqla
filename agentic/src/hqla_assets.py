@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 import QuantLib as ql
+import copy
+import inspect
+
 
 """
 HQLAInstrument (abstract base)
@@ -55,6 +58,51 @@ class HQLA_Asset(ABC):
         Returns a float representing the present value.
         """
         pass
+
+    def clone(self):
+        """
+        Return a copy of this asset.
+        Python attributes are deep-copied; QuantLib objects are shared.
+        """
+        cls = type(self)
+        
+        # Prepare kwargs for constructor
+        kwargs = {
+            "issue_date": self.issue_date,
+            "maturity_date": self.maturity_date,
+            "face_value": self.face_value,
+            "calendar": self.calendar,
+            "day_count": self.day_count,
+            "quantity": self.quantity,
+            "name": self.name,
+            "isin": self.isin,
+        }
+        # Add optional attributes if they exist
+        if hasattr(self, "coupons"):
+            kwargs["coupons"] = copy.deepcopy(self.coupons)
+        if hasattr(self, "coupon_frequency"):
+            kwargs["coupon_frequency"] = self.coupon_frequency
+        if hasattr(self, "business_day_conv"):
+            kwargs["business_day_conv"] = self.business_day_conv
+
+        # Filter kwargs to only those accepted by __init__
+        sig = inspect.signature(cls.__init__)
+        valid_kwargs = {k: v for k, v in kwargs.items() if k in sig.parameters}
+
+        new_inst = cls(**valid_kwargs)
+
+        # Copy Python-native attributes
+        for attr in ["dirty_price", "clean_price", "quantity", "haircut", "max_lcr_weight"]:
+            if hasattr(self, attr):
+                setattr(new_inst, attr, copy.deepcopy(getattr(self, attr)))
+
+        # Share QuantLib objects
+        new_inst.bond = self.bond
+        new_inst.schedule = getattr(self, "schedule", None)
+        return new_inst
+
+
+    
 
 
 class Floating(HQLA_Asset):

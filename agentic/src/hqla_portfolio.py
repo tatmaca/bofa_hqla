@@ -10,6 +10,8 @@ Updated: 2025-11-17
 
 from typing import Dict, List
 import QuantLib as ql
+import pandas as pd
+import copy
 
 import hqla_assets as HQLA
 
@@ -23,6 +25,8 @@ class Portfolio:
             "L2A": [],
             "L2B": [],
         }
+
+
 
     def _category(self, inst: HQLA.HQLA_Asset) -> str:
         """Infer Basel III level from inheritance."""
@@ -103,6 +107,75 @@ class Portfolio:
             # Optionally, print subtotal for the category
             subtotal = sum(inst.dirty_price * inst.quantity for inst in group)
             print(f"Subtotal ({cat}): ${subtotal:.2f}")
+
+    def build_assets_summary(self):
+        """Build comprehensive asset summary with all required metrics"""
+        rows = []
+
+        for level, group in self.assets.items():
+            for inst in group:
+                if inst.bond is None:
+                    raise ValueError(
+                        f"Instrument {inst.name} has no QuantLib bond built yet."
+                    )
+
+                # Get prices
+                clean_price_float = inst.clean_price or inst.bond.cleanPrice()
+                dirty_price_float = inst.dirty_price or inst.bond.dirtyPrice()
+                clean_price = ql.BondPrice(clean_price_float, ql.BondPrice.Clean)
+
+                # Compute YTM
+                try:
+                    ytm = inst.bond.bondYield(
+                        clean_price, inst.day_count, ql.Compounded, ql.Semiannual
+                    )
+                except:
+                    ytm = 0.0  # Fallback for zero-coupon or short bonds
+
+                # Compute modified duration
+                try:
+                    # QuantLib's duration is Macaulay duration
+                    settlement = ql.Settings.instance().evaluationDate
+                    mac_duration = ql.BondFunctions.duration(
+                        inst.bond,
+                        ytm,
+                        inst.day_count,
+                        ql.Compounded,
+                        ql.Semiannual,
+                        ql.Duration.Macaulay,
+                        settlement,
+                    )
+                    # Modified duration = Macaulay / (1 + y/k) where k=2 for semiannual
+                    mod_duration = mac_duration / (1 + ytm / 2)
+                except:
+                    mod_duration = 0.0
+
+                # Time to maturity in years
+                eval_date = ql.Settings.instance().evaluationDate
+                ttm = (inst.maturity_date - eval_date) / 365.25
+
+                rows.append(
+                    {
+                        "Name": inst.name,
+                        "Level": level,
+                        "Quantity": inst.quantity,
+                        "CleanPrice": clean_price_float,
+                        "DirtyPrice": dirty_price_float,
+                        "Haircut": inst.haircut,
+                        "LCR_Weight": inst.max_lcr_weight,
+                        "YTM": ytm,
+                        "ModDuration": mod_duration,
+                        "TimeToMaturity": ttm,
+                    }
+                )
+
+        return pd.DataFrame(rows)
+
+    def clone(self):    
+        new_portfolio = Portfolio()
+        for level, group in self.assets.items():
+            new_portfolio.assets[level] = [inst.clone() for inst in group]
+        return new_portfolio
 
 
 if __name__ == "__main__":
