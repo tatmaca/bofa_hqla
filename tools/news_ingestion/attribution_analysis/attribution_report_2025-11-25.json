@@ -1,0 +1,54 @@
+{
+  "date": "2025-11-25",
+  "attribution": {
+    "3M": {
+      "FED_TONE": 20.0,
+      "RISK_OFF": 10.0,
+      "CPI_HEAD_SURP": 5.6,
+      "GEO_EVENT": 5.0,
+      "RETAIL_SALES_SURP": 1.4,
+      "FISCAL_DEFICIT_NEWS": -0.0,
+      "HOUSING_TURN": -0.0
+    },
+    "2Y": {
+      "FED_TONE": 25.0,
+      "RISK_OFF": 12.5,
+      "CPI_HEAD_SURP": 9.799999999999999,
+      "GEO_EVENT": 7.5,
+      "FISCAL_DEFICIT_NEWS": -5.0,
+      "RETAIL_SALES_SURP": 4.199999999999999,
+      "HOUSING_TURN": -0.8
+    },
+    "5Y": {
+      "FED_TONE": 17.5,
+      "RISK_OFF": 15.0,
+      "GEO_EVENT": 10.0,
+      "CPI_HEAD_SURP": 9.799999999999999,
+      "FISCAL_DEFICIT_NEWS": -7.5,
+      "RETAIL_SALES_SURP": 5.6,
+      "HOUSING_TURN": -1.6
+    },
+    "10Y": {
+      "RISK_OFF": 20.0,
+      "GEO_EVENT": 15.0,
+      "FISCAL_DEFICIT_NEWS": -12.5,
+      "FED_TONE": 12.5,
+      "CPI_HEAD_SURP": 8.399999999999999,
+      "RETAIL_SALES_SURP": 4.199999999999999,
+      "HOUSING_TURN": -2.4000000000000004
+    },
+    "30Y": {
+      "RISK_OFF": 22.5,
+      "GEO_EVENT": 17.5,
+      "FISCAL_DEFICIT_NEWS": -15.0,
+      "FED_TONE": 7.5,
+      "CPI_HEAD_SURP": 7.0,
+      "RETAIL_SALES_SURP": 2.8,
+      "HOUSING_TURN": -2.4000000000000004
+    }
+  },
+  "visualizations": {
+    "factor_attribution": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_attribution_2025-11-25.png",
+    "factor_heatmap": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_heatmap_2025-11-25.png"
+  }
+}

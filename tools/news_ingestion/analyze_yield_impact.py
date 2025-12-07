@@ -29,14 +29,38 @@ SPREADS = ["2s10s", "2s30s"]
 # Import get_conn from db module to use consistent database path
 from db import get_conn
 
-def get_bucketed_news(date: Optional[str] = None) -> Dict[str, List[Dict]]:
-    """Get news articles grouped by bucket for a given date."""
+def get_bucketed_news(date: Optional[str] = None, prevent_lookahead: bool = True) -> Dict[str, List[Dict]]:
+    """
+    Get news articles grouped by bucket for a given date.
+    
+    Args:
+        date: Date string (YYYY-MM-DD), defaults to today
+        prevent_lookahead: If True, only include articles published before market close
+    """
     if date is None:
         date = dt.date.today().isoformat()
     
-    with get_conn() as c:
-        rows = c.execute("""
-            SELECT bucket, title, text, summary, source, url, bucket_confidence
+    # Build query with look-ahead bias prevention
+    if prevent_lookahead:
+        from lookahead_bias_utils import get_market_close_time
+        market_close = get_market_close_time(dt.datetime.strptime(date, "%Y-%m-%d").date())
+        market_close_iso = market_close.isoformat()
+        
+        query = """
+            SELECT bucket, title, text, summary, source, url, bucket_confidence, published_at
+            FROM articles
+            WHERE DATE(COALESCE(published_at, fetched_at)) = DATE(?)
+              AND bucket IS NOT NULL
+              AND bucket != ''
+              AND title IS NOT NULL
+              AND title != ''
+              AND (published_at IS NULL OR published_at < ?)
+            ORDER BY bucket_confidence DESC, published_at DESC
+        """
+        params = (date, market_close_iso)
+    else:
+        query = """
+            SELECT bucket, title, text, summary, source, url, bucket_confidence, published_at
             FROM articles
             WHERE DATE(COALESCE(published_at, fetched_at)) = DATE(?)
               AND bucket IS NOT NULL
@@ -44,7 +68,11 @@ def get_bucketed_news(date: Optional[str] = None) -> Dict[str, List[Dict]]:
               AND title IS NOT NULL
               AND title != ''
             ORDER BY bucket_confidence DESC, published_at DESC
-        """, (date,)).fetchall()
+        """
+        params = (date,)
+    
+    with get_conn() as c:
+        rows = c.execute(query, params).fetchall()
     
     buckets = {}
     for row in rows:

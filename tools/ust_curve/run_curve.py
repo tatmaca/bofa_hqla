@@ -69,7 +69,7 @@ def fetch_par_from_xml(as_of):
             out = {}
             def g(key): return raw.get(key)
             mapping = {
-                "0.25": g("6mo"),
+                "0.25": g("3mo") or g("6mo"),  # 3 months (prefer 3mo, fallback to 6mo)
                 "1": g("1yr"),
                 "2": g("2yr"),
                 "3": g("3yr"),
@@ -108,7 +108,7 @@ def fetch_par_from_csv_archive(as_of):
                 try: return float(v)
                 except: return None
             out = {
-                "0.25": f("6 Mo"),
+                "0.25": f("3 Mo") or f("6 Mo"),  # 3 months (prefer 3 Mo, fallback to 6 Mo)
                 "1": f("1 Yr"),
                 "2": f("2 Yr"),
                 "3": f("3 Yr"),
@@ -143,7 +143,7 @@ def fetch_par_from_year_csv(as_of):
             except:
                 return None
         out = {
-            "0.25": f("6 Mo"),
+            "0.25": f("3 Mo") or f("6 Mo"),  # 3 months (prefer 3 Mo, fallback to 6 Mo)
             "1":    f("1 Yr"),
             "2":    f("2 Yr"),
             "3":    f("3 Yr"),

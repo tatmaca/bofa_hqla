@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Yield Curve">
+    <meta name="theme-color" content="#667eea">
+    <title>UST Yield Curve Dashboard</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>UST Yield Curve Dashboard</h1>
+            <div class="date-selector">
+                <label for="date-select">Date:</label>
+                <select id="date-select">
+                    <option value="{{ latest_date }}">{{ latest_date }}</option>
+                </select>
+                <button id="refresh-btn">Refresh</button>
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">2-Year Yield</div>
+                <div class="stat-value" id="stat-2y">-</div>
+                <div class="stat-change" id="change-2y">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">10-Year Yield</div>
+                <div class="stat-value" id="stat-10y">-</div>
+                <div class="stat-change" id="change-10y">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">30-Year Yield</div>
+                <div class="stat-value" id="stat-30y">-</div>
+                <div class="stat-change" id="change-30y">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">2s10s Spread</div>
+                <div class="stat-value" id="stat-2s10s">-</div>
+                <div class="stat-change" id="change-2s10s">-</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h2>Yield Curve: Today vs Yesterday</h2>
+                <canvas id="curve-chart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h2>Day-over-Day Changes</h2>
+                <canvas id="delta-chart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h2>Prediction vs Actual</h2>
+                <canvas id="prediction-chart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h2>Key Spreads</h2>
+                <canvas id="spreads-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="content-card">
+                <h2>Top 5 News Articles</h2>
+                <div id="news-list"></div>
+            </div>
+            <div class="content-card">
+                <h2>Prediction Summary</h2>
+                <div id="prediction-summary"></div>
+            </div>
+            <div class="content-card">
+                <h2>Risk Flags</h2>
+                <div id="risks-list"></div>
+            </div>
+        </div>
+
+        <div class="attribution-grid">
+            <div class="content-card">
+                <h2>Linear Model: Factor Attribution</h2>
+                <p class="subtitle">Top factors driving yield changes (ranked by contribution)</p>
+                <div id="factor-attribution"></div>
+            </div>
+            <div class="content-card">
+                <h2>Nonlinear Model: XGBoost Predictions</h2>
+                <p class="subtitle">Enhanced predictions using historical patterns</p>
+                <div id="xgboost-predictions"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script>
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('ServiceWorker registered:', registration);
+                    })
+                    .catch((error) => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+        
+        // Add install prompt for iOS
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show custom install button if needed
+        });
+    </script>
+</body>
+</html>
+

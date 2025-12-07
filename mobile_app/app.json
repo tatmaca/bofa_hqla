@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Yield Curve Dashboard",
+    "slug": "yield-curve-app",
+    "version": "1.0.0",
+    "sdkVersion": "54.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#667eea"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yieldcurve.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#667eea"
+      }
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#667eea"
+        }
+      ]
+    ]
+  }
+}
+

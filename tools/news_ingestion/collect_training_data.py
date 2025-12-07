@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from db import get_conn
 from bucket_news import get_bucket_counts, BUCKETS
 from analyze_yield_impact import load_curve_snapshot, extract_llm_features
+from train_linear_online import get_daily_factor_scores
 
 DB_PATH = os.environ.get("NEWS_DB_PATH", "news.db")
 ANALYSES_DIR = Path(__file__).parent / "analyses"
@@ -68,20 +69,54 @@ def get_actual_yield_changes(date: str) -> Optional[Dict]:
         zeros = delta.get("zeros_pct", {})
         spreads = delta.get("spreads_pct", {})
         
-        return {
-            "2y": zeros.get("2y", 0.0),
-            "5y": zeros.get("5y", 0.0),
-            "10y": zeros.get("10y", 0.0),
-            "30y": zeros.get("30y", 0.0),
-            "2s10s": spreads.get("2s10s", 0.0),
-            "2s30s": spreads.get("2s30s", 0.0),
+        # Map all available tenors from database
+        # Database uses: 1M, 3M, 6M, 1y, 2y, 3y, 5y, 7y, 10y, 20y, 30y
+        # We standardize to lowercase: 1m, 3m, 6m, 1y, 2y, 3y, 5y, 7y, 10y, 20y, 30y
+        tenor_mapping = {
+            "1M": "1m", "1m": "1m",
+            "3M": "3m", "3m": "3m",
+            "6M": "6m", "6m": "6m",
+            "1Y": "1y", "1y": "1y",
+            "2Y": "2y", "2y": "2y",
+            "3Y": "3y", "3y": "3y",
+            "5Y": "5y", "5y": "5y",
+            "7Y": "7y", "7y": "7y",
+            "10Y": "10y", "10y": "10y",
+            "20Y": "20y", "20y": "20y",
+            "30Y": "30y", "30y": "30y",
         }
+        
+        result = {}
+        # Map all available tenors
+        for db_key, std_key in tenor_mapping.items():
+            if db_key in zeros:
+                result[std_key] = zeros[db_key]
+            elif db_key.lower() in zeros:
+                result[std_key] = zeros[db_key.lower()]
+            else:
+                result[std_key] = 0.0
+        
+        # Add spreads
+        result["2s10s"] = spreads.get("2s10s", 0.0)
+        result["2s30s"] = spreads.get("2s30s", 0.0)
+        
+        return result
     except Exception as e:
         print(f"[WARN] Failed to load actual changes for {date}: {e}")
         return None
 
-def collect_training_data(start_date: str, end_date: str) -> List[Dict]:
-    """Collect training data for date range."""
+def collect_training_data(start_date: str, end_date: str, 
+                          filter_significance: bool = True,
+                          threshold_std: float = 2.0) -> List[Dict]:
+    """
+    Collect training data for date range.
+    
+    Args:
+        start_date: Start date (YYYY-MM-DD)
+        end_date: End date (YYYY-MM-DD)
+        filter_significance: If True, only include dates with significant moves
+        threshold_std: Standard deviation threshold for significance
+    """
     dates = get_available_dates(start_date, end_date)
     training_data = []
     
@@ -126,10 +161,28 @@ def collect_training_data(start_date: str, end_date: str) -> List[Dict]:
             missing_snapshots.append(date)
             continue
         
+        # Check significance if filtering enabled
+        if filter_significance:
+            try:
+                from yield_movement_thresholds import should_train_on_date
+                should_train, sig_info = should_train_on_date(date, threshold_std, min_significant_tenors=1)
+                if not should_train:
+                    # Skip dates without significant moves
+                    continue
+            except ImportError:
+                # Module not available, skip filtering
+                pass
+            except Exception:
+                # Error in significance check, continue without filtering
+                pass
+        
         # Extract features
         llm_features = extract_llm_features(llm_pred)
         
-        # Build feature vector: bucket counts + LLM predictions
+        # Get factor scores from linear model (connect the two steps)
+        factor_scores = get_daily_factor_scores(date)
+        
+        # Build feature vector: bucket counts + LLM predictions + factor scores
         features = {}
         
         # News bucket features
@@ -142,6 +195,10 @@ def collect_training_data(start_date: str, end_date: str) -> List[Dict]:
         
         # Add LLM prediction features
         features.update(llm_features)
+        
+        # Add factor scores (connect linear model to XGBoost)
+        for factor_name, factor_score in factor_scores.items():
+            features[f"factor_{factor_name}"] = factor_score
         
         # Store training example
         training_data.append({

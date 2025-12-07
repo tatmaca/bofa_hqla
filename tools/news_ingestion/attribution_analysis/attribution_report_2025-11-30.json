@@ -1,0 +1,44 @@
+{
+  "date": "2025-11-30",
+  "attribution": {
+    "3M": {
+      "CPI_HEAD_SURP": 4.800000000000001,
+      "RISK_OFF": 3.5999999999999996,
+      "OIL_SHOCK_UP": 1.6,
+      "WAGE_SURP": -1.4,
+      "FISCAL_DEFICIT_NEWS": -0.0
+    },
+    "2Y": {
+      "CPI_HEAD_SURP": 8.400000000000002,
+      "RISK_OFF": 4.5,
+      "WAGE_SURP": -3.5,
+      "OIL_SHOCK_UP": 2.4000000000000004,
+      "FISCAL_DEFICIT_NEWS": -0.20000000000000018
+    },
+    "5Y": {
+      "CPI_HEAD_SURP": 8.400000000000002,
+      "RISK_OFF": 5.3999999999999995,
+      "WAGE_SURP": -4.199999999999999,
+      "OIL_SHOCK_UP": 3.2,
+      "FISCAL_DEFICIT_NEWS": -0.30000000000000027
+    },
+    "10Y": {
+      "CPI_HEAD_SURP": 7.200000000000001,
+      "RISK_OFF": 7.199999999999999,
+      "OIL_SHOCK_UP": 4.0,
+      "WAGE_SURP": -3.5,
+      "FISCAL_DEFICIT_NEWS": -0.5000000000000004
+    },
+    "30Y": {
+      "RISK_OFF": 8.1,
+      "CPI_HEAD_SURP": 6.000000000000001,
+      "OIL_SHOCK_UP": 4.0,
+      "WAGE_SURP": -2.8,
+      "FISCAL_DEFICIT_NEWS": -0.6000000000000005
+    }
+  },
+  "visualizations": {
+    "factor_attribution": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_attribution_2025-11-30.png",
+    "factor_heatmap": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_heatmap_2025-11-30.png"
+  }
+}

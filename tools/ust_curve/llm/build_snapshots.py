@@ -34,10 +34,10 @@ def pillars_to_zero_curve(pillars):
 
 def compute_metrics(pillars):
     xs, zs = pillars_to_zero_curve(pillars)
-    std_tenors = [0.5,1,2,3,5,7,10,20,30]
+    std_tenors = [0.25, 0.5, 1, 2, 3, 5, 7, 10, 20, 30]  # Added 0.25 (3M)
     zeros = {int(t if t>=1 else 1 if math.isclose(t,0.5) else t): lininterp(t, xs, zs)*100.0 for t in std_tenors}
-    # name keys nicely
-    k = lambda y: f"{int(y)}y" if y>=1 else "6m"
+    # name keys nicely: 0.25 -> "3M", 0.5 -> "6m", 1+ -> "Ny"
+    k = lambda y: f"{int(y)}y" if y>=1 else ("3M" if math.isclose(y, 0.25) else "6m")
     zeros_map = {k(t): round(lininterp(t, xs, zs)*100.0, 4) for t in std_tenors}
     # spreads (in %)
     s_2s10  = zeros_map["10y"] - zeros_map["2y"]
