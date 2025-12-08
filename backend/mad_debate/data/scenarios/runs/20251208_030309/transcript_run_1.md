@@ -1,0 +1,207 @@
+# Debate Transcript — Run 1
+
+### **JUDGE** (Judge)
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepening with Widening Credit Spreads",
+        "Description": "Yield curve steepens as short-term rates rise; credit spreads widen.",
+        "Probability": 0.20,
+        "Rationale": "Current economic indicators suggest potential recession fears and increased risk aversion.",
+        "ImpactChannels": ["Rates (20 bps)", "Curve (bear steepener)", "Credit OAS (15 bps)"],
+        "Shocks": {"move_index": 110, "yield_curve": "bear_steepener", "credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -3, "NII": -200},
+        "TradeList": ["Add $2bn USTs via repo", "Reduce $1bn in corporate bonds"],
+        "Assumptions": "Consumer credit quality deteriorates; demand for USTs increases."
+    },
+    {
+        "Scenario": "Regulatory Changes Leading to Higher Capital Requirements",
+        "Description": "Increased capital requirements impact liquidity and lending capabilities.",
+        "Probability": 0.15,
+        "Rationale": "Ongoing regulatory discussions suggest potential tightening of capital rules for G-SIBs.",
+        "ImpactChannels": ["Reg changes", "Liquidity"],
+        "Shocks": {"move_index": 110, "yield_curve": "flat", "credit_spreads": {"ig_oas": 0, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": -10, "NSFR": -8, "NII": -100},
+        "TradeList": ["Increase liquidity buffer by $3bn", "Reduce lending by $2bn"],
+        "Assumptions": "Higher capital buffers required; lending growth slows."
+    },
+    {
+        "Scenario": "Stable Deposits with Increased Funding Costs",
+        "Description": "Retail deposits remain stable, but funding costs rise due to competitive pressures.",
+        "Probability": 0.15,
+        "Rationale": "Current trends indicate stable deposits with potential upward pressure on rates.",
+        "ImpactChannels": ["Deposits (2%)", "NII"],
+        "Shocks": {"move_index": 110, "yield_curve": "flat", "credit_spreads": {"ig_oas": 0, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1, "NII": -150},
+        "TradeList": ["Increase pricing on deposits by 25 bps", "Refinance $1bn in wholesale funding"],
+        "Assumptions": "Depositors shift to higher-yielding products."
+    },
+    {
+        "Scenario": "Geopolitical Tensions Lead to Flight to Quality",
+        "Description": "Escalation of geopolitical tensions results in significant inflow to USTs.",
+        "Probability": 0.20,
+        "Rationale": "Current geopolitical climate remains tense, prompting investors to seek safe-haven assets.",
+        "ImpactChannels": ["Rates (30 bps)", "MBS basis (10 bps)"],
+        "Shocks": {"move_index": 110, "yield_curve": "bull", "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": 5, "NSFR": 3, "NII": 100},
+        "TradeList": ["Add $3bn USTs via purchases", "Sell $1bn in corporate bonds"],
+        "Assumptions": "Increased demand for safe assets raises UST prices."
+    },
+    {
+        "Scenario": "Controlled Inflation with Stable Consumer Sentiment",
+        "Description": "Inflation remains manageable, supported by strong consumer spending and SME resilience.",
+        "Probability": 0.15,
+        "Rationale": "Current economic indicators show stable growth and consumer confidence.",
+        "ImpactChannels": ["Stable deposits", "NII growth", "Lower volatility"],
+        "Shocks": {"move_index": 100, "yield_curve": "bull", "credit_spreads": {"ig_oas": -5, "hy_oas": -10}},
+        "MetricsDelta": {"LCR": 5, "NSFR": 4, "NII": 150},
+        "TradeList": ["Add $2bn Agency MBS", "Increase exposure to short-term treasuries"],
+        "Assumptions": "Consumer spending remains robust, supporting economic growth."
+    },
+    {
+        "Scenario": "Curve Flattening with Stable Long-Term Rates",
+        "Description": "Long-term rates remain stable while short-term rates rise, leading to a flattening curve.",
+        "Probability": 0.15,
+        "Rationale": "Inflation concerns lead to short-term rate hikes, but long-term stability prevails.",
+        "ImpactChannels": ["NII pressure", "Reduced convexity risk"],
+        "Shocks": {"move_index": 100, "yield_curve": "flat", "credit_spreads": {"ig_oas": 0, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1, "NII": -250},
+        "TradeList": ["Adjust asset allocation to manage convexity", "Increase hedging on fixed-income positions"],
+        "Assumptions": "Inflation expectations are met with measured policy responses."
+    }
+]
+```
+
+## Round 1
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepening with Widening Credit Spreads",
+        "Description": "Yield curve steepens as short-term rates rise; credit spreads widen.",
+        "Probability": 0.25,
+        "Rationale": "Current economic indicators suggest potential recession fears and increased risk aversion.",
+        "ImpactChannels": ["Rates (20 bps)", "Curve (bear steepener)", "Credit OAS (15 bps)"],
+        "Shocks": {"move_index": 110, "yield_curve": "bear_steepener", "credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -3, "NII": -200},
+        "TradeList": ["Add $2bn USTs via repo", "Reduce $1bn in corporate bonds"],
+        "Assumptions": "Consumer credit quality deteriorates; demand for USTs increases."
+    },
+    {
+        "Scenario": "Regulatory Changes Leading to Higher Capital Requirements",
+        "Description": "Increased capital requirements impact liquidity and lending capabilities.",
+        "Probability": 0.20,
+        "Rationale": "Ongoing regulatory discussions suggest potential tightening of capital rules for G-SIBs.",
+        "ImpactChannels": ["Reg changes", "Liquidity"],
+        "Shocks": {"move_index": 110, "yield_curve": "flat", "credit_spreads": {"ig_oas": 0, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": -10, "NSFR": -8, "NII": -100},
+        "TradeList": ["Increase liquidity buffer by $3bn", "Reduce lending by $2bn"],
+        "Assumptions": "Higher capital buffers required; lending growth slows."
+    },
+    {
+        "Scenario": "Stable Deposits with Increased Funding Costs",
+        "Description": "Retail deposits remain stable, but funding costs rise due to competitive pressures.",
+        "Probability": 0.15,
+        "Rationale": "Current trends indicate stable deposits with potential upward pressure on rates.",
+        "ImpactChannels": ["Deposits (2%)", "NII"],
+        "Shocks": {"move_index": 110, "yield_curve": "flat", "credit_spreads": {"ig_oas": 0, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1, "NII": -150},
+        "TradeList": ["Increase pricing on deposits by 25 bps", "Refinance $1bn in wholesale funding"],
+        "Assumptions": "Depositors shift to higher-yielding products."
+    },
+    {
+        "Scenario": "Geopolitical Tensions Lead to Flight to Quality",
+        "Description": "Escalation of geopolitical tensions results in significant inflow to USTs.",
+        "Probability": 0.25,
+        "Rationale": "Current geopolitical climate remains tense, prompting investors to seek safe-haven assets.",
+        "ImpactChannels": ["Rates (30 bps)", "MBS basis (10 bps)"],
+        "Shocks": {"move_index": 110, "yield_curve": "bull", "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": +5, "NSFR": +3, "NII": +100},
+        "TradeList": ["Add $3bn USTs via purchases", "Sell $1bn in corporate bonds"],
+        "Assumptions": "Increased demand for safe assets raises UST prices."
+    },
+    {
+        "Scenario": "Rising Inflation Expectations with No Fed Action",
+        "Description": "Inflation expectations rise sharply while the Fed remains passive.",
+        "Probability": 0.15,
+        "Rationale": "Macro indicators suggest rising inflation pressures due to supply chain issues.",
+        "ImpactChannels": ["Rates (25 bps)", "Curve (flat)", "NII"],
+        "Shocks": {"move_index": 110, "yield_curve": "flat", "credit_spreads": {"ig_oas": 0, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -200},
+        "TradeList": ["Adjust loan pricing to reflect higher inflation", "Increase hedges on fixed-income securities"],
+        "Assumptions": "Inflation pressures are persistent, impacting consumer spending."
+    }
+]
+```
+
+### **Devil's advocate**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Controlled Inflation with Stable Consumer Sentiment",
+        "Description": "Inflation remains manageable, supported by strong consumer spending and SME resilience.",
+        "Probability": 0.30,
+        "Rationale": "Current economic indicators show stable growth and consumer confidence.",
+        "ImpactChannels": ["Stable deposits", "NII growth", "Lower volatility"],
+        "Shocks": {"move_index": 100, "yield_curve": "bull", "credit_spreads": {"ig_oas": -5, "hy_oas": -10}},
+        "MetricsDelta": {"LCR": +5, "NSFR": +4, "NII": +150},
+        "TradeList": ["Add $2bn Agency MBS", "Increase exposure to short-term treasuries"],
+        "Assumptions": "Consumer spending remains robust, supporting economic growth."
+    },
+    {
+        "Scenario": "Diversified Deposits Lead to Stable Funding Costs",
+        "Description": "Bank of America benefits from a diverse deposit base, stabilizing funding costs.",
+        "Probability": 0.25,
+        "Rationale": "A well-diversified funding stack reduces sensitivity to market shifts.",
+        "ImpactChannels": ["Lower funding costs", "Enhanced liquidity"],
+        "Shocks": {"move_index": 100, "yield_curve": "flat", "credit_spreads": {"ig_oas": 0, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": +3, "NSFR": +2, "NII": +100},
+        "TradeList": ["Term out $1bn in wholesale funding", "Optimize deposit mix to reduce betas"],
+        "Assumptions": "Consumer deposit growth offsets potential rate increases."
+    },
+    {
+        "Scenario": "Regulatory Relief Enhances Capital Position",
+        "Description": "Potential regulatory changes lead to improved capital ratios for G-SIBs.",
+        "Probability": 0.20,
+        "Rationale": "Ongoing discussions suggest potential easing of capital requirements.",
+        "ImpactChannels": ["Increased lending capacity", "Better profitability"],
+        "Shocks": {"move_index": 100, "yield_curve": "bull", "credit_spreads": {"ig_oas": -5, "hy_oas": -5}},
+        "MetricsDelta": {"LCR": +4, "NSFR": +3, "NII": +200},
+        "TradeList": ["Increase lending by $2bn", "Shift into higher-yielding assets"],
+        "Assumptions": "Regulatory environment becomes more favorable for lending."
+    },
+    {
+        "Scenario": "Flight to Quality Drives Demand for HQLA",
+        "Description": "Geopolitical tensions increase demand for safe-haven assets, benefiting HQLA values.",
+        "Probability": 0.15,
+        "Rationale": "Market uncertainty drives investors towards USTs and high-quality assets.",
+        "ImpactChannels": ["Increased HQLA valuations", "Improved liquidity"],
+        "Shocks": {"move_index": 100, "yield_curve": "bull", "credit_spreads": {"ig_oas": -10, "hy_oas": -15}},
+        "MetricsDelta": {"LCR": +6, "NSFR": +5, "NII": +50},
+        "TradeList": ["Add $3bn USTs", "Reduce risk exposure in corporate bonds"],
+        "Assumptions": "Market uncertainty leads to a flight to quality."
+    },
+    {
+        "Scenario": "Curve Flattening with Stable Long-Term Rates",
+        "Description": "Long-term rates remain stable while short-term rates rise, leading to a flattening curve.",
+        "Probability": 0.10,
+        "Rationale": "Inflation concerns lead to short-term rate hikes, but long-term stability prevails.",
+        "ImpactChannels": ["NII pressure", "Reduced convexity risk"],
+        "Shocks": {"move_index": 100, "yield_curve": "flat", "credit_spreads": {"ig_oas": 0, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1, "NII": -250},
+        "TradeList": ["Adjust asset allocation to manage convexity", "Increase hedging on fixed-income positions"],
+        "Assumptions": "Inflation expectations are met with measured policy responses."
+    }
+]
+```
+

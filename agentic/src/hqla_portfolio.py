@@ -9,7 +9,9 @@ Updated: 2025-12-06
 """
 
 from typing import Dict, List
+
 import QuantLib as ql
+
 from . import hqla_instruments as HQLA
 
 

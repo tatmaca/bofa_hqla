@@ -1,0 +1,151 @@
+[
+  {
+    "Scenario": "Bear Steepener with Rising Credit Spreads",
+    "Description": "A bear steepening of the yield curve occurs with a rise in inflation expectations, leading to higher short-term rates and wider credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Current inflation pressures and market uncertainty support this scenario, affecting consumer and corporate borrowing costs.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Credit OAS (bps)"
+    ],
+    "Shocks": {
+      "move": 120,
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "NII": -200
+    },
+    "TradeList": [
+      "Add $2bn USTs via repo",
+      "Reduce $1bn MBS holdings"
+    ],
+    "Assumptions": "Inflation remains elevated, consumer spending slows, and corporate credit risks increase."
+  },
+  {
+    "Scenario": "Significant Deposit Runoff",
+    "Description": "A 10% runoff in retail deposits occurs due to rising interest rates, leading to a liquidity squeeze.",
+    "Probability": 0.15,
+    "Rationale": "Rising rates may drive consumers to seek higher-yielding investments, impacting Bank of America's deposit base.",
+    "ImpactChannels": [
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -4,
+      "NII": -150
+    },
+    "TradeList": [
+      "Increase $1bn in wholesale funding",
+      "Optimize deposit pricing strategy"
+    ],
+    "Assumptions": "Consumer sentiment shifts towards higher returns, affecting deposit stability."
+  },
+  {
+    "Scenario": "MBS Basis Widening and Lower Treasury Yields",
+    "Description": "The MBS basis widens by 50 bps while Treasury yields decline due to safe-haven demand.",
+    "Probability": 0.1,
+    "Rationale": "Increased volatility in the mortgage market and shifts in investor sentiment can widen the MBS basis significantly.",
+    "ImpactChannels": [
+      "MBS basis (bps)"
+    ],
+    "Shocks": {
+      "move": -30,
+      "ig_oas": 0,
+      "hy_oas": 0,
+      "mbs_basis": 50
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "NII": -100
+    },
+    "TradeList": [
+      "Add $500mn MBS via direct purchase",
+      "Reduce UST holdings by $300mn"
+    ],
+    "Assumptions": "Market reacts to geopolitical tensions, increasing prepayment risks and volatility in MBS."
+  },
+  {
+    "Scenario": "Regulatory Flexibility Enhancing Liquidity Management",
+    "Description": "Increased regulatory flexibility allows for optimized liquidity management, enhancing the bank's funding profile.",
+    "Probability": 0.15,
+    "Rationale": "Policymakers may relax certain requirements to promote lending and economic recovery, benefiting the bank.",
+    "ImpactChannels": [
+      "Regulatory Ratios",
+      "Funding Flexibility"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": 6,
+      "NSFR": 4,
+      "NII": 100
+    },
+    "TradeList": [
+      "Prepare for $2bn TLAC issuance",
+      "Engage in $1bn green bond purchases"
+    ],
+    "Assumptions": "Regulatory environment becomes more favorable, enhancing the bank's ability to manage liquidity effectively."
+  },
+  {
+    "Scenario": "Resilient Economic Growth with Controlled Inflation",
+    "Description": "Moderate inflation persists alongside strong consumer spending, fostering a stable economic environment.",
+    "Probability": 0.2,
+    "Rationale": "Consumer sentiment indicators reflect resilience, supporting steady demand and mitigating deposit outflows.",
+    "ImpactChannels": [
+      "Consumer Spending Growth (%)",
+      "Credit Spreads (bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": -5,
+      "hy_oas": -10
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 3,
+      "NII": 90
+    },
+    "TradeList": [
+      "Add $1bn Agency MBS",
+      "Rotate $300mn into high-grade corporates"
+    ],
+    "Assumptions": "Inflation stabilizes and consumer confidence drives sustained lending activity."
+  },
+  {
+    "Scenario": "Increased Risk Appetite Leading to Tightening Spreads",
+    "Description": "Market participants display increased risk appetite, resulting in tighter credit spreads and improved asset valuations.",
+    "Probability": 0.1,
+    "Rationale": "Positive economic indicators encourage investors to take on more risk, benefiting asset performance.",
+    "ImpactChannels": [
+      "Credit Spread (bps)",
+      "Asset Valuation"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": -20,
+      "hy_oas": -30
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1,
+      "NII": 80
+    },
+    "TradeList": [
+      "Allocate $200mn to high-yield corporate bonds",
+      "Increase investment in equity markets by $300mn"
+    ],
+    "Assumptions": "A favorable economic backdrop encourages a more aggressive investment stance among market participants."
+  }
+]

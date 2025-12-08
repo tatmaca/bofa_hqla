@@ -1,0 +1,150 @@
+[
+  {
+    "Scenario": "Bear Steepener with Rising Credit Spreads",
+    "Description": "A bear steepener in the yield curve occurs with the 10-year yield rising by 50 bps while the 2-year yield rises by 15 bps. IG spreads widen by 15 bps and HY spreads by 45 bps, leading to increased funding costs and potential retail deposit runoff.",
+    "Probability": 0.22,
+    "Rationale": "Current macro outlook suggests inflationary pressures that could lead to a steepening curve and widening credit spreads.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Credit OAS (15 bps)",
+      "Deposits/runoff (5%)"
+    ],
+    "Shocks": {
+      "move": 50,
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "NII": -200
+    },
+    "TradeList": [
+      "Add $1bn in UST 10-year via repo",
+      "Reduce $500mn MBS holdings"
+    ],
+    "Assumptions": "Inflation expectations remain elevated, impacting bond valuations and credit spreads."
+  },
+  {
+    "Scenario": "Regulatory Changes Impacting Liquidity",
+    "Description": "Potential changes in Basel III increase LCR requirements by 5%, tightening liquidity buffers and increasing capital ratios pressure.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing discussions around regulatory requirements suggest a risk to liquidity metrics.",
+    "ImpactChannels": [
+      "Reg changes (LCR +5%)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Increase cash holdings by $2bn",
+      "Issue $1bn in term debt"
+    ],
+    "Assumptions": "Regulatory bodies remain vigilant post-crisis, leading to potential tightening."
+  },
+  {
+    "Scenario": "Stable Macro Environment but Rising Deposits Beta",
+    "Description": "Consumer confidence remains stable, but the retail deposits beta increases by 10%, leading to a runoff of approximately $10bn in deposits.",
+    "Probability": 0.16,
+    "Rationale": "Stable macro conditions could still lead to increased sensitivity in deposit behavior.",
+    "ImpactChannels": [
+      "Deposits/runoff (10%)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -4,
+      "NII": -150
+    },
+    "TradeList": [
+      "Add $1bn in short-term T-bills",
+      "Reduce reliance on wholesale funding by $2bn"
+    ],
+    "Assumptions": "Consumer behavior shifts as rates rise, affecting deposit stability."
+  },
+  {
+    "Scenario": "Geopolitical Tensions and Commodity Price Volatility",
+    "Description": "Increased geopolitical tensions lead to a flight to quality, causing UST yields to drop by 25 bps but widening MBS spreads by 20 bps.",
+    "Probability": 0.12,
+    "Rationale": "Current geopolitical climate poses risks to market stability, affecting asset prices.",
+    "ImpactChannels": [
+      "Rates (-25 bps)",
+      "MBS basis (20 bps)"
+    ],
+    "Shocks": {
+      "move": -25,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NSFR": 2,
+      "NII": -100
+    },
+    "TradeList": [
+      "Increase UST holdings by $1.5bn",
+      "Reduce MBS exposure by $500mn"
+    ],
+    "Assumptions": "Market reacts to geopolitical risks by seeking safe-haven assets."
+  },
+  {
+    "Scenario": "Resilient Economic Recovery",
+    "Description": "The economy continues to recover steadily, leading to a bull steepener where 10-year yields decrease by 20 bps while 2-year yields remain stable. This allows for tightening of credit spreads by 10 bps.",
+    "Probability": 0.18,
+    "Rationale": "Consumer and SME resilience supports steady economic growth, mitigating inflation fears.",
+    "ImpactChannels": [
+      "Rates (-20 bps)",
+      "Credit OAS (-10 bps)"
+    ],
+    "Shocks": {
+      "move": -20,
+      "ig_oas": -10,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 3,
+      "NII": 150
+    },
+    "TradeList": [
+      "Add $1bn Agency MBS",
+      "Rotate $500mn into high-quality munis"
+    ],
+    "Assumptions": "Steady economic growth encourages confidence in financial markets."
+  },
+  {
+    "Scenario": "Economic Slowdown with Flattening Yield Curve",
+    "Description": "An unexpected economic slowdown flattens the yield curve, causing a reduction in interest income, with a 30 bps decline in long-term rates.",
+    "Probability": 0.17,
+    "Rationale": "Ongoing economic indicators suggest potential downside risks that could impact growth.",
+    "ImpactChannels": [
+      "Rates (-30 bps)",
+      "Curve (flattening)"
+    ],
+    "Shocks": {
+      "move": -30,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": -6,
+      "NSFR": -3,
+      "NII": -250
+    },
+    "TradeList": [
+      "Reduce long-duration assets by $1bn",
+      "Increase short-term funding by $1.5bn"
+    ],
+    "Assumptions": "Economic indicators point towards potential slowdown, affecting interest rates."
+  }
+]

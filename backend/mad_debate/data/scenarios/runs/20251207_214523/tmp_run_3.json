@@ -1,0 +1,134 @@
+[
+  {
+    "Scenario": "Bear Steepening with Inflationary Pressures",
+    "Description": "Moderate inflation leads to a bear steepening of the yield curve with a 30bps increase in long-term rates, while credit spreads widen by 10bps.",
+    "Probability": 0.28,
+    "Rationale": "Inflationary pressures can lead to higher long-term yields, impacting consumer spending and credit quality.",
+    "ImpactChannels": "Rates (30 bps), Curve (bear steepener), Credit OAS (10 bps)",
+    "Shocks": {
+      "move": 30,
+      "ig_oas": 10,
+      "hy_oas": 20
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4,
+      "NII": -250
+    },
+    "TradeList": [
+      "Reduce $1bn in MBS",
+      "Add $500mm USTs"
+    ],
+    "Assumptions": "Consumer confidence weakens due to rising inflation indicators such as CPI."
+  },
+  {
+    "Scenario": "Tighter Funding Conditions with Deposit Volatility",
+    "Description": "Increased competition for deposits leads to a 7% reduction in deposits, adversely affecting liquidity metrics and increasing funding costs.",
+    "Probability": 0.22,
+    "Rationale": "Tighter funding conditions could lead to increased deposit betas, impacting NII and liquidity.",
+    "ImpactChannels": "Deposits (-7%), NII contraction due to increased funding costs",
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 5,
+      "hy_oas": 15
+    },
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -5,
+      "NII": -300
+    },
+    "TradeList": [
+      "Increase cash reserves by $1bn",
+      "Sell $500mm corporate bonds"
+    ],
+    "Assumptions": "Investor behavior shifts due to rising interest rates, leading to deposit outflows."
+  },
+  {
+    "Scenario": "Widening Credit Spreads and Market Volatility",
+    "Description": "Market volatility leads to a 15bps widening in credit spreads, negatively impacting the valuation of corporate bonds and MBS.",
+    "Probability": 0.18,
+    "Rationale": "Increased uncertainty in the market could lead to higher risk premiums, affecting the bank's portfolio.",
+    "ImpactChannels": "Credit OAS (15 bps), Asset valuations decline due to increased spreads",
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 15,
+      "hy_oas": 30
+    },
+    "MetricsDelta": {
+      "LCR": -6,
+      "NSFR": -3,
+      "NII": -150
+    },
+    "TradeList": [
+      "Reduce exposure to high-yield assets by $500mm",
+      "Add $1bn in cash equivalents"
+    ],
+    "Assumptions": "Market participants react negatively to economic signals, leading to increased volatility."
+  },
+  {
+    "Scenario": "Economic Slowdown and Increased Risk Aversion",
+    "Description": "An unexpected economic downturn leads to a 10% decrease in deposits and increased demand for USTs as a safe haven.",
+    "Probability": 0.15,
+    "Rationale": "Economic downturns can result in reduced consumer spending and greater risk aversion among investors.",
+    "ImpactChannels": "Deposits (-10%), Flight to quality drives up UST demand",
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 10,
+      "hy_oas": 20
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -6,
+      "NII": -400
+    },
+    "TradeList": [
+      "Increase UST holdings by $1bn",
+      "Sell $500mm in equities"
+    ],
+    "Assumptions": "Key economic indicators signal a downturn, such as rising unemployment and declining GDP growth."
+  },
+  {
+    "Scenario": "Geopolitical Tensions and Market Reactions",
+    "Description": "Rising geopolitical tensions lead to increased volatility and a flight to quality, boosting demand for USTs.",
+    "Probability": 0.1,
+    "Rationale": "Geopolitical uncertainties can create significant market reactions, impacting liquidity and funding costs.",
+    "ImpactChannels": "Rates (20 bps), Curve flattening as investors seek safety",
+    "Shocks": {
+      "move": -20,
+      "ig_oas": 5,
+      "hy_oas": 10
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1,
+      "NII": -50
+    },
+    "TradeList": [
+      "Add $1bn in USTs",
+      "Rotate $500mm into liquid assets"
+    ],
+    "Assumptions": "Market participants prioritize safety in uncertain environments, increasing demand for government securities."
+  },
+  {
+    "Scenario": "Stable Rates with Increased Deposit Betas",
+    "Description": "Stable interest rates coupled with a 5% increase in deposits, allowing for enhanced liquidity and NII stability.",
+    "Probability": 0.07,
+    "Rationale": "A strong retail presence ensures deposit betas remain stable amidst rate fluctuations.",
+    "ImpactChannels": "Deposits (+5%), NII stability",
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": 4,
+      "NSFR": 3,
+      "NII": 100
+    },
+    "TradeList": [
+      "Maintain $1bn in cash reserves",
+      "Invest $500mm in municipal bonds"
+    ],
+    "Assumptions": "Market conditions remain stable, supporting earnings."
+  }
+]

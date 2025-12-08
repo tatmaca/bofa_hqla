@@ -1,20 +1,21 @@
 # api_server.py
+import base64
+import datetime as dt
+import datetime as _dt
 import io
-import os
+
 import numpy as np
 import pandas as pd
 import QuantLib as ql
-from fastapi import FastAPI, Form, Request, UploadFile
+from fastapi import Body, FastAPI, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, HTMLResponse
-from pathlib import Path
-import json
-import datetime as _dt
-import base64
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from hqla_portfolio import Portfolio
 
-from . import hqla_instruments as HQLA
-from .hqla_portfolio import Portfolio
+sys.path.append(str(Path(__file__).resolve().parents[2] / "tools" / "news_ingestion"))
+
+from generate_scenario_predictions import generate_all_scenario_curves
 
 app = FastAPI()
 portfolio = Portfolio()
@@ -35,7 +36,11 @@ app.add_middleware(
 _repo_root = Path(__file__).resolve().parents[2]
 _attr_dir = _repo_root / "tools" / "news_ingestion" / "attribution_analysis"
 if _attr_dir.exists():
-    app.mount("/attribution-static", StaticFiles(directory=_attr_dir), name="attribution-static")
+    app.mount(
+        "/attribution-static",
+        StaticFiles(directory=_attr_dir),
+        name="attribution-static",
+    )
 
 ALLOWED_IMAGE_MODES = {"report", "heatmap", "all", "none"}
 
@@ -83,7 +88,9 @@ def _load_attribution_payload(
         with open(report_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        pngs = sorted(_attr_dir.glob(f"*{target_date}*.png")) if _attr_dir.exists() else []
+        pngs = (
+            sorted(_attr_dir.glob(f"*{target_date}*.png")) if _attr_dir.exists() else []
+        )
         pngs = _filter_images(pngs, image_mode)
 
         base_url = str(request.base_url).rstrip("/")
@@ -222,6 +229,7 @@ async def upload_yield_curve(file: UploadFile = None, request: Request = None):
         try:
             payload = await request.json()
             df = pd.DataFrame(payload)
+            print(df)
         except Exception as e:
             return JSONResponse(
                 status_code=400, content={"error": f"Invalid input: {e}"}
@@ -421,7 +429,9 @@ async def get_attribution_html(
     if image_mode not in ALLOWED_IMAGE_MODES:
         return JSONResponse(
             status_code=400,
-            content={"error": f"image_mode must be one of {sorted(ALLOWED_IMAGE_MODES)}"},
+            content={
+                "error": f"image_mode must be one of {sorted(ALLOWED_IMAGE_MODES)}"
+            },
         )
 
     data, err = _load_attribution_payload(
@@ -455,8 +465,51 @@ async def get_attribution_html(
     rows.append("</pre>")
     html = "\n".join(rows)
 
-    headers = {"Content-Disposition": f'attachment; filename="attribution_{target_date}.html"'}
+    headers = {
+        "Content-Disposition": f'attachment; filename="attribution_{target_date}.html"'
+    }
     return HTMLResponse(content=html, media_type="text/html", headers=headers)
+
+
+@app.post("/generate-scenario-curves/")
+async def generate_scenario_curves_endpoint(
+    jsonl_input: str = Body(..., description="Scenario JSONL content"),
+    combine_with_news: bool = Body(
+        False, description="Combine scenario factors with news"
+    ),
+    date: str = Body(None, description="Date string YYYY-MM-DD, defaults to today"),
+):
+    """
+    Receives JSONL input for scenarios from the frontend and generates predicted curves.
+    """
+    print("ENTERING CURVE GENERATOR")
+
+    target_date = date if date else dt.date.today().isoformat()
+
+    # Write the JSONL content to a temporary file
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w+", suffix=".jsonl", delete=False
+        ) as tmp_file:
+            tmp_file.write(jsonl_input)
+            tmp_file_path = tmp_file.name
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to write temp file: {e}"}
+
+    # Run the generator
+    try:
+        curves = generate_all_scenario_curves(
+            target_date,
+            scenarios_path=tmp_file_path,
+            combine_with_news=combine_with_news,
+        )
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to generate curves: {e}"}
+
+    if not curves:
+        return {"status": "error", "message": "No curves generated"}
+
+    return {"status": "success", "curves": curves}
 
 
 @app.post("/optimize-scenarios/")

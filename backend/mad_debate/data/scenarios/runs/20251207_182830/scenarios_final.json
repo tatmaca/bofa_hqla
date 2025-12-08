@@ -1,0 +1,266 @@
+[
+  {
+    "Scenario": "Economic Slowdown with Flat Yield Curve",
+    "Description": "Economic indicators suggest a slowdown, leading to a flat yield curve and a decrease in credit spreads by 20 bps.",
+    "Probability": 0.25,
+    "Rationale": "Mixed signals from economic data indicate a potential recession but also show resilience in certain sectors.",
+    "ImpactChannels": [
+      "Rates (flat curve)",
+      "Credit OAS (-20 bps)"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "credit_spreads": {
+        "ig_oas": -20,
+        "hy_oas": -20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -2,
+      "NII": -250
+    },
+    "TradeList": [
+      "Reallocate $1bn from Level 2 to Level 1 HQLA",
+      "Adjust loan pricing strategies to attract borrowers"
+    ],
+    "Assumptions": "Economic indicators consistently point towards a downturn, but consumer credit demand remains robust."
+  },
+  {
+    "Scenario": "Geopolitical Tensions Leading to Flight to Quality",
+    "Description": "Increased geopolitical tensions drive demand for USTs, tightening liquidity and reducing credit spreads.",
+    "Probability": 0.23,
+    "Rationale": "Global political uncertainties could lead to increased demand for safe assets, benefiting the bank's HQLA.",
+    "ImpactChannels": [
+      "Credit OAS (IG -10 bps, HY -20 bps)"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": -10,
+        "hy_oas": -20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 3,
+      "NII": 100
+    },
+    "TradeList": [
+      "Increase UST holdings by $1bn via repo",
+      "Evaluate MBS portfolio for liquidity optimization"
+    ],
+    "Assumptions": "Geopolitical tensions escalate, creating safe-haven demand, with the bank capitalizing on opportunities."
+  },
+  {
+    "Scenario": "Moderate Deposit Runoff",
+    "Description": "Retail deposit runoff of 3% as consumers shift to higher-yielding accounts.",
+    "Probability": 0.22,
+    "Rationale": "Consumer sensitivity to yield changes may lead to modest deposit outflows, but the bank retains a solid deposit base.",
+    "ImpactChannels": [
+      "Deposits/runoff (3%)"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -5,
+      "NII": -200
+    },
+    "TradeList": [
+      "Enhance deposit product offerings by $300mn",
+      "Launch marketing campaign for retention"
+    ],
+    "Assumptions": "Interest rates increase, leading to consumer behavior changes, but core deposits remain stable."
+  },
+  {
+    "Scenario": "Bear Steepener with Widening Credit Spreads",
+    "Description": "Long-term rates rise by 50 bps while short-term rates increase by only 20 bps, leading to widening credit spreads across investment-grade and high-yield sectors.",
+    "Probability": 0.22,
+    "Rationale": "Economic uncertainties and inflation pressures create volatility in the bond market.",
+    "ImpactChannels": "Rates (20 bps), Curve (bear steepener), Credit OAS (IG +15, HY +30)",
+    "Shocks": {
+      "move": 20,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 30
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -6,
+      "NSFR": -4,
+      "OCI": -1.5
+    },
+    "TradeList": [
+      "Reduce $2bn in IG corporates",
+      "Increase cash reserves by $1bn"
+    ],
+    "Assumptions": "Consumer confidence declines due to inflation fears."
+  },
+  {
+    "Scenario": "Bear Steepening with Rising Credit Spreads",
+    "Description": "A bear steepening of the yield curve with a 50 bps increase in 10-year yields and a 15 bps rise in IG spreads and 45 bps in HY spreads.",
+    "Probability": 0.215,
+    "Rationale": "Inflation concerns may lead to prolonged rate hikes, but economic data shows resilience.",
+    "ImpactChannels": [
+      "Rates (10Y +50 bps)",
+      "Credit OAS (IG +15 bps, HY +45 bps)"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "NII": -150
+    },
+    "TradeList": [
+      "Add $1bn 10-year USTs",
+      "Reduce $500mn Agency MBS"
+    ],
+    "Assumptions": "Inflation remains a concern, leading to prolonged rate hikes, but consumer demand remains strong."
+  },
+  {
+    "Scenario": "Regulatory Tightening on Capital and Liquidity",
+    "Description": "New regulations impose higher capital requirements, increasing the cost of funding.",
+    "Probability": 0.2,
+    "Rationale": "Regulatory changes are a consistent risk for G-SIBs, and the Basel Endgame is on the horizon.",
+    "ImpactChannels": [
+      "Reg changes: Basel Endgame",
+      "Funding costs increase (10%)"
+    ],
+    "Shocks": {
+      "move": 100,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 10,
+        "hy_oas": 30
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5,
+      "NII": -1
+    },
+    "TradeList": [
+      "Increase liquidity buffer by $2bn",
+      "Reduce wholesale funding reliance by $1bn"
+    ],
+    "Assumptions": "New capital surcharges implemented; market volatility increases."
+  },
+  {
+    "Scenario": "Economic Slowdown with Deposit Runoff",
+    "Description": "Economic downturn leads to a decline in consumer confidence and deposit runoff.",
+    "Probability": 0.2,
+    "Rationale": "SMEs are particularly sensitive to economic conditions, leading to deposit outflows.",
+    "ImpactChannels": [
+      "Deposits run off (10%)",
+      "Funding costs increase (15 bps)"
+    ],
+    "Shocks": {
+      "move": 90,
+      "yield_curve": "bear_flat",
+      "credit_spreads": {
+        "ig_oas": 20,
+        "hy_oas": 50
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -4,
+      "NII": -2
+    },
+    "TradeList": [
+      "Add $500mn to secured funding via repo",
+      "Reduce asset growth targets by 5%"
+    ],
+    "Assumptions": "Consumer and business sentiment deteriorates significantly."
+  },
+  {
+    "Scenario": "Strengthened Economic Data with Stable Credit Conditions",
+    "Description": "Positive economic data leads to a stable credit environment and a flattening yield curve.",
+    "Probability": 0.2,
+    "Rationale": "Surprises in economic data can positively affect market perceptions and liquidity.",
+    "ImpactChannels": [
+      "Rates (15 bps decrease in yields)",
+      "Curve (flattening)",
+      "NII increase (5%)"
+    ],
+    "Shocks": {
+      "move": 110,
+      "yield_curve": "bull_flat",
+      "credit_spreads": {
+        "ig_oas": 5,
+        "hy_oas": 10
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 3,
+      "NII": 2
+    },
+    "TradeList": [
+      "Add $1bn in longer-term USTs",
+      "Expand lending to creditworthy SMEs by $1bn"
+    ],
+    "Assumptions": "Economic growth exceeds expectations; credit quality remains stable."
+  },
+  {
+    "Scenario": "Bear Steepening with Increased Credit Spreads",
+    "Description": "Long-term rates rise faster than short-term rates, leading to a bear steepening of the yield curve and widening credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Inflation pressures and cautious risk sentiment prompt investors to reassess credit risks.",
+    "ImpactChannels": [
+      "Rates: +50 bps",
+      "Credit OAS: +30 bps",
+      "MBS basis: +20 bps"
+    ],
+    "Shocks": {
+      "move": 50,
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "OCI": -100
+    },
+    "TradeList": [
+      "Add $2bn USTs via repo",
+      "Reduce $1bn MBS holdings"
+    ],
+    "Assumptions": "Inflation remains a concern; investor sentiment shifts toward safety."
+  },
+  {
+    "Scenario": "Stable Macroeconomic Recovery",
+    "Description": "Robust consumer spending and SME growth support stable deposit flows and lending activity.",
+    "Probability": 0.2,
+    "Rationale": "Economic resilience mitigates risk-off sentiment and drives banking activities.",
+    "ImpactChannels": [
+      "Deposits: Stable",
+      "Lending: Growth"
+    ],
+    "Shocks": {
+      "move": 0,
+      "credit_spreads": {
+        "ig_oas": -10,
+        "hy_oas": -15
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NSFR": 2,
+      "OCI": 0
+    },
+    "TradeList": [
+      "Increase lending by $2bn from retail deposits",
+      "Add $500mm in short-term USTs through repo"
+    ],
+    "Assumptions": "Continued economic activity; consumer confidence remains high."
+  }
+]

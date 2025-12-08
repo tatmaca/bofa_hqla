@@ -1,0 +1,148 @@
+[
+  {
+    "Scenario": "Bear Steepening with Increased Credit Spreads",
+    "Description": "A bear steepening of the yield curve occurs, alongside a 15 bps increase in IG credit spreads and a 45 bps increase in HY credit spreads.",
+    "Probability": 0.22,
+    "Rationale": "The bear steepener impacts HQLA valuations negatively due to a rise in long-term rates, while widening credit spreads could impair asset valuations.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Credit OAS (bps)"
+    ],
+    "Shocks": {
+      "move": 120,
+      "yield_curve": "bear_steepener",
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $2bn in UST 10-year securities via repo to enhance LCR."
+    ],
+    "Assumptions": "Retail deposit beta remains stable, while wholesale funding costs increase."
+  },
+  {
+    "Scenario": "Regulatory Changes and TLAC Adjustments",
+    "Description": "Introduction of stricter TLAC requirements and adjustments to GSIB surcharges, increasing liquidity add-ons by 50bps.",
+    "Probability": 0.14,
+    "Rationale": "Increased capital requirements could lead to tighter liquidity conditions and may necessitate adjustments in the HQLA stack.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {
+      "TLAC": 50
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Shift $1bn from Level 2A to Level 1 HQLA to meet new TLAC standards."
+    ],
+    "Assumptions": "Market conditions remain stable; no major economic shocks."
+  },
+  {
+    "Scenario": "Consumer Spending Shock with Deposit Runoff",
+    "Description": "A sudden decline in consumer confidence leads to a 10% increase in deposit runoff, particularly in wealth management accounts.",
+    "Probability": 0.18,
+    "Rationale": "Increased deposit runoff affects liquidity, impacting the LCR and NSFR metrics.",
+    "ImpactChannels": [
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "Deposit_runoff": 10
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase short-term funding via CP issuance by $1.5bn."
+    ],
+    "Assumptions": "Consumer balance sheets deteriorate due to inflation pressures."
+  },
+  {
+    "Scenario": "MBS Basis Widening Due to Credit Concerns",
+    "Description": "The MBS basis widens by 50 bps due to heightened credit concerns in the mortgage market.",
+    "Probability": 0.1,
+    "Rationale": "A widening MBS basis negatively impacts the valuations of the agency MBS holdings in the HQLA stack.",
+    "ImpactChannels": [
+      "MBS basis (bps)"
+    ],
+    "Shocks": {
+      "MBS_basis": 50
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Sell $500mn in MBS to mitigate impact on OCI."
+    ],
+    "Assumptions": "Housing market shows signs of weakness, but no systemic crisis."
+  },
+  {
+    "Scenario": "Macro Resilience with Consumer Demand",
+    "Description": "Consumer confidence remains strong, leading to stable credit demand and a resilient deposit base.",
+    "Probability": 0.13,
+    "Rationale": "Strong consumer demand supports lending and mitigates risks associated with deposit outflows.",
+    "ImpactChannels": [
+      "Consumer Confidence",
+      "Credit Demand"
+    ],
+    "Shocks": {
+      "consumer_confidence": "high"
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Increase lending by $1bn to SMEs."
+    ],
+    "Assumptions": "Stable economic growth with no significant disruptions."
+  },
+  {
+    "Scenario": "Diverse Funding Sources Stabilizing Liquidity",
+    "Description": "Bank of America leverages diverse funding sources to maintain liquidity in a rising rate environment.",
+    "Probability": 0.13,
+    "Rationale": "Access to various funding mechanisms provides resilience against liquidity pressures.",
+    "ImpactChannels": [
+      "Funding Stability"
+    ],
+    "Shocks": {
+      "wholesale_funding": "stable"
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 2
+    },
+    "TradeList": [
+      "Issue $1bn in long-term bonds to enhance liquidity."
+    ],
+    "Assumptions": "Funding markets remain favorable."
+  },
+  {
+    "Scenario": "Convexity Management in Fixed-Income Portfolio",
+    "Description": "Active management of convexity risk to optimize fixed-income portfolio performance amid interest rate changes.",
+    "Probability": 0.1,
+    "Rationale": "Understanding convexity allows for strategic positioning to benefit from shifts in the yield curve.",
+    "ImpactChannels": [
+      "Interest Rates",
+      "Portfolio Duration"
+    ],
+    "Shocks": {
+      "yield_curve": "flattening"
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Adjust duration by reallocating $1bn into shorter-duration bonds."
+    ],
+    "Assumptions": "Interest rate movements are predictable."
+  }
+]

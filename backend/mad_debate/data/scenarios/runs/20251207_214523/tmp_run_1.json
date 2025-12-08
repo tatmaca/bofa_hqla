@@ -1,0 +1,185 @@
+[
+  {
+    "Scenario": "Bear Steepener with Rising Credit Spreads",
+    "Description": "A bear steepening yield curve, with a 50 bps rise in the 10-year yield and a 15 bps increase in IG OAS.",
+    "Probability": 0.2,
+    "Rationale": "Current inflation fears and Fed policy lead to higher long-term rates and credit spreads.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Credit OAS (15 bps)"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "credit_spreads": {
+        "ig_oas": 15
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $1bn in 10Y USTs via auction",
+      "Reduce agency MBS by $500mn"
+    ],
+    "Assumptions": "Inflation persists; Fed maintains a hawkish stance."
+  },
+  {
+    "Scenario": "Stable Rates with Increased Deposit Beta",
+    "Description": "Retail deposit costs increase by 5% as beta rises, while rates remain stable.",
+    "Probability": 0.13,
+    "Rationale": "Competitive pressures lead to increased retail deposit costs.",
+    "ImpactChannels": [
+      "Deposits (5%)"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "deposits": 5
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NII": -2
+    },
+    "TradeList": [
+      "Increase retail deposit rates by 25 bps",
+      "Issue $500mn in short-term debt"
+    ],
+    "Assumptions": "Deposit competition intensifies; no significant rate changes."
+  },
+  {
+    "Scenario": "Regulatory Changes with TLAC Surcharge",
+    "Description": "An increase of 50 bps in TLAC requirements due to regulatory changes.",
+    "Probability": 0.1,
+    "Rationale": "Ongoing regulatory discussions suggest potential for increased capital requirements.",
+    "ImpactChannels": [
+      "Reg changes (TLAC +50 bps)"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "regulatory": "TLAC +50 bps"
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -4
+    },
+    "TradeList": [
+      "Raise $1bn in long-term senior debt",
+      "Optimize HQLA composition"
+    ],
+    "Assumptions": "Regulatory landscape evolves; market adapts to new requirements."
+  },
+  {
+    "Scenario": "Credit Market Distress",
+    "Description": "A 45 bps increase in high-yield OAS due to economic downturn.",
+    "Probability": 0.13,
+    "Rationale": "Rising credit risk from consumers and CRE sectors suggests increasing spreads.",
+    "ImpactChannels": [
+      "Credit OAS (45 bps)"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "credit_spreads": {
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -6,
+      "OCI": -3
+    },
+    "TradeList": [
+      "Reduce high-yield exposure by $750mn",
+      "Increase UST holdings by $500mn"
+    ],
+    "Assumptions": "Economic downturn leads to credit distress; market reacts."
+  },
+  {
+    "Scenario": "Geopolitical Tensions and Commodity Price Surge",
+    "Description": "Geopolitical tensions lead to a 20% increase in oil prices and a 25 bps rise in the 10-year yield.",
+    "Probability": 0.12,
+    "Rationale": "Increasing geopolitical risks influence commodity prices and inflation.",
+    "ImpactChannels": [
+      "Rates (25 bps)",
+      "Commodity Prices (20%)"
+    ],
+    "Shocks": {
+      "move_index": 25,
+      "commodity_prices": 20
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NII": -3
+    },
+    "TradeList": [
+      "Increase liquidity buffers by $500mn",
+      "Monitor exposure to commodity-linked credits"
+    ],
+    "Assumptions": "Ongoing geopolitical tensions; inflationary pressures persist."
+  },
+  {
+    "Scenario": "Controlled Inflation with Gradual Easing",
+    "Description": "Inflation stabilizes, leading to gradual easing from the Fed, allowing the yield curve to flatten.",
+    "Probability": 0.12,
+    "Rationale": "Resilient consumer spending and SMEs support economic growth.",
+    "ImpactChannels": [
+      "Rates (10 bps)",
+      "Inflation stabilization"
+    ],
+    "Shocks": {
+      "move_index": -10
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Increase Agency MBS holdings by $500mn via secondary market purchases",
+      "Term out $300mn of wholesale funding with 3-year maturity"
+    ],
+    "Assumptions": "Economic growth stabilizes; inflationary pressures are contained."
+  },
+  {
+    "Scenario": "Bull Steepener with Rate Volatility",
+    "Description": "Increased demand for long-duration assets leads to a bull steepener in the yield curve.",
+    "Probability": 0.12,
+    "Rationale": "Investors seek safe-haven assets amid market volatility.",
+    "ImpactChannels": [
+      "Rates (20 bps lower in 10Y)"
+    ],
+    "Shocks": {
+      "move_index": -20
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NII": 1
+    },
+    "TradeList": [
+      "Extend duration by $500mn in USTs through auction participation",
+      "Reallocate $250mn to long-term municipal bonds to enhance yield curve positioning"
+    ],
+    "Assumptions": "Market uncertainty drives demand for longer-duration securities; investor sentiment remains cautious."
+  },
+  {
+    "Scenario": "Tighter Credit Spreads with Economic Recovery",
+    "Description": "Improved economic conditions lead to tighter credit spreads, positively impacting asset valuations.",
+    "Probability": 0.08,
+    "Rationale": "Strong GDP growth supports credit quality improvements.",
+    "ImpactChannels": [
+      "Credit spreads (10 bps tighter)"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "credit_spreads": {
+        "ig_oas": -10
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "OCI": 3
+    },
+    "TradeList": [
+      "Increase corporate bond holdings by $600mn",
+      "Evaluate opportunities in high-yield credits with robust credit profiles"
+    ],
+    "Assumptions": "Economic recovery is robust; credit markets stabilize without significant defaults."
+  }
+]

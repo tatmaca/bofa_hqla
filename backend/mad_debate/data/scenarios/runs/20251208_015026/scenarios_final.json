@@ -1,0 +1,142 @@
+[
+  {
+    "Scenario": "Bear Steepening with Increased Credit Spreads",
+    "Description": "A bear steepening of the yield curve alongside rising credit spreads (IG OAS +15bps, HY OAS +45bps) due to inflation concerns and economic slowdown.",
+    "Probability": 0.25,
+    "Rationale": "Expected deterioration in credit quality affecting MBS and corporate assets, leading to higher funding costs.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Credit OAS (bps)",
+      "MBS basis (bps)"
+    ],
+    "Shocks": {
+      "move": 110,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -10,
+      "NII": -200
+    },
+    "TradeList": [
+      "Add $1bn Agency MBS via repo",
+      "Reallocate $500mn to USTs"
+    ],
+    "Assumptions": "Inflation expectations rise, impacting consumer confidence and credit quality."
+  },
+  {
+    "Scenario": "Regulatory Tightening Post Basel Endgame",
+    "Description": "Increased capital and liquidity requirements lead to tighter funding conditions and potential asset reallocation.",
+    "Probability": 0.2,
+    "Rationale": "New regulations could impact liquidity metrics and increase overall funding costs.",
+    "ImpactChannels": [
+      "Reg changes",
+      "Rates (bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5,
+      "NII": -100
+    },
+    "TradeList": [
+      "Reduce $500mn in Level 2 assets",
+      "Increase liquidity reserves by $1bn"
+    ],
+    "Assumptions": "Regulatory landscape changes, impacting capital and liquidity strategies."
+  },
+  {
+    "Scenario": "Sovereign Credit Spread Widening",
+    "Description": "A geopolitical event causes sovereign credit spreads to widen, impacting funding costs.",
+    "Probability": 0.2,
+    "Rationale": "Increased risk perception affects our Level 1 assets and overall liquidity.",
+    "ImpactChannels": [
+      "Credit OAS (bps)",
+      "Rates (bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 20,
+        "hy_oas": 30
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -15,
+      "NII": -200
+    },
+    "TradeList": [
+      "Increase cash reserves by $1bn",
+      "Reduce exposure to higher spread assets"
+    ],
+    "Assumptions": "Geopolitical tensions escalate, impacting credit markets."
+  },
+  {
+    "Scenario": "Economic Recovery with Falling Credit Spreads",
+    "Description": "Strong economic recovery leads to falling credit spreads and improved capital ratios.",
+    "Probability": 0.2,
+    "Rationale": "Improved consumer balance sheets enhance liquidity and NII, but may lead to tighter monetary policy.",
+    "ImpactChannels": [
+      "Credit OAS (bps)",
+      "Rates (bps)"
+    ],
+    "Shocks": {
+      "move": -50,
+      "yield_curve": "bull_flat",
+      "credit_spreads": {
+        "ig_oas": -10,
+        "hy_oas": -20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 10,
+      "NII": 300
+    },
+    "TradeList": [
+      "Invest $500mn in corporate bonds",
+      "Increase loans to consumers by $1bn"
+    ],
+    "Assumptions": "Economic indicators point towards recovery, improving overall financial health."
+  },
+  {
+    "Scenario": "Stable Rates with Increased Deposit Runoff",
+    "Description": "Stable interest rates but increased retail deposit beta leads to runoff, straining liquidity.",
+    "Probability": 0.15,
+    "Rationale": "Consumer behavior shifts as clients seek higher yields, impacting funding availability.",
+    "ImpactChannels": [
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -15,
+      "NSFR": -10,
+      "NII": -150
+    },
+    "TradeList": [
+      "Increase wholesale funding by $750mn",
+      "Adjust deposit pricing strategy"
+    ],
+    "Assumptions": "Clients are increasingly sensitive to yield, leading to deposit outflows."
+  }
+]

@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { fs } from "fs";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -618,32 +619,6 @@ export default function HqlaE2EDashboard() {
   );
   const [yieldCurve, setYieldCurve] = useState([]); // Prepare table data safely before rendering
 
-  const scenarioCurves = useMemo(() => {
-    if (!yieldCurve || yieldCurve.length === 0) return {};
-
-    const n = yieldCurve.length;
-    const midIndex = Math.floor(n / 2);
-
-    // Compute mean rate
-    const meanRate = yieldCurve.reduce((sum, p) => sum + p.rate, 0) / n;
-
-    return {
-      "level-up": yieldCurve.map((p) => ({ ...p, rate: p.rate + 0.01 })),
-      "level-down": yieldCurve.map((p) => ({ ...p, rate: p.rate - 0.01 })),
-
-      steepening: yieldCurve.map((p, i) => {
-        const factor = (i - midIndex) / (n - 1);
-        return { ...p, rate: p.rate + factor * 0.01 };
-      }),
-
-      flattening: yieldCurve.map((p) => {
-        // nudge each rate toward the mean by a fixed fraction
-        const adjustment = (meanRate - p.rate) * 0.5; // 0.5 = 50% of difference
-        return { ...p, rate: p.rate + adjustment };
-      }),
-    };
-  }, [yieldCurve]);
-
   const [scenario, setScenario] = useState({
     status: "idle",
     pct: 0,
@@ -937,6 +912,90 @@ export default function HqlaE2EDashboard() {
     }
   }, [newsOutput]);
 
+  const [predictedCurves, setPredictedCurves] = useState({});
+  useEffect(() => {
+    const matrix = scenario.output?.scenarioMatrix;
+    if (!matrix || matrix.length === 0) return;
+
+    // convert rows → JSONL → request curve predictions
+    const jsonl = matrix.map((row) => JSON.stringify(row)).join("\n");
+
+    async function fetchPredictions() {
+      console.log("Entering fetch predictions");
+      try {
+        const yyyymmdd = scenarioRunLabel.slice(0, 8);
+        const formatted = `${yyyymmdd.slice(0, 4)}-${yyyymmdd.slice(4, 6)}-${yyyymmdd.slice(6, 8)}`;
+        const resp = await fetch(
+          "http://localhost:8000/generate-scenario-curves",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              jsonl_input: jsonl, // match the key in your FastAPI endpoint
+              combine_with_news: true, // or false depending on UI
+              date: formatted,
+            }),
+          },
+        );
+
+        const out = await resp.json();
+
+        // Extract only the scenario entries with predictions
+        const extractedPredictions = {};
+        for (const key in out.curves) {
+          if (
+            key === "date" ||
+            key === "base_date" ||
+            key === "prediction_date"
+          )
+            continue;
+
+          const curveEntry = out.curves[key];
+          if (curveEntry?.predictions) {
+            extractedPredictions[key] = curveEntry.predictions;
+          }
+        }
+
+        // Now set only the filtered scenario curves
+        setPredictedCurves(extractedPredictions);
+        console.log(predictedCurves);
+      } catch (err) {
+        console.error("Prediction error:", err);
+      }
+    }
+
+    fetchPredictions();
+  }, [scenario.output?.scenarioMatrix]);
+
+  const scenarioCurves = useMemo(() => {
+    if (!yieldCurve || yieldCurve.length === 0) return {};
+
+    // yieldCurveMap for fast lookup by tenor
+    const yieldCurveMap = Object.fromEntries(
+      yieldCurve.map((p) => [p.tenor, p.rate]),
+    );
+
+    // Build scenario curves by adding scenario deltas to base curve
+    const curves: Record<string, { tenor: string; rate: number }[]> = {};
+
+    Object.keys(predictedCurves).forEach((scenarioKey) => {
+      console.log(scenarioKey);
+      const scenario = predictedCurves[scenarioKey];
+      console.log(scenario);
+      if (!scenario) return;
+
+      // Map each tenor in base curve, add scenario change
+      curves[scenarioKey] = yieldCurve.map((point) => {
+        const delta = scenario[point.tenor] / 1000 ?? 0; // default 0 if missing
+        return { tenor: point.tenor, rate: point.rate + delta };
+      });
+    });
+
+    console.log("see if scenario curves are okay");
+    console.log(curves);
+    return curves;
+  }, [yieldCurve, predictedCurves]);
+
   const launchScenarioGen = async (options: any) => {
     setSelectedScenario(null);
     setSelectedDebateRun(null);
@@ -1115,59 +1174,6 @@ export default function HqlaE2EDashboard() {
           </Card>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.08 }}
-        >
-          <Card className="shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle>Attribution Viewer</CardTitle>
-              <CardDescription>
-                One-click open of the attribution HTML with chart links.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-4 gap-3 items-end">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none">
-                    Report date
-                  </label>
-                  <Input
-                    type="date"
-                    className="h-9"
-                    value={attributionDate}
-                    onChange={(e) => setAttributionDate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none">
-                    Image type
-                  </label>
-                  <select
-                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                    value={attributionMode}
-                    onChange={(e) => setAttributionMode(e.target.value)}
-                  >
-                    <option value="all">All</option>
-                    <option value="report">Report</option>
-                    <option value="heatmap">Heatmap</option>
-                    <option value="none">None</option>
-                  </select>
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-medium leading-none">
-                    Open
-                  </label>
-                  <Button className="w-full" onClick={openAttributionPage}>
-                    Open attribution HTML
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
         {/* Portfolio summary table */}
         {portfolioSummary && (
           <Card className="shadow-sm">
@@ -1252,7 +1258,8 @@ export default function HqlaE2EDashboard() {
                           {/* YTM */}
                           <TableCell>
                             {scenarioRow.ytm.toFixed(2)}%
-                            {scenarioSummary && renderDelta(deltaYtm, true)}
+                            {scenarioSummary &&
+                              renderDelta(deltaYtm / 100, true)}
                           </TableCell>
 
                           {/* Quantity */}
@@ -1388,120 +1395,128 @@ export default function HqlaE2EDashboard() {
               />
               <div className="flex items-stretch gap-3 overflow-x-auto pb-2">
                 {/* Debate */}
-                <div className="min-w-[280px] flex-1">
-                  <Step
-                    index={1}
-                    title="Debate Preview"
-                    desc="MAD: Proponent vs Devil's advocate + Judge"
-                    status={scenario.status as any}
-                  />
-                  <div className="mt-2 rounded-lg border p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="text-[11px] text-slate-500">
-                        ← Portfolio input feeds MAD debate and scenario
-                        generation
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-[11px] text-slate-500 flex items-center gap-2">
-                          <span>
-                            Runs ×{" "}
-                            <span className="font-medium">{debateRuns}</span>
-                          </span>
-                          <span>•</span>
-                          <span>
-                            Rounds ×{" "}
-                            <span className="font-medium">{debateRounds}</span>
-                          </span>
-                        </div>
-                        {availableRuns.length > 0 && (
-                          <div className="flex items-center gap-1">
-                            <span className="text-[11px] text-slate-500">
-                              Run:
-                            </span>
-                            <select
-                              className="text-[11px] bg-slate-50 border border-slate-300 rounded-full px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-slate-400"
-                              value={activeRun ?? ""}
-                              onChange={(e) => {
-                                const v = e.target.value;
-                                setSelectedDebateRun(v ? Number(v) : null);
-                              }}
-                            >
-                              {availableRuns.map((r) => (
-                                <option key={r} value={r}>
-                                  {r}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        )}
-                        <label className="flex items-center gap-1 text-[11px] text-slate-600">
-                          <input
-                            type="checkbox"
-                            className="h-3.5 w-3.5"
-                            checked={offlineMode}
-                            onChange={(e) => setOfflineMode(e.target.checked)}
-                          />
-                          Offline sample
-                        </label>
-                      </div>
-                    </div>
-                    <DebatePreview
-                      debate={previewDebate}
-                      maxChars={1200}
-                      runOptions={availableRuns}
-                      activeRun={activeRun}
-                      onSelectRun={(run) => setSelectedDebateRun(run)}
-                      onShowMatrix={(payload) => setMatrixModal(payload)}
+                <div
+                  className="mt-2 rounded-lg border p-2 
+                                max-h-300 overflow-y-auto 
+                                max-w-[800px]"
+                >
+                  <div className="min-w-[280px] flex-1">
+                    <Step
+                      index={1}
+                      title="Debate Preview"
+                      desc="MAD: Proponent vs Devil's advocate + Judge"
+                      status={scenario.status as any}
                     />
-                    <div className="mt-2 text-[11px] text-slate-600">
-                      {scenario.liveStage
-                        ? scenario.liveStage
-                        : scenario.status === "running"
-                          ? "MAD debate is running…"
-                          : "Idle. Click Run to launch MAD debate."}
-                    </div>
-                    <div className="mt-2">
-                      <LogView
-                        logs={(scenario.logs || []).slice(-8)}
-                        title="MAD"
+                    <div className="mt-2 rounded-lg border p-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[11px] text-slate-500">
+                          ← Portfolio input feeds MAD debate and scenario
+                          generation
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-[11px] text-slate-500 flex items-center gap-2">
+                            <span>
+                              Runs ×{" "}
+                              <span className="font-medium">{debateRuns}</span>
+                            </span>
+                            <span>•</span>
+                            <span>
+                              Rounds ×{" "}
+                              <span className="font-medium">
+                                {debateRounds}
+                              </span>
+                            </span>
+                          </div>
+                          {availableRuns.length > 0 && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] text-slate-500">
+                                Run:
+                              </span>
+                              <select
+                                className="text-[11px] bg-slate-50 border border-slate-300 rounded-full px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-slate-400"
+                                value={activeRun ?? ""}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  setSelectedDebateRun(v ? Number(v) : null);
+                                }}
+                              >
+                                {availableRuns.map((r) => (
+                                  <option key={r} value={r}>
+                                    {r}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+                          <label className="flex items-center gap-1 text-[11px] text-slate-600">
+                            <input
+                              type="checkbox"
+                              className="h-3.5 w-3.5"
+                              checked={offlineMode}
+                              onChange={(e) => setOfflineMode(e.target.checked)}
+                            />
+                            Offline sample
+                          </label>
+                        </div>
+                      </div>
+                      <DebatePreview
+                        debate={previewDebate}
+                        maxChars={1200}
+                        runOptions={availableRuns}
+                        activeRun={activeRun}
+                        onSelectRun={(run) => setSelectedDebateRun(run)}
+                        onShowMatrix={(payload) => setMatrixModal(payload)}
                       />
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex gap-2">
+                      <div className="mt-2 text-[11px] text-slate-600">
+                        {scenario.liveStage
+                          ? scenario.liveStage
+                          : scenario.status === "running"
+                            ? "MAD debate is running…"
+                            : "Idle. Click Run to launch MAD debate."}
+                      </div>
+                      <div className="mt-2">
+                        <LogView
+                          logs={(scenario.logs || []).slice(-8)}
+                          title="MAD"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setOpenDebate(true)}
+                          >
+                            Details
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setOpenDebateParams(true)}
+                          >
+                            Parameters
+                          </Button>
+                        </div>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          onClick={() => setOpenDebate(true)}
+                          onClick={() =>
+                            launchScenarioGen({
+                              portfolioName,
+                              yaml,
+                              debateRounds,
+                              debateRuns,
+                              debaterAPrompt,
+                              debaterBPrompt,
+                              judgePrompt,
+                              offlineSample: offlineMode,
+                            })
+                          }
                         >
-                          Details
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setOpenDebateParams(true)}
-                        >
-                          Parameters
+                          <PlayCircle className="h-4 w-4 mr-1" />
+                          Run
                         </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          launchScenarioGen({
-                            portfolioName,
-                            yaml,
-                            debateRounds,
-                            debateRuns,
-                            debaterAPrompt,
-                            debaterBPrompt,
-                            judgePrompt,
-                            offlineSample: offlineMode,
-                          })
-                        }
-                      >
-                        <PlayCircle className="h-4 w-4 mr-1" />
-                        Run
-                      </Button>
                     </div>
                   </div>
                 </div>
@@ -1840,6 +1855,61 @@ export default function HqlaE2EDashboard() {
                   </div>
                 </div>
               </div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.08 }}
+              >
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle>Attribution Viewer</CardTitle>
+                    <CardDescription>
+                      One-click open of the attribution HTML with chart links.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-4 gap-3 items-end">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium leading-none">
+                          Report date
+                        </label>
+                        <Input
+                          type="date"
+                          className="h-9"
+                          value={attributionDate}
+                          onChange={(e) => setAttributionDate(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium leading-none">
+                          Image type
+                        </label>
+                        <select
+                          className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                          value={attributionMode}
+                          onChange={(e) => setAttributionMode(e.target.value)}
+                        >
+                          <option value="all">All</option>
+                          <option value="report">Report</option>
+                          <option value="heatmap">Heatmap</option>
+                          <option value="none">None</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-sm font-medium leading-none">
+                          Open
+                        </label>
+                        <Button
+                          className="w-full"
+                          onClick={openAttributionPage}
+                        >
+                          Open attribution HTML
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
               <div className="mt-3">
                 <Progress value={pipelinePct} />
                 <p className="mt-2 text-xs text-muted-foreground">
