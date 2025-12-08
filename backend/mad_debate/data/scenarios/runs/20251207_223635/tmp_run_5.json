@@ -1,0 +1,134 @@
+[
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Long-term interest rates rise due to inflationary pressures, steepening the yield curve.",
+    "Probability": 0.2,
+    "Rationale": "Current inflation trends suggest potential Fed adjustments, impacting long-term borrowing costs.",
+    "ImpactChannels": [
+      "Rates: +50 bps",
+      "Curve: bear steepener"
+    ],
+    "Shocks": {
+      "move": 50,
+      "slope_2s10s_bps": 50
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Add $2bn in long-term USTs",
+      "Reduce $1bn short-term repo exposure"
+    ],
+    "Assumptions": "Inflation remains persistent, Fed signals a tightening approach."
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Credit spreads widen by 25 bps in IG and 50 bps in HY due to heightened risk aversion.",
+    "Probability": 0.25,
+    "Rationale": "Economic uncertainty may lead to wider spreads, impacting portfolio valuations.",
+    "ImpactChannels": [
+      "Credit OAS: IG +25 bps, HY +50 bps"
+    ],
+    "Shocks": {
+      "ig_oas": 25,
+      "hy_oas": 50
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase liquidity buffer by $1bn through repo",
+      "Monitor corporate exposure closely"
+    ],
+    "Assumptions": "Increased risk aversion persists in the market."
+  },
+  {
+    "Scenario": "Funding Pressure from Deposit Runoff",
+    "Description": "Increased interest rates lead to significant runoff in deposits, affecting funding stability.",
+    "Probability": 0.2,
+    "Rationale": "As rates rise, consumers may seek better returns, impacting Bank of America's funding stack.",
+    "ImpactChannels": [
+      "Deposit outflows increase",
+      "Funding costs rise"
+    ],
+    "Shocks": {
+      "depo_beta": -5
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Extend maturity on $1bn in wholesale funding",
+      "Enhance retail deposit offerings"
+    ],
+    "Assumptions": "Depositor behavior shifts due to competitive rate offerings."
+  },
+  {
+    "Scenario": "Stricter Regulatory Environment",
+    "Description": "Potential implementation of stricter liquidity requirements impacts funding costs.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing discussions around Basel reforms could lead to tighter liquidity requirements.",
+    "ImpactChannels": [
+      "Increased capital requirements",
+      "Higher compliance costs"
+    ],
+    "Shocks": {
+      "move_index": 0
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4
+    },
+    "TradeList": [
+      "Prepare for $1bn increase in TLAC requirements",
+      "Review capital structure"
+    ],
+    "Assumptions": "Regulatory environment becomes more stringent."
+  },
+  {
+    "Scenario": "Geopolitical Risks Heightened",
+    "Description": "Escalation in geopolitical tensions leads to increased market volatility and demand for safe-haven assets.",
+    "Probability": 0.1,
+    "Rationale": "Increased geopolitical risks could lead to liquidity challenges despite temporary asset boosts.",
+    "ImpactChannels": [
+      "Rates react negatively, credit spreads widen"
+    ],
+    "Shocks": {
+      "move": -30
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Add $1bn in USTs through market operations",
+      "Evaluate credit risk exposure"
+    ],
+    "Assumptions": "Geopolitical tensions escalate, creating market instability."
+  },
+  {
+    "Scenario": "Controlled Inflation with Gradual Easing",
+    "Description": "Inflation remains stable, allowing for gradual easing of monetary policy, supporting consumer spending.",
+    "Probability": 0.1,
+    "Rationale": "Resilient consumer behavior and stable inflation suggest ongoing economic growth but with caution.",
+    "ImpactChannels": [
+      "Consumer spending remains robust",
+      "Stable loan demand"
+    ],
+    "Shocks": {
+      "move": 25
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Increase allocation to Agency MBS by $1bn",
+      "Rebalance towards consumer loans"
+    ],
+    "Assumptions": "Economic growth continues at a steady pace but with risks of inflation."
+  }
+]

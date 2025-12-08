@@ -1,0 +1,218 @@
+[
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Credit spreads widen by 25 bps in IG and 50 bps in HY due to heightened risk aversion.",
+    "Probability": 0.25,
+    "Rationale": "Economic uncertainty may lead to wider spreads, impacting portfolio valuations.",
+    "ImpactChannels": [
+      "Credit OAS: IG +25 bps, HY +50 bps"
+    ],
+    "Shocks": {
+      "ig_oas": 25,
+      "hy_oas": 50
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase liquidity buffer by $1bn through repo",
+      "Monitor corporate exposure closely"
+    ],
+    "Assumptions": "Increased risk aversion persists in the market."
+  },
+  {
+    "Scenario": "Persistently High Inflation with Monetary Tightening",
+    "Description": "Inflation remains elevated, prompting the Fed to maintain or increase interest rates, impacting consumer spending and borrowing.",
+    "Probability": 0.2,
+    "Rationale": "Continued inflationary pressures could lead to sustained higher rates, negatively affecting liquidity and spending.",
+    "ImpactChannels": [
+      "Consumer spending",
+      "Monetary policy"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "NII": -1200000000,
+      "LCR": -3
+    },
+    "TradeList": [
+      "Reduce exposure to rate-sensitive assets",
+      "Increase cash reserves"
+    ],
+    "Assumptions": "Economic conditions remain volatile, with inflation risks impacting consumer behavior."
+  },
+  {
+    "Scenario": "Bear Steepener in Yield Curve",
+    "Description": "Short-term rates remain stable while long-term rates increase, leading to a bear steepening of the yield curve.",
+    "Probability": 0.2,
+    "Rationale": "Market reactions to prolonged inflation could lead to higher long-term rates, impacting funding costs.",
+    "ImpactChannels": [
+      "Interest rate curve",
+      "Asset yield enhancement"
+    ],
+    "Shocks": {
+      "move": 50,
+      "slope_2s10s_bps": 30
+    },
+    "MetricsDelta": {
+      "NII": -800000000,
+      "LCR": -2
+    },
+    "TradeList": [
+      "Decrease duration in bond portfolio",
+      "Increase investments in short-term securities"
+    ],
+    "Assumptions": "Investor expectations shift towards long-term inflation risk."
+  },
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Long-term interest rates rise due to inflationary pressures, steepening the yield curve.",
+    "Probability": 0.2,
+    "Rationale": "Current inflation trends suggest potential Fed adjustments, impacting long-term borrowing costs.",
+    "ImpactChannels": [
+      "Rates: +50 bps",
+      "Curve: bear steepener"
+    ],
+    "Shocks": {
+      "move": 50,
+      "slope_2s10s_bps": 50
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Add $2bn in long-term USTs",
+      "Reduce $1bn short-term repo exposure"
+    ],
+    "Assumptions": "Inflation remains persistent, Fed signals a tightening approach."
+  },
+  {
+    "Scenario": "Funding Pressure from Deposit Runoff",
+    "Description": "Increased interest rates lead to significant runoff in deposits, affecting funding stability.",
+    "Probability": 0.2,
+    "Rationale": "As rates rise, consumers may seek better returns, impacting Bank of America's funding stack.",
+    "ImpactChannels": [
+      "Deposit outflows increase",
+      "Funding costs rise"
+    ],
+    "Shocks": {
+      "depo_beta": -5
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Extend maturity on $1bn in wholesale funding",
+      "Enhance retail deposit offerings"
+    ],
+    "Assumptions": "Depositor behavior shifts due to competitive rate offerings."
+  },
+  {
+    "Scenario": "Rising Deposit Betas Amidst Competition",
+    "Description": "Increased competition leads to higher deposit betas as banks raise rates to attract customers.",
+    "Probability": 0.18,
+    "Rationale": "Higher rates in the market drive depositors to seek better yields, increasing funding costs.",
+    "ImpactChannels": [
+      "Deposit stability",
+      "Funding costs"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "NII": -500000000,
+      "LCR": -4
+    },
+    "TradeList": [
+      "Enhance marketing for competitive deposit products",
+      "Review pricing strategies for deposits"
+    ],
+    "Assumptions": "Depositors respond to competitive pressures for higher returns."
+  },
+  {
+    "Scenario": "Tighter Spreads in Credit Markets",
+    "Description": "Credit spreads tighten by 20 bps as investor confidence improves, benefiting Bank of America's bond portfolio.",
+    "Probability": 0.15,
+    "Rationale": "Improving economic conditions lead to enhanced credit quality across sectors.",
+    "ImpactChannels": [
+      "Credit spreads",
+      "Asset valuations"
+    ],
+    "Shocks": {
+      "ig_oas": -20
+    },
+    "MetricsDelta": {
+      "NII": 300000000,
+      "OCI": 150000000
+    },
+    "TradeList": [
+      "Increase exposure to investment-grade bonds",
+      "Reduce high-yield allocations"
+    ],
+    "Assumptions": "Positive economic indicators lead to tighter spreads in credit markets."
+  },
+  {
+    "Scenario": "Increased Regulatory Scrutiny on Liquidity",
+    "Description": "Regulatory bodies impose stricter liquidity requirements, limiting operational flexibility.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing regulatory scrutiny may lead to heightened capital and liquidity requirements.",
+    "ImpactChannels": [
+      "Regulatory environment",
+      "Liquidity management"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Prepare for potential regulatory changes",
+      "Optimize HQLA portfolio"
+    ],
+    "Assumptions": "Regulatory environment remains stringent, impacting liquidity management."
+  },
+  {
+    "Scenario": "Stricter Regulatory Environment",
+    "Description": "Potential implementation of stricter liquidity requirements impacts funding costs.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing discussions around Basel reforms could lead to tighter liquidity requirements.",
+    "ImpactChannels": [
+      "Increased capital requirements",
+      "Higher compliance costs"
+    ],
+    "Shocks": {
+      "move_index": 0
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4
+    },
+    "TradeList": [
+      "Prepare for $1bn increase in TLAC requirements",
+      "Review capital structure"
+    ],
+    "Assumptions": "Regulatory environment becomes more stringent."
+  },
+  {
+    "Scenario": "Widening MBS Basis Risk",
+    "Description": "MBS basis widens due to supply-demand imbalances, negatively affecting valuations.",
+    "Probability": 0.12,
+    "Rationale": "Market conditions may lead to reduced demand for MBS amidst rising rates, impacting valuations.",
+    "ImpactChannels": [
+      "MBS basis",
+      "Asset valuations"
+    ],
+    "Shocks": {
+      "mbs_basis": 50
+    },
+    "MetricsDelta": {
+      "OCI": -600000000,
+      "LCR": -3
+    },
+    "TradeList": [
+      "Reduce MBS holdings to mitigate OCI impact",
+      "Increase cash positions"
+    ],
+    "Assumptions": "Market dynamics shift, leading to wider spreads in MBS."
+  }
+]
