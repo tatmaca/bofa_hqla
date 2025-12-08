@@ -1,0 +1,24 @@
+{
+  "date": "2025-11-29",
+  "attribution": {
+    "3M": {
+      "BOE_TONE": -0.9
+    },
+    "2Y": {
+      "BOE_TONE": -1.8
+    },
+    "5Y": {
+      "BOE_TONE": -2.7
+    },
+    "10Y": {
+      "BOE_TONE": -2.7
+    },
+    "30Y": {
+      "BOE_TONE": -2.7
+    }
+  },
+  "visualizations": {
+    "factor_attribution": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_attribution_2025-11-29.png",
+    "factor_heatmap": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_heatmap_2025-11-29.png"
+  }
+}

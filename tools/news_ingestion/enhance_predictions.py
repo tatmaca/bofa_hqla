@@ -22,6 +22,7 @@ except (ImportError, AttributeError) as e:
 
 from bucket_news import get_bucket_counts, BUCKETS
 from analyze_yield_impact import analyze_yield_impact, get_bucketed_news, load_curve_snapshot, extract_llm_features
+from train_linear_online import get_daily_factor_scores
 
 MODEL_DIR = Path(__file__).parent / "models"
 TENORS = ["2y", "5y", "10y", "30y"]
@@ -64,6 +65,9 @@ def prepare_features(date: str, llm_prediction: Dict) -> Optional[np.ndarray]:
     # Extract LLM features
     llm_features = extract_llm_features(llm_prediction)
     
+    # Get factor scores from linear model (connect the two steps)
+    factor_scores = get_daily_factor_scores(date)
+    
     # Build feature vector
     total_articles = sum(bucket_counts.values())
     features = {}
@@ -77,6 +81,10 @@ def prepare_features(date: str, llm_prediction: Dict) -> Optional[np.ndarray]:
     
     # Add LLM prediction features
     features.update(llm_features)
+    
+    # Add factor scores (connect linear model to XGBoost)
+    for factor_name, factor_score in factor_scores.items():
+        features[f"factor_{factor_name}"] = factor_score
     
     # Load model metadata to get feature order
     model_data = load_latest_xgb_models()

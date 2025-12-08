@@ -1,0 +1,69 @@
+{
+  "date": "2025-12-01",
+  "attribution": {
+    "3M": {
+      "FED_TONE": 20.0,
+      "RISK_OFF": 10.0,
+      "GEO_EVENT": 5.0,
+      "GDP_SURP": -4.300000000000001,
+      "OIL_SHOCK_DOWN": 3.0,
+      "CPI_HEAD_SURP": -2.3999999999999995,
+      "RISK_ON": 2.0999999999999996,
+      "NFP_SURP": -2.0999999999999996,
+      "BOE_TONE": 1.35,
+      "PRODUCTIVITY_SURP": 0.8
+    },
+    "2Y": {
+      "FED_TONE": 25.0,
+      "RISK_OFF": 12.5,
+      "GDP_SURP": -8.600000000000001,
+      "GEO_EVENT": 7.5,
+      "OIL_SHOCK_DOWN": 4.5,
+      "CPI_HEAD_SURP": -4.199999999999999,
+      "NFP_SURP": -4.199999999999999,
+      "ISM_SURP": -2.8,
+      "RISK_ON": 2.8,
+      "BOE_TONE": 2.7
+    },
+    "5Y": {
+      "FED_TONE": 17.5,
+      "RISK_OFF": 15.0,
+      "GDP_SURP": -10.750000000000002,
+      "GEO_EVENT": 10.0,
+      "OIL_SHOCK_DOWN": 6.0,
+      "EU_GROWTH_NEWS": -4.300000000000001,
+      "CPI_HEAD_SURP": -4.199999999999999,
+      "NFP_SURP": -4.199999999999999,
+      "CHINA_GROWTH_NEWS": -4.1,
+      "BOE_TONE": 4.050000000000001
+    },
+    "10Y": {
+      "RISK_OFF": 20.0,
+      "GEO_EVENT": 15.0,
+      "FED_TONE": 12.5,
+      "GDP_SURP": -8.600000000000001,
+      "OIL_SHOCK_DOWN": 7.5,
+      "EU_GROWTH_NEWS": -6.450000000000001,
+      "CHINA_GROWTH_NEWS": -6.1499999999999995,
+      "RISK_ON": 4.199999999999999,
+      "BOE_TONE": 4.050000000000001,
+      "FISCAL_DEFICIT_NEWS": 3.750000000000001
+    },
+    "30Y": {
+      "RISK_OFF": 22.5,
+      "GEO_EVENT": 17.5,
+      "FED_TONE": 7.5,
+      "OIL_SHOCK_DOWN": 7.5,
+      "GDP_SURP": -6.450000000000001,
+      "EU_GROWTH_NEWS": -6.450000000000001,
+      "CHINA_GROWTH_NEWS": -6.1499999999999995,
+      "FISCAL_DEFICIT_NEWS": 4.500000000000002,
+      "RISK_ON": 4.199999999999999,
+      "BOE_TONE": 4.050000000000001
+    }
+  },
+  "visualizations": {
+    "factor_attribution": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_attribution_2025-12-01.png",
+    "factor_heatmap": "/Users/josh_li/projects/bofa_hqla/tools/news_ingestion/attribution_analysis/factor_heatmap_2025-12-01.png"
+  }
+}

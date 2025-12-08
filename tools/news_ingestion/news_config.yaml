@@ -1,86 +1,513 @@
-user_agent: "JL-NewsCrawler/0.1 (+contact: you@example.com)"
-concurrency: 12  # Increased from 8
-rss_max_workers: 6  # Increased from 4
-per_host_rps: 1.0  # Increased from 0.5 (1 request/second is still polite)
-timeout_s: 20  # Increased from 15
+user_agent: 'JL-NewsCrawler/0.1 (+contact: you@example.com)'
+concurrency: 12
+rss_max_workers: 6
+per_host_rps: 1.0
+timeout_s: 20
 dedupe_horizon_days: 1
-
-# <-- NEW -->
-window_hours: 72  # Increased to catch weekend news (3 days)
-timezone: "America/Chicago"
-strict_24h: false  # Changed to false - collect articles even without dates (we can filter later)
-
-# OpenAI API key for LLM bucketing and analysis (optional, can also use env var OPENAI_API_KEY)
-openai_api_key: null
-
-# Domains where we only keep metadata (title/url/published_at); no full-text fetch
-# (prevents paywall scraping, keeps items usable for LLM rationales)
+window_hours: 72
+timezone: America/Chicago
+strict_24h: false
+openai_api_key: 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
 metadata_only_domains:
-  - www.ft.com
-  - www.bloomberg.com
-  - www.wsj.com
-  - www.nytimes.com
-  - www.economist.com
-  - www.barrons.com
-  - www.financialtimes.com
-
-# Domains to skip entirely (optional; start empty)
-skip_domains: []  # Removed marketwatch.com - can collect metadata at least
-
-# Enhanced RSS feeds - added more sources
+- www.ft.com
+- www.bloomberg.com
+- www.wsj.com
+- www.nytimes.com
+- www.economist.com
+- www.barrons.com
+- www.financialtimes.com
+skip_domains: []
 rss_feeds:
-  # Reuters (multiple feeds)
-  - https://www.reuters.com/finance/markets/us/rss
-  - https://www.reuters.com/world/us/rss
-  - https://www.reuters.com/business/rss
-  - https://www.reuters.com/markets/rss
-  
-  # AP News
-  - https://apnews.com/hub/ap-top-news?rss=1
-  - https://apnews.com/hub/business?rss=1
-  - https://apnews.com/hub/financial-markets?rss=1
-  
-  # Financial Times
-  - https://www.ft.com/?format=rss  # may hit paywall; titles still useful
-  - https://www.ft.com/markets?format=rss
-  
-  # CNBC
-  - https://www.cnbc.com/id/100003114/device/rss/rss.html  # Top News
-  - https://www.cnbc.com/id/15839135/device/rss/rss.html  # Markets
-  
-  # Bloomberg (metadata only)
-  - https://www.bloomberg.com/feeds/bloomberg.rss
-  
-  # Yahoo Finance
-  - https://finance.yahoo.com/news/rssindex
-  
-  # MarketWatch (if not paywalled)
-  - https://www.marketwatch.com/rss/topstories
-  
-  # Financial news aggregators
-  - https://feeds.feedburner.com/zerohedge/feed  # Zero Hedge
-  - https://www.investing.com/rss/news.rss  # Investing.com
-
-# Enhanced front pages - added more sources
+- https://www.reuters.com/finance/markets/us/rss
+- https://www.reuters.com/world/us/rss
+- https://www.reuters.com/business/rss
+- https://www.reuters.com/markets/rss
+- https://apnews.com/hub/ap-top-news?rss=1
+- https://apnews.com/hub/business?rss=1
+- https://apnews.com/hub/financial-markets?rss=1
+- https://www.ft.com/?format=rss
+- https://www.ft.com/markets?format=rss
+- https://www.cnbc.com/id/100003114/device/rss/rss.html
+- https://www.cnbc.com/id/15839135/device/rss/rss.html
+- https://www.bloomberg.com/feeds/bloomberg.rss
+- https://finance.yahoo.com/news/rssindex
+- https://www.marketwatch.com/rss/topstories
+- https://feeds.feedburner.com/zerohedge/feed
+- https://www.investing.com/rss/news.rss
 front_pages:
-  - https://www.reuters.com/markets/us/
-  - https://www.reuters.com/business/
-  - https://www.cnbc.com/markets/
-  - https://www.cnbc.com/business/
-  - https://www.bloomberg.com/markets  # paywalled: metadata-only
-  - https://finance.yahoo.com/
-  - https://www.marketwatch.com/
-  - https://www.investing.com/news/
-
-# Enhanced sitemaps - added more sources
+- https://www.reuters.com/markets/us/
+- https://www.reuters.com/business/
+- https://www.cnbc.com/markets/
+- https://www.cnbc.com/business/
+- https://www.bloomberg.com/markets
+- https://finance.yahoo.com/
+- https://www.marketwatch.com/
+- https://www.investing.com/news/
 sitemaps:
-  - https://www.reuters.com/sitemap_news_index.xml
-  - https://apnews.com/sitemap.xml
-  - https://www.cnbc.com/sitemap.xml
-  - https://finance.yahoo.com/sitemap.xml
-
-# Optimized limits for faster crawling
-max_links_per_front: 50  # Reduced for faster processing
-max_urls_per_sitemap: 100  # Reduced for faster processing
-max_total_urls: 200  # Maximum total URLs to process per run (keeps crawl fast)
-
+- https://www.reuters.com/sitemap_news_index.xml
+- https://apnews.com/sitemap.xml
+- https://www.cnbc.com/sitemap.xml
+- https://finance.yahoo.com/sitemap.xml
+max_links_per_front: 50
+max_urls_per_sitemap: 100
+max_total_urls: 200
+linear_model_cold_start:
+  learning_rate: 0.05
+  forgetting_factor: 0.98
+  max_daily_coef_change: 0.8
+  smoothing_gamma: 0.2
+  FED_TONE:
+    1M: 8
+    3M: 8
+    6M: 8.5
+    1Y: 9.0
+    2Y: 10
+    3Y: 8.5
+    5Y: 7
+    7Y: 6.0
+    10Y: 5
+    20Y: 4.0
+    30Y: 3
+  FED_PATH_SURPRISE:
+    1M: 4
+    3M: 4
+    6M: 5.0
+    1Y: 6.0
+    2Y: 8
+    3Y: 7.5
+    5Y: 7
+    7Y: 6.5
+    10Y: 6
+    20Y: 5.5
+    30Y: 5
+  POLICY_RATE_SURPRISE:
+    1M: 12
+    3M: 12
+    6M: 11.2
+    1Y: 10.5
+    2Y: 9
+    3Y: 6.0
+    5Y: 3
+    7Y: 2.0
+    10Y: 1
+    20Y: 0.5
+    30Y: 0
+  BAL_SHEET_QT_QE:
+    1M: 0
+    3M: 0
+    6M: 0.5
+    1Y: 1.0
+    2Y: 2
+    3Y: 3.0
+    5Y: 4
+    7Y: 4.5
+    10Y: 5
+    20Y: 5.0
+    30Y: 5
+  CPI_CORE_SURP:
+    1M: 5
+    3M: 5
+    6M: 5.8
+    1Y: 6.5
+    2Y: 8
+    3Y: 8.0
+    5Y: 8
+    7Y: 7.5
+    10Y: 7
+    20Y: 6.5
+    30Y: 6
+  CPI_HEAD_SURP:
+    1M: 4
+    3M: 4
+    6M: 4.8
+    1Y: 5.5
+    2Y: 7
+    3Y: 7.0
+    5Y: 7
+    7Y: 6.5
+    10Y: 6
+    20Y: 5.5
+    30Y: 5
+  PCE_CORE_SURP:
+    1M: 4
+    3M: 4
+    6M: 4.5
+    1Y: 5.0
+    2Y: 6
+    3Y: 6.0
+    5Y: 6
+    7Y: 5.5
+    10Y: 5
+    20Y: 4.5
+    30Y: 4
+  NFP_SURP:
+    1M: 3
+    3M: 3
+    6M: 3.8
+    1Y: 4.5
+    2Y: 6
+    3Y: 6.0
+    5Y: 6
+    7Y: 5.5
+    10Y: 5
+    20Y: 4.5
+    30Y: 4
+  WAGE_SURP:
+    1M: 2
+    3M: 2
+    6M: 2.8
+    1Y: 3.5
+    2Y: 5
+    3Y: 5.5
+    5Y: 6
+    7Y: 5.5
+    10Y: 5
+    20Y: 4.5
+    30Y: 4
+  UNEMPLOYMENT_RATE_SURP:
+    1M: -2
+    3M: -2
+    6M: -2.5
+    1Y: -3.0
+    2Y: -4
+    3Y: -4.5
+    5Y: -5
+    7Y: -4.5
+    10Y: -4
+    20Y: -3.5
+    30Y: -3
+  ISM_SURP:
+    1M: 1
+    3M: 1
+    6M: 1.8
+    1Y: 2.5
+    2Y: 4
+    3Y: 4.5
+    5Y: 5
+    7Y: 4.5
+    10Y: 4
+    20Y: 3.5
+    30Y: 3
+  RETAIL_SALES_SURP:
+    1M: 1
+    3M: 1
+    6M: 1.5
+    1Y: 2.0
+    2Y: 3
+    3Y: 3.5
+    5Y: 4
+    7Y: 3.5
+    10Y: 3
+    20Y: 2.5
+    30Y: 2
+  GDP_SURP:
+    1M: 2
+    3M: 2
+    6M: 2.5
+    1Y: 3.0
+    2Y: 4
+    3Y: 4.5
+    5Y: 5
+    7Y: 4.5
+    10Y: 4
+    20Y: 3.5
+    30Y: 3
+  PRODUCTIVITY_SURP:
+    1M: 1
+    3M: 1
+    6M: 1.2
+    1Y: 1.5
+    2Y: 2
+    3Y: 2.5
+    5Y: 3
+    7Y: 3.0
+    10Y: 3
+    20Y: 2.5
+    30Y: 2
+  INFL_EXP_SURP:
+    1M: 2
+    3M: 2
+    6M: 2.5
+    1Y: 3.0
+    2Y: 4
+    3Y: 4.5
+    5Y: 5
+    7Y: 5.5
+    10Y: 6
+    20Y: 6.0
+    30Y: 6
+  SUPPLY_LONG:
+    1M: 0
+    3M: 0
+    6M: 0.5
+    1Y: 1.0
+    2Y: 2
+    3Y: 3.0
+    5Y: 4
+    7Y: 5.0
+    10Y: 6
+    20Y: 6.5
+    30Y: 7
+  SUPPLY_BILLS:
+    1M: 3
+    3M: 3
+    6M: 2.8
+    1Y: 2.5
+    2Y: 2
+    3Y: 1.0
+    5Y: 0
+    7Y: 0.0
+    10Y: 0
+    20Y: 0.0
+    30Y: 0
+  FISCAL_DEFICIT_NEWS:
+    1M: 0
+    3M: 0
+    6M: 0.5
+    1Y: 1.0
+    2Y: 2
+    3Y: 2.5
+    5Y: 3
+    7Y: 4.0
+    10Y: 5
+    20Y: 5.5
+    30Y: 6
+  TERM_PREMIUM_NEWS:
+    1M: 0
+    3M: 0
+    6M: 0.2
+    1Y: 0.5
+    2Y: 1
+    3Y: 2.0
+    5Y: 3
+    7Y: 4.0
+    10Y: 5
+    20Y: 5.5
+    30Y: 6
+  RISK_OFF:
+    1M: -4
+    3M: -4
+    6M: -4.2
+    1Y: -4.5
+    2Y: -5
+    3Y: -5.5
+    5Y: -6
+    7Y: -7.0
+    10Y: -8
+    20Y: -8.5
+    30Y: -9
+  RISK_ON:
+    1M: 3
+    3M: 3
+    6M: 3.2
+    1Y: 3.5
+    2Y: 4
+    3Y: 4.5
+    5Y: 5
+    7Y: 5.5
+    10Y: 6
+    20Y: 6.0
+    30Y: 6
+  MOVE_SHIFT:
+    1M: 0
+    3M: 0
+    6M: 0.2
+    1Y: 0.5
+    2Y: 1
+    3Y: 1.5
+    5Y: 2
+    7Y: 2.5
+    10Y: 3
+    20Y: 3.5
+    30Y: 4
+  OIL_SHOCK_UP:
+    1M: 2
+    3M: 2
+    6M: 2.2
+    1Y: 2.5
+    2Y: 3
+    3Y: 3.5
+    5Y: 4
+    7Y: 4.5
+    10Y: 5
+    20Y: 5.0
+    30Y: 5
+  OIL_SHOCK_DOWN:
+    1M: -2
+    3M: -2
+    6M: -2.2
+    1Y: -2.5
+    2Y: -3
+    3Y: -3.5
+    5Y: -4
+    7Y: -4.5
+    10Y: -5
+    20Y: -5.0
+    30Y: -5
+  MBS_CONVEXITY:
+    1M: 0
+    3M: 0
+    6M: 0.0
+    1Y: 0.0
+    2Y: 0
+    3Y: 1.0
+    5Y: 2
+    7Y: 3.0
+    10Y: 4
+    20Y: 4.5
+    30Y: 5
+  HOUSING_TURN:
+    1M: 0
+    3M: 0
+    6M: 0.2
+    1Y: 0.5
+    2Y: 1
+    3Y: 1.5
+    5Y: 2
+    7Y: 2.5
+    10Y: 3
+    20Y: 3.0
+    30Y: 3
+  FUNDING_STRESS:
+    1M: 6
+    3M: 6
+    6M: 5.0
+    1Y: 4.0
+    2Y: 2
+    3Y: 0.0
+    5Y: -2
+    7Y: -2.5
+    10Y: -3
+    20Y: -3.0
+    30Y: -3
+  ECB_TONE:
+    1M: 1
+    3M: 1
+    6M: 1.2
+    1Y: 1.5
+    2Y: 2
+    3Y: 2.5
+    5Y: 3
+    7Y: 3.5
+    10Y: 4
+    20Y: 4.0
+    30Y: 4
+  ECB_RATE_SURP:
+    1M: 1
+    3M: 1
+    6M: 1.2
+    1Y: 1.5
+    2Y: 2
+    3Y: 2.5
+    5Y: 3
+    7Y: 3.5
+    10Y: 4
+    20Y: 4.0
+    30Y: 4
+  BOE_TONE:
+    1M: 1
+    3M: 1
+    6M: 1.2
+    1Y: 1.5
+    2Y: 2
+    3Y: 2.5
+    5Y: 3
+    7Y: 3.0
+    10Y: 3
+    20Y: 3.0
+    30Y: 3
+  BOE_RATE_SURP:
+    1M: 1
+    3M: 1
+    6M: 1.2
+    1Y: 1.5
+    2Y: 2
+    3Y: 2.5
+    5Y: 3
+    7Y: 3.0
+    10Y: 3
+    20Y: 3.0
+    30Y: 3
+  YCC_JGB_SHIFT:
+    1M: 0
+    3M: 0
+    6M: 0.0
+    1Y: 0.0
+    2Y: 0
+    3Y: 1.0
+    5Y: 2
+    7Y: 3.0
+    10Y: 4
+    20Y: 4.5
+    30Y: 5
+  CHINA_GROWTH_NEWS:
+    1M: 0
+    3M: 0
+    6M: 0.2
+    1Y: 0.5
+    2Y: 1
+    3Y: 1.5
+    5Y: 2
+    7Y: 2.5
+    10Y: 3
+    20Y: 3.0
+    30Y: 3
+  EU_GROWTH_NEWS:
+    1M: 0
+    3M: 0
+    6M: 0.2
+    1Y: 0.5
+    2Y: 1
+    3Y: 1.5
+    5Y: 2
+    7Y: 2.5
+    10Y: 3
+    20Y: 3.0
+    30Y: 3
+  GEO_EVENT:
+    1M: -2
+    3M: -2
+    6M: -2.2
+    1Y: -2.5
+    2Y: -3
+    3Y: -3.5
+    5Y: -4
+    7Y: -5.0
+    10Y: -6
+    20Y: -6.5
+    30Y: -7
+linear_model_sign_guards:
+  CPI_CORE_SURP: non_negative
+  CPI_HEAD_SURP: non_negative
+  PCE_CORE_SURP: non_negative
+  NFP_SURP: non_negative
+  WAGE_SURP: non_negative
+  ISM_SURP: non_negative
+  RETAIL_SALES_SURP: non_negative
+  GDP_SURP: non_negative
+  PRODUCTIVITY_SURP: non_negative
+  INFL_EXP_SURP: non_negative
+  SUPPLY_LONG: non_negative
+  SUPPLY_BILLS: non_negative
+  FISCAL_DEFICIT_NEWS: non_negative
+  TERM_PREMIUM_NEWS: non_negative
+  RISK_OFF: non_positive
+  OIL_SHOCK_DOWN: non_positive
+  FUNDING_STRESS:
+    3M:
+      min: 0
+    2Y:
+      min: 0
+    5Y:
+      max: 0
+    10Y:
+      max: 0
+    30Y:
+      max: 0
+yield_movement_thresholds:
+  threshold_std: 2.0
+  absolute_threshold_bps: 5.0
+  rolling_window_days: 60
+  min_samples: 20
+  filter_training: true
+  min_significant_tenors: 1

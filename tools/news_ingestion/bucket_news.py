@@ -314,19 +314,61 @@ def bucket_articles(hours: int = 24, batch_size: int = 50, api_key: Optional[str
     print(f"[BUCKET] Completed: {processed} articles bucketed" + 
           (f" ({errors} fell back to keyword matching)" if errors > 0 else ""))
 
-def get_bucket_counts(date: Optional[str] = None) -> Dict[str, int]:
-    """Get article counts per bucket for a given date (or today)."""
+def get_bucket_counts(date: Optional[str] = None, prevent_lookahead: bool = True) -> Dict[str, int]:
+    """
+    Get article counts per bucket for a given date (or today).
+    
+    Args:
+        date: Date string (YYYY-MM-DD), defaults to today
+        prevent_lookahead: If True, only count articles published before market close
+    """
     if date is None:
         date = dt.date.today().isoformat()
     
-    with get_conn() as c:
-        rows = c.execute("""
+    # Build query with optional look-ahead bias prevention
+    if prevent_lookahead:
+        try:
+            from lookahead_bias_utils import get_market_close_time
+            market_close = get_market_close_time(dt.datetime.strptime(date, "%Y-%m-%d").date())
+            market_close_iso = market_close.isoformat()
+            
+            query = """
+                SELECT bucket, COUNT(*) as count
+                FROM articles
+                WHERE DATE(COALESCE(published_at, fetched_at)) = DATE(?)
+                  AND bucket IS NOT NULL
+                  AND title IS NOT NULL
+                  AND title != ''
+                  AND (published_at IS NULL OR published_at < ?)
+                GROUP BY bucket
+            """
+            params = (date, market_close_iso)
+        except ImportError:
+            # Fallback if lookahead_bias_utils not available
+            query = """
+                SELECT bucket, COUNT(*) as count
+                FROM articles
+                WHERE DATE(COALESCE(published_at, fetched_at)) = DATE(?)
+                  AND bucket IS NOT NULL
+                  AND title IS NOT NULL
+                  AND title != ''
+                GROUP BY bucket
+            """
+            params = (date,)
+    else:
+        query = """
             SELECT bucket, COUNT(*) as count
             FROM articles
             WHERE DATE(COALESCE(published_at, fetched_at)) = DATE(?)
               AND bucket IS NOT NULL
+              AND title IS NOT NULL
+              AND title != ''
             GROUP BY bucket
-        """, (date,)).fetchall()
+        """
+        params = (date,)
+    
+    with get_conn() as c:
+        rows = c.execute(query, params).fetchall()
     
     return {row["bucket"]: row["count"] for row in rows}
 

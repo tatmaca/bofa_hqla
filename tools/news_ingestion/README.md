@@ -64,9 +64,20 @@ The system performs these steps daily:
 | `run_ingest.py` | News ingestion (RSS + web crawl) |
 | `bucket_news.py` | Categorize news into 8 buckets |
 | `analyze_yield_impact.py` | LLM analysis of news impact |
+| `train_linear_online.py` | Linear online learning model (ONYL) |
 | `train_xgboost.py` | Train XGBoost models |
 | `update_models_rolling.py` | Rolling window model updates |
 | `check_status.py` | Monitor system health |
+
+### Prediction & Accuracy Tracking
+
+| Script | Purpose |
+|--------|---------|
+| `generate_scenario_curves.py` | Generate baseline + scenario yield curve predictions |
+| `calculate_prediction_accuracy.py` | Calculate accuracy metrics (MAE, RMSE, R², etc.) |
+| `batch_calculate_accuracy.py` | Batch calculate accuracy for date ranges |
+| `generate_accuracy_report.py` | Generate comprehensive accuracy reports with visualizations |
+| `visualize_accuracy.py` | Create accuracy visualizations (time series, heatmaps, etc.) |
 
 ### Data Collection
 
@@ -78,6 +89,23 @@ The system performs these steps daily:
 | `collect_training_data.py` | Collect training data with LLM features |
 | `collect_training_data_simple.py` | Collect training data without LLM |
 
+### Scenario-Based Predictions
+
+The system generates 10 yield curve predictions daily:
+- **1 baseline prediction** from the day's news
+- **9 scenario-based predictions** using predefined economic scenarios
+
+See [SCENARIO_CURVES_GUIDE.md](SCENARIO_CURVES_GUIDE.md) for details.
+
+### Accuracy Tracking
+
+The system tracks prediction accuracy over time with:
+- **Metrics**: MAE, RMSE, R², directional accuracy, correlation
+- **Visualizations**: Time series, heatmaps, per-tenor comparisons
+- **Reports**: Comprehensive markdown and JSON reports
+
+See accuracy reports in `accuracy_analysis/` directory.
+
 ### Utilities
 
 | Script | Purpose |
@@ -85,6 +113,8 @@ The system performs these steps daily:
 | `test_system.py` | Comprehensive system tests |
 | `fix_dependencies.py` | Fix NumPy/XGBoost compatibility |
 | `run_daily.sh` | Daily runner script for automation |
+| `visualize_attribution.py` | Generate attribution analysis visualizations |
+| `compare_models.py` | Compare linear and XGBoost model alignment |
 
 ## News Buckets
 
