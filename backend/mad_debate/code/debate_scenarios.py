@@ -14,7 +14,7 @@ Key improvements vs previous version:
 
 from __future__ import annotations
 
-import os, sys, json, argparse, copy, statistics, time, random, traceback, logging, textwrap, re, shutil
+import os, sys, json, argparse, copy, statistics, time, random, traceback, logging, textwrap, re, shutil, datetime, calendar
 from typing import List, Dict, Any, Optional
 
 import yaml
@@ -58,6 +58,14 @@ def require_env(var: str) -> str:
         logging.error(f"Environment variable {var} is not set.")
         sys.exit(1)
     return val
+
+def add_months(d: datetime.date, months: int) -> datetime.date:
+    """Return date d advanced by <months>, clamping day to month end."""
+    month_index = d.month - 1 + months
+    year = d.year + month_index // 12
+    month = month_index % 12 + 1
+    day = min(d.day, calendar.monthrange(year, month)[1])
+    return datetime.date(year, month, day)
 
 # =========================================================
 # OpenAI client
@@ -151,6 +159,7 @@ REQUIRED_TOP_KEYS = {
     "MetricsDelta",
     "TradeList",
     "Assumptions",
+    "Signals",
 }
 
 def validate_schema_one(obj: Dict[str, Any]) -> List[str]:
@@ -340,6 +349,10 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
 
     inputs_cfg = cfg.get("inputs", {})
     header_lines = []
+    today = datetime.date.today()
+    horizon_date = add_months(today, 6)
+    horizon_label = f"{horizon_date.isoformat()} (6 months from {today.isoformat()})"
+    header_lines.append(f"Forecast horizon: {horizon_label}")
     portfolio_name = inputs_cfg.get("portfolio_name")
     if portfolio_name:
         header_lines.append(f"Portfolio Name: {portfolio_name}")
@@ -357,31 +370,59 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
         shock_text = str(shock_yaml).strip()
         if shock_text:
             header_lines.append(f"Shock YAML:\n{shock_text}")
+    holdings_csv = inputs_cfg.get("holdings_csv")
+    if holdings_csv:
+        header_lines.append("Holdings CSV (uploaded preview):\n" + short(str(holdings_csv), 3500))
+    risk_ladder_csv = inputs_cfg.get("risk_ladder_csv")
+    if risk_ladder_csv:
+        header_lines.append("Risk ladder CSV (uploaded preview):\n" + short(str(risk_ladder_csv), 3500))
     news_context = inputs_cfg.get("news_context")
     if news_context:
         header_lines.append("Latest news drivers:\n" + str(news_context).strip())
     header_block = "\n".join([line for line in header_lines if line])
 
-    instructions = textwrap.dedent("""\
+    instructions = textwrap.dedent(f"""\
         Task:
-        Propose and DEFEND *exactly five* distinct 6-month scenarios with quantitative shocks and probabilities that ~sum to 1.
-        Use finance-consistent channels: {Rates (bps), Curve (bull/bear & steep/flat), Credit OAS (bps), MBS basis (bps),
-        Deposits/runoff (%), Reg changes (brief text)}.
+        Propose and DEFEND roughly ten distinct 6-month scenarios (target 9–11) with quantitative shocks and probabilities that ~sum to 1. Anchor every scenario on the forecast date {horizon_date.isoformat()} (6 months from today) and state that date explicitly in your output.
+        Use finance-consistent channels: Rates (bps), Curve (bull/bear & steep/flat), Credit OAS (bps), MBS basis (bps),
+        Deposits/runoff (%), Reg changes (brief text).
+        Every round, probabilities across the array must sum to 1.0 (normalize before sending).
 
         Respond in TWO parts every time:
         (1) Reasoning: critique, assumptions, and why your shocks/probabilities make sense (NO JSON here).
         (2) Revised JSON: a STRICT JSON array matching the schema. DO NOT use backticks. No extra prose.
 
         Schema (top-level keys for each scenario):
-        ["Scenario","Description","Probability","Rationale","ImpactChannels","Shocks","MetricsDelta","TradeList","Assumptions"]
+        ["Scenario","Description","Probability","Rationale","ImpactChannels","Shocks","MetricsDelta","TradeList","Assumptions","Signals"]
 
         EVERY element must include ALL schema keys with realistic values. Missing fields = invalid output.
-        Be specific: quantify shocks (bps, %, $bn), describe deposit behavior, and list concrete trades/liquidity actions.
+        Be specific: quantify shocks (bps, %, $bn), describe deposit behavior, and list concrete trades/liquidity actions. Spell out dated milestones or key markers to watch between now and {horizon_date.isoformat()} (e.g., policy meetings, large bill paydowns, earnings, big roll dates) and make event descriptions concrete.
+        Include a Signals array per scenario with 3–5 specific "watch for X/Y" items (dated releases/meetings/auctions with levels or thresholds) so the matrix clearly shows what to monitor as the scenario materializes.
     """)
 
     seed_user = f"{header_block}\n\n{instructions}"
 
     hist: List[Dict[str, str]] = []
+
+    judge_template = cfg["prompts"].get("system_judge", "")
+    judge_constraints = cfg.get("inputs", {}).get("constraints", {})
+    judge_override = bool(runtime_cfg.get("judge_prompt_override"))
+    if judge_override:
+        judge_sys = judge_template
+    else:
+        try:
+            judge_sys = judge_template.format(**judge_constraints)
+        except Exception as exc:
+            logging.warning(
+                f"Judge prompt formatting failed ({type(exc).__name__}); using raw template."
+            )
+            judge_sys = judge_template
+    runtime_cfg.setdefault("judge_prompt_effective", judge_sys)
+    judge_user = (
+        "From the above A/B reasoning and JSON proposals, produce a FINAL merged JSON array of scenarios "
+        "that EXACTLY matches the schema. Deliver 9–11 distinct scenarios (target 10) with probabilities summing to ~1 across the set. "
+        "Output RAW JSON only (no markdown, no backticks, no labels)."
+    )
     def emit_stage(label: str, content: str) -> None:
         pretty_label = label
         upper = label.upper()
@@ -399,11 +440,16 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
     for r in range(rounds):
         # ----- A speaks -----
         round_tag = f"R{r + 1}-A"
-        promptA = seed_user if r == 0 else textwrap.dedent("""\
-            Critique the Devil's advocate's last JSON in words first (no numbers can be hand-wavy; be precise).
-            Then produce: 
-            Revised JSON: <STRICT JSON array per schema, no backticks, no prose after>
-        """)
+        if r == 0:
+            promptA = seed_user
+        else:
+            promptA = textwrap.dedent("""\
+                Critique the Devil's advocate's last JSON in words first (highlight precise numeric deltas vs. their prior round proposal).
+                Reference the previous round's debate when explaining what you kept, modified, or rejected.
+                Rebalance probabilities so the set sums to 1.0 before you emit JSON.
+                Then produce:
+                Revised JSON: <STRICT JSON array per schema, no backticks, no prose after>
+            """).strip()
         mA = make_messages(sysA, promptA, hist)
         outA = chat(
             model=deb_models[0],
@@ -436,9 +482,11 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
         round_tag = f"R{r + 1}-B"
         promptB = textwrap.dedent("""\
             Critique the Proponent's position in words first (focus on macro/flows, funding, basis, convexity). Never refer to them as "A" or "B".
+            React to the Proponent's latest JSON and spell out which elements you are embracing vs. changing, with precise numbers, relative to the prior round.
+            Rebalance probabilities so the set sums to 1.0 before you emit JSON.
             Then produce:
             Revised JSON: <STRICT JSON array per schema, no backticks, no prose after>
-        """)
+        """).strip()
         mB = make_messages(sysB, promptB, hist)
         outB = chat(
             model=deb_models[1],
@@ -466,48 +514,27 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
             with open(pB, "w", encoding="utf-8") as f:
                 f.write(outB)
 
-    # Judge merges/selects
-    judge_template = cfg["prompts"].get("system_judge", "")
-    judge_constraints = cfg.get("inputs", {}).get("constraints", {})
-    judge_override = bool(runtime_cfg.get("judge_prompt_override"))
-    if judge_override:
-        judge_sys = judge_template
-    else:
-        try:
-            judge_sys = judge_template.format(**judge_constraints)
-        except Exception as exc:
-            logging.warning(
-                f"Judge prompt formatting failed ({type(exc).__name__}); using raw template."
-            )
-            judge_sys = judge_template
-    runtime_cfg.setdefault("judge_prompt_effective", judge_sys)
-    judge_user = (
-        "From the above A/B reasoning and JSON proposals, produce a FINAL merged JSON array of scenarios "
-        "that EXACTLY matches the schema. Reject duplicates; ensure probabilities sum to ~1 across the set. "
-        "Output RAW JSON only (no markdown, no backticks, no labels)."
-    )
-    logging.info(f"[{run_tag}] Invoking judge model={cfg['debate']['judge_model']}")
+    logging.info(f"[{run_tag}] Invoking judge model={cfg['debate']['judge_model']} (final)")
     judge_out = chat(
         model=cfg["debate"]["judge_model"],
         messages=make_messages(judge_sys, judge_user, hist),
         temperature=cfg["debate"]["judge_temperature"],
         top_p=1.0,
         max_tokens=int(cfg["debate"].get("judge_max_tokens", 10000)),
-        run_tag=run_tag, round_tag="JUDGE"
+        run_tag=run_tag,
+        round_tag="JUDGE"
     )
     emit_stage("JUDGE", judge_out)
 
-    # For transcript: attempt to extract JSON block for judge as well
     judge_json_for_tx = extract_json_block(judge_out) or ""
     transcript.append({
         "speaker": "JUDGE",
         "round": 0,
-        "reasoning": "",  # judge shouldn't add prose; keep empty
+        "reasoning": "",
         "json": judge_json_for_tx,
         "raw": judge_out
     })
 
-    # Save judge raw (always, for auditability)
     if save_wip:
         raw_path = os.path.join(artifacts_dir, f"judge_raw_run_{run_idx + 1}.txt")
         os.makedirs(os.path.dirname(raw_path), exist_ok=True)
@@ -676,6 +703,14 @@ def main():
     if env_shock_yaml:
         inputs_cfg["shock_yaml"] = env_shock_yaml
         logging.info("Attach user shock YAML via MAD_SHOCK_YAML")
+    env_holdings_csv = os.getenv("MAD_HOLDINGS_CSV")
+    if env_holdings_csv:
+        inputs_cfg["holdings_csv"] = env_holdings_csv
+        logging.info("Attach holdings CSV via MAD_HOLDINGS_CSV")
+    env_risk_csv = os.getenv("MAD_RISK_LADDER_CSV")
+    if env_risk_csv:
+        inputs_cfg["risk_ladder_csv"] = env_risk_csv
+        logging.info("Attach risk ladder CSV via MAD_RISK_LADDER_CSV")
     env_news_context = os.getenv("MAD_NEWS_CONTEXT")
     if env_news_context:
         inputs_cfg["news_context"] = env_news_context

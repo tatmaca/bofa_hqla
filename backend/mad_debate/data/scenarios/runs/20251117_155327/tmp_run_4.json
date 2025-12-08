@@ -1,0 +1,141 @@
+[
+  {
+    "Scenario": "Bear Steepening with Rising Credit Spreads",
+    "Description": "Long-term rates rise faster than short-term rates, with IG credit spreads widening by 15bps and HY spreads by 45bps.",
+    "Probability": 0.2,
+    "Rationale": "Inflation concerns and tightening monetary policy lead to a bear steepening yield curve, increasing risk aversion among investors.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Credit OAS (bps)",
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "yield_curve": "bear_steepener",
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NII": 2
+    },
+    "TradeList": [
+      "Add $2bn USTs via repo",
+      "Increase MBS purchases by $1bn"
+    ],
+    "Assumptions": "Sustained inflation leads to a shift in investor sentiment, affecting long-term asset valuations."
+  },
+  {
+    "Scenario": "Regulatory Tightening with TLAC Adjustments",
+    "Description": "New TLAC requirements increase capital burdens, leading to a rise in funding costs.",
+    "Probability": 0.15,
+    "Rationale": "Regulatory discussions suggest potential tightening of capital requirements for G-SIBs, impacting liquidity management and funding strategies.",
+    "ImpactChannels": [
+      "Reg changes",
+      "Credit OAS (bps)"
+    ],
+    "Shocks": {
+      "regulatory": "TLAC adjustments increase by 50bps"
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NII": -5
+    },
+    "TradeList": [
+      "Reduce corporate bond holdings by $1bn",
+      "Issue $3bn of new TLAC-compliant debt"
+    ],
+    "Assumptions": "Increased regulatory scrutiny leads to higher funding costs, impacting overall profitability."
+  },
+  {
+    "Scenario": "Stable Deposits with Minor Rate Increases",
+    "Description": "Deposits remain stable, with a modest interest rate increase of 25bps.",
+    "Probability": 0.3,
+    "Rationale": "Gradual rate hikes are expected as economic conditions improve, supporting the bank's net interest income.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "move": 25
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NII": 8
+    },
+    "TradeList": [
+      "Add $1bn in short-term notes",
+      "Increase floating-rate loan issuance by $1bn"
+    ],
+    "Assumptions": "Market conditions stabilize, allowing for gradual increases in interest rates without significant deposit runoff."
+  },
+  {
+    "Scenario": "Geopolitical Tensions Leading to Flight to Safety",
+    "Description": "Increased demand for USTs leads to a compression of credit spreads and a stable deposit base.",
+    "Probability": 0.1,
+    "Rationale": "Geopolitical instability drives investors towards safe-haven assets, enhancing the demand for USTs and benefiting liquidity.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Credit OAS (bps)"
+    ],
+    "Shocks": {
+      "ig_oas": -10,
+      "hy_oas": -20
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NII": 3
+    },
+    "TradeList": [
+      "Add $1.5bn USTs",
+      "Decrease corporate bond issuance by $1bn"
+    ],
+    "Assumptions": "Heightened geopolitical risks lead to increased demand for safe assets, stabilizing deposit flows."
+  },
+  {
+    "Scenario": "Economic Recovery with Increased Loan Demand",
+    "Description": "Strong economic growth leads to higher loan demand and tighter credit spreads.",
+    "Probability": 0.1,
+    "Rationale": "Positive economic indicators suggest a recovery, boosting loan demand and reducing risk premiums, benefiting the bank's balance sheet.",
+    "ImpactChannels": [
+      "Credit OAS (bps)",
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "ig_oas": -5,
+      "hy_oas": -10
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NII": 10
+    },
+    "TradeList": [
+      "Increase loan origination by $2bn",
+      "Add $500mm in MBS"
+    ],
+    "Assumptions": "Economic growth leads to increased lending activity and improved asset quality."
+  },
+  {
+    "Scenario": "Commodity Price Shock and Energy Volatility",
+    "Description": "Oil prices spike 20% due to supply disruptions, increasing input costs and pressuring credit in energy-exposed sectors.",
+    "Probability": 0.15,
+    "Rationale": "Geopolitical or supply chain events drive a sharp rise in commodity prices, impacting credit and deposit flows in affected sectors.",
+    "ImpactChannels": [
+      "Commodity Prices",
+      "Credit OAS (bps)",
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "oil_price": "+20%",
+      "energy_sector_oas": 30
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NII": -1
+    },
+    "TradeList": [
+      "Reduce energy sector loan exposure by $500mm",
+      "Increase hedging on energy-linked derivatives"
+    ],
+    "Assumptions": "Energy price volatility transmits to broader credit and liquidity conditions through sectoral stress."
+  }
+]

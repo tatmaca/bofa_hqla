@@ -1,0 +1,244 @@
+[
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "IG OAS widens by 12bps, HY OAS widens by 35bps, increasing funding costs and risk-off sentiment.",
+    "Probability": 0.15,
+    "Rationale": "Increased funding costs impact capital ratios and profitability, but BoA's diversified funding can cushion the impact.",
+    "ImpactChannels": [
+      "Credit OAS (+12bps IG, +35bps HY)"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": 12,
+        "hy_oas": 35
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NII": -100
+    },
+    "TradeList": [
+      "Increase $500mn in secured funding via repo",
+      "Add $500mn Agency MBS"
+    ],
+    "Assumptions": "Market volatility leads to risk-off sentiment."
+  },
+  {
+    "Scenario": "Interest Rate Increase",
+    "Description": "A +50 bps increase in interest rates, leading to improved NII but declining HQLA valuations.",
+    "Probability": 0.15,
+    "Rationale": "Current Fed signals indicate potential for measured rate hikes.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Curve (bear steepener)",
+      "Deposits (-5%)"
+    ],
+    "Shocks": {
+      "move": 50,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -3,
+      "NII": 200
+    },
+    "TradeList": [
+      "Add $1bn 10-year Treasuries via auction"
+    ],
+    "Assumptions": "Consumer spending remains stable despite moderate rate increases."
+  },
+  {
+    "Scenario": "Credit Spread Widening",
+    "Description": "A +30 bps increase in IG spreads and +70 bps in HY spreads, impacting corporate bond valuations.",
+    "Probability": 0.14,
+    "Rationale": "Economic uncertainties lead to wider spreads.",
+    "ImpactChannels": [
+      "Credit (30 bps)",
+      "MBS basis (10 bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": 0,
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 70
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": -2,
+      "NII": -60
+    },
+    "TradeList": [
+      "Reduce corporate bond holdings by $500mn"
+    ],
+    "Assumptions": "Corporate defaults remain within manageable levels."
+  },
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Short-term rates rise by 50bps while long-term rates fall by 10bps, flattening the yield curve.",
+    "Probability": 0.12,
+    "Rationale": "A bear steepener reduces loan profitability while increasing funding costs, but BoA can manage through asset reallocations.",
+    "ImpactChannels": [
+      "Rates (+50bps 2yr)",
+      "Curve (bear steepener)"
+    ],
+    "Shocks": {
+      "move": 60,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NII": -150
+    },
+    "TradeList": [
+      "Add $500mn 10-year UST via repo",
+      "Sell $250mn 2-year notes"
+    ],
+    "Assumptions": "Short-term rates rise due to Fed tightening."
+  },
+  {
+    "Scenario": "Regulatory Change",
+    "Description": "New Basel III regulations impose higher capital and liquidity requirements.",
+    "Probability": 0.1,
+    "Rationale": "Increased compliance costs and need for liquidity adjustment, but BoA's proactive management can ease transitions.",
+    "ImpactChannels": [
+      "Reg changes (Basel III)"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Adjust capital allocation to meet new ratios"
+    ],
+    "Assumptions": "Regulatory announcements impact market confidence."
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis widens by 22bps, increasing funding costs and impacting OCI.",
+    "Probability": 0.1,
+    "Rationale": "Higher funding costs negatively impact OCI and profitability, but BoA can strategically manage its MBS portfolio.",
+    "ImpactChannels": [
+      "MBS basis (+22bps)"
+    ],
+    "Shocks": {
+      "mbs_basis": 22
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NII": -50
+    },
+    "TradeList": [
+      "Sell $500mn MBS to reduce basis risk",
+      "Add $750mn MBS"
+    ],
+    "Assumptions": "Market conditions lead to wider MBS spreads."
+  },
+  {
+    "Scenario": "Bear Steepening Yield Curve",
+    "Description": "A bear steepening of the yield curve, impacting MBS basis and refinancing.",
+    "Probability": 0.1,
+    "Rationale": "Current yield curve dynamics suggest a potential steepening.",
+    "ImpactChannels": [
+      "Curve (bear steepener)",
+      "MBS basis (20 bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": -1,
+      "NII": -100
+    },
+    "TradeList": [
+      "Hedge MBS exposure with $300mn in Treasuries"
+    ],
+    "Assumptions": "Refinancing activity remains robust."
+  },
+  {
+    "Scenario": "High Volatility Scenario",
+    "Description": "An increase in market volatility (VIX to 25) leading to liquidity stresses.",
+    "Probability": 0.1,
+    "Rationale": "Current market sentiment suggests rising volatility.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Credit (50 bps)"
+    ],
+    "Shocks": {
+      "move": 50,
+      "yield_curve": 0,
+      "credit_spreads": {
+        "ig_oas": 50,
+        "hy_oas": 50
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3,
+      "NII": -200
+    },
+    "TradeList": [
+      "Increase liquidity reserves by $500mn"
+    ],
+    "Assumptions": "Market conditions normalize after initial shock."
+  },
+  {
+    "Scenario": "Housing Market Correction",
+    "Description": "A 15% decline in home prices negatively impacts MBS valuations.",
+    "Probability": 0.1,
+    "Rationale": "Recent housing market data suggests potential for corrections.",
+    "ImpactChannels": [
+      "MBS basis (30 bps)",
+      "Credit (10 bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": 0,
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "NII": -150
+    },
+    "TradeList": [
+      "Rebalance MBS portfolio by $400mn"
+    ],
+    "Assumptions": "Consumer confidence dips due to housing market."
+  },
+  {
+    "Scenario": "Deposit Runoff",
+    "Description": "5% unexpected retail deposit runoff over 6 months.",
+    "Probability": 0.09,
+    "Rationale": "Heightened consumer sensitivity to interest rates leads to liquidity pressures, but BoA's diversified base can offset this.",
+    "ImpactChannels": [
+      "Deposits run-off (5%)"
+    ],
+    "Shocks": {
+      "deposits": -5
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Raise $500mn via term debt issuance"
+    ],
+    "Assumptions": "Consumers withdraw deposits in response to rate increases."
+  }
+]

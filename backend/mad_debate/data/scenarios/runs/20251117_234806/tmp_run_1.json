@@ -1,0 +1,117 @@
+[
+  {
+    "Scenario": "Interest Rate Shock",
+    "Description": "Bear steepener with short-term rates up 50 bps and long-term rates up 20 bps, impacting NII.",
+    "Probability": 0.25,
+    "Rationale": "Market expectations of aggressive Fed tightening given inflation concerns.",
+    "ImpactChannels": [
+      "Rates: +50 bps",
+      "Curve: Bear Steepener"
+    ],
+    "Shocks": {
+      "move": 50,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -2,
+      "NII": -500000000
+    },
+    "TradeList": [
+      "Add $2bn 10Y USTs",
+      "Reduce $1bn 3M repo"
+    ],
+    "Assumptions": "Consumer behavior remains stable despite rate increases."
+  },
+  {
+    "Scenario": "Credit Spread Widening",
+    "Description": "IG OAS increases by 15 bps and HY OAS by 45 bps, indicating rising credit risk.",
+    "Probability": 0.15,
+    "Rationale": "Increased credit risk perceptions from potential consumer balance sheet deterioration.",
+    "ImpactChannels": [
+      "Credit OAS: +15 bps",
+      "Credit OAS: +45 bps"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -1,
+      "OCI": -300000000
+    },
+    "TradeList": [
+      "Sell $1bn IG corporate bonds",
+      "Add $500M in high-quality munis"
+    ],
+    "Assumptions": "Economic conditions worsen, leading to higher default risk."
+  },
+  {
+    "Scenario": "Deposits Runoff",
+    "Description": "Retail deposits experience a 5% runoff due to competitive pressures from higher rates.",
+    "Probability": 0.15,
+    "Rationale": "Stable but rising deposit beta indicates sensitivity among SMEs.",
+    "ImpactChannels": [
+      "Deposits: -5%"
+    ],
+    "Shocks": {
+      "deposits": -5
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3,
+      "NII": -200000000
+    },
+    "TradeList": [
+      "Increase $1bn in term deposits",
+      "Adjust funding via FHLB borrowing"
+    ],
+    "Assumptions": "Retail and SME clients shift to higher-yielding options."
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Increase in TLAC requirements by 50 bps, tightening liquidity conditions.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing regulatory discussions may lead to increased capital requirements.",
+    "ImpactChannels": [
+      "Reg changes: TLAC +50 bps"
+    ],
+    "Shocks": {
+      "regulatory": "TLAC +50 bps"
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Raise $1bn in Tier 2 bonds",
+      "Optimize HQLA mix"
+    ],
+    "Assumptions": "Regulatory environment continues to evolve with focus on G-SIBs."
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis widens by 25 bps due to market perception changes in housing risks.",
+    "Probability": 0.2,
+    "Rationale": "Market volatility and prepayment risk perception increase basis spreads.",
+    "ImpactChannels": [
+      "MBS basis: +25 bps"
+    ],
+    "Shocks": {
+      "mbs_basis": 25
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1,
+      "OCI": -200000000
+    },
+    "TradeList": [
+      "Add $1bn in Agency MBS",
+      "Rebalance MBS portfolio"
+    ],
+    "Assumptions": "Housing market shows signs of weakness, affecting MBS valuations."
+  }
+]

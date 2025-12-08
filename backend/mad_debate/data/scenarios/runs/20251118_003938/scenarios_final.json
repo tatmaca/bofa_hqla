@@ -1,0 +1,216 @@
+[
+  {
+    "Scenario": "Negative Economic Shock",
+    "Description": "Unemployment rate rises by 1%, increasing defaults.",
+    "Probability": 0.18,
+    "Rationale": "Economic downturn leads to increased stress on consumer balance sheets.",
+    "ImpactChannels": "Credit (defaults increase)",
+    "Shocks": {
+      "unemployment": 1
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -6
+    },
+    "TradeList": [
+      "Increase loan loss reserves by $500m",
+      "Enhance credit monitoring"
+    ],
+    "Assumptions": "Economic conditions deteriorate; consumer confidence drops."
+  },
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Short-term rates decline while long-term rates rise, leading to a bear steepening of the yield curve.",
+    "Probability": 0.16,
+    "Rationale": "Yield curve volatility remains elevated as inflation expectations diverge from near-term growth signals.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move_index": -50,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 0,
+      "OCI": -100
+    },
+    "TradeList": [
+      "Add $1bn 10Y UST via repo",
+      "Sell $500mm 2Y UST"
+    ],
+    "Assumptions": "Moderate economic growth with persistent inflation."
+  },
+  {
+    "Scenario": "Interest Rate Shock",
+    "Description": "10-year yield increases by 50 bps while 2-year yield remains stable.",
+    "Probability": 0.14,
+    "Rationale": "Ongoing inflation concerns and potential Fed tightening.",
+    "ImpactChannels": "Rates (50 bps)",
+    "Shocks": {
+      "move_index": 50
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $2bn USTs via repo",
+      "Increase duration hedges"
+    ],
+    "Assumptions": "Yield curve remains steep; no major economic shocks."
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Credit spreads widen due to market volatility, increasing risk premiums on corporate bonds and MBS.",
+    "Probability": 0.13,
+    "Rationale": "Flight to quality amid geopolitical or economic stress.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 100
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -1,
+      "OCI": -25
+    },
+    "TradeList": [
+      "Sell $750mm agency MBS",
+      "Add $500mm IG corporate bonds"
+    ],
+    "Assumptions": "Market sentiment deteriorates due to external shocks."
+  },
+  {
+    "Scenario": "Stable Economy with Gradual Rate Increases",
+    "Description": "Steady growth and inflation prompt the Fed to gradually raise rates.",
+    "Probability": 0.13,
+    "Rationale": "Economic indicators remain stable with moderate growth.",
+    "ImpactChannels": [
+      "Rates"
+    ],
+    "Shocks": {
+      "move_index": 100
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 0,
+      "NII": 300
+    },
+    "TradeList": [
+      "Add $500mm in TIPS",
+      "Rebalance portfolio duration"
+    ],
+    "Assumptions": "No major shocks; policy normalization continues."
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Changes in TLAC or liquidity add-ons requiring higher buffers.",
+    "Probability": 0.12,
+    "Rationale": "Potential regulatory shifts could impact capital management.",
+    "ImpactChannels": "Reg changes (TLAC adjustments)",
+    "Shocks": {
+      "regulatory": "TLAC increase by 50 bps"
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4
+    },
+    "TradeList": [
+      "Increase capital reserves by $1bn",
+      "Review liquidity strategy"
+    ],
+    "Assumptions": "Regulatory environment remains stable; no major market shocks."
+  },
+  {
+    "Scenario": "Commodity Price Spike",
+    "Description": "Commodity prices increase by 20%, creating inflationary pressures.",
+    "Probability": 0.1,
+    "Rationale": "Rising commodity prices could lead to higher interest rates.",
+    "ImpactChannels": "Rates (inflation effect)",
+    "Shocks": {
+      "commodity_prices": 20
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Adjust interest rate hedges",
+      "Increase cash reserves"
+    ],
+    "Assumptions": "Inflation concerns escalate; no major geopolitical events."
+  },
+  {
+    "Scenario": "Commodity Price Shock",
+    "Description": "Sharp increase in commodity prices triggers economic instability and sectoral credit deterioration.",
+    "Probability": 0.1,
+    "Rationale": "Geopolitical tensions or supply disruptions drive up prices.",
+    "ImpactChannels": [
+      "Commodity Prices",
+      "Credit"
+    ],
+    "Shocks": {
+      "commodity_prices": 0.2
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -4,
+      "NII": -75
+    },
+    "TradeList": [
+      "Increase exposure to commodity-linked assets",
+      "Reassess credit risk in affected sectors"
+    ],
+    "Assumptions": "Global supply shocks persist."
+  },
+  {
+    "Scenario": "Credit Spread Widening",
+    "Description": "IG spreads widen by 20 bps and HY spreads by 50 bps.",
+    "Probability": 0.09,
+    "Rationale": "Market risk aversion increases due to geopolitical tensions.",
+    "ImpactChannels": "Credit OAS (20 bps IG, 50 bps HY)",
+    "Shocks": {
+      "ig_oas": 20,
+      "hy_oas": 50
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "OCI": -2
+    },
+    "TradeList": [
+      "Reduce exposure to HY bonds",
+      "Increase cash reserves"
+    ],
+    "Assumptions": "Stable economic growth; no major defaults."
+  },
+  {
+    "Scenario": "Bull Flattener",
+    "Description": "Long-term rates fall more than short-term rates, flattening the curve as markets price in recession risk.",
+    "Probability": 0.08,
+    "Rationale": "Unexpected economic slowdown drives demand for long-duration safe assets.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move_index": -75,
+      "yield_curve": "bull_flattener"
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NSFR": 1,
+      "OCI": 150
+    },
+    "TradeList": [
+      "Add $500mm 30Y UST",
+      "Reduce $400mm 5Y UST"
+    ],
+    "Assumptions": "Recession risk rises but credit remains stable."
+  }
+]

@@ -11943,3 +11943,689 @@ A's Position Critique:
 05:01:24 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251117_045949/scenarios_final.json
 05:01:24 [INFO] Wrote run metadata to data/scenarios/runs/20251117_045949/metadata.json
 05:01:24 [INFO] Done.
+15:25:42 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+15:25:42 [INFO] Detected OPENAI_API_KEY (length=164).
+15:25:42 [INFO] openai package version: 2.6.1
+15:25:42 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+15:25:42 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+15:25:42 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+15:25:42 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+15:25:42 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+15:25:42 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+15:25:42 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+15:25:42 [INFO] [RUN#1/5] starting debate...
+15:26:19 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:26:19 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=1429 total=2414
+15:26:50 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:26:50 [INFO] [RUN#1 R1-B] tokens: prompt=1711 output=1125 total=2836
+15:27:06 [ERROR] [RUN#1] Interrupted by user.
+15:27:06 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+15:27:06 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251117_152542/scenarios_final.json
+15:27:06 [INFO] Wrote run metadata to data/scenarios/runs/20251117_152542/metadata.json
+15:27:06 [INFO] Done.
+15:28:16 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+15:28:16 [INFO] Detected OPENAI_API_KEY (length=164).
+15:28:16 [INFO] openai package version: 2.6.1
+15:28:16 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+15:28:16 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+15:28:16 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+15:28:16 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+15:28:16 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+15:28:16 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+15:28:16 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+15:28:16 [INFO] [RUN#1/5] starting debate...
+15:28:40 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:28:40 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=1295 total=2280
+15:29:04 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:29:04 [INFO] [RUN#1 R1-B] tokens: prompt=1577 output=1119 total=2696
+15:29:32 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:29:32 [INFO] [RUN#1 R2-A] tokens: prompt=2950 output=1247 total=4197
+15:29:54 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:29:54 [INFO] [RUN#1 R2-B] tokens: prompt=3951 output=1042 total=4993
+15:30:25 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:30:25 [INFO] [RUN#1 R3-A] tokens: prompt=5247 output=1221 total=6468
+15:30:51 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:30:51 [INFO] [RUN#1 R3-B] tokens: prompt=6222 output=1083 total=7305
+15:30:51 [INFO] [RUN#1] Invoking judge model=gpt-4.1
+15:30:57 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:30:57 [INFO] [RUN#1 JUDGE] tokens: prompt=7245 output=1210 total=8455
+15:30:57 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251117_152816/transcript_run_1.{jsonl,md}
+15:30:57 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251117_152816/tmp_run_1.json (count=7)
+15:30:57 [INFO] [RUN#1] finished; scenarios=7
+15:30:57 [INFO] [RUN#2/5] starting debate...
+15:32:14 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:32:14 [INFO] [RUN#2 R1-A] tokens: prompt=985 output=1271 total=2256
+15:32:35 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:32:35 [INFO] [RUN#2 R1-B] tokens: prompt=1553 output=965 total=2518
+15:33:03 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:33:03 [INFO] [RUN#2 R2-A] tokens: prompt=2772 output=1138 total=3910
+15:33:35 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:33:35 [INFO] [RUN#2 R2-B] tokens: prompt=3664 output=1094 total=4758
+15:34:00 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:34:00 [INFO] [RUN#2 R3-A] tokens: prompt=5012 output=1143 total=6155
+15:34:31 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:34:31 [INFO] [RUN#2 R3-B] tokens: prompt=5909 output=1122 total=7031
+15:34:31 [INFO] [RUN#2] Invoking judge model=gpt-4.1
+15:34:38 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:34:38 [INFO] [RUN#2 JUDGE] tokens: prompt=6971 output=1057 total=8028
+15:34:38 [INFO] [RUN#2] Wrote transcript to data/scenarios/runs/20251117_152816/transcript_run_2.{jsonl,md}
+15:34:38 [INFO] [RUN#2] Saved intermediate results to data/scenarios/runs/20251117_152816/tmp_run_2.json (count=7)
+15:34:38 [INFO] [RUN#2] finished; scenarios=7
+15:34:38 [INFO] [RUN#3/5] starting debate...
+15:35:09 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:35:09 [INFO] [RUN#3 R1-A] tokens: prompt=985 output=1410 total=2395
+15:35:34 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:35:34 [INFO] [RUN#3 R1-B] tokens: prompt=1692 output=1193 total=2885
+15:36:01 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:36:01 [INFO] [RUN#3 R2-A] tokens: prompt=3139 output=1223 total=4362
+15:36:28 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:36:28 [INFO] [RUN#3 R2-B] tokens: prompt=4119 output=1196 total=5315
+15:36:56 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:36:56 [INFO] [RUN#3 R3-A] tokens: prompt=5569 output=1219 total=6788
+15:37:18 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:37:18 [INFO] [RUN#3 R3-B] tokens: prompt=6542 output=1184 total=7726
+15:37:18 [INFO] [RUN#3] Invoking judge model=gpt-4.1
+15:37:30 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:37:30 [INFO] [RUN#3 JUDGE] tokens: prompt=7666 output=1331 total=8997
+15:37:30 [INFO] [RUN#3] Wrote transcript to data/scenarios/runs/20251117_152816/transcript_run_3.{jsonl,md}
+15:37:30 [INFO] [RUN#3] Saved intermediate results to data/scenarios/runs/20251117_152816/tmp_run_3.json (count=7)
+15:37:30 [INFO] [RUN#3] finished; scenarios=7
+15:37:30 [INFO] [RUN#4/5] starting debate...
+15:38:03 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:38:03 [INFO] [RUN#4 R1-A] tokens: prompt=985 output=1467 total=2452
+15:38:24 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:38:24 [INFO] [RUN#4 R1-B] tokens: prompt=1749 output=1070 total=2819
+15:38:47 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:38:48 [INFO] [RUN#4 R2-A] tokens: prompt=3073 output=1241 total=4314
+15:39:16 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:39:16 [INFO] [RUN#4 R2-B] tokens: prompt=4071 output=1055 total=5126
+15:39:41 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:39:41 [INFO] [RUN#4 R3-A] tokens: prompt=5380 output=1212 total=6592
+15:40:04 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:40:04 [INFO] [RUN#4 R3-B] tokens: prompt=6349 output=1095 total=7444
+15:40:04 [INFO] [RUN#4] Invoking judge model=gpt-4.1
+15:40:12 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:40:12 [INFO] [RUN#4 JUDGE] tokens: prompt=7384 output=958 total=8342
+15:40:12 [INFO] [RUN#4] Wrote transcript to data/scenarios/runs/20251117_152816/transcript_run_4.{jsonl,md}
+15:40:12 [INFO] [RUN#4] Saved intermediate results to data/scenarios/runs/20251117_152816/tmp_run_4.json (count=6)
+15:40:12 [INFO] [RUN#4] finished; scenarios=6
+15:40:12 [INFO] [RUN#5/5] starting debate...
+15:40:45 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:40:45 [INFO] [RUN#5 R1-A] tokens: prompt=985 output=1465 total=2450
+15:41:08 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:41:08 [INFO] [RUN#5 R1-B] tokens: prompt=1747 output=974 total=2721
+15:41:29 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:41:29 [INFO] [RUN#5 R2-A] tokens: prompt=2975 output=1071 total=4046
+15:41:48 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:41:48 [INFO] [RUN#5 R2-B] tokens: prompt=3803 output=953 total=4756
+15:42:10 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:42:10 [INFO] [RUN#5 R3-A] tokens: prompt=5010 output=1059 total=6069
+15:42:11 [ERROR] [RUN#5] Interrupted by user.
+15:42:11 [INFO] Wrote 10 aggregated scenarios to /tmp/mad_scenarios.json
+15:42:11 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251117_152816/scenarios_final.json
+15:42:11 [INFO] Wrote run metadata to data/scenarios/runs/20251117_152816/metadata.json
+15:42:11 [INFO] Done.
+15:42:39 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+15:42:39 [INFO] Detected OPENAI_API_KEY (length=164).
+15:42:39 [INFO] openai package version: 2.6.1
+15:42:39 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+15:42:39 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+15:42:39 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+15:42:39 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+15:42:39 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+15:42:39 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+15:42:39 [INFO] Rounds=3 Runs=3 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+15:42:39 [INFO] [RUN#1/3] starting debate...
+15:43:09 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:43:09 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=1302 total=2287
+15:43:30 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:43:30 [INFO] [RUN#1 R1-B] tokens: prompt=1584 output=1016 total=2600
+15:43:52 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+15:43:52 [INFO] Detected OPENAI_API_KEY (length=164).
+15:43:52 [INFO] openai package version: 2.6.1
+15:43:52 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+15:43:52 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+15:43:52 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+15:43:52 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+15:43:52 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+15:43:52 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+15:43:52 [INFO] Rounds=3 Runs=3 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+15:43:52 [INFO] [RUN#1/3] starting debate...
+15:43:54 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:43:54 [INFO] [RUN#1 R2-A] tokens: prompt=2854 output=1126 total=3980
+15:43:55 [ERROR] [RUN#1] Interrupted by user.
+15:43:55 [ERROR] [RUN#1] Interrupted by user.
+15:43:55 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+15:43:55 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251117_154239/scenarios_final.json
+15:43:55 [INFO] Wrote run metadata to data/scenarios/runs/20251117_154239/metadata.json
+15:43:55 [INFO] Done.
+15:43:55 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+15:43:55 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251117_154352/scenarios_final.json
+15:43:55 [INFO] Wrote run metadata to data/scenarios/runs/20251117_154352/metadata.json
+15:43:55 [INFO] Done.
+15:44:17 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+15:44:17 [INFO] Detected OPENAI_API_KEY (length=164).
+15:44:17 [INFO] openai package version: 2.6.1
+15:44:17 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+15:44:17 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+15:44:17 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+15:44:17 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+15:44:17 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+15:44:17 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+15:44:17 [INFO] Rounds=3 Runs=3 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+15:44:17 [INFO] [RUN#1/3] starting debate...
+15:44:48 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:44:48 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=1482 total=2467
+15:45:13 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:45:13 [INFO] [RUN#1 R1-B] tokens: prompt=1764 output=1312 total=3076
+15:45:37 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:45:37 [INFO] [RUN#1 R2-A] tokens: prompt=3330 output=1334 total=4664
+15:45:50 [ERROR] [RUN#1] Interrupted by user.
+15:45:50 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+15:45:50 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251117_154417/scenarios_final.json
+15:45:50 [INFO] Wrote run metadata to data/scenarios/runs/20251117_154417/metadata.json
+15:45:50 [INFO] Done.
+15:51:56 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+15:51:56 [INFO] Detected OPENAI_API_KEY (length=164).
+15:51:56 [INFO] openai package version: 2.6.1
+15:51:56 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+15:51:56 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+15:51:56 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+15:51:56 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+15:51:56 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+15:51:56 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+15:51:56 [INFO] Rounds=3 Runs=3 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+15:51:56 [INFO] [RUN#1/3] starting debate...
+15:52:26 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:52:26 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=1429 total=2414
+15:52:48 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:52:48 [INFO] [RUN#1 R1-B] tokens: prompt=1711 output=1153 total=2864
+15:53:03 [ERROR] [RUN#1] Interrupted by user.
+15:53:03 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+15:53:03 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251117_155156/scenarios_final.json
+15:53:03 [INFO] Wrote run metadata to data/scenarios/runs/20251117_155156/metadata.json
+15:53:03 [INFO] Done.
+15:53:27 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+15:53:27 [INFO] Detected OPENAI_API_KEY (length=164).
+15:53:27 [INFO] openai package version: 2.6.1
+15:53:27 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+15:53:27 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+15:53:27 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+15:53:27 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+15:53:27 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+15:53:27 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+15:53:27 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+15:53:27 [INFO] [RUN#1/5] starting debate...
+15:53:51 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:53:51 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=1316 total=2301
+15:54:12 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:54:12 [INFO] [RUN#1 R1-B] tokens: prompt=1598 output=1054 total=2652
+15:54:32 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:54:32 [INFO] [RUN#1 R2-A] tokens: prompt=2906 output=1231 total=4137
+15:54:58 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:54:58 [INFO] [RUN#1 R2-B] tokens: prompt=3891 output=1042 total=4933
+15:55:32 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:55:32 [INFO] [RUN#1 R3-A] tokens: prompt=5187 output=1196 total=6383
+15:55:54 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:55:54 [INFO] [RUN#1 R3-B] tokens: prompt=6137 output=1084 total=7221
+15:55:54 [INFO] [RUN#1] Invoking judge model=gpt-4.1
+15:56:07 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:56:07 [INFO] [RUN#1 JUDGE] tokens: prompt=7161 output=1334 total=8495
+15:56:07 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251117_155327/transcript_run_1.{jsonl,md}
+15:56:07 [ERROR] [RUN#1] JSON parse error on judge output: ValueError: No JSON block or JSONL-style content could be parsed
+15:56:07 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251117_155327/tmp_run_1.json (count=0)
+15:56:07 [INFO] [RUN#1] finished; scenarios=0
+15:56:07 [INFO] [RUN#2/5] starting debate...
+15:56:34 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:56:34 [INFO] [RUN#2 R1-A] tokens: prompt=985 output=1457 total=2442
+15:57:01 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:57:01 [INFO] [RUN#2 R1-B] tokens: prompt=1739 output=1289 total=3028
+15:57:26 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:57:26 [INFO] [RUN#2 R2-A] tokens: prompt=3282 output=1320 total=4602
+15:57:53 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:57:53 [INFO] [RUN#2 R2-B] tokens: prompt=4359 output=1285 total=5644
+15:58:20 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:58:20 [INFO] [RUN#2 R3-A] tokens: prompt=5898 output=1352 total=7250
+15:58:48 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:58:48 [INFO] [RUN#2 R3-B] tokens: prompt=7007 output=1311 total=8318
+15:58:48 [INFO] [RUN#2] Invoking judge model=gpt-4.1
+15:58:56 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:58:56 [INFO] [RUN#2 JUDGE] tokens: prompt=8258 output=1397 total=9655
+15:58:56 [INFO] [RUN#2] Wrote transcript to data/scenarios/runs/20251117_155327/transcript_run_2.{jsonl,md}
+15:58:56 [ERROR] [RUN#2] JSON parse error on judge output: ValueError: No JSON block or JSONL-style content could be parsed
+15:58:56 [INFO] [RUN#2] Saved intermediate results to data/scenarios/runs/20251117_155327/tmp_run_2.json (count=0)
+15:58:56 [INFO] [RUN#2] finished; scenarios=0
+15:58:56 [INFO] [RUN#3/5] starting debate...
+15:59:25 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:59:25 [INFO] [RUN#3 R1-A] tokens: prompt=985 output=1385 total=2370
+15:59:47 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+15:59:47 [INFO] [RUN#3 R1-B] tokens: prompt=1667 output=1170 total=2837
+16:00:13 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:00:13 [INFO] [RUN#3 R2-A] tokens: prompt=3091 output=1312 total=4403
+16:00:37 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:00:37 [INFO] [RUN#3 R2-B] tokens: prompt=4160 output=1214 total=5374
+16:01:11 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:01:11 [INFO] [RUN#3 R3-A] tokens: prompt=5628 output=1324 total=6952
+16:01:40 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:01:40 [INFO] [RUN#3 R3-B] tokens: prompt=6709 output=1204 total=7913
+16:01:40 [INFO] [RUN#3] Invoking judge model=gpt-4.1
+16:01:51 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:01:51 [INFO] [RUN#3 JUDGE] tokens: prompt=7853 output=1327 total=9180
+16:01:51 [INFO] [RUN#3] Wrote transcript to data/scenarios/runs/20251117_155327/transcript_run_3.{jsonl,md}
+16:01:51 [INFO] [RUN#3] Saved intermediate results to data/scenarios/runs/20251117_155327/tmp_run_3.json (count=7)
+16:01:51 [INFO] [RUN#3] finished; scenarios=7
+16:01:51 [INFO] [RUN#4/5] starting debate...
+16:02:23 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:02:23 [INFO] [RUN#4 R1-A] tokens: prompt=985 output=1359 total=2344
+16:02:45 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:02:45 [INFO] [RUN#4 R1-B] tokens: prompt=1641 output=1138 total=2779
+16:03:06 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:03:06 [INFO] [RUN#4 R2-A] tokens: prompt=3033 output=1222 total=4255
+16:03:27 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:03:27 [INFO] [RUN#4 R2-B] tokens: prompt=4012 output=1189 total=5201
+16:03:55 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:03:55 [INFO] [RUN#4 R3-A] tokens: prompt=5455 output=1288 total=6743
+16:04:24 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:04:24 [INFO] [RUN#4 R3-B] tokens: prompt=6500 output=1234 total=7734
+16:04:24 [INFO] [RUN#4] Invoking judge model=gpt-4.1
+16:04:36 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:04:36 [INFO] [RUN#4 JUDGE] tokens: prompt=7674 output=1127 total=8801
+16:04:36 [INFO] [RUN#4] Wrote transcript to data/scenarios/runs/20251117_155327/transcript_run_4.{jsonl,md}
+16:04:36 [INFO] [RUN#4] Saved intermediate results to data/scenarios/runs/20251117_155327/tmp_run_4.json (count=6)
+16:04:36 [INFO] [RUN#4] finished; scenarios=6
+16:04:36 [INFO] [RUN#5/5] starting debate...
+16:05:01 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:05:01 [INFO] [RUN#5 R1-A] tokens: prompt=985 output=1300 total=2285
+16:05:29 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:05:29 [INFO] [RUN#5 R1-B] tokens: prompt=1582 output=1148 total=2730
+16:05:58 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:05:58 [INFO] [RUN#5 R2-A] tokens: prompt=2984 output=1306 total=4290
+16:06:23 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:06:23 [INFO] [RUN#5 R2-B] tokens: prompt=4044 output=1211 total=5255
+16:06:54 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:06:54 [INFO] [RUN#5 R3-A] tokens: prompt=5509 output=1357 total=6866
+16:07:22 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:07:22 [INFO] [RUN#5 R3-B] tokens: prompt=6620 output=1271 total=7891
+16:07:22 [INFO] [RUN#5] Invoking judge model=gpt-4.1
+16:07:36 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+16:07:36 [INFO] [RUN#5 JUDGE] tokens: prompt=7831 output=1064 total=8895
+16:07:36 [INFO] [RUN#5] Wrote transcript to data/scenarios/runs/20251117_155327/transcript_run_5.{jsonl,md}
+16:07:36 [INFO] [RUN#5] Saved intermediate results to data/scenarios/runs/20251117_155327/tmp_run_5.json (count=6)
+16:07:36 [INFO] [RUN#5] finished; scenarios=6
+16:07:36 [INFO] Wrote 10 aggregated scenarios to /tmp/mad_scenarios.json
+16:07:36 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251117_155327/scenarios_final.json
+16:07:36 [INFO] Wrote run metadata to data/scenarios/runs/20251117_155327/metadata.json
+16:07:36 [INFO] Done.
+22:19:57 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+22:19:57 [INFO] Detected OPENAI_API_KEY (length=164).
+22:19:57 [INFO] openai package version: 2.6.1
+22:19:57 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+22:19:57 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+22:19:57 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+22:19:57 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+22:19:57 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+22:19:57 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+22:19:57 [INFO] Rounds=3 Runs=3 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+22:19:57 [INFO] [RUN#1/3] starting debate...
+22:20:06 [ERROR] [RUN#1] Interrupted by user.
+22:20:06 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+22:20:06 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251117_221957/scenarios_final.json
+22:20:06 [INFO] Wrote run metadata to data/scenarios/runs/20251117_221957/metadata.json
+22:20:06 [INFO] Done.
+23:48:06 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+23:48:06 [INFO] Detected OPENAI_API_KEY (length=164).
+23:48:06 [INFO] openai package version: 2.6.1
+23:48:06 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+23:48:06 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+23:48:06 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+23:48:06 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+23:48:06 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+23:48:06 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+23:48:06 [INFO] Rounds=3 Runs=3 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+23:48:06 [INFO] [RUN#1/3] starting debate...
+23:48:36 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:48:36 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=1251 total=2236
+23:49:01 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:49:01 [INFO] [RUN#1 R1-B] tokens: prompt=1559 output=1130 total=2689
+23:49:01 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (round 1)
+23:49:06 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:49:06 [INFO] [RUN#1 R1-J] tokens: prompt=2606 output=848 total=3454
+23:49:29 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:49:29 [INFO] [RUN#1 R2-A] tokens: prompt=4707 output=1240 total=5947
+23:49:57 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:49:57 [INFO] [RUN#1 R2-B] tokens: prompt=5714 output=1166 total=6880
+23:49:57 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (round 2)
+23:50:02 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:50:02 [INFO] [RUN#1 R2-J] tokens: prompt=5914 output=848 total=6762
+23:50:33 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:50:33 [INFO] [RUN#1 R3-A] tokens: prompt=8015 output=1224 total=9239
+23:51:06 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:51:06 [INFO] [RUN#1 R3-B] tokens: prompt=9006 output=1403 total=10409
+23:51:06 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (round 3)
+23:51:11 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:51:11 [INFO] [RUN#1 R3-J] tokens: prompt=9442 output=848 total=10290
+23:51:11 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251117_234806/transcript_run_1.{jsonl,md}
+23:51:11 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251117_234806/tmp_run_1.json (count=5)
+23:51:11 [INFO] [RUN#1] finished; scenarios=5
+23:51:11 [INFO] [RUN#2/3] starting debate...
+23:51:31 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:51:31 [INFO] [RUN#2 R1-A] tokens: prompt=985 output=1150 total=2135
+23:51:58 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:51:58 [INFO] [RUN#2 R1-B] tokens: prompt=1458 output=1120 total=2578
+23:51:58 [INFO] [RUN#2] Invoking judge model=gpt-4.1 (round 1)
+23:52:07 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:52:07 [INFO] [RUN#2 R1-J] tokens: prompt=2492 output=929 total=3421
+23:52:43 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:52:43 [INFO] [RUN#2 R2-A] tokens: prompt=4755 output=1573 total=6328
+23:53:17 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:53:17 [INFO] [RUN#2 R2-B] tokens: prompt=6095 output=1516 total=7611
+23:53:17 [INFO] [RUN#2] Invoking judge model=gpt-4.1 (round 2)
+23:53:24 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:53:24 [INFO] [RUN#2 R2-J] tokens: prompt=6564 output=929 total=7493
+23:53:57 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+23:53:57 [INFO] [RUN#2 R3-A] tokens: prompt=8827 output=1555 total=10382
+23:54:21 [ERROR] [RUN#2] Interrupted by user.
+23:54:21 [INFO] Wrote 5 aggregated scenarios to /tmp/mad_scenarios.json
+23:54:21 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251117_234806/scenarios_final.json
+23:54:21 [INFO] Wrote run metadata to data/scenarios/runs/20251117_234806/metadata.json
+23:54:21 [INFO] Done.
+00:00:52 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+00:00:52 [INFO] Detected OPENAI_API_KEY (length=164).
+00:00:52 [INFO] openai package version: 2.6.1
+00:00:52 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+00:00:52 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+00:00:52 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+00:00:52 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+00:00:52 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+00:00:52 [INFO] Attach holdings CSV via MAD_HOLDINGS_CSV
+00:00:52 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+00:00:52 [INFO] Rounds=3 Runs=3 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+00:00:52 [INFO] [RUN#1/3] starting debate...
+00:00:58 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+00:00:58 [INFO] Detected OPENAI_API_KEY (length=164).
+00:00:58 [INFO] openai package version: 2.6.1
+00:00:58 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+00:00:58 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+00:00:58 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+00:00:58 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+00:00:58 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+00:00:58 [INFO] Attach holdings CSV via MAD_HOLDINGS_CSV
+00:00:58 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+00:00:58 [INFO] Rounds=3 Runs=3 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+00:00:58 [INFO] [RUN#1/3] starting debate...
+00:01:37 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:01:37 [INFO] [RUN#1 R1-A] tokens: prompt=2900 output=2025 total=4925
+00:01:43 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:01:43 [INFO] [RUN#1 R1-A] tokens: prompt=2900 output=2227 total=5127
+00:02:19 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:02:19 [INFO] [RUN#1 R1-B] tokens: prompt=2333 output=1900 total=4233
+00:02:19 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (round 1)
+00:02:28 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:02:28 [INFO] [RUN#1 R1-J] tokens: prompt=4160 output=1373 total=5533
+00:02:28 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:02:28 [INFO] [RUN#1 R1-B] tokens: prompt=2535 output=1896 total=4431
+00:02:28 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (round 1)
+00:02:40 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:02:40 [INFO] [RUN#1 R1-J] tokens: prompt=4358 output=1524 total=5882
+00:03:07 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:03:07 [INFO] [RUN#1 R2-A] tokens: prompt=7301 output=1887 total=9188
+00:03:28 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:03:28 [INFO] [RUN#1 R2-A] tokens: prompt=7801 output=2153 total=9954
+00:03:47 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:03:47 [INFO] [RUN#1 R2-B] tokens: prompt=8952 output=1931 total=10883
+00:03:47 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (round 2)
+00:04:01 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:04:01 [INFO] [RUN#1 R2-J] tokens: prompt=9399 output=1373 total=10772
+00:04:20 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:04:20 [INFO] [RUN#1 R2-B] tokens: prompt=9721 output=2245 total=11966
+00:04:20 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (round 2)
+00:04:27 [ERROR] [RUN#1] Interrupted by user.
+00:04:27 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+00:04:27 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251118_000052/scenarios_final.json
+00:04:27 [INFO] Wrote run metadata to data/scenarios/runs/20251118_000052/metadata.json
+00:04:27 [INFO] Done.
+00:04:27 [ERROR] [RUN#1] Interrupted by user.
+00:04:27 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+00:04:27 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251118_000058/scenarios_final.json
+00:04:27 [INFO] Wrote run metadata to data/scenarios/runs/20251118_000058/metadata.json
+00:04:27 [INFO] Done.
+00:09:16 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+00:09:16 [INFO] Detected OPENAI_API_KEY (length=164).
+00:09:16 [INFO] openai package version: 2.6.1
+00:09:16 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+00:09:16 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+00:09:16 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+00:09:16 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+00:09:16 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+00:09:16 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+00:09:16 [INFO] Rounds=3 Runs=3 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+00:09:16 [INFO] [RUN#1/3] starting debate...
+00:09:47 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:09:47 [INFO] [RUN#1 R1-A] tokens: prompt=989 output=1899 total=2888
+00:10:30 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:10:30 [INFO] [RUN#1 R1-B] tokens: prompt=2211 output=1817 total=4028
+00:11:10 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:11:10 [INFO] [RUN#1 R2-A] tokens: prompt=4272 output=1987 total=6259
+00:11:58 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:11:58 [INFO] [RUN#1 R2-B] tokens: prompt=6029 output=2180 total=8209
+00:12:40 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:12:40 [INFO] [RUN#1 R3-A] tokens: prompt=8453 output=2112 total=10565
+00:13:25 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:13:25 [INFO] [RUN#1 R3-B] tokens: prompt=10334 output=2199 total=12533
+00:13:25 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (final)
+00:13:40 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:13:40 [INFO] [RUN#1 JUDGE] tokens: prompt=12456 output=1560 total=14016
+00:13:40 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251118_000916/transcript_run_1.{jsonl,md}
+00:13:40 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251118_000916/tmp_run_1.json (count=10)
+00:13:40 [INFO] [RUN#1] finished; scenarios=10
+00:13:40 [INFO] [RUN#2/3] starting debate...
+00:14:16 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:14:16 [INFO] [RUN#2 R1-A] tokens: prompt=989 output=1816 total=2805
+00:14:42 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:14:42 [INFO] [RUN#2 R1-B] tokens: prompt=2128 output=1658 total=3786
+00:15:07 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:15:07 [INFO] [RUN#2 R2-A] tokens: prompt=4029 output=1829 total=5858
+00:15:45 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:15:45 [INFO] [RUN#2 R2-B] tokens: prompt=5628 output=1746 total=7374
+00:16:20 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:16:20 [INFO] [RUN#2 R3-A] tokens: prompt=7618 output=1832 total=9450
+00:16:58 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:16:58 [INFO] [RUN#2 R3-B] tokens: prompt=9220 output=1775 total=10995
+00:16:58 [INFO] [RUN#2] Invoking judge model=gpt-4.1 (final)
+00:17:10 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:17:10 [INFO] [RUN#2 JUDGE] tokens: prompt=10918 output=1579 total=12497
+00:17:10 [INFO] [RUN#2] Wrote transcript to data/scenarios/runs/20251118_000916/transcript_run_2.{jsonl,md}
+00:17:10 [ERROR] [RUN#2] JSON parse error on judge output: ValueError: No JSON block or JSONL-style content could be parsed
+00:17:10 [INFO] [RUN#2] Saved intermediate results to data/scenarios/runs/20251118_000916/tmp_run_2.json (count=0)
+00:17:10 [INFO] [RUN#2] finished; scenarios=0
+00:17:10 [INFO] [RUN#3/3] starting debate...
+00:17:59 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:17:59 [INFO] [RUN#3 R1-A] tokens: prompt=989 output=2412 total=3401
+00:18:48 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:18:48 [INFO] [RUN#3 R1-B] tokens: prompt=2724 output=2227 total=4951
+00:19:37 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:19:37 [INFO] [RUN#3 R2-A] tokens: prompt=5195 output=2349 total=7544
+00:20:23 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:20:23 [INFO] [RUN#3 R2-B] tokens: prompt=7314 output=2380 total=9694
+00:21:12 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:21:12 [INFO] [RUN#3 R3-A] tokens: prompt=9938 output=2310 total=12248
+00:22:04 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:22:04 [INFO] [RUN#3 R3-B] tokens: prompt=12018 output=2374 total=14392
+00:22:04 [INFO] [RUN#3] Invoking judge model=gpt-4.1 (final)
+00:22:14 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:22:14 [INFO] [RUN#3 JUDGE] tokens: prompt=14315 output=1752 total=16067
+00:22:14 [INFO] [RUN#3] Wrote transcript to data/scenarios/runs/20251118_000916/transcript_run_3.{jsonl,md}
+00:22:14 [INFO] [RUN#3] Saved intermediate results to data/scenarios/runs/20251118_000916/tmp_run_3.json (count=10)
+00:22:14 [INFO] [RUN#3] finished; scenarios=10
+00:22:14 [INFO] Wrote 10 aggregated scenarios to /tmp/mad_scenarios.json
+00:22:14 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251118_000916/scenarios_final.json
+00:22:14 [INFO] Wrote run metadata to data/scenarios/runs/20251118_000916/metadata.json
+00:22:14 [INFO] Done.
+00:31:43 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+00:31:43 [INFO] Detected OPENAI_API_KEY (length=164).
+00:31:43 [INFO] openai package version: 2.6.1
+00:31:43 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+00:31:43 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+00:31:43 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+00:31:43 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+00:31:43 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+00:31:43 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+00:31:43 [INFO] Rounds=2 Runs=1 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+00:31:43 [INFO] [RUN#1/1] starting debate...
+00:32:43 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:32:43 [INFO] [RUN#1 R1-A] tokens: prompt=989 output=2386 total=3375
+00:33:33 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:33:33 [INFO] [RUN#1 R1-B] tokens: prompt=2698 output=2077 total=4775
+00:34:30 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:34:30 [INFO] [RUN#1 R2-A] tokens: prompt=5019 output=2327 total=7346
+00:35:21 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:35:21 [INFO] [RUN#1 R2-B] tokens: prompt=7116 output=2299 total=9415
+00:35:21 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (final)
+00:35:38 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:35:38 [INFO] [RUN#1 JUDGE] tokens: prompt=9338 output=1639 total=10977
+00:35:38 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251118_003143/transcript_run_1.{jsonl,md}
+00:35:38 [ERROR] [RUN#1] JSON parse error on judge output: ValueError: No JSON block or JSONL-style content could be parsed
+00:35:38 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251118_003143/tmp_run_1.json (count=0)
+00:35:38 [INFO] [RUN#1] finished; scenarios=0
+00:35:38 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+00:35:38 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251118_003143/scenarios_final.json
+00:35:38 [INFO] Wrote run metadata to data/scenarios/runs/20251118_003143/metadata.json
+00:35:38 [INFO] Done.
+00:39:38 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+00:39:38 [INFO] Detected OPENAI_API_KEY (length=164).
+00:39:38 [INFO] openai package version: 2.6.1
+00:39:38 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+00:39:38 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+00:39:38 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+00:39:38 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+00:39:38 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+00:39:38 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+00:39:38 [INFO] Rounds=3 Runs=3 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+00:39:38 [INFO] [RUN#1/3] starting debate...
+00:40:17 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:40:17 [INFO] [RUN#1 R1-A] tokens: prompt=989 output=1986 total=2975
+00:40:55 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:40:55 [INFO] [RUN#1 R1-B] tokens: prompt=2298 output=1669 total=3967
+00:41:47 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:41:47 [INFO] [RUN#1 R2-A] tokens: prompt=4211 output=2047 total=6258
+00:42:28 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:42:28 [INFO] [RUN#1 R2-B] tokens: prompt=6028 output=1939 total=7967
+00:43:22 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:43:22 [INFO] [RUN#1 R3-A] tokens: prompt=8211 output=2075 total=10286
+00:44:01 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:44:01 [INFO] [RUN#1 R3-B] tokens: prompt=10056 output=2001 total=12057
+00:44:01 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (final)
+00:44:26 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:44:26 [INFO] [RUN#1 JUDGE] tokens: prompt=11980 output=1385 total=13365
+00:44:26 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251118_003938/transcript_run_1.{jsonl,md}
+00:44:26 [ERROR] [RUN#1] JSON parse error on judge output: ValueError: No JSON block or JSONL-style content could be parsed
+00:44:26 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251118_003938/tmp_run_1.json (count=0)
+00:44:26 [INFO] [RUN#1] finished; scenarios=0
+00:44:26 [INFO] [RUN#2/3] starting debate...
+00:44:55 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:44:55 [INFO] [RUN#2 R1-A] tokens: prompt=989 output=2063 total=3052
+00:45:39 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:45:39 [INFO] [RUN#2 R1-B] tokens: prompt=2375 output=1949 total=4324
+00:46:10 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:46:10 [INFO] [RUN#2 R2-A] tokens: prompt=4568 output=2085 total=6653
+00:46:56 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:46:56 [INFO] [RUN#2 R2-B] tokens: prompt=6423 output=2095 total=8518
+00:47:47 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:47:47 [INFO] [RUN#2 R3-A] tokens: prompt=8762 output=2144 total=10906
+00:48:29 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:48:29 [INFO] [RUN#2 R3-B] tokens: prompt=10676 output=2066 total=12742
+00:48:29 [INFO] [RUN#2] Invoking judge model=gpt-4.1 (final)
+00:48:43 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:48:43 [INFO] [RUN#2 JUDGE] tokens: prompt=12665 output=1413 total=14078
+00:48:43 [INFO] [RUN#2] Wrote transcript to data/scenarios/runs/20251118_003938/transcript_run_2.{jsonl,md}
+00:48:43 [INFO] [RUN#2] Saved intermediate results to data/scenarios/runs/20251118_003938/tmp_run_2.json (count=10)
+00:48:43 [INFO] [RUN#2] finished; scenarios=10
+00:48:43 [INFO] [RUN#3/3] starting debate...
+00:49:15 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:49:15 [INFO] [RUN#3 R1-A] tokens: prompt=989 output=1826 total=2815
+00:49:53 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:49:54 [INFO] [RUN#3 R1-B] tokens: prompt=2138 output=2094 total=4232
+00:50:42 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:50:42 [INFO] [RUN#3 R2-A] tokens: prompt=4476 output=2171 total=6647
+00:51:22 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:51:22 [INFO] [RUN#3 R2-B] tokens: prompt=6416 output=2152 total=8568
+00:52:00 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:52:00 [INFO] [RUN#3 R3-A] tokens: prompt=8812 output=1980 total=10792
+00:52:46 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:52:46 [INFO] [RUN#3 R3-B] tokens: prompt=10562 output=2182 total=12744
+00:52:46 [INFO] [RUN#3] Invoking judge model=gpt-4.1 (final)
+00:53:10 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+00:53:10 [INFO] [RUN#3 JUDGE] tokens: prompt=12667 output=1536 total=14203
+00:53:10 [INFO] [RUN#3] Wrote transcript to data/scenarios/runs/20251118_003938/transcript_run_3.{jsonl,md}
+00:53:10 [INFO] [RUN#3] Saved intermediate results to data/scenarios/runs/20251118_003938/tmp_run_3.json (count=10)
+00:53:10 [INFO] [RUN#3] finished; scenarios=10
+00:53:10 [INFO] Wrote 10 aggregated scenarios to /tmp/mad_scenarios.json
+00:53:10 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251118_003938/scenarios_final.json
+00:53:10 [INFO] Wrote run metadata to data/scenarios/runs/20251118_003938/metadata.json
+00:53:10 [INFO] Done.
+05:45:21 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+05:45:21 [INFO] Detected OPENAI_API_KEY (length=164).
+05:45:21 [INFO] openai package version: 2.6.1
+05:45:21 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+05:45:21 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+05:45:21 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+05:45:21 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+05:45:21 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+05:45:21 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+05:45:21 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+05:45:21 [INFO] [RUN#1/5] starting debate...
+05:46:17 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:46:17 [INFO] [RUN#1 R1-A] tokens: prompt=1081 output=2505 total=3586
+05:47:08 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:47:08 [INFO] [RUN#1 R1-B] tokens: prompt=2817 output=2307 total=5124
+05:47:15 [ERROR] [RUN#1] Interrupted by user.
+05:47:15 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+05:47:15 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_054521/scenarios_final.json
+05:47:15 [INFO] Wrote run metadata to data/scenarios/runs/20251208_054521/metadata.json
+05:47:15 [INFO] Done.
+05:48:38 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+05:48:38 [INFO] Detected OPENAI_API_KEY (length=164).
+05:48:38 [INFO] openai package version: 2.6.1
+05:48:38 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+05:48:38 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+05:48:38 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+05:48:38 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+05:48:38 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+05:48:38 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+05:48:38 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+05:48:38 [INFO] [RUN#1/5] starting debate...
+05:49:20 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:49:20 [INFO] [RUN#1 R1-A] tokens: prompt=1130 output=1951 total=3081
+05:50:10 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:50:10 [INFO] [RUN#1 R1-B] tokens: prompt=2263 output=2135 total=4398
+05:50:55 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:50:55 [INFO] [RUN#1 R2-A] tokens: prompt=4639 output=2263 total=6902
+05:51:40 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:51:40 [INFO] [RUN#1 R2-B] tokens: prompt=6669 output=2145 total=8814
+05:52:29 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:52:29 [INFO] [RUN#1 R3-A] tokens: prompt=9055 output=2421 total=11476
+05:53:12 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:53:12 [INFO] [RUN#1 R3-B] tokens: prompt=11246 output=2331 total=13577
+05:53:12 [INFO] [RUN#1] Invoking judge model=gpt-4.1 (final)
+05:53:34 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:53:34 [INFO] [RUN#1 JUDGE] tokens: prompt=13497 output=2085 total=15582
+05:53:35 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251208_054838/transcript_run_1.{jsonl,md}
+05:53:35 [ERROR] [RUN#1] JSON parse error on judge output: ValueError: No JSON block or JSONL-style content could be parsed
+05:53:35 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251208_054838/tmp_run_1.json (count=0)
+05:53:35 [INFO] [RUN#1] finished; scenarios=0
+05:53:35 [INFO] [RUN#2/5] starting debate...
+05:54:17 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:54:17 [INFO] [RUN#2 R1-A] tokens: prompt=1130 output=2108 total=3238
+05:55:06 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:55:06 [INFO] [RUN#2 R1-B] tokens: prompt=2420 output=2138 total=4558
+05:55:58 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:55:58 [INFO] [RUN#2 R2-A] tokens: prompt=4801 output=2398 total=7199
+05:56:52 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:56:52 [INFO] [RUN#2 R2-B] tokens: prompt=6966 output=2284 total=9250
+05:57:39 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+05:57:39 [INFO] [RUN#2 R3-A] tokens: prompt=9491 output=2484 total=11975
+05:58:26 [ERROR] [RUN#2] Interrupted by user.
+05:58:26 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+05:58:26 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_054838/scenarios_final.json
+05:58:26 [INFO] Wrote run metadata to data/scenarios/runs/20251208_054838/metadata.json
+05:58:26 [INFO] Done.

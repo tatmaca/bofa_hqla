@@ -19,6 +19,8 @@ type DebateRunParams = {
   judgePrompt?: string;
   offlineSampleDir?: string;
   newsContext?: string;
+  holdingsCsv?: string;
+  riskLadderCsv?: string;
 };
 
 type LoggerChannel = "stdout" | "stderr";
@@ -498,6 +500,8 @@ async function runMadDebateScript(params: DebateRunParams, options: RunOptions =
   setEnv("MAD_SHOCK_YAML", params.yaml);
   setEnv("MAD_OFFLINE_SAMPLE_DIR", params.offlineSampleDir);
   setEnv("MAD_NEWS_CONTEXT", params.newsContext);
+  setEnv("MAD_HOLDINGS_CSV", params.holdingsCsv);
+  setEnv("MAD_RISK_LADDER_CSV", params.riskLadderCsv);
 
   console.log("[scenario-gen] launching MAD script", {
     pythonCmd,
@@ -1053,6 +1057,8 @@ export async function POST(req: Request) {
       offlineSample,
       newsContext,
       debateRuns,
+      holdingsCsv,
+      riskLadderCsv,
     } = body || {};
 
     const parsedRounds =
@@ -1074,6 +1080,12 @@ export async function POST(req: Request) {
         typeof newsContext === "string" && newsContext.trim()
       ),
       offlineSample: Boolean(offlineSample),
+      hasHoldingsCsv: Boolean(
+        typeof holdingsCsv === "string" && holdingsCsv.trim().length
+      ),
+      hasRiskLadderCsv: Boolean(
+        typeof riskLadderCsv === "string" && riskLadderCsv.trim().length
+      ),
     });
 
     const projectRoot = path.join(process.cwd(), "..");
@@ -1197,6 +1209,14 @@ export async function POST(req: Request) {
                   judgePrompt: typeof judgePrompt === "string" ? judgePrompt : undefined,
                   offlineSampleDir,
                   newsContext: sanitizedNewsContext,
+                  holdingsCsv:
+                    typeof holdingsCsv === "string" && holdingsCsv.trim().length
+                      ? holdingsCsv
+                      : undefined,
+                  riskLadderCsv:
+                    typeof riskLadderCsv === "string" && riskLadderCsv.trim().length
+                      ? riskLadderCsv
+                      : undefined,
                 },
                 {
                   logger: (entry) => processMessage(entry.message, entry.channel),

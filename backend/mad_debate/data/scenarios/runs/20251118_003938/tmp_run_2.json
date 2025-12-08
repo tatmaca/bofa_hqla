@@ -1,0 +1,193 @@
+[
+  {
+    "Scenario": "Interest Rate Shock",
+    "Description": "10-year yield increases by 50 bps while 2-year yield remains stable.",
+    "Probability": 0.14,
+    "Rationale": "Ongoing inflation concerns and potential Fed tightening.",
+    "ImpactChannels": "Rates (50 bps)",
+    "Shocks": {
+      "move_index": 50
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $2bn USTs via repo",
+      "Increase duration hedges"
+    ],
+    "Assumptions": "Yield curve remains steep; no major economic shocks."
+  },
+  {
+    "Scenario": "Credit Spread Widening",
+    "Description": "IG spreads widen by 20 bps and HY spreads by 50 bps.",
+    "Probability": 0.09,
+    "Rationale": "Market risk aversion increases due to geopolitical tensions.",
+    "ImpactChannels": "Credit OAS (20 bps IG, 50 bps HY)",
+    "Shocks": {
+      "ig_oas": 20,
+      "hy_oas": 50
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "OCI": -2
+    },
+    "TradeList": [
+      "Reduce exposure to HY bonds",
+      "Increase cash reserves"
+    ],
+    "Assumptions": "Stable economic growth; no major defaults."
+  },
+  {
+    "Scenario": "Deposit Runoff",
+    "Description": "10% runoff in retail deposits due to rising rates.",
+    "Probability": 0.08,
+    "Rationale": "Higher rates incentivize outflows to alternative investments.",
+    "ImpactChannels": "Deposits (-10%)",
+    "Shocks": {
+      "deposits": -10
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Increase term debt issuance by $1bn",
+      "Enhance deposit retention strategies"
+    ],
+    "Assumptions": "Consumer sentiment remains weak; SMEs highly sensitive."
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis widens by 25 bps due to market dislocation.",
+    "Probability": 0.06,
+    "Rationale": "Increased supply from refinancing leads to wider basis.",
+    "ImpactChannels": "MBS basis (25 bps)",
+    "Shocks": {
+      "mbs_basis": 25
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "OCI": -3
+    },
+    "TradeList": [
+      "Reduce MBS purchases by $1bn",
+      "Enhance liquidity management"
+    ],
+    "Assumptions": "Housing market remains volatile; no major economic shocks."
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Changes in TLAC or liquidity add-ons requiring higher buffers.",
+    "Probability": 0.06,
+    "Rationale": "Potential regulatory shifts could impact capital management.",
+    "ImpactChannels": "Reg changes (TLAC adjustments)",
+    "Shocks": {
+      "regulatory": "TLAC increase by 50 bps"
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4
+    },
+    "TradeList": [
+      "Increase capital reserves by $1bn",
+      "Review liquidity strategy"
+    ],
+    "Assumptions": "Regulatory environment remains stable; no major market shocks."
+  },
+  {
+    "Scenario": "Negative Economic Shock",
+    "Description": "Unemployment rate rises by 1%, increasing defaults.",
+    "Probability": 0.18,
+    "Rationale": "Economic downturn leads to increased stress on consumer balance sheets.",
+    "ImpactChannels": "Credit (defaults increase)",
+    "Shocks": {
+      "unemployment": 1
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -6
+    },
+    "TradeList": [
+      "Increase loan loss reserves by $500m",
+      "Enhance credit monitoring"
+    ],
+    "Assumptions": "Economic conditions deteriorate; consumer confidence drops."
+  },
+  {
+    "Scenario": "Commodity Price Spike",
+    "Description": "Commodity prices increase by 20%, creating inflationary pressures.",
+    "Probability": 0.1,
+    "Rationale": "Rising commodity prices could lead to higher interest rates.",
+    "ImpactChannels": "Rates (inflation effect)",
+    "Shocks": {
+      "commodity_prices": 20
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Adjust interest rate hedges",
+      "Increase cash reserves"
+    ],
+    "Assumptions": "Inflation concerns escalate; no major geopolitical events."
+  },
+  {
+    "Scenario": "Geopolitical Tension",
+    "Description": "Geopolitical event leads to a flight to safety; UST yields drop by 25 bps.",
+    "Probability": 0.05,
+    "Rationale": "Uncertainty drives investors towards safe-haven assets.",
+    "ImpactChannels": "Rates (-25 bps)",
+    "Shocks": {
+      "move_index": -25
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 3
+    },
+    "TradeList": [
+      "Increase UST holdings by $1bn",
+      "Reduce risk exposure"
+    ],
+    "Assumptions": "Geopolitical risks remain high; market volatility increases."
+  },
+  {
+    "Scenario": "Sovereign Spread Widening",
+    "Description": "GBP/EUR sovereign spreads widen by 15 bps due to instability.",
+    "Probability": 0.02,
+    "Rationale": "Economic instability in Europe affects global risk sentiment.",
+    "ImpactChannels": "Credit spreads (15 bps)",
+    "Shocks": {
+      "sovereign_spreads": 15
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Monitor European exposure",
+      "Adjust hedging strategies"
+    ],
+    "Assumptions": "European economies face stress; no major US economic impact."
+  },
+  {
+    "Scenario": "Emerging Market Stress",
+    "Description": "Emerging market credit spreads widen by 100 bps due to crisis.",
+    "Probability": 0.02,
+    "Rationale": "Regional crisis leads to increased risk aversion globally.",
+    "ImpactChannels": "Credit spreads (100 bps)",
+    "Shocks": {
+      "emerging_market_spreads": 100
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Review EM exposure",
+      "Increase liquidity buffers"
+    ],
+    "Assumptions": "Crisis is contained; US markets remain stable."
+  }
+]

@@ -1,6 +1,6 @@
 project: HQLA-MAD-Scenarios
 horizon_months: 6
-num_scenarios_target: 8
+num_scenarios_target: 10
 
 inputs:
   portfolio_snapshot:
@@ -40,14 +40,18 @@ debate:
 prompts:
   system_debater: |
     You are a senior bank risk strategist generating plausible 6-month scenarios that impact HQLA portfolios.
-    Use only finance-consistent reasoning. Propose concrete SHOCKS with magnitudes (bps/%), tie to channels:
+    Use only finance-consistent reasoning. Propose concrete SHOCKS with magnitudes (bps/%) tied to channels:
     {Rates, Curve (bull/bear, steep/flat), Credit OAS, MBS basis, Deposits/runoff, Reg changes}.
+    Sharpen every Description and Rationale with explicit magnitudes/time windows (e.g., “2s10s steepens 50–70 bps in 4 weeks”).
+    Add a Signals array with 3–5 specific, observable triggers (levels/changes + short time windows) that would indicate the scenario is materializing.
     Give internally consistent probabilities that sum to ~100% across the set in each run.
+    Produce roughly ten scenarios (target 9–11) every time unless explicitly instructed otherwise.
     Always produce JSON that matches the schema the judge expects.
   system_judge: |
     You are a strict risk committee chair. Select/merge winning scenarios maximizing plausibility, distinctness,
     and decision-usefulness under constraints (LCR≥{lcr_min_pct}%, Level2≤{level2_cap_pct}% of HQLA).
-    Reject hand-wavy claims. Enforce 6-month horizon and quantitative shocks. Return STRICT JSON array.
+    Reject hand-wavy claims. Enforce 6-month horizon, quantitative shocks, and the presence of specific Signals.
+    Return a STRICT JSON array with 9–11 distinct scenarios (target 10).
 
 schema:
   fields:
@@ -71,6 +75,7 @@ schema:
         dur_change_years: float
     - TradeList: [ str ]  # concrete HQLA trades within constraints
     - Assumptions: [ str ]
+    - Signals: [ str ]  # 3-5 observable triggers with thresholds/time windows indicating scenario onset
 aggregation:
   probability_pooling: median
   dedupe_similarity_threshold: 0.7

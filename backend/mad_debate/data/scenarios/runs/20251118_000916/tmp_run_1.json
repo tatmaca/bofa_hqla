@@ -1,0 +1,212 @@
+[
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Short-term rates rise by 50bps while long-term rates fall by 10bps, flattening the yield curve.",
+    "Probability": 0.12,
+    "Rationale": "A bear steepener reduces loan profitability while increasing funding costs, but BoA can manage through asset reallocations.",
+    "ImpactChannels": [
+      "Rates (+50bps 2yr)",
+      "Curve (bear steepener)"
+    ],
+    "Shocks": {
+      "move": 60,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NII": -150
+    },
+    "TradeList": [
+      "Add $500mn 10-year UST via repo",
+      "Sell $250mn 2-year notes"
+    ],
+    "Assumptions": "Short-term rates rise due to Fed tightening."
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "IG OAS widens by 12bps, HY OAS widens by 35bps, increasing funding costs and risk-off sentiment.",
+    "Probability": 0.15,
+    "Rationale": "Increased funding costs impact capital ratios and profitability, but BoA's diversified funding can cushion the impact.",
+    "ImpactChannels": [
+      "Credit OAS (+12bps IG, +35bps HY)"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": 12,
+        "hy_oas": 35
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NII": -100
+    },
+    "TradeList": [
+      "Increase $500mn in secured funding via repo",
+      "Add $500mn Agency MBS"
+    ],
+    "Assumptions": "Market volatility leads to risk-off sentiment."
+  },
+  {
+    "Scenario": "Deposit Runoff",
+    "Description": "5% unexpected retail deposit runoff over 6 months.",
+    "Probability": 0.08,
+    "Rationale": "Heightened consumer sensitivity to interest rates leads to liquidity pressures, but BoA's diversified base can offset this.",
+    "ImpactChannels": [
+      "Deposits run-off (5%)"
+    ],
+    "Shocks": {
+      "deposits": -5
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Raise $500mn via term debt issuance"
+    ],
+    "Assumptions": "Consumers withdraw deposits in response to rate increases."
+  },
+  {
+    "Scenario": "Regulatory Change",
+    "Description": "New Basel III regulations impose higher capital and liquidity requirements.",
+    "Probability": 0.1,
+    "Rationale": "Increased compliance costs and need for liquidity adjustment, but BoA's proactive management can ease transitions.",
+    "ImpactChannels": [
+      "Reg changes (Basel III)"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Adjust capital allocation to meet new ratios"
+    ],
+    "Assumptions": "Regulatory announcements impact market confidence."
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis widens by 22bps, increasing funding costs and impacting OCI.",
+    "Probability": 0.1,
+    "Rationale": "Higher funding costs negatively impact OCI and profitability, but BoA can strategically manage its MBS portfolio.",
+    "ImpactChannels": [
+      "MBS basis (+22bps)"
+    ],
+    "Shocks": {
+      "mbs_basis": 22
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NII": -50
+    },
+    "TradeList": [
+      "Sell $500mn MBS to reduce basis risk",
+      "Add $750mn MBS"
+    ],
+    "Assumptions": "Market conditions lead to wider MBS spreads."
+  },
+  {
+    "Scenario": "Geopolitical Tensions",
+    "Description": "Increased geopolitical tensions drive flight-to-quality to USTs, lowering long-end rates by 20bps.",
+    "Probability": 0.08,
+    "Rationale": "Investors seek safety, impacting capital ratios and valuations, but BoA can leverage this for liquidity.",
+    "ImpactChannels": [
+      "Rates (-20bps 10yr UST)"
+    ],
+    "Shocks": {
+      "rates": {
+        "10yr": -20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase UST holdings by $500mn"
+    ],
+    "Assumptions": "Investors react to geopolitical instability."
+  },
+  {
+    "Scenario": "Commodity Price Surge",
+    "Description": "Oil and agricultural prices rise 15%, driving headline inflation and Fed hawkishness.",
+    "Probability": 0.07,
+    "Rationale": "Rising inflation prompts Fed to increase rates, affecting NII, but BoA can adapt through its asset mix.",
+    "ImpactChannels": [
+      "Commodity prices (+15%)",
+      "Rates (Fed hike expectations)"
+    ],
+    "Shocks": {
+      "commodities": 15
+    },
+    "MetricsDelta": {
+      "NII": -100
+    },
+    "TradeList": [
+      "Adjust asset allocation to include inflation-linked securities"
+    ],
+    "Assumptions": "Sustained rise in commodity prices."
+  },
+  {
+    "Scenario": "Tightening Wholesale Funding Markets",
+    "Description": "Wholesale funding spreads widen by 20bps, increasing unsecured borrowing costs.",
+    "Probability": 0.08,
+    "Rationale": "Increased funding costs impact liquidity and capital ratios, but BoA has a diversified funding approach.",
+    "ImpactChannels": [
+      "Wholesale funding spreads (+20bps)"
+    ],
+    "Shocks": {
+      "wholesale_spreads": 20
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Increase reliance on secured funding"
+    ],
+    "Assumptions": "Market conditions lead to reduced liquidity."
+  },
+  {
+    "Scenario": "Consumer Credit Stress",
+    "Description": "Consumer loan default rates rise by 60bps, increasing credit losses.",
+    "Probability": 0.08,
+    "Rationale": "Increased defaults affect credit spreads and profitability metrics, but BoA's credit risk management can mitigate losses.",
+    "ImpactChannels": [
+      "Consumer credit defaults (+60bps)"
+    ],
+    "Shocks": {
+      "consumer_defaults": 60
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NII": -150
+    },
+    "TradeList": [
+      "Increase reserves for potential loan losses"
+    ],
+    "Assumptions": "Economic downturn leads to increased defaults."
+  },
+  {
+    "Scenario": "Equity Market Correction",
+    "Description": "S&P 500 falls 12%, VIX spikes to 30, increasing market volatility and risk aversion.",
+    "Probability": 0.07,
+    "Rationale": "Increased volatility affects valuations and liquidity metrics, but BoA can manage risk through diversified assets.",
+    "ImpactChannels": [
+      "Equities (-12%)",
+      "VIX (+30)"
+    ],
+    "Shocks": {
+      "equities": -12,
+      "vix": 30
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NII": -100
+    },
+    "TradeList": [
+      "Rebalance equity exposure to reduce risk"
+    ],
+    "Assumptions": "Market correction leads to increased uncertainty."
+  }
+]

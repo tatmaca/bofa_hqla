@@ -1,0 +1,240 @@
+[
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Short-term rates decline while long-term rates rise, leading to a bear steepening of the yield curve.",
+    "Probability": 0.16,
+    "Rationale": "Yield curve volatility remains elevated as inflation expectations diverge from near-term growth signals.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move_index": -50,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 0,
+      "OCI": -100
+    },
+    "TradeList": [
+      "Add $1bn 10Y UST via repo",
+      "Sell $500mm 2Y UST"
+    ],
+    "Assumptions": "Moderate economic growth with persistent inflation."
+  },
+  {
+    "Scenario": "Bull Flattener",
+    "Description": "Long-term rates fall more than short-term rates, flattening the curve as markets price in recession risk.",
+    "Probability": 0.08,
+    "Rationale": "Unexpected economic slowdown drives demand for long-duration safe assets.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move_index": -75,
+      "yield_curve": "bull_flattener"
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NSFR": 1,
+      "OCI": 150
+    },
+    "TradeList": [
+      "Add $500mm 30Y UST",
+      "Reduce $400mm 5Y UST"
+    ],
+    "Assumptions": "Recession risk rises but credit remains stable."
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Credit spreads widen due to market volatility, increasing risk premiums on corporate bonds and MBS.",
+    "Probability": 0.13,
+    "Rationale": "Flight to quality amid geopolitical or economic stress.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 100
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -1,
+      "OCI": -25
+    },
+    "TradeList": [
+      "Sell $750mm agency MBS",
+      "Add $500mm IG corporate bonds"
+    ],
+    "Assumptions": "Market sentiment deteriorates due to external shocks."
+  },
+  {
+    "Scenario": "Deposit Runoff",
+    "Description": "Rising retail beta and competitive rates lead to deposit outflows, especially from wealth management.",
+    "Probability": 0.06,
+    "Rationale": "Depositors seek higher yields as rates rise.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "deposits": -5
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -2,
+      "NII": -50
+    },
+    "TradeList": [
+      "Increase $1bn in short-term wholesale funding",
+      "Adjust deposit pricing strategy"
+    ],
+    "Assumptions": "Retail depositors become more rate sensitive."
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Basel Endgame and related rules tighten capital and liquidity requirements.",
+    "Probability": 0.18,
+    "Rationale": "Ongoing regulatory reforms increase required buffers.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {
+      "reg_changes": "Increased TLAC requirements"
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": -3,
+      "OCI": -100
+    },
+    "TradeList": [
+      "Rebalance capital structure",
+      "Increase liquidity reserves by $2bn"
+    ],
+    "Assumptions": "Regulatory environment continues to evolve."
+  },
+  {
+    "Scenario": "Commodity Price Shock",
+    "Description": "Sharp increase in commodity prices triggers economic instability and sectoral credit deterioration.",
+    "Probability": 0.1,
+    "Rationale": "Geopolitical tensions or supply disruptions drive up prices.",
+    "ImpactChannels": [
+      "Commodity Prices",
+      "Credit"
+    ],
+    "Shocks": {
+      "commodity_prices": 0.2
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -4,
+      "NII": -75
+    },
+    "TradeList": [
+      "Increase exposure to commodity-linked assets",
+      "Reassess credit risk in affected sectors"
+    ],
+    "Assumptions": "Global supply shocks persist."
+  },
+  {
+    "Scenario": "Stable Economy with Gradual Rate Increases",
+    "Description": "Steady growth and inflation prompt the Fed to gradually raise rates.",
+    "Probability": 0.13,
+    "Rationale": "Economic indicators remain stable with moderate growth.",
+    "ImpactChannels": [
+      "Rates"
+    ],
+    "Shocks": {
+      "move_index": 100
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 0,
+      "NII": 300
+    },
+    "TradeList": [
+      "Add $500mm in TIPS",
+      "Rebalance portfolio duration"
+    ],
+    "Assumptions": "No major shocks; policy normalization continues."
+  },
+  {
+    "Scenario": "Geopolitical Tensions Rise",
+    "Description": "Escalating geopolitical tensions drive market instability and risk-off sentiment.",
+    "Probability": 0.04,
+    "Rationale": "Regional conflicts or trade disputes increase volatility.",
+    "ImpactChannels": [
+      "Credit",
+      "Curve"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": 25,
+        "hy_oas": 75
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1,
+      "OCI": -200
+    },
+    "TradeList": [
+      "Increase cash holdings by $1bn",
+      "Monitor exposure to affected regions"
+    ],
+    "Assumptions": "Risk aversion grows, impacting valuations."
+  },
+  {
+    "Scenario": "High Inflation Scenario",
+    "Description": "Persistent high inflation leads to aggressive monetary tightening.",
+    "Probability": 0.06,
+    "Rationale": "Central banks act forcefully to contain inflation.",
+    "ImpactChannels": [
+      "Rates",
+      "NII"
+    ],
+    "Shocks": {
+      "move_index": 150
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1,
+      "NII": 500
+    },
+    "TradeList": [
+      "Add $750mm in short-term securities",
+      "Reassess loan pricing strategy"
+    ],
+    "Assumptions": "Inflation remains above target for an extended period."
+  },
+  {
+    "Scenario": "Market Liquidity Crisis",
+    "Description": "Sudden liquidity crisis impacts funding availability and asset valuations.",
+    "Probability": 0.06,
+    "Rationale": "Market stress leads to a freeze in liquidity and higher funding costs.",
+    "ImpactChannels": [
+      "Liquidity",
+      "Credit"
+    ],
+    "Shocks": {
+      "move_index": 100,
+      "credit_spreads": {
+        "ig_oas": 50,
+        "hy_oas": 150
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "OCI": -100
+    },
+    "TradeList": [
+      "Increase liquidity reserves by $1bn",
+      "Engage in emergency funding measures"
+    ],
+    "Assumptions": "Market participants react to stress, leading to widespread sell-offs."
+  }
+]
