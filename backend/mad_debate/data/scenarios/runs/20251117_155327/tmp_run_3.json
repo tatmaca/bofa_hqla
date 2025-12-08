@@ -1,0 +1,185 @@
+[
+  {
+    "Scenario": "Bear Steepener Scenario",
+    "Description": "Short-term interest rates rise due to inflation concerns, leading to a bear steepening of the yield curve.",
+    "Probability": 0.15,
+    "Rationale": "Inflation pressures are likely to push up short-term rates more than long-term rates, affecting HQLA valuations.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Curve (bear steepener)",
+      "Credit OAS (15 bps)",
+      "MBS basis (10 bps)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1,
+      "NII": -0.5
+    },
+    "TradeList": [
+      "Add $2bn in 10-year USTs",
+      "Short $1bn in 2-year notes via swaps"
+    ],
+    "Assumptions": "Inflation remains persistent; Fed accelerates tightening."
+  },
+  {
+    "Scenario": "Credit Widening Scenario",
+    "Description": "Widening credit spreads as corporate profitability declines due to economic slowdown.",
+    "Probability": 0.15,
+    "Rationale": "Concerns about corporate balance sheets lead to increased risk aversion and wider spreads.",
+    "ImpactChannels": [
+      "Credit OAS (45 bps)",
+      "MBS basis (20 bps)",
+      "Deposits (2% runoff)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "credit_spreads": {
+        "ig_oas": 45,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "NII": -1
+    },
+    "TradeList": [
+      "Reduce exposure to $1bn in high-yield bonds",
+      "Increase cash reserves by $3bn"
+    ],
+    "Assumptions": "Economic growth slows, impacting corporate earnings."
+  },
+  {
+    "Scenario": "Deposit Runoff Scenario",
+    "Description": "Increased consumer demand for higher yields leads to significant deposit runoff.",
+    "Probability": 0.15,
+    "Rationale": "As interest rates rise, consumers seek alternative investments, increasing outflows.",
+    "ImpactChannels": [
+      "Deposits (5% runoff)",
+      "Rates (20 bps)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "deposit_runoff": 5
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3,
+      "NII": -2
+    },
+    "TradeList": [
+      "Increase marketing for savings products",
+      "Issue $2bn in CDs to retain deposits"
+    ],
+    "Assumptions": "Consumers react to rising rates by seeking higher returns."
+  },
+  {
+    "Scenario": "Geopolitical Shock Scenario",
+    "Description": "A geopolitical event leads to increased risk aversion and a flight to safety, impacting liquidity and credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Geopolitical instability can cause market disruptions and significant shifts in investor sentiment.",
+    "ImpactChannels": [
+      "Rates (30 bps)",
+      "Credit OAS (30 bps)",
+      "MBS basis (15 bps)"
+    ],
+    "Shocks": {
+      "move_index": 90,
+      "credit_spreads": {
+        "ig_oas": -30,
+        "hy_oas": -15
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 0,
+      "NSFR": 0,
+      "NII": -2
+    },
+    "TradeList": [
+      "Purchase $2bn in USTs",
+      "Reduce exposure to equities by $1bn"
+    ],
+    "Assumptions": "Geopolitical events create immediate market shifts."
+  },
+  {
+    "Scenario": "Controlled Inflation with Gradual Easing",
+    "Description": "Inflation remains stable, leading to a measured approach from the Fed in interest rate adjustments.",
+    "Probability": 0.15,
+    "Rationale": "Consumer and SME resilience supports economic stability, but inflationary pressures persist.",
+    "ImpactChannels": [
+      "Rates (15 bps)",
+      "Curve (bull flattening)",
+      "Moderate deposit flows"
+    ],
+    "Shocks": {
+      "move_index": 105,
+      "yield_curve": "bull_flattening"
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 0,
+      "NII": 1
+    },
+    "TradeList": [
+      "Add $1bn in Agency MBS",
+      "Rotate $500mn into 10-year Treasuries"
+    ],
+    "Assumptions": "The Fed maintains a cautious approach to rate hikes."
+  },
+  {
+    "Scenario": "Regulatory Tightening Scenario",
+    "Description": "New regulatory measures increase capital and liquidity requirements for GSIBs.",
+    "Probability": 0.1,
+    "Rationale": "Increased regulatory scrutiny leads to tighter liquidity constraints and higher costs.",
+    "ImpactChannels": [
+      "Reg changes",
+      "Deposits (1% runoff)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "regulatory_changes": "Increase in GSIB surcharge by 50 bps"
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4,
+      "NII": -1.5
+    },
+    "TradeList": [
+      "Raise $5bn in term debt",
+      "Optimize liquidity buffer by $1bn"
+    ],
+    "Assumptions": "Regulatory environment becomes more stringent."
+  },
+  {
+    "Scenario": "Regulatory Relief Scenario",
+    "Description": "Potential easing of regulatory requirements enhances liquidity metrics.",
+    "Probability": 0.1,
+    "Rationale": "Discussions suggest possible regulatory relief, but implementation is uncertain.",
+    "ImpactChannels": [
+      "LCR improvement",
+      "Increased investment capacity"
+    ],
+    "Shocks": {
+      "move_index": 100,
+      "regulatory_changes": "Reduction in GSIB surcharge"
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1,
+      "NII": 1
+    },
+    "TradeList": [
+      "Optimize funding stack by extending maturities",
+      "Invest $2bn in high-quality munis"
+    ],
+    "Assumptions": "Regulatory climate becomes moderately favorable."
+  }
+]

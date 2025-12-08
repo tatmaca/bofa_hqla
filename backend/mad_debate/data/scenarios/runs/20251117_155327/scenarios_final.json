@@ -1,0 +1,256 @@
+[
+  {
+    "Scenario": "Stable Deposits with Minor Rate Increases",
+    "Description": "Deposits remain stable, with a modest interest rate increase of 25bps.",
+    "Probability": 0.3,
+    "Rationale": "Gradual rate hikes are expected as economic conditions improve, supporting the bank's net interest income.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "move": 25
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NII": 8
+    },
+    "TradeList": [
+      "Add $1bn in short-term notes",
+      "Increase floating-rate loan issuance by $1bn"
+    ],
+    "Assumptions": "Market conditions stabilize, allowing for gradual increases in interest rates without significant deposit runoff."
+  },
+  {
+    "Scenario": "Geopolitical Shock Scenario",
+    "Description": "A geopolitical event leads to increased risk aversion and a flight to safety, impacting liquidity and credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Geopolitical instability can cause market disruptions and significant shifts in investor sentiment.",
+    "ImpactChannels": [
+      "Rates (30 bps)",
+      "Credit OAS (30 bps)",
+      "MBS basis (15 bps)"
+    ],
+    "Shocks": {
+      "move_index": 90,
+      "credit_spreads": {
+        "ig_oas": -30,
+        "hy_oas": -15
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 0,
+      "NSFR": 0,
+      "NII": -2
+    },
+    "TradeList": [
+      "Purchase $2bn in USTs",
+      "Reduce exposure to equities by $1bn"
+    ],
+    "Assumptions": "Geopolitical events create immediate market shifts."
+  },
+  {
+    "Scenario": "Bear Steepening with Rising Credit Spreads",
+    "Description": "Long-term rates rise faster than short-term rates, with IG credit spreads widening by 15bps and HY spreads by 45bps.",
+    "Probability": 0.2,
+    "Rationale": "Inflation concerns and tightening monetary policy lead to a bear steepening yield curve, increasing risk aversion among investors.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Credit OAS (bps)",
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "yield_curve": "bear_steepener",
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NII": 2
+    },
+    "TradeList": [
+      "Add $2bn USTs via repo",
+      "Increase MBS purchases by $1bn"
+    ],
+    "Assumptions": "Sustained inflation leads to a shift in investor sentiment, affecting long-term asset valuations."
+  },
+  {
+    "Scenario": "Positive Economic Signals with Consumer Resilience",
+    "Description": "Indicators of economic strength lead to positive consumer sentiment, supporting deposit growth and credit quality.",
+    "Probability": 0.2,
+    "Rationale": "Robust consumer spending and stable employment figures suggest resilience in household balance sheets, benefiting overall credit quality.",
+    "ImpactChannels": [
+      "Deposits",
+      "Credit"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": -5,
+      "hy_oas": -10
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 4,
+      "NII": 6
+    },
+    "TradeList": [
+      "Increase reserves by $1bn",
+      "Enhance credit offerings to SMEs"
+    ],
+    "Assumptions": "Continued economic strength supports consumer confidence and credit quality."
+  },
+  {
+    "Scenario": "Regulatory Relief and Capital Efficiency",
+    "Description": "Potential regulatory relief that allows for more efficient capital management and improved funding conditions.",
+    "Probability": 0.2,
+    "Rationale": "Ongoing discussions around regulatory adjustments could favor banks, improving capital requirements and allowing for better liquidity management.",
+    "ImpactChannels": [
+      "Regulation",
+      "Funding"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": 6,
+      "NSFR": 5,
+      "NII": 2
+    },
+    "TradeList": [
+      "Reallocate $1bn into higher-yielding Level 2 assets",
+      "Reduce reliance on short-term funding"
+    ],
+    "Assumptions": "Regulatory changes are implemented that favor capital efficiency and liquidity management."
+  },
+  {
+    "Scenario": "Bear Steepener Scenario",
+    "Description": "Short-term interest rates rise due to inflation concerns, leading to a bear steepening of the yield curve.",
+    "Probability": 0.15,
+    "Rationale": "Inflation pressures are likely to push up short-term rates more than long-term rates, affecting HQLA valuations.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Curve (bear steepener)",
+      "Credit OAS (15 bps)",
+      "MBS basis (10 bps)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1,
+      "NII": -0.5
+    },
+    "TradeList": [
+      "Add $2bn in 10-year USTs",
+      "Short $1bn in 2-year notes via swaps"
+    ],
+    "Assumptions": "Inflation remains persistent; Fed accelerates tightening."
+  },
+  {
+    "Scenario": "Credit Widening Scenario",
+    "Description": "Widening credit spreads as corporate profitability declines due to economic slowdown.",
+    "Probability": 0.15,
+    "Rationale": "Concerns about corporate balance sheets lead to increased risk aversion and wider spreads.",
+    "ImpactChannels": [
+      "Credit OAS (45 bps)",
+      "MBS basis (20 bps)",
+      "Deposits (2% runoff)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "credit_spreads": {
+        "ig_oas": 45,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "NII": -1
+    },
+    "TradeList": [
+      "Reduce exposure to $1bn in high-yield bonds",
+      "Increase cash reserves by $3bn"
+    ],
+    "Assumptions": "Economic growth slows, impacting corporate earnings."
+  },
+  {
+    "Scenario": "Deposit Runoff Scenario",
+    "Description": "Increased consumer demand for higher yields leads to significant deposit runoff.",
+    "Probability": 0.15,
+    "Rationale": "As interest rates rise, consumers seek alternative investments, increasing outflows.",
+    "ImpactChannels": [
+      "Deposits (5% runoff)",
+      "Rates (20 bps)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "deposit_runoff": 5
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3,
+      "NII": -2
+    },
+    "TradeList": [
+      "Increase marketing for savings products",
+      "Issue $2bn in CDs to retain deposits"
+    ],
+    "Assumptions": "Consumers react to rising rates by seeking higher returns."
+  },
+  {
+    "Scenario": "Controlled Inflation with Gradual Easing",
+    "Description": "Inflation remains stable, leading to a measured approach from the Fed in interest rate adjustments.",
+    "Probability": 0.15,
+    "Rationale": "Consumer and SME resilience supports economic stability, but inflationary pressures persist.",
+    "ImpactChannels": [
+      "Rates (15 bps)",
+      "Curve (bull flattening)",
+      "Moderate deposit flows"
+    ],
+    "Shocks": {
+      "move_index": 105,
+      "yield_curve": "bull_flattening"
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 0,
+      "NII": 1
+    },
+    "TradeList": [
+      "Add $1bn in Agency MBS",
+      "Rotate $500mn into 10-year Treasuries"
+    ],
+    "Assumptions": "The Fed maintains a cautious approach to rate hikes."
+  },
+  {
+    "Scenario": "Regulatory Tightening with TLAC Adjustments",
+    "Description": "New TLAC requirements increase capital burdens, leading to a rise in funding costs.",
+    "Probability": 0.15,
+    "Rationale": "Regulatory discussions suggest potential tightening of capital requirements for G-SIBs, impacting liquidity management and funding strategies.",
+    "ImpactChannels": [
+      "Reg changes",
+      "Credit OAS (bps)"
+    ],
+    "Shocks": {
+      "regulatory": "TLAC adjustments increase by 50bps"
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NII": -5
+    },
+    "TradeList": [
+      "Reduce corporate bond holdings by $1bn",
+      "Issue $3bn of new TLAC-compliant debt"
+    ],
+    "Assumptions": "Increased regulatory scrutiny leads to higher funding costs, impacting overall profitability."
+  }
+]

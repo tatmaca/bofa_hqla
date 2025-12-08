@@ -1,0 +1,148 @@
+[
+  {
+    "Scenario": "Bear Steepening with Rising Credit Spreads",
+    "Description": "10-year yield rises by 50 bps, 2-year yield by 20 bps; IG spreads widen by 15 bps, HY spreads widen by 45 bps.",
+    "Probability": 0.2,
+    "Rationale": "Inflation pressures and tighter monetary policy expectations lead to a bear steepening of the yield curve.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Curve (bear steepener)",
+      "Credit OAS (IG +15 bps, HY +45 bps)"
+    ],
+    "Shocks": {
+      "move": 50,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -3,
+      "NII": -0.5
+    },
+    "TradeList": [
+      "Add $1bn 10-year USTs",
+      "Reduce $500mn in long-term corporates"
+    ],
+    "Assumptions": "Consumer spending remains strong; inflation continues to drive Fed policy."
+  },
+  {
+    "Scenario": "MBS Basis Widening and Deposit Runoff",
+    "Description": "MBS basis widens by 40 bps; retail deposits runoff by 5%.",
+    "Probability": 0.15,
+    "Rationale": "Uncertainty in the housing market leads to reduced demand for MBS and increased consumer withdrawals.",
+    "ImpactChannels": [
+      "MBS basis (40 bps)",
+      "Deposits/runoff (5%)"
+    ],
+    "Shocks": {
+      "mbs_basis": 40,
+      "deposits": -5
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": -2,
+      "NII": -0.7
+    },
+    "TradeList": [
+      "Reduce $300mn MBS holdings",
+      "Increase cash reserves by $1bn"
+    ],
+    "Assumptions": "Housing market remains volatile; consumers prioritize liquidity."
+  },
+  {
+    "Scenario": "Controlled Inflation with Stable Growth",
+    "Description": "Inflation remains controlled; GDP growth stabilizes around 2.5%.",
+    "Probability": 0.15,
+    "Rationale": "Resilient consumers and SMEs lead to stable spending and liquidity flows.",
+    "ImpactChannels": [
+      "Stable growth",
+      "Controlled inflation"
+    ],
+    "Shocks": {
+      "inflation": 0,
+      "gdp_growth": 2.5
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 2,
+      "NII": 0.5
+    },
+    "TradeList": [
+      "Add $1bn in Agency MBS",
+      "Rotate $500mn into municipals"
+    ],
+    "Assumptions": "Consumer confidence remains high; spending patterns do not shift significantly."
+  },
+  {
+    "Scenario": "Diversified Funding Stack Benefits",
+    "Description": "Deposit growth of 3%; lower reliance on wholesale funding.",
+    "Probability": 0.15,
+    "Rationale": "Diversification in deposits enhances liquidity position.",
+    "ImpactChannels": [
+      "Deposit growth",
+      "Lower wholesale funding needs"
+    ],
+    "Shocks": {
+      "deposits": 3,
+      "wholesale_funding": -10
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 3,
+      "NII": 0.6
+    },
+    "TradeList": [
+      "Term out $1bn in wholesale funding",
+      "Increase retail deposit offerings"
+    ],
+    "Assumptions": "Interest rates stabilize, encouraging deposit growth."
+  },
+  {
+    "Scenario": "Stable Rates with Increased Market Volatility",
+    "Description": "VIX rises to 30; stable interest rates but higher demand for quality assets.",
+    "Probability": 0.15,
+    "Rationale": "Increased volatility leads to flight to quality, benefiting high-quality assets.",
+    "ImpactChannels": [
+      "VIX impact",
+      "Flight to quality"
+    ],
+    "Shocks": {
+      "vix": 30
+    },
+    "MetricsDelta": {
+      "LCR": 0,
+      "NSFR": 0,
+      "NII": -0.2
+    },
+    "TradeList": [
+      "Add $500mn in sovereign bonds",
+      "Increase liquidity reserves"
+    ],
+    "Assumptions": "Market remains volatile, but rates do not significantly shift."
+  },
+  {
+    "Scenario": "Regulatory Changes Leading to Increased Liquidity Requirements",
+    "Description": "LCR requirement increases by 5% due to regulatory changes.",
+    "Probability": 0.1,
+    "Rationale": "Heightened regulatory scrutiny and potential new liquidity frameworks impact capital ratios.",
+    "ImpactChannels": [
+      "Reg changes (LCR +5%)"
+    ],
+    "Shocks": {
+      "regulatory": "LCR +5%"
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4,
+      "NII": -0.3
+    },
+    "TradeList": [
+      "Increase HQLA by $2bn",
+      "Optimize funding stack"
+    ],
+    "Assumptions": "Regulatory environment remains focused on liquidity."
+  }
+]

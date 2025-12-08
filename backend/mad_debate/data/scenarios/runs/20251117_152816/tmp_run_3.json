@@ -1,0 +1,170 @@
+[
+  {
+    "Scenario": "Bear Steepener with Credit Widening",
+    "Description": "A bear steepening of the yield curve occurs, with short-term rates rising by 50 bps while long-term rates remain unchanged. IG spreads widen by 15 bps and HY spreads by 45 bps.",
+    "Probability": 0.18,
+    "Rationale": "With the Fed's tightening stance, a bear steepener is likely, coupled with rising credit spreads due to risk aversion in the market.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Credit OAS (15 bps)",
+      "Curve (bear steepener)"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -5,
+      "NII": -200
+    },
+    "TradeList": [
+      "Add $2bn in USTs via repo",
+      "Reduce $1bn in Level 2 assets"
+    ],
+    "Assumptions": "Short-term rates will rise due to Fed policy; credit risk perceptions will worsen."
+  },
+  {
+    "Scenario": "Increased Deposit Runoff",
+    "Description": "Retail and wealth deposits decrease by 10% due to rising interest rates, leading to a liquidity challenge.",
+    "Probability": 0.15,
+    "Rationale": "As interest rates rise, clients may seek higher yields elsewhere, particularly SMEs which are sensitive to rate changes.",
+    "ImpactChannels": [
+      "Deposits (10%)",
+      "NII impact"
+    ],
+    "Shocks": {
+      "depo_runoff": 10
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -10,
+      "NII": -300
+    },
+    "TradeList": [
+      "Increase secured funding by $3bn",
+      "Optimize Level 2 asset mix"
+    ],
+    "Assumptions": "Deposit beta remains stable; clients will actively seek higher yields."
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "An increase in MBS supply coupled with reduced investor demand leads to a widening basis of 50 bps, negatively impacting valuations and NII.",
+    "Probability": 0.13,
+    "Rationale": "Market dynamics could lead to increased basis risk in MBS, affecting liquidity and capital ratios.",
+    "ImpactChannels": [
+      "Widened MBS basis",
+      "OCI deterioration",
+      "NII impact"
+    ],
+    "Shocks": {
+      "mbs_basis": 50
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -5,
+      "NII": -250
+    },
+    "TradeList": [
+      "Reduce MBS exposure by $1.5bn",
+      "Increase allocation to high-quality treasuries"
+    ],
+    "Assumptions": "Market conditions lead to a deterioration in MBS valuations."
+  },
+  {
+    "Scenario": "Rising Deposit Betas",
+    "Description": "Interest rates rise sharply, causing deposit betas to increase by more than historical averages, resulting in higher funding costs and NII compression.",
+    "Probability": 0.13,
+    "Rationale": "Heightened competition for deposits could lead to increased betas, impacting the funding stack.",
+    "ImpactChannels": [
+      "NII compression",
+      "Increased funding costs"
+    ],
+    "Shocks": {
+      "deposit_beta": 50
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -5,
+      "NII": -400
+    },
+    "TradeList": [
+      "Optimize funding sources to reduce reliance on deposits",
+      "Increase wholesale funding by $2bn"
+    ],
+    "Assumptions": "Market conditions lead to a competitive environment for deposit rates."
+  },
+  {
+    "Scenario": "Convexity Risk in Rising Rate Environment",
+    "Description": "A bear steepening of the yield curve results in nonlinear impacts on fixed income portfolios due to convexity risk.",
+    "Probability": 0.13,
+    "Rationale": "Convexity could lead to unexpected losses on fixed income securities as rates rise.",
+    "ImpactChannels": [
+      "Fixed income portfolio losses",
+      "Increased funding pressures"
+    ],
+    "Shocks": {
+      "short_rates": 50,
+      "long_rates": -20
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -10,
+      "NII": -500
+    },
+    "TradeList": [
+      "Rebalance fixed income portfolio to reduce duration risk",
+      "Increase short-term funding exposure"
+    ],
+    "Assumptions": "Interest rates rise rapidly, leading to heightened convexity risks."
+  },
+  {
+    "Scenario": "Economic Recovery with Tightened Credit Spreads",
+    "Description": "A surprising economic recovery leads to a decline in IG spreads by 20 bps and HY spreads by 30 bps.",
+    "Probability": 0.16,
+    "Rationale": "Positive economic indicators may drive a shift in investor sentiment, favoring risk assets.",
+    "ImpactChannels": [
+      "Credit OAS (-20 bps)",
+      "NII improvement"
+    ],
+    "Shocks": {
+      "ig_oas": -20,
+      "hy_oas": -30
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 5,
+      "NII": 200
+    },
+    "TradeList": [
+      "Increase corporate bond holdings by $1bn",
+      "Expand risk appetite in Level 2 assets"
+    ],
+    "Assumptions": "Economic indicators show resilience; market sentiment shifts positively."
+  },
+  {
+    "Scenario": "Controlled Inflation with Stable Flows",
+    "Description": "Inflation stabilizes around 2% while consumer spending remains strong, leading to stable deposit levels.",
+    "Probability": 0.12,
+    "Rationale": "Stable inflation can support economic growth and maintain deposit flows, enhancing Bank of America's liquidity.",
+    "ImpactChannels": [
+      "Stable deposits",
+      "Enhanced NII"
+    ],
+    "Shocks": {
+      "inflation": 2,
+      "deposits": 0
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 5,
+      "NII": 300
+    },
+    "TradeList": [
+      "Reallocate $1bn into stable consumer loans",
+      "Increase Agency MBS holdings by $2bn"
+    ],
+    "Assumptions": "Consumer resilience holds; inflation stabilizes without major shocks."
+  }
+]

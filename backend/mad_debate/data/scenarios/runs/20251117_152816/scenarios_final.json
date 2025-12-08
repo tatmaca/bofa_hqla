@@ -1,0 +1,236 @@
+[
+  {
+    "Scenario": "Interest Rate Volatility",
+    "Description": "Interest rates rise sharply, increasing funding costs and affecting deposit betas.",
+    "Probability": 0.28,
+    "Rationale": "A sudden shift in monetary policy could lead to rapid rate increases, straining liquidity.",
+    "ImpactChannels": [
+      "Funding costs up 50 bps",
+      "Deposit beta increases"
+    ],
+    "Shocks": {
+      "funding_costs": 50,
+      "deposit_beta": 10
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NII": -3
+    },
+    "TradeList": [
+      "Sell $1bn long-term securities",
+      "Lock in rates on wholesale funding"
+    ],
+    "Assumptions": "The Fed raises rates more aggressively than anticipated."
+  },
+  {
+    "Scenario": "Bear Steepener with Rising Credit Spreads",
+    "Description": "The yield curve steepens as long-term rates rise significantly, with IG credit spreads increasing by 15bps and HY by 45bps.",
+    "Probability": 0.22,
+    "Rationale": "Current market conditions suggest a shift to a bear steepener due to anticipated Fed tightening amidst economic uncertainty.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Credit OAS (bps)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "NII": -2
+    },
+    "TradeList": [
+      "Add $1bn USTs via repo",
+      "Increase MBS position by $500mn"
+    ],
+    "Assumptions": "Continued economic uncertainty leading to market volatility."
+  },
+  {
+    "Scenario": "Deposit Runoff Due to Rate Increases",
+    "Description": "As interest rates rise, significant deposit runoff occurs, increasing reliance on wholesale funding.",
+    "Probability": 0.22,
+    "Rationale": "Higher rates could lead consumers to seek better returns elsewhere, straining the funding mix.",
+    "ImpactChannels": [
+      "Deposits decrease by 5%",
+      "Increased reliance on wholesale funding"
+    ],
+    "Shocks": {
+      "deposits": -5
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NII": -2
+    },
+    "TradeList": [
+      "Lock in long-term funding to stabilize liquidity",
+      "Increase rates on savings accounts"
+    ],
+    "Assumptions": "Consumers react negatively to rising interest rates."
+  },
+  {
+    "Scenario": "Deposit Outflow from Wealth Management",
+    "Description": "Higher rates lead to increased withdrawals from wealth management accounts, affecting funding.",
+    "Probability": 0.18,
+    "Rationale": "Current trends indicate a stable but rising deposit beta, suggesting potential outflows.",
+    "ImpactChannels": [
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "deposit_runoff": 5
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Increase liquidity by $1bn in cash",
+      "Utilize $500mn in FHLB advances"
+    ],
+    "Assumptions": "Rate hikes lead to increased client withdrawals."
+  },
+  {
+    "Scenario": "Bear Steepening of the Yield Curve",
+    "Description": "Short-term rates increase more than long-term rates due to market expectations of tighter monetary policy.",
+    "Probability": 0.18,
+    "Rationale": "Fed guidance and macro conditions make a bear steepener plausible within 6 months.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move": 50,
+      "slope_2s10s_bps": 40
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $2bn USTs via repo",
+      "Reduce $1bn Level 2 assets"
+    ],
+    "Assumptions": "Short-term rates increase faster than long-term rates."
+  },
+  {
+    "Scenario": "Bear Steepener with Credit Widening",
+    "Description": "A bear steepening of the yield curve occurs, with short-term rates rising by 50 bps while long-term rates remain unchanged. IG spreads widen by 15 bps and HY spreads by 45 bps.",
+    "Probability": 0.18,
+    "Rationale": "With the Fed's tightening stance, a bear steepener is likely, coupled with rising credit spreads due to risk aversion in the market.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Credit OAS (15 bps)",
+      "Curve (bear steepener)"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -5,
+      "NII": -200
+    },
+    "TradeList": [
+      "Add $2bn in USTs via repo",
+      "Reduce $1bn in Level 2 assets"
+    ],
+    "Assumptions": "Short-term rates will rise due to Fed policy; credit risk perceptions will worsen."
+  },
+  {
+    "Scenario": "Favorable Rate Environment with Stable Deposit Betas",
+    "Description": "Rates increase but deposit betas remain stable, allowing for improved NII.",
+    "Probability": 0.17,
+    "Rationale": "Higher rates have historically not led to proportionate increases in deposit betas.",
+    "ImpactChannels": [
+      "NII (increased)"
+    ],
+    "Shocks": {
+      "move_index": 100,
+      "deposit_beta": 0.4
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NSFR": 2,
+      "NII": 5
+    },
+    "TradeList": [
+      "Add $1bn in short-term USTs",
+      "Rotate $400mn into high-quality munis"
+    ],
+    "Assumptions": "Market competition keeps deposit betas manageable."
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Increased risk aversion leads to wider credit spreads in IG and HY markets.",
+    "Probability": 0.165,
+    "Rationale": "Potential for risk-off sentiment and credit spread widening remains material.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "ig_oas": 25,
+      "hy_oas": 75
+    },
+    "MetricsDelta": {
+      "LCR": -7,
+      "OCI": -3
+    },
+    "TradeList": [
+      "Reduce $500mn Level 2 corporate bonds",
+      "Increase cash reserves by $1bn"
+    ],
+    "Assumptions": "Risk aversion rises, impacting corporate valuations."
+  },
+  {
+    "Scenario": "Economic Recovery with Tightened Credit Spreads",
+    "Description": "A surprising economic recovery leads to a decline in IG spreads by 20 bps and HY spreads by 30 bps.",
+    "Probability": 0.16,
+    "Rationale": "Positive economic indicators may drive a shift in investor sentiment, favoring risk assets.",
+    "ImpactChannels": [
+      "Credit OAS (-20 bps)",
+      "NII improvement"
+    ],
+    "Shocks": {
+      "ig_oas": -20,
+      "hy_oas": -30
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 5,
+      "NII": 200
+    },
+    "TradeList": [
+      "Increase corporate bond holdings by $1bn",
+      "Expand risk appetite in Level 2 assets"
+    ],
+    "Assumptions": "Economic indicators show resilience; market sentiment shifts positively."
+  },
+  {
+    "Scenario": "Market Recovery Leading to Lower Credit Spreads",
+    "Description": "Improved economic conditions lead to tightening of credit spreads.",
+    "Probability": 0.15,
+    "Rationale": "Economic recovery could drive credit spreads tighter, boosting valuations.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "ig_oas": -15,
+      "hy_oas": -45
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "OCI": 4
+    },
+    "TradeList": [
+      "Add $1bn corporate bonds",
+      "Reduce cash reserves by $500mn"
+    ],
+    "Assumptions": "Economic indicators improve, leading to market recovery."
+  }
+]

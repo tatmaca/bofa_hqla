@@ -1,0 +1,137 @@
+[
+  {
+    "Scenario": "Interest Rate Volatility",
+    "Description": "Interest rates rise sharply, increasing funding costs and affecting deposit betas.",
+    "Probability": 0.28,
+    "Rationale": "A sudden shift in monetary policy could lead to rapid rate increases, straining liquidity.",
+    "ImpactChannels": [
+      "Funding costs up 50 bps",
+      "Deposit beta increases"
+    ],
+    "Shocks": {
+      "funding_costs": 50,
+      "deposit_beta": 10
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NII": -3
+    },
+    "TradeList": [
+      "Sell $1bn long-term securities",
+      "Lock in rates on wholesale funding"
+    ],
+    "Assumptions": "The Fed raises rates more aggressively than anticipated."
+  },
+  {
+    "Scenario": "Deposit Runoff Due to Rate Increases",
+    "Description": "As interest rates rise, significant deposit runoff occurs, increasing reliance on wholesale funding.",
+    "Probability": 0.22,
+    "Rationale": "Higher rates could lead consumers to seek better returns elsewhere, straining the funding mix.",
+    "ImpactChannels": [
+      "Deposits decrease by 5%",
+      "Increased reliance on wholesale funding"
+    ],
+    "Shocks": {
+      "deposits": -5
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NII": -2
+    },
+    "TradeList": [
+      "Lock in long-term funding to stabilize liquidity",
+      "Increase rates on savings accounts"
+    ],
+    "Assumptions": "Consumers react negatively to rising interest rates."
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Economic uncertainties lead to wider credit spreads, impacting asset valuations.",
+    "Probability": 0.18,
+    "Rationale": "Increased risk aversion could widen spreads due to deteriorating credit conditions.",
+    "ImpactChannels": [
+      "Credit spreads widen 25 bps",
+      "Asset valuations decrease"
+    ],
+    "Shocks": {
+      "credit_spreads": 25
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NII": -2
+    },
+    "TradeList": [
+      "Reduce exposure to riskier assets by $750m",
+      "Increase holdings in government securities"
+    ],
+    "Assumptions": "Market sentiment shifts towards risk aversion."
+  },
+  {
+    "Scenario": "Economic Stability with External Volatility",
+    "Description": "Economic growth continues, but external factors introduce volatility affecting consumer behavior and deposit flows.",
+    "Probability": 0.15,
+    "Rationale": "Geopolitical tensions and inflationary pressures could impact consumer confidence despite growth.",
+    "ImpactChannels": [
+      "Deposits fluctuate",
+      "Consumer spending volatile"
+    ],
+    "Shocks": {
+      "deposits": 3,
+      "confidence": -2
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NII": -1
+    },
+    "TradeList": [
+      "Increase liquidity reserves by $1bn",
+      "Diversify into short-duration assets"
+    ],
+    "Assumptions": "Economic growth is sustained, but external factors create uncertainty."
+  },
+  {
+    "Scenario": "Market Volatility and Basis Risk",
+    "Description": "Increased market volatility leads to heightened basis risk, impacting the bank’s asset valuations.",
+    "Probability": 0.1,
+    "Rationale": "Fluctuations in the yield curve could create mismatches in asset and liability valuations.",
+    "ImpactChannels": [
+      "Basis risk increases",
+      "Convexity impacts asset values"
+    ],
+    "Shocks": {
+      "basis_risk": 20
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NII": -1
+    },
+    "TradeList": [
+      "Hedge against interest rate movements",
+      "Rebalance portfolio towards less volatile assets"
+    ],
+    "Assumptions": "Market conditions remain unpredictable."
+  },
+  {
+    "Scenario": "Curve Bull-Steepener",
+    "Description": "Long-term rates decline more than short-term rates, leading to a bull-steepening yield curve.",
+    "Probability": 0.07,
+    "Rationale": "Market conditions favor long-duration assets, enhancing portfolio performance.",
+    "ImpactChannels": [
+      "Long-term rates down 30 bps",
+      "Short-term rates stable"
+    ],
+    "Shocks": {
+      "long_rates": -30,
+      "short_rates": 0
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NII": 2
+    },
+    "TradeList": [
+      "Sell $500m short-term Treasuries",
+      "Buy $1bn long-term bonds"
+    ],
+    "Assumptions": "Investor sentiment shifts towards longer-duration investments."
+  }
+]

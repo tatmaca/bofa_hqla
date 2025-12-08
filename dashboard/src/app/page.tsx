@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image"; // (Optional) Next Image for real logos
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,8 @@ async function runScenarioGen(
     judgePrompt: string;
     offlineSample?: boolean;
     newsContext?: string;
+    holdingsCsv?: string;
+    riskLadderCsv?: string;
   }
 ){
   const {
@@ -51,6 +53,8 @@ async function runScenarioGen(
     judgePrompt,
     offlineSample,
     newsContext,
+    holdingsCsv,
+    riskLadderCsv,
   } = params;
   const totalMessages =
     Math.max(1, (debateRuns || 1) * ((debateRounds || 1) * 2 + 1));
@@ -73,6 +77,8 @@ async function runScenarioGen(
     activeLiveRun: null,
     expectedMessages: totalMessages,
     seenMessages: 0,
+    historyDebate: {},
+    historyRunOrder: [],
     output:{
       ...(s.output || {}),
       debate: [],
@@ -101,19 +107,21 @@ async function runScenarioGen(
       const rawStageText = typeof stage.text === "string" ? stage.text : "";
       const stageMessage = typeof stage.message === "string" ? stage.message : "";
       const parsedStage = extractScenariosAndStripJson(stageMessage || rawStageText);
-      const stageText = parsedStage.cleanText || cleanStageLine(rawStageText);
+      let stageText = parsedStage.cleanText || cleanStageLine(rawStageText);
       const rawSegments = collectJsonSegments(stageMessage || rawStageText);
       const rawMatrixText = rawSegments.length ? rawSegments.join("\n\n") : undefined;
       let entryScenarios =
         (Array.isArray(stage.scenarios) && stage.scenarios.length
           ? stage.scenarios
           : parsedStage.scenarios) || [];
-      if (!entryScenarios.length && rawSegments.length) {
-        const fallback = rawSegments.flatMap((segment) =>
-          tryParseScenarioPayload(segment)
-        );
+      if (!entryScenarios.length && rawMatrixText) {
+        const fallback = safeParseScenarioJson(rawMatrixText);
         if (fallback.length) {
           entryScenarios = fallback;
+          const stripped = stripJsonSegmentsFromText(stageMessage || rawStageText, rawSegments);
+          if (stripped) {
+            stageText = stripped;
+          }
         }
       }
       const totalRuns = typeof stage.totalRuns === "number" ? stage.totalRuns : undefined;
@@ -133,10 +141,20 @@ async function runScenarioGen(
           : s.liveDebate && typeof s.liveDebate === "object"
           ? { ...s.liveDebate }
           : {};
+      const baseHistoryDebate =
+        Array.isArray(s.historyDebate)
+          ? { 1: s.historyDebate }
+          : s.historyDebate && typeof s.historyDebate === "object"
+          ? { ...s.historyDebate }
+          : {};
       const existingRunDebate = Array.isArray(baseLiveDebate[runKey])
         ? baseLiveDebate[runKey]
         : [];
-      const entryText = stageMessage || cleanStageLine(rawStageText);
+      const existingHistoryDebate = Array.isArray(baseHistoryDebate[runKey])
+        ? baseHistoryDebate[runKey]
+        : [];
+      const entryText = stageText || cleanStageLine(rawStageText);
+      let nextHistoryRunOrder = Array.isArray(s.historyRunOrder) ? [...s.historyRunOrder] : [];
       if (entryText && (stage.speakerLabel || stage.phase)) {
         const entry = {
           role: stage.speakerLabel || (stage.phase ? stage.phase.toUpperCase() : "Update"),
@@ -148,6 +166,10 @@ async function runScenarioGen(
           matrixId: entryScenarios.length ? `${runKey}-${stage.round ?? 0}-${Date.now()}` : undefined,
         };
         baseLiveDebate[runKey] = [...existingRunDebate, entry].slice(-40);
+        baseHistoryDebate[runKey] = [...existingHistoryDebate, entry];
+        if (!nextHistoryRunOrder.includes(runKey)) {
+          nextHistoryRunOrder = [...nextHistoryRunOrder, runKey];
+        }
       }
       let liveRunOrder = Array.isArray(s.liveRunOrder) ? [...s.liveRunOrder] : [];
       if (!liveRunOrder.includes(runKey)) {
@@ -160,6 +182,8 @@ async function runScenarioGen(
         pct: Math.max(s.pct, progressFromMessages),
         liveDebate: baseLiveDebate,
         liveRunOrder,
+        historyDebate: baseHistoryDebate,
+        historyRunOrder: nextHistoryRunOrder,
         activeLiveRun: runKey,
         expectedMessages: expected,
         seenMessages: newSeen,
@@ -220,25 +244,29 @@ async function runScenarioGen(
     });
 
     const metadata = data?.metadata || null;
-    setter((s:any)=>({
-      ...s,
-      status:"done",
-      pct:100,
-      logs:[...s.logs, "Loaded live MAD debate + scenarios."],
-      liveStage:"MAD judge consolidated scenarios.",
-      liveDebate: {},
-      liveRunOrder: [],
-      activeLiveRun: null,
-      expectedMessages: 0,
-      seenMessages: 0,
-      output:{
-        ...(s.output || {}),
-        debate: sortedDebate,
-        scenarios,
-        scenarioMatrix,
-        metadata,
-      },
-    }));
+    setter((s:any)=>{
+      const persistedDebate = flattenDebateRuns(s.historyDebate, s.historyRunOrder);
+      const finalDebate = sortedDebate.length ? sortedDebate : persistedDebate;
+      return {
+        ...s,
+        status:"done",
+        pct:100,
+        logs:[...s.logs, "Loaded live MAD debate + scenarios."],
+        liveStage:"MAD judge consolidated scenarios.",
+        liveDebate: s.liveDebate,
+        liveRunOrder: s.liveRunOrder,
+        activeLiveRun: s.activeLiveRun,
+        expectedMessages: 0,
+        seenMessages: 0,
+        output:{
+          ...(s.output || {}),
+          debate: finalDebate,
+          scenarios,
+          scenarioMatrix,
+          metadata,
+        },
+      };
+    });
     return { scenarios, scenarioMatrix, debate: sortedDebate, metadata };
   };
 
@@ -257,6 +285,8 @@ async function runScenarioGen(
         judgePrompt,
         offlineSample: offlineSample ? true : undefined,
         newsContext,
+        holdingsCsv,
+        riskLadderCsv,
       }),
     });
 
@@ -497,8 +527,27 @@ const Step = ({index, title, desc, status}:{index:number;title:string;desc:strin
 export default function HqlaE2EDashboard(){
   const [portfolioName, setPortfolioName] = useState("Example HQLA Portfolio");
   const [yaml, setYaml] = useState("# shocks.yaml\nmove_index: 110\nyield_curve: bear_steepener\ncredit_spreads: { ig_oas: +15, hy_oas: +45 }\n");
+  const [holdingsCsv, setHoldingsCsv] = useState<string>("");
+  const [riskLadderCsv, setRiskLadderCsv] = useState<string>("");
+  const [holdingsFileName, setHoldingsFileName] = useState<string>("");
+  const [riskFileName, setRiskFileName] = useState<string>("");
+  const [csvError, setCsvError] = useState<string | null>(null);
 
-  const [scenario, setScenario] = useState({status:"idle", pct:0, logs:[], output:null, liveStage:null, totalRuns:null, liveDebate:{}, liveRunOrder:[], activeLiveRun:null, expectedMessages:0, seenMessages:0} as any);
+  const [scenario, setScenario] = useState({
+    status:"idle",
+    pct:0,
+    logs:[],
+    output:null,
+    liveStage:null,
+    totalRuns:null,
+    liveDebate:{},
+    liveRunOrder:[],
+    activeLiveRun:null,
+    expectedMessages:0,
+    seenMessages:0,
+    historyDebate:{},
+    historyRunOrder:[],
+  } as any);
   const [impact, setImpact] = useState({status:"idle", pct:0, logs:[], output:null} as any);
   const [opt, setOpt] = useState({status:"idle", pct:0, logs:[], output:null} as any);
   const [mon, setMon] = useState({status:"idle", pct:0, logs:[], output:null} as any);
@@ -563,6 +612,8 @@ export default function HqlaE2EDashboard(){
   const [openMon, setOpenMon] = useState(false);
   const [openDebateParams, setOpenDebateParams] = useState(false);
   const [matrixModal, setMatrixModal] = useState<{ title: string; scenarios: any[]; prevScenarios?: any[]; rawMatrixText?: string } | null>(null);
+  const holdingsInputRef = useRef<HTMLInputElement>(null);
+  const riskInputRef = useRef<HTMLInputElement>(null);
 
   const pipelinePct = useMemo(()=>{
     const pcs = [scenario.pct||0, impact.pct||0, opt.pct||0, mon.pct||0];
@@ -579,7 +630,14 @@ export default function HqlaE2EDashboard(){
   const allDone = [scenario,impact,opt,mon].every(s=>s.status==="done");
 
   // Debate run selection logic
-  const debateMessages = (scenario.output?.debate || []) as any[];
+  const historyDebate = flattenDebateRuns(scenario.historyDebate, scenario.historyRunOrder);
+  const debateMessagesFromResult = (scenario.output?.debate || []) as any[];
+  const debateMessages =
+    scenario.status === "done" && historyDebate.length
+      ? historyDebate
+      : debateMessagesFromResult.length
+      ? debateMessagesFromResult
+      : historyDebate;
   const historicalRuns = Array.from(
     new Set(
       debateMessages.map((m) => (typeof m.run === "number" ? m.run : 1))
@@ -593,6 +651,10 @@ export default function HqlaE2EDashboard(){
   liveRunOrder.forEach((r: number) => {
     if (typeof r === "number") runSet.add(r);
   });
+  const historyRunOrder = Array.isArray(scenario.historyRunOrder)
+    ? scenario.historyRunOrder.filter((r: any) => typeof r === "number")
+    : [];
+  historyRunOrder.forEach((r) => runSet.add(r));
   if (typeof scenario.activeLiveRun === "number") {
     runSet.add(scenario.activeLiveRun);
   }
@@ -646,7 +708,11 @@ export default function HqlaE2EDashboard(){
   const launchScenarioGen = async (options:any) => {
     setSelectedScenario(null);
     setSelectedDebateRun(null);
-    return runScenarioGen(setScenario, options);
+    return runScenarioGen(setScenario, {
+      ...options,
+      holdingsCsv: holdingsCsv || undefined,
+      riskLadderCsv: riskLadderCsv || undefined,
+    });
   };
 
   const buildNewsContext = (news:any) => {
@@ -692,6 +758,26 @@ export default function HqlaE2EDashboard(){
       [];
     await runImpact(setImpact, scenarioMatrix);
     await runOptimize(setOpt, scenarioMatrix);
+  };
+  const handleCsvSelection = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setter: (text: string) => void,
+    nameSetter: (text: string) => void
+  ) => {
+    const file = event.target.files?.[0] || null;
+    event.target.value = "";
+    if (!file) return;
+    try {
+      setCsvError(null);
+      const text = await file.text();
+      setter(text);
+      nameSetter(file.name);
+    } catch (err: any) {
+      console.error("CSV upload error", err);
+      setter("");
+      nameSetter("");
+      setCsvError(`Failed to read ${file.name}: ${String(err?.message || err)}`);
+    }
   };
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
@@ -751,8 +837,27 @@ export default function HqlaE2EDashboard(){
                   <label className="text-sm font-medium leading-none">Portfolio name</label>
                   <Input className="h-8" value={portfolioName} onChange={(e)=>setPortfolioName(e.target.value)} placeholder="HQLA v2025Q4"/>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Button variant="outline" size="sm">Upload Holdings CSV</Button>
-                    <Button variant="outline" size="sm">Upload Risk Ladder</Button>
+                    <Button variant="outline" size="sm" onClick={()=>holdingsInputRef.current?.click()}>Upload Holdings CSV</Button>
+                    <Button variant="outline" size="sm" onClick={()=>riskInputRef.current?.click()}>Upload Risk Ladder</Button>
+                  </div>
+                  <input
+                    ref={holdingsInputRef}
+                    type="file"
+                    accept=".csv,text/csv"
+                    className="hidden"
+                    onChange={(e) => handleCsvSelection(e, setHoldingsCsv, setHoldingsFileName)}
+                  />
+                  <input
+                    ref={riskInputRef}
+                    type="file"
+                    accept=".csv,text/csv"
+                    className="hidden"
+                    onChange={(e) => handleCsvSelection(e, setRiskLadderCsv, setRiskFileName)}
+                  />
+                  <div className="space-y-0.5 text-[11px] text-muted-foreground">
+                    <div>Holdings CSV: {holdingsFileName ? holdingsFileName : "No file uploaded"}</div>
+                    <div>Risk ladder CSV: {riskFileName ? riskFileName : "No file uploaded"}</div>
+                    {csvError && <div className="text-rose-600">{csvError}</div>}
                   </div>
                 </div>
                 <div className="col-span-2 space-y-2">
@@ -1605,7 +1710,16 @@ function extractScenariosAndStripJson(
       if (parsed.length) rows.push(...parsed);
     }
     if (rows.length) {
-      return { cleanText: prefixText.trim(), scenarios: rows };
+      const cleanedBody = stripJsonSegmentsFromText(cleaned, segments);
+      const fallbackText = cleanedBody || prefixText;
+      return { cleanText: fallbackText.trim(), scenarios: rows };
+    }
+
+    const fallbackRows = safeParseScenarioJson(segments.join("\n\n"));
+    if (fallbackRows.length) {
+      const cleanedBody = stripJsonSegmentsFromText(cleaned, segments);
+      const fallbackText = cleanedBody || prefixText;
+      return { cleanText: fallbackText.trim(), scenarios: fallbackRows };
     }
   }
 
@@ -1770,6 +1884,77 @@ function collectJsonSegments(text: string): string[] {
   }
 
   return segments;
+}
+
+function stripJsonSegmentsFromText(text: string, segments: string[]): string {
+  if (!text) return "";
+  if (!segments?.length) return text.trim();
+  let result = text;
+  for (const segment of segments) {
+    if (!segment) continue;
+    result = result.split(segment).join("");
+  }
+  return result.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function safeParseScenarioJson(raw?: string): any[] {
+  if (!raw) return [];
+  let cleaned = raw.trim();
+  if (!cleaned) return [];
+  cleaned = cleaned.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+
+  const labelRegex = /(revised\s+json|json)\s*:?\s*/i;
+  const labelMatch = cleaned.match(labelRegex);
+  if (labelMatch && typeof labelMatch.index === "number") {
+    cleaned = cleaned.slice(labelMatch.index + labelMatch[0].length).trim();
+  }
+
+  const firstCurly = cleaned.indexOf("{");
+  const firstBracket = cleaned.indexOf("[");
+  const startIdx =
+    firstCurly === -1
+      ? firstBracket
+      : firstBracket === -1
+      ? firstCurly
+      : Math.min(firstCurly, firstBracket);
+  if (startIdx > 0) {
+    cleaned = cleaned.slice(startIdx);
+  }
+
+  const primary = tryParseScenarioPayload(cleaned);
+  if (primary.length) return primary;
+
+  const segments = collectJsonSegments(cleaned);
+  if (!segments.length) return [];
+  const parsed: any[] = [];
+  for (const segment of segments) {
+    const rows = tryParseScenarioPayload(segment);
+    if (rows.length) parsed.push(...rows);
+  }
+  return parsed;
+}
+
+function flattenDebateRuns(byRun?: Record<number, any[]> | any[], runOrder?: number[]): any[] {
+  if (!byRun) return [];
+  if (Array.isArray(byRun)) return byRun;
+  const orderedRuns =
+    Array.isArray(runOrder) && runOrder.length
+      ? runOrder
+      : Object.keys(byRun)
+          .map((key) => Number(key))
+          .filter((num) => Number.isFinite(num))
+          .sort((a, b) => a - b);
+
+  const combined: any[] = [];
+  for (const run of orderedRuns) {
+    const bucket = Array.isArray((byRun as any)[run])
+      ? (byRun as any)[run]
+      : Array.isArray((byRun as any)[String(run)])
+      ? (byRun as any)[String(run)]
+      : [];
+    combined.push(...bucket);
+  }
+  return combined;
 }
 
 function formatScenarioField(key: string, value: any): string {

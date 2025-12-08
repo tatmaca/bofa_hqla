@@ -1,0 +1,270 @@
+[
+  {
+    "Scenario": "Interest Rate Increase",
+    "Description": "A +50 bps increase in interest rates, leading to improved NII but declining HQLA valuations.",
+    "Probability": 0.15,
+    "Rationale": "Current Fed signals indicate potential for measured rate hikes.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Curve (bear steepener)",
+      "Deposits (-5%)"
+    ],
+    "Shocks": {
+      "move": 50,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -3,
+      "NII": 200
+    },
+    "TradeList": [
+      "Add $1bn 10-year Treasuries via auction"
+    ],
+    "Assumptions": "Consumer spending remains stable despite moderate rate increases."
+  },
+  {
+    "Scenario": "Credit Spread Widening",
+    "Description": "A +30 bps increase in IG spreads and +70 bps in HY spreads, impacting corporate bond valuations.",
+    "Probability": 0.14,
+    "Rationale": "Economic uncertainties lead to wider spreads.",
+    "ImpactChannels": [
+      "Credit (30 bps)",
+      "MBS basis (10 bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": 0,
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 70
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": -2,
+      "NII": -60
+    },
+    "TradeList": [
+      "Reduce corporate bond holdings by $500mn"
+    ],
+    "Assumptions": "Corporate defaults remain within manageable levels."
+  },
+  {
+    "Scenario": "Bear Steepening Yield Curve",
+    "Description": "A bear steepening of the yield curve, impacting MBS basis and refinancing.",
+    "Probability": 0.1,
+    "Rationale": "Current yield curve dynamics suggest a potential steepening.",
+    "ImpactChannels": [
+      "Curve (bear steepener)",
+      "MBS basis (20 bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": -1,
+      "NII": -100
+    },
+    "TradeList": [
+      "Hedge MBS exposure with $300mn in Treasuries"
+    ],
+    "Assumptions": "Refinancing activity remains robust."
+  },
+  {
+    "Scenario": "Deposit Runoff",
+    "Description": "A 5% runoff in retail deposits, leading to higher reliance on wholesale funding.",
+    "Probability": 0.1,
+    "Rationale": "Economic pressures may lead to consumer liquidity needs.",
+    "ImpactChannels": [
+      "Deposits (-5%)",
+      "Funding costs (+15 bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": 0,
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4,
+      "NII": -15
+    },
+    "TradeList": [
+      "Increase repo financing by $1bn"
+    ],
+    "Assumptions": "Consumer credit quality remains stable."
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Potential regulatory changes increasing GSIB surcharges impacting capital ratios.",
+    "Probability": 0.06,
+    "Rationale": "Ongoing discussions around Basel Endgame may affect capital requirements.",
+    "ImpactChannels": [
+      "Reg changes (GSIB surcharge increase)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": 0,
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "NII": -8
+    },
+    "TradeList": [
+      "Reassess capital allocation across business units"
+    ],
+    "Assumptions": "Regulatory environment remains volatile."
+  },
+  {
+    "Scenario": "High Volatility Scenario",
+    "Description": "An increase in market volatility (VIX to 25) leading to liquidity stresses.",
+    "Probability": 0.1,
+    "Rationale": "Current market sentiment suggests rising volatility.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Credit (50 bps)"
+    ],
+    "Shocks": {
+      "move": 50,
+      "yield_curve": 0,
+      "credit_spreads": {
+        "ig_oas": 50,
+        "hy_oas": 50
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3,
+      "NII": -200
+    },
+    "TradeList": [
+      "Increase liquidity reserves by $500mn"
+    ],
+    "Assumptions": "Market conditions normalize after initial shock."
+  },
+  {
+    "Scenario": "Geopolitical Tensions",
+    "Description": "Heightened geopolitical tensions lead to a 20% spike in oil prices.",
+    "Probability": 0.07,
+    "Rationale": "Current global tensions suggest potential for oil price shocks.",
+    "ImpactChannels": [
+      "Commodity Prices (20% increase)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": 0,
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1,
+      "NII": -60
+    },
+    "TradeList": [
+      "Monitor energy sector exposures closely"
+    ],
+    "Assumptions": "Inflation expectations rise moderately."
+  },
+  {
+    "Scenario": "Housing Market Correction",
+    "Description": "A 15% decline in home prices negatively impacts MBS valuations.",
+    "Probability": 0.1,
+    "Rationale": "Recent housing market data suggests potential for corrections.",
+    "ImpactChannels": [
+      "MBS basis (30 bps)",
+      "Credit (10 bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": 0,
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "NII": -150
+    },
+    "TradeList": [
+      "Rebalance MBS portfolio by $400mn"
+    ],
+    "Assumptions": "Consumer confidence dips due to housing market."
+  },
+  {
+    "Scenario": "Corporate Profitability Decline",
+    "Description": "A notable decline in corporate profitability leads to increased default risk.",
+    "Probability": 0.05,
+    "Rationale": "Current earnings outlook suggests risks of profitability declines.",
+    "ImpactChannels": [
+      "Credit (50 bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": 0,
+      "credit_spreads": {
+        "ig_oas": 50,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1,
+      "NII": -50
+    },
+    "TradeList": [
+      "Increase credit risk monitoring efforts"
+    ],
+    "Assumptions": "Defaults remain within manageable levels."
+  },
+  {
+    "Scenario": "Increased Treasury Issuance",
+    "Description": "A significant increase in Treasury issuance ($500bn) leading to higher yields.",
+    "Probability": 0.07,
+    "Rationale": "Fiscal policy trends indicate potential for increased issuance.",
+    "ImpactChannels": [
+      "Rates (20 bps)",
+      "Curve (bear steepener)"
+    ],
+    "Shocks": {
+      "move": 20,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -2,
+      "NII": -50
+    },
+    "TradeList": [
+      "Adjust HQLA portfolio to accommodate higher yields"
+    ],
+    "Assumptions": "Market absorption of new Treasuries remains stable."
+  }
+]
