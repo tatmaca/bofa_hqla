@@ -418,6 +418,15 @@ def update_coefficients(date: str,
     # Smooth across maturities
     updated_coefficients = smooth_across_maturities(updated_coefficients, smoothing_gamma)
     
+    # Warn if updated coefficients are getting too large
+    is_valid, warnings = validate_coefficients(updated_coefficients, max_reasonable=2.0)
+    if warnings:
+        print(f"[WARN] After updating coefficients for {date}, some coefficients exceed 2.0 bps:")
+        for warning in warnings[:3]:  # Show first 3 warnings
+            print(f"  {warning}")
+        if len(warnings) > 3:
+            print(f"  ... (see validate_coefficients for full list)")
+    
     return updated_coefficients
 
 def update_intercepts(date: str,
@@ -436,8 +445,46 @@ def update_intercepts(date: str,
     
     return updated_intercepts
 
+def validate_coefficients(coefficients: Dict[str, Dict[str, float]], 
+                          max_reasonable: float = 2.0) -> Tuple[bool, List[str]]:
+    """
+    Validate that coefficients are in reasonable range.
+    
+    Args:
+        coefficients: {tenor: {factor_name: coefficient_bps}}
+        max_reasonable: Maximum reasonable coefficient value (default: 2.0 bps)
+    
+    Returns:
+        (is_valid, warnings) where warnings is a list of warning messages
+    """
+    warnings = []
+    large_coefs = []
+    
+    for tenor, factor_coefs in coefficients.items():
+        for factor_name, coef_bps in factor_coefs.items():
+            abs_coef = abs(coef_bps)
+            if abs_coef > max_reasonable:
+                large_coefs.append((tenor, factor_name, coef_bps))
+    
+    if large_coefs:
+        warnings.append(f"Found {len(large_coefs)} coefficients exceeding {max_reasonable} bps:")
+        for tenor, factor, coef in large_coefs[:5]:
+            warnings.append(f"  {tenor:4s} / {factor:30s}: {coef:7.4f} bps")
+        if len(large_coefs) > 5:
+            warnings.append(f"  ... and {len(large_coefs) - 5} more")
+    
+    return len(warnings) == 0, warnings
+
 def save_coefficients(date: str, coefficients: Dict[str, Dict[str, float]]):
-    """Save coefficients to database."""
+    """Save coefficients to database with validation."""
+    # Validate coefficients before saving
+    is_valid, warnings = validate_coefficients(coefficients, max_reasonable=2.0)
+    
+    if warnings:
+        print(f"[WARN] Coefficient validation warnings for {date}:")
+        for warning in warnings:
+            print(f"  {warning}")
+    
     conn = get_conn()
     c = conn.cursor()
     
@@ -478,9 +525,47 @@ def save_intercepts(date: str, intercepts: Dict[str, float]):
     conn.commit()
     conn.close()
 
+def validate_predictions(predictions: Dict[str, float],
+                        max_reasonable: float = 20.0) -> Tuple[bool, List[str]]:
+    """
+    Validate that predictions are in reasonable range.
+    
+    Args:
+        predictions: {tenor: predicted_delta_bps}
+        max_reasonable: Maximum reasonable prediction magnitude (default: 20.0 bps)
+    
+    Returns:
+        (is_valid, warnings) where warnings is a list of warning messages
+    """
+    warnings = []
+    extreme_preds = []
+    
+    for tenor, pred in predictions.items():
+        abs_pred = abs(pred)
+        if abs_pred > max_reasonable:
+            extreme_preds.append((tenor, pred))
+    
+    if extreme_preds:
+        warnings.append(f"Found {len(extreme_preds)} predictions exceeding ±{max_reasonable} bps:")
+        for tenor, pred in extreme_preds[:5]:
+            warnings.append(f"  {tenor:4s}: {pred:+7.4f} bps")
+        if len(extreme_preds) > 5:
+            warnings.append(f"  ... and {len(extreme_preds) - 5} more")
+    
+    return len(warnings) == 0, warnings
+
 def save_predictions(date: str, predictions: Dict[str, float], 
                     actuals: Dict[str, float]):
-    """Save predictions and errors to database."""
+    """Save predictions and errors to database with validation."""
+    # Validate predictions before saving
+    is_valid, warnings = validate_predictions(predictions, max_reasonable=20.0)
+    
+    if warnings:
+        print(f"[WARN] Prediction scale validation warnings for {date}:")
+        for warning in warnings:
+            print(f"  {warning}")
+        print(f"  [INFO] Typical yield changes are 1-6 bps, up to ~10 bps on volatile days")
+    
     conn = get_conn()
     c = conn.cursor()
     

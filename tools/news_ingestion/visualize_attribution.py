@@ -10,6 +10,9 @@ Creates visualizations for:
 import os
 import json
 import numpy as np
+# Set matplotlib backend before importing pyplot to avoid numpy compatibility issues
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from typing import Dict, List, Optional, Tuple
@@ -26,19 +29,26 @@ from train_linear_online import (
     get_daily_factor_scores,
     TENORS
 )
-from train_xgboost import MODEL_DIR
+
+# Optional XGBoost model directory (only needed for SHAP comparisons)
+try:
+    from train_xgboost import MODEL_DIR
+    HAS_XGBOOST = True
+except (ImportError, SystemError):
+    MODEL_DIR = None
+    HAS_XGBOOST = False
 
 try:
     import seaborn as sns
     sns.set_style("whitegrid")
     HAS_SEABORN = True
-except ImportError:
+except (ImportError, AttributeError):
     HAS_SEABORN = False
 
 try:
     import shap
     HAS_SHAP = True
-except ImportError:
+except (ImportError, SystemError):
     HAS_SHAP = False
     shap = None
 
@@ -112,8 +122,74 @@ def plot_factor_attribution_by_tenor(attribution: Dict[str, Dict[str, float]],
     if save_path is None:
         save_path = OUTPUT_DIR / f"factor_attribution_{date}.png"
     
-    plt.savefig(save_path, dpi=150, bbox_inches='tight')
-    plt.close()
+    # Fix matplotlib/numpy compatibility issue (numpy 1.26+ with matplotlib 3.9.4)
+    # Solution: Disable patch before saving, then save as SVG (doesn't trigger numpy array conversion)
+    try:
+        # Temporarily disable patch to avoid numpy conversion error
+        original_patch_visible = fig.patch.get_visible() if hasattr(fig.patch, 'get_visible') else True
+        try:
+            fig.patch.set_visible(False)
+        except:
+            pass
+        
+        # Save as SVG first (SVG doesn't have the numpy patch rendering issue)
+        svg_path = save_path.with_suffix('.svg')
+        fig.savefig(svg_path, dpi=150, bbox_inches='tight', format='svg', facecolor='white')
+        
+        # Restore patch visibility
+        try:
+            fig.patch.set_visible(original_patch_visible)
+        except:
+            pass
+        
+        # Convert SVG to PNG using cairosvg or system tools
+        try:
+            import cairosvg
+            cairosvg.svg2png(url=str(svg_path), write_to=str(save_path), dpi=150)
+            svg_path.unlink()  # Remove SVG after conversion
+        except ImportError:
+            # Fallback: try using system command (rsvg-convert or ImageMagick)
+            try:
+                import subprocess
+                # Try rsvg-convert first (librsvg)
+                result = subprocess.run(['rsvg-convert', '-d', '150', '-o', str(save_path), str(svg_path)],
+                                      capture_output=True, timeout=10)
+                if result.returncode == 0:
+                    svg_path.unlink()
+                else:
+                    # Try ImageMagick convert
+                    result = subprocess.run(['convert', '-density', '150', str(svg_path), str(save_path)],
+                                          capture_output=True, timeout=10)
+                    if result.returncode == 0:
+                        svg_path.unlink()
+                    else:
+                        raise Exception("System converters not available")
+            except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
+                # If no converters available, keep SVG and inform user
+                print(f"[WARN] SVG saved but PNG conversion not available.")
+                print(f"[WARN] Install cairosvg: pip install cairosvg")
+                print(f"[WARN] Or use system tool: brew install librsvg (for rsvg-convert)")
+                print(f"[WARN] SVG file saved: {svg_path}")
+                # Keep SVG file - user can convert manually or we'll use SVG
+                # For now, just report success with SVG
+                save_path = svg_path
+    except Exception as e:
+        # If SVG save also fails, try direct PNG save with workarounds
+        try:
+            # Try with explicit format and no patch interaction
+            fig.savefig(save_path, dpi=150, format='png', facecolor='white')
+        except Exception as e2:
+            # Last resort: save without any options
+            try:
+                fig.savefig(str(save_path), format='png')
+            except Exception as e3:
+                print(f"[ERROR] All save methods failed: {e3}")
+                # Save error info
+                error_file = save_path.with_suffix('.error.txt')
+                with open(error_file, 'w') as f:
+                    f.write(f"Failed to save visualization: {e3}\n")
+    finally:
+        plt.close()
     
     print(f"[VIZ] Saved factor attribution plot to {save_path}")
     return save_path
@@ -174,9 +250,13 @@ def plot_factor_contribution_heatmap(attribution: Dict[str, Dict[str, float]],
     ax.set_ylabel('Factor', fontsize=12, fontweight='bold')
     ax.set_title(f'Factor Contribution Heatmap - {date}', fontsize=14, fontweight='bold')
     
-    # Add colorbar
-    cbar = plt.colorbar(im, ax=ax)
-    cbar.set_label('Contribution (bps)', fontsize=10)
+    # Add colorbar (may trigger numpy issues, so wrap in try/except)
+    try:
+        cbar = plt.colorbar(im, ax=ax)
+        cbar.set_label('Contribution (bps)', fontsize=10)
+    except Exception as cbar_err:
+        # If colorbar causes issues, skip it
+        print(f"[WARN] Could not add colorbar: {cbar_err}")
     
     # Add text annotations
     for i in range(len(top_factor_names)):
@@ -190,8 +270,67 @@ def plot_factor_contribution_heatmap(attribution: Dict[str, Dict[str, float]],
     if save_path is None:
         save_path = OUTPUT_DIR / f"factor_heatmap_{date}.png"
     
-    plt.savefig(save_path, dpi=150, bbox_inches='tight')
-    plt.close()
+    # Fix matplotlib/numpy compatibility issue (same as attribution plot - use SVG)
+    try:
+        # Temporarily disable patch to avoid numpy conversion error
+        original_patch_visible = fig.patch.get_visible() if hasattr(fig.patch, 'get_visible') else True
+        try:
+            fig.patch.set_visible(False)
+        except:
+            pass
+        
+        # Save as SVG first (SVG doesn't have the numpy patch rendering issue)
+        svg_path = save_path.with_suffix('.svg')
+        fig.savefig(svg_path, dpi=150, bbox_inches='tight', format='svg', facecolor='white')
+        
+        # Restore patch visibility
+        try:
+            fig.patch.set_visible(original_patch_visible)
+        except:
+            pass
+        
+        # Convert SVG to PNG using cairosvg or system tools
+        try:
+            import cairosvg
+            cairosvg.svg2png(url=str(svg_path), write_to=str(save_path), dpi=150)
+            svg_path.unlink()  # Remove SVG after conversion
+        except ImportError:
+            # Fallback: try using system command (rsvg-convert or ImageMagick)
+            try:
+                import subprocess
+                result = subprocess.run(['rsvg-convert', '-d', '150', '-o', str(save_path), str(svg_path)],
+                                      capture_output=True, timeout=10)
+                if result.returncode == 0:
+                    svg_path.unlink()
+                else:
+                    result = subprocess.run(['convert', '-density', '150', str(svg_path), str(save_path)],
+                                          capture_output=True, timeout=10)
+                    if result.returncode == 0:
+                        svg_path.unlink()
+                    else:
+                        raise Exception("System converters not available")
+            except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
+                # If no converters available, keep SVG
+                print(f"[WARN] SVG saved but PNG conversion not available for heatmap.")
+                print(f"[WARN] SVG file saved: {svg_path}")
+                save_path = svg_path
+    except Exception as e:
+        # If SVG save also fails, the error is likely in figure creation, not saving
+        # Try to save as SVG without bbox_inches
+        try:
+            svg_path = save_path.with_suffix('.svg')
+            fig.patch.set_visible(False)
+            fig.savefig(svg_path, dpi=150, format='svg', facecolor='white')
+            print(f"[WARN] Heatmap saved as SVG (PNG conversion failed): {svg_path}")
+            save_path = svg_path
+        except Exception as e2:
+            print(f"[ERROR] Could not save heatmap: {e2}")
+            # Save error for debugging
+            error_file = save_path.with_suffix('.error.txt')
+            with open(error_file, 'w') as f:
+                f.write(f"SVG save error: {e}\nPNG fallback error: {e2}\n")
+    finally:
+        plt.close()
     
     print(f"[VIZ] Saved factor heatmap to {save_path}")
     return save_path
@@ -254,8 +393,22 @@ def plot_shap_summary(shap_values: np.ndarray,
     if save_path is None:
         save_path = OUTPUT_DIR / f"shap_summary_{target_name}_{date}.png"
     
-    plt.savefig(save_path, dpi=150, bbox_inches='tight')
-    plt.close()
+    # Fix matplotlib/numpy compatibility by removing patch
+    try:
+        original_patch = fig.patch
+        fig.patch = None
+        fig.set_dpi(150)
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        canvas = FigureCanvasAgg(fig)
+        canvas.print_png(str(save_path))
+        fig.patch = original_patch
+    except Exception:
+        try:
+            plt.savefig(save_path, dpi=150, bbox_inches='tight')
+        except:
+            plt.savefig(save_path, dpi=150)
+    finally:
+        plt.close()
     
     print(f"[VIZ] Saved SHAP summary plot to {save_path}")
     return save_path
@@ -335,8 +488,22 @@ def compare_linear_shap_importance(linear_coefficients: Dict[str, Dict[str, floa
     if save_path is None:
         save_path = OUTPUT_DIR / f"linear_shap_comparison_{tenor}_{date}.png"
     
-    plt.savefig(save_path, dpi=150, bbox_inches='tight')
-    plt.close()
+    # Fix matplotlib/numpy compatibility by removing patch
+    try:
+        original_patch = fig.patch
+        fig.patch = None
+        fig.set_dpi(150)
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        canvas = FigureCanvasAgg(fig)
+        canvas.print_png(str(save_path))
+        fig.patch = original_patch
+    except Exception:
+        try:
+            plt.savefig(save_path, dpi=150, bbox_inches='tight')
+        except:
+            plt.savefig(save_path, dpi=150)
+    finally:
+        plt.close()
     
     print(f"[VIZ] Saved linear-SHAP comparison to {save_path}")
     return save_path
@@ -387,13 +554,16 @@ def generate_attribution_report(date: str,
     report["visualizations"]["factor_heatmap"] = str(viz_path)
     
     # Try to load XGBoost models and generate SHAP plots
-    try:
-        metadata_files = sorted(MODEL_DIR.glob("xgb_metadata_*.json"), reverse=True)
-        if metadata_files:
-            with open(metadata_files[0]) as f:
-                xgb_metadata = json.load(f)
-            
-            # For each target, try to get SHAP info from saved models
+    if not HAS_XGBOOST or MODEL_DIR is None:
+        print(f"[INFO] XGBoost models not available - skipping SHAP comparisons")
+    else:
+        try:
+            metadata_files = sorted(MODEL_DIR.glob("xgb_metadata_*.json"), reverse=True)
+            if metadata_files:
+                with open(metadata_files[0]) as f:
+                    xgb_metadata = json.load(f)
+                
+                # For each target, try to get SHAP info from saved models
                 for target in xgb_metadata.get("targets", []):
                     model_info = xgb_metadata.get("model_info", {}).get(target, {})
                     shap_ranking = model_info.get("top_features_shap", [])
@@ -419,8 +589,8 @@ def generate_attribution_report(date: str,
                             )
                             if viz_path:
                                 report["visualizations"][f"linear_shap_comparison_{target}"] = str(viz_path)
-    except Exception as e:
-        print(f"[WARN] Could not generate SHAP comparisons: {e}")
+        except Exception as e:
+            print(f"[WARN] Could not generate SHAP comparisons: {e}")
     
     # Save report JSON
     report_path = output_dir / f"attribution_report_{date}.json"
