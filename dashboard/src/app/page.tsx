@@ -137,7 +137,7 @@ async function runScenarioGen(
   };
 
   const normalizeScenarioMatrix = (rows: any[]) => {
-    if (!Array.isArray(rows) || !rows.length) return [];
+    if (!Array.isArray(rows) || !rows.length) return { matrix: [], sumBefore: 0 };
     const probs = rows.map((sc) => {
       const raw =
         typeof sc?.Probability !== "undefined"
@@ -153,18 +153,20 @@ async function runScenarioGen(
       (a, b) => a + (Number.isFinite(b) ? (b as number) : 0),
       0,
     );
-    const base = totalRaw > 0 ? probs.map((p) => p / totalRaw) : probs.map(() => 1 / probs.length);
+    const base =
+      totalRaw > 0 ? probs.map((p) => p / totalRaw) : probs.map(() => 1 / probs.length);
     // force exact sum to 1 by adjusting the last entry
     let adj = [...base];
     if (adj.length > 0) {
       const partial = adj.slice(0, -1).reduce((a, b) => a + b, 0);
       adj[adj.length - 1] = Math.max(0, 1 - partial);
     }
-    return rows.map((sc, idx) => ({
+    const matrix = rows.map((sc, idx) => ({
       ...sc,
       Probability: Number(adj[idx]?.toFixed(6) || 0),
       probability_sum_before: totalRaw,
     }));
+    return { matrix, sumBefore: totalRaw };
   };
 
   const applyStage = (stage: any) => {
@@ -285,7 +287,7 @@ async function runScenarioGen(
     });
 
     const rawScenarios = Array.isArray(data?.scenarios) ? data.scenarios : [];
-    const scenarioMatrix = normalizeScenarioMatrix(
+    const { matrix: scenarioMatrix, sumBefore } = normalizeScenarioMatrix(
       rawScenarios
         .map((sc: any) => (sc && typeof sc === "object" ? sc : null))
         .filter(Boolean),
@@ -343,6 +345,7 @@ async function runScenarioGen(
           scenarioMatrix,
           metadata,
           probabilitySum: probabilitySum > 0 ? 1 : probabilitySum,
+          probabilitySumBefore: sumBefore,
         },
       };
     });

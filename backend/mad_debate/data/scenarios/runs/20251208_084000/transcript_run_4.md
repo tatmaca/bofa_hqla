@@ -1,0 +1,981 @@
+# Debate Transcript — Run 4
+
+### **JUDGE** (Judge)
+
+**JSON**
+
+```json
+[
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Long-term rates rise significantly while short-term rates remain stable, resulting in a bear steepening of the yield curve.",
+    "Probability": 0.10,
+    "Rationale": "Expectations of inflation rising due to economic recovery lead to a steepening curve, impacting long-duration assets.",
+    "ImpactChannels": "Rates/Credit",
+    "Shocks": {"move": 120, "yield_curve": "bear_steepener"},
+    "MetricsDelta": {"LCR": -5, "OCI": -1.5},
+    "TradeList": ["Add $2bn 10y USTs", "Reduce $1bn MBS"],
+    "Assumptions": "Inflation remains above 3%, Fed signals no immediate rate hikes.",
+    "Signals": ["CPI release > 3.0% on 2025-01-15", "FOMC meeting on 2025-03-20"],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Credit spreads widen significantly due to increased risk aversion in the market, affecting corporate bond valuations.",
+    "Probability": 0.07,
+    "Rationale": "Deteriorating corporate earnings lead to increased risk premiums, impacting capital ratios.",
+    "ImpactChannels": "Credit",
+    "Shocks": {"ig_oas": 15, "hy_oas": 45},
+    "MetricsDelta": {"CapitalRatio": -0.2, "LCR": -3},
+    "TradeList": ["Reduce $1bn corporate bonds", "Add $500mm cash"],
+    "Assumptions": "Corporate earnings reports are largely negative.",
+    "Signals": ["Earnings reports > 50% misses in 2025-02"],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Retail Deposit Beta Increase",
+    "Description": "Increased competition leads to a rise in retail deposit beta, increasing funding costs.",
+    "Probability": 0.14,
+    "Rationale": "Heightened competition in the banking sector results in rising deposit rates.",
+    "ImpactChannels": "Deposits",
+    "Shocks": {"depo_beta": 0.15},
+    "MetricsDelta": {"NII": -7, "LCR": -4},
+    "TradeList": ["Increase retail deposit rates by 25bps"],
+    "Assumptions": "Market interest rates rise alongside competition.",
+    "Signals": ["Retail deposit flows > 5% runoff in 2025-03"],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Implementation of Basel Endgame leads to higher capital requirements and liquidity add-ons.",
+    "Probability": 0.07,
+    "Rationale": "Regulatory pressures increase, impacting capital and liquidity metrics.",
+    "ImpactChannels": "Regulation",
+    "Shocks": {"regulatory": "Basel Endgame implementation"},
+    "MetricsDelta": {"CapitalRatio": -0.5, "LCR": -3},
+    "TradeList": ["Prepare for increased capital buffers"],
+    "Assumptions": "Regulatory body announces final rules.",
+    "Signals": ["Basel Committee meeting on 2025-06-01"],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "A widening MBS basis impacts the valuation of agency MBS in the HQLA stack.",
+    "Probability": 0.08,
+    "Rationale": "Market liquidity issues lead to reduced investor appetite for MBS.",
+    "ImpactChannels": "MBS",
+    "Shocks": {"mbs_basis": 50},
+    "MetricsDelta": {"OCI": -2, "LCR": -3},
+    "TradeList": ["Reduce MBS holdings by $1bn"],
+    "Assumptions": "Investor sentiment shifts due to market volatility.",
+    "Signals": ["MBS basis > 50bps on 2025-05-15"],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Geopolitical Risk",
+    "Description": "Escalation of geopolitical tensions leads to increased demand for USTs, impacting liquidity conditions.",
+    "Probability": 0.10,
+    "Rationale": "Market uncertainty leads to a flight to quality, affecting funding costs.",
+    "ImpactChannels": "Rates",
+    "Shocks": {"move": -50},
+    "MetricsDelta": {"LCR": 5, "NII": -2},
+    "TradeList": ["Increase UST holdings by $2bn"],
+    "Assumptions": "Tensions escalate in the Middle East.",
+    "Signals": ["Tension reports escalate on 2025-04-10"],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Commodity Price Shock",
+    "Description": "A sharp rise in commodity prices leads to inflation concerns and shifts in monetary policy.",
+    "Probability": 0.09,
+    "Rationale": "Rising inflation prompts a shift in the Fed's stance on interest rates.",
+    "ImpactChannels": "Rates",
+    "Shocks": {"move": 75},
+    "MetricsDelta": {"NII": -5, "LCR": -4},
+    "TradeList": ["Adjust loan pricing to reflect increased rates"],
+    "Assumptions": "Commodity prices increase by 20%.",
+    "Signals": ["Commodity index > 150 on 2025-03-30"],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Consumer Balance Sheet Stress",
+    "Description": "Increasing defaults among consumers lead to tightening credit conditions.",
+    "Probability": 0.07,
+    "Rationale": "Deterioration of consumer financial health impacts credit quality.",
+    "ImpactChannels": "Credit",
+    "Shocks": {"default_rate": 1.5},
+    "MetricsDelta": {"LCR": -2, "CapitalRatio": -0.3},
+    "TradeList": ["Increase reserves by $1bn"],
+    "Assumptions": "Unemployment rises to 6%.",
+    "Signals": ["Unemployment report > 6% on 2025-05-15"],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Wealth Management Runoff",
+    "Description": "Market volatility leads to significant withdrawals from wealth management accounts.",
+    "Probability": 0.09,
+    "Rationale": "Clients withdraw deposits due to market uncertainties.",
+    "ImpactChannels": "Deposits",
+    "Shocks": {"wealth_runoff": 5},
+    "MetricsDelta": {"LCR": -6, "NII": -3},
+    "TradeList": ["Increase liquidity buffers by $1bn"],
+    "Assumptions": "Market remains volatile throughout the period.",
+    "Signals": ["Client withdrawals > $10bn in 2025-04"],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Treasury Issuance Surge",
+    "Description": "Increased Treasury issuance leads to higher yields, impacting the HQLA stack.",
+    "Probability": 0.09,
+    "Rationale": "Higher issuance increases supply, impacting UST valuations.",
+    "ImpactChannels": "Rates",
+    "Shocks": {"move": 50},
+    "MetricsDelta": {"LCR": -3, "OCI": -1},
+    "TradeList": ["Reduce UST holdings by $1bn"],
+    "Assumptions": "UST issuance increases by 25%.",
+    "Signals": ["Treasury auction results on 2025-03-01"],
+    "PredictionDate": "2025-12-08"
+  }
+]
+```
+
+## Round 1
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "Long-term rates rise significantly while short-term rates remain stable, resulting in a bear steepening of the yield curve.",
+        "Probability": 0.15,
+        "Rationale": "Expectations of inflation rising due to economic recovery lead to a steepening curve, impacting long-duration assets.",
+        "ImpactChannels": "Rates/Credit",
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "OCI": -1.5},
+        "TradeList": ["Add $2bn 10y USTs", "Reduce $1bn MBS"],
+        "Assumptions": "Inflation remains above 3%, Fed signals no immediate rate hikes.",
+        "Signals": ["CPI release > 3.0% on 2025-01-15", "FOMC meeting on 2025-03-20"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "Credit spreads widen significantly due to increased risk aversion in the market, affecting corporate bond valuations.",
+        "Probability": 0.10,
+        "Rationale": "Deteriorating corporate earnings lead to increased risk premiums, impacting capital ratios.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"ig_oas": 15, "hy_oas": 45},
+        "MetricsDelta": {"CapitalRatio": -0.2, "LCR": -3},
+        "TradeList": ["Reduce $1bn corporate bonds", "Add $500mm cash"],
+        "Assumptions": "Corporate earnings reports are largely negative.",
+        "Signals": ["Earnings reports > 50% misses in 2025-02"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Retail Deposit Beta Increase",
+        "Description": "Increased competition leads to a rise in retail deposit beta, increasing funding costs.",
+        "Probability": 0.12,
+        "Rationale": "Heightened competition in the banking sector results in rising deposit rates.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"depo_beta": 0.15},
+        "MetricsDelta": {"NII": -7, "LCR": -4},
+        "TradeList": ["Increase retail deposit rates by 25bps"],
+        "Assumptions": "Market interest rates rise alongside competition.",
+        "Signals": ["Retail deposit flows > 5% runoff in 2025-03"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Regulatory Changes",
+        "Description": "Implementation of Basel Endgame leads to higher capital requirements and liquidity add-ons.",
+        "Probability": 0.08,
+        "Rationale": "Regulatory pressures increase, impacting capital and liquidity metrics.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"regulatory": "Basel Endgame implementation"},
+        "MetricsDelta": {"CapitalRatio": -0.5, "LCR": -3},
+        "TradeList": ["Prepare for increased capital buffers"],
+        "Assumptions": "Regulatory body announces final rules.",
+        "Signals": ["Basel Committee meeting on 2025-06-01"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "A widening MBS basis impacts the valuation of agency MBS in the HQLA stack.",
+        "Probability": 0.09,
+        "Rationale": "Market liquidity issues lead to reduced investor appetite for MBS.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"mbs_basis": 50},
+        "MetricsDelta": {"OCI": -2, "LCR": -3},
+        "TradeList": ["Reduce MBS holdings by $1bn"],
+        "Assumptions": "Investor sentiment shifts due to market volatility.",
+        "Signals": ["MBS basis > 50bps on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Geopolitical Risk",
+        "Description": "Escalation of geopolitical tensions leads to increased demand for USTs, impacting liquidity conditions.",
+        "Probability": 0.10,
+        "Rationale": "Market uncertainty leads to a flight to quality, affecting funding costs.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": -50},
+        "MetricsDelta": {"LCR": +5, "NII": -2},
+        "TradeList": ["Increase UST holdings by $2bn"],
+        "Assumptions": "Tensions escalate in the Middle East.",
+        "Signals": ["Tension reports escalate on 2025-04-10"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Commodity Price Shock",
+        "Description": "A sharp rise in commodity prices leads to inflation concerns and shifts in monetary policy.",
+        "Probability": 0.10,
+        "Rationale": "Rising inflation prompts a shift in the Fed's stance on interest rates.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 75},
+        "MetricsDelta": {"NII": -5, "LCR": -4},
+        "TradeList": ["Adjust loan pricing to reflect increased rates"],
+        "Assumptions": "Commodity prices increase by 20%.",
+        "Signals": ["Commodity index > 150 on 2025-03-30"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Consumer Balance Sheet Stress",
+        "Description": "Increasing defaults among consumers lead to tightening credit conditions.",
+        "Probability": 0.08,
+        "Rationale": "Deterioration of consumer financial health impacts credit quality.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"default_rate": 1.5},
+        "MetricsDelta": {"LCR": -2, "CapitalRatio": -0.3},
+        "TradeList": ["Increase reserves by $1bn"],
+        "Assumptions": "Unemployment rises to 6%.",
+        "Signals": ["Unemployment report > 6% on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Wealth Management Runoff",
+        "Description": "Market volatility leads to significant withdrawals from wealth management accounts.",
+        "Probability": 0.09,
+        "Rationale": "Clients withdraw deposits due to market uncertainties.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"wealth_runoff": 5},
+        "MetricsDelta": {"LCR": -6, "NII": -3},
+        "TradeList": ["Increase liquidity buffers by $1bn"],
+        "Assumptions": "Market remains volatile throughout the period.",
+        "Signals": ["Client withdrawals > $10bn in 2025-04"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Treasury Issuance Surge",
+        "Description": "Increased Treasury issuance leads to higher yields, impacting the HQLA stack.",
+        "Probability": 0.09,
+        "Rationale": "Higher issuance increases supply, impacting UST valuations.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 50},
+        "MetricsDelta": {"LCR": -3, "OCI": -1},
+        "TradeList": ["Reduce UST holdings by $1bn"],
+        "Assumptions": "UST issuance increases by 25%.",
+        "Signals": ["Treasury auction results on 2025-03-01"],
+        "PredictionDate": "2025-12-08"
+    }
+]
+```
+
+### **Devil's advocate**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "Long-term rates rise significantly while short-term rates remain stable, resulting in a bear steepening of the yield curve.",
+        "Probability": 0.12,
+        "Rationale": "Expectations of inflation rising due to economic recovery lead to a steepening curve, impacting long-duration assets.",
+        "ImpactChannels": "Rates/Credit",
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "OCI": -1.5},
+        "TradeList": ["Add $2bn 10y USTs", "Reduce $1bn MBS"],
+        "Assumptions": "Inflation remains above 3%, Fed signals no immediate rate hikes.",
+        "Signals": ["CPI release > 3.0% on 2025-01-15", "FOMC meeting on 2025-03-20"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "Credit spreads widen significantly due to increased risk aversion in the market, affecting corporate bond valuations.",
+        "Probability": 0.09,
+        "Rationale": "Deteriorating corporate earnings lead to increased risk premiums, impacting capital ratios.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"ig_oas": 15, "hy_oas": 45},
+        "MetricsDelta": {"CapitalRatio": -0.2, "LCR": -3},
+        "TradeList": ["Reduce $1bn corporate bonds", "Add $500mm cash"],
+        "Assumptions": "Corporate earnings reports are largely negative.",
+        "Signals": ["Earnings reports > 50% misses in 2025-02"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Retail Deposit Beta Increase",
+        "Description": "Increased competition leads to a rise in retail deposit beta, increasing funding costs.",
+        "Probability": 0.10,
+        "Rationale": "Heightened competition in the banking sector results in rising deposit rates.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"depo_beta": 0.15},
+        "MetricsDelta": {"NII": -7, "LCR": -4},
+        "TradeList": ["Increase retail deposit rates by 25bps"],
+        "Assumptions": "Market interest rates rise alongside competition.",
+        "Signals": ["Retail deposit flows > 5% runoff in 2025-03"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Regulatory Changes",
+        "Description": "Implementation of Basel Endgame leads to higher capital requirements and liquidity add-ons.",
+        "Probability": 0.08,
+        "Rationale": "Regulatory pressures increase, impacting capital and liquidity metrics.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"regulatory": "Basel Endgame implementation"},
+        "MetricsDelta": {"CapitalRatio": -0.5, "LCR": -3},
+        "TradeList": ["Prepare for increased capital buffers"],
+        "Assumptions": "Regulatory body announces final rules.",
+        "Signals": ["Basel Committee meeting on 2025-06-01"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "A widening MBS basis impacts the valuation of agency MBS in the HQLA stack.",
+        "Probability": 0.09,
+        "Rationale": "Market liquidity issues lead to reduced investor appetite for MBS.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"mbs_basis": 50},
+        "MetricsDelta": {"OCI": -2, "LCR": -3},
+        "TradeList": ["Reduce MBS holdings by $1bn"],
+        "Assumptions": "Investor sentiment shifts due to market volatility.",
+        "Signals": ["MBS basis > 50bps on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Geopolitical Risk",
+        "Description": "Escalation of geopolitical tensions leads to increased demand for USTs, impacting liquidity conditions.",
+        "Probability": 0.10,
+        "Rationale": "Market uncertainty leads to a flight to quality, affecting funding costs.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": -50},
+        "MetricsDelta": {"LCR": +5, "NII": -2},
+        "TradeList": ["Increase UST holdings by $2bn"],
+        "Assumptions": "Tensions escalate in the Middle East.",
+        "Signals": ["Tension reports escalate on 2025-04-10"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Commodity Price Shock",
+        "Description": "A sharp rise in commodity prices leads to inflation concerns and shifts in monetary policy.",
+        "Probability": 0.09,
+        "Rationale": "Rising inflation prompts a shift in the Fed's stance on interest rates.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 75},
+        "MetricsDelta": {"NII": -5, "LCR": -4},
+        "TradeList": ["Adjust loan pricing to reflect increased rates"],
+        "Assumptions": "Commodity prices increase by 20%.",
+        "Signals": ["Commodity index > 150 on 2025-03-30"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Consumer Balance Sheet Stress",
+        "Description": "Increasing defaults among consumers lead to tightening credit conditions.",
+        "Probability": 0.09,
+        "Rationale": "Deterioration of consumer financial health impacts credit quality.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"default_rate": 1.5},
+        "MetricsDelta": {"LCR": -2, "CapitalRatio": -0.3},
+        "TradeList": ["Increase reserves by $1bn"],
+        "Assumptions": "Unemployment rises to 6%.",
+        "Signals": ["Unemployment report > 6% on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Wealth Management Runoff",
+        "Description": "Market volatility leads to significant withdrawals from wealth management accounts.",
+        "Probability": 0.09,
+        "Rationale": "Clients withdraw deposits due to market uncertainties.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"wealth_runoff": 5},
+        "MetricsDelta": {"LCR": -6, "NII": -3},
+        "TradeList": ["Increase liquidity buffers by $1bn"],
+        "Assumptions": "Market remains volatile throughout the period.",
+        "Signals": ["Client withdrawals > $10bn in 2025-04"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Treasury Issuance Surge",
+        "Description": "Increased Treasury issuance leads to higher yields, impacting the HQLA stack.",
+        "Probability": 0.09,
+        "Rationale": "Higher issuance increases supply, impacting UST valuations.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 50},
+        "MetricsDelta": {"LCR": -3, "OCI": -1},
+        "TradeList": ["Reduce UST holdings by $1bn"],
+        "Assumptions": "UST issuance increases by 25%.",
+        "Signals": ["Treasury auction results on 2025-03-01"],
+        "PredictionDate": "2025-12-08"
+    }
+]
+```
+
+## Round 2
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "Long-term rates rise significantly while short-term rates remain stable, resulting in a bear steepening of the yield curve.",
+        "Probability": 0.10,
+        "Rationale": "Expectations of inflation rising due to economic recovery lead to a steepening curve, impacting long-duration assets.",
+        "ImpactChannels": "Rates/Credit",
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "OCI": -1.5},
+        "TradeList": ["Add $2bn 10y USTs", "Reduce $1bn MBS"],
+        "Assumptions": "Inflation remains above 3%, Fed signals no immediate rate hikes.",
+        "Signals": ["CPI release > 3.0% on 2025-01-15", "FOMC meeting on 2025-03-20"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "Credit spreads widen significantly due to increased risk aversion in the market, affecting corporate bond valuations.",
+        "Probability": 0.08,
+        "Rationale": "Deteriorating corporate earnings lead to increased risk premiums, impacting capital ratios.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"ig_oas": 15, "hy_oas": 45},
+        "MetricsDelta": {"CapitalRatio": -0.2, "LCR": -3},
+        "TradeList": ["Reduce $1bn corporate bonds", "Add $500mm cash"],
+        "Assumptions": "Corporate earnings reports are largely negative.",
+        "Signals": ["Earnings reports > 50% misses in 2025-02"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Retail Deposit Beta Increase",
+        "Description": "Increased competition leads to a rise in retail deposit beta, increasing funding costs.",
+        "Probability": 0.15,
+        "Rationale": "Heightened competition in the banking sector results in rising deposit rates.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"depo_beta": 0.15},
+        "MetricsDelta": {"NII": -7, "LCR": -4},
+        "TradeList": ["Increase retail deposit rates by 25bps"],
+        "Assumptions": "Market interest rates rise alongside competition.",
+        "Signals": ["Retail deposit flows > 5% runoff in 2025-03"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Regulatory Changes",
+        "Description": "Implementation of Basel Endgame leads to higher capital requirements and liquidity add-ons.",
+        "Probability": 0.08,
+        "Rationale": "Regulatory pressures increase, impacting capital and liquidity metrics.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"regulatory": "Basel Endgame implementation"},
+        "MetricsDelta": {"CapitalRatio": -0.5, "LCR": -3},
+        "TradeList": ["Prepare for increased capital buffers"],
+        "Assumptions": "Regulatory body announces final rules.",
+        "Signals": ["Basel Committee meeting on 2025-06-01"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "A widening MBS basis impacts the valuation of agency MBS in the HQLA stack.",
+        "Probability": 0.09,
+        "Rationale": "Market liquidity issues lead to reduced investor appetite for MBS.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"mbs_basis": 50},
+        "MetricsDelta": {"OCI": -2, "LCR": -3},
+        "TradeList": ["Reduce MBS holdings by $1bn"],
+        "Assumptions": "Investor sentiment shifts due to market volatility.",
+        "Signals": ["MBS basis > 50bps on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Geopolitical Risk",
+        "Description": "Escalation of geopolitical tensions leads to increased demand for USTs, impacting liquidity conditions.",
+        "Probability": 0.10,
+        "Rationale": "Market uncertainty leads to a flight to quality, affecting funding costs.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": -50},
+        "MetricsDelta": {"LCR": +5, "NII": -2},
+        "TradeList": ["Increase UST holdings by $2bn"],
+        "Assumptions": "Tensions escalate in the Middle East.",
+        "Signals": ["Tension reports escalate on 2025-04-10"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Commodity Price Shock",
+        "Description": "A sharp rise in commodity prices leads to inflation concerns and shifts in monetary policy.",
+        "Probability": 0.09,
+        "Rationale": "Rising inflation prompts a shift in the Fed's stance on interest rates.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 75},
+        "MetricsDelta": {"NII": -5, "LCR": -4},
+        "TradeList": ["Adjust loan pricing to reflect increased rates"],
+        "Assumptions": "Commodity prices increase by 20%.",
+        "Signals": ["Commodity index > 150 on 2025-03-30"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Consumer Balance Sheet Stress",
+        "Description": "Increasing defaults among consumers lead to tightening credit conditions.",
+        "Probability": 0.08,
+        "Rationale": "Deterioration of consumer financial health impacts credit quality.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"default_rate": 1.5},
+        "MetricsDelta": {"LCR": -2, "CapitalRatio": -0.3},
+        "TradeList": ["Increase reserves by $1bn"],
+        "Assumptions": "Unemployment rises to 6%.",
+        "Signals": ["Unemployment report > 6% on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Wealth Management Runoff",
+        "Description": "Market volatility leads to significant withdrawals from wealth management accounts.",
+        "Probability": 0.09,
+        "Rationale": "Clients withdraw deposits due to market uncertainties.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"wealth_runoff": 5},
+        "MetricsDelta": {"LCR": -6, "NII": -3},
+        "TradeList": ["Increase liquidity buffers by $1bn"],
+        "Assumptions": "Market remains volatile throughout the period.",
+        "Signals": ["Client withdrawals > $10bn in 2025-04"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Treasury Issuance Surge",
+        "Description": "Increased Treasury issuance leads to higher yields, impacting the HQLA stack.",
+        "Probability": 0.09,
+        "Rationale": "Higher issuance increases supply, impacting UST valuations.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 50},
+        "MetricsDelta": {"LCR": -3, "OCI": -1},
+        "TradeList": ["Reduce UST holdings by $1bn"],
+        "Assumptions": "UST issuance increases by 25%.",
+        "Signals": ["Treasury auction results on 2025-03-01"],
+        "PredictionDate": "2025-12-08"
+    }
+]
+```
+
+### **Devil's advocate**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "Long-term rates rise significantly while short-term rates remain stable, resulting in a bear steepening of the yield curve.",
+        "Probability": 0.10,
+        "Rationale": "Expectations of inflation rising due to economic recovery lead to a steepening curve, impacting long-duration assets.",
+        "ImpactChannels": "Rates/Credit",
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "OCI": -1.5},
+        "TradeList": ["Add $2bn 10y USTs", "Reduce $1bn MBS"],
+        "Assumptions": "Inflation remains above 3%, Fed signals no immediate rate hikes.",
+        "Signals": ["CPI release > 3.0% on 2025-01-15", "FOMC meeting on 2025-03-20"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "Credit spreads widen significantly due to increased risk aversion in the market, affecting corporate bond valuations.",
+        "Probability": 0.07,
+        "Rationale": "Deteriorating corporate earnings lead to increased risk premiums, impacting capital ratios.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"ig_oas": 15, "hy_oas": 45},
+        "MetricsDelta": {"CapitalRatio": -0.2, "LCR": -3},
+        "TradeList": ["Reduce $1bn corporate bonds", "Add $500mm cash"],
+        "Assumptions": "Corporate earnings reports are largely negative.",
+        "Signals": ["Earnings reports > 50% misses in 2025-02"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Retail Deposit Beta Increase",
+        "Description": "Increased competition leads to a rise in retail deposit beta, increasing funding costs.",
+        "Probability": 0.12,
+        "Rationale": "Heightened competition in the banking sector results in rising deposit rates.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"depo_beta": 0.15},
+        "MetricsDelta": {"NII": -7, "LCR": -4},
+        "TradeList": ["Increase retail deposit rates by 25bps"],
+        "Assumptions": "Market interest rates rise alongside competition.",
+        "Signals": ["Retail deposit flows > 5% runoff in 2025-03"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Regulatory Changes",
+        "Description": "Implementation of Basel Endgame leads to higher capital requirements and liquidity add-ons.",
+        "Probability": 0.07,
+        "Rationale": "Regulatory pressures increase, impacting capital and liquidity metrics.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"regulatory": "Basel Endgame implementation"},
+        "MetricsDelta": {"CapitalRatio": -0.5, "LCR": -3},
+        "TradeList": ["Prepare for increased capital buffers"],
+        "Assumptions": "Regulatory body announces final rules.",
+        "Signals": ["Basel Committee meeting on 2025-06-01"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "A widening MBS basis impacts the valuation of agency MBS in the HQLA stack.",
+        "Probability": 0.08,
+        "Rationale": "Market liquidity issues lead to reduced investor appetite for MBS.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"mbs_basis": 50},
+        "MetricsDelta": {"OCI": -2, "LCR": -3},
+        "TradeList": ["Reduce MBS holdings by $1bn"],
+        "Assumptions": "Investor sentiment shifts due to market volatility.",
+        "Signals": ["MBS basis > 50bps on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Geopolitical Risk",
+        "Description": "Escalation of geopolitical tensions leads to increased demand for USTs, impacting liquidity conditions.",
+        "Probability": 0.10,
+        "Rationale": "Market uncertainty leads to a flight to quality, affecting funding costs.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": -50},
+        "MetricsDelta": {"LCR": +5, "NII": -2},
+        "TradeList": ["Increase UST holdings by $2bn"],
+        "Assumptions": "Tensions escalate in the Middle East.",
+        "Signals": ["Tension reports escalate on 2025-04-10"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Commodity Price Shock",
+        "Description": "A sharp rise in commodity prices leads to inflation concerns and shifts in monetary policy.",
+        "Probability": 0.08,
+        "Rationale": "Rising inflation prompts a shift in the Fed's stance on interest rates.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 75},
+        "MetricsDelta": {"NII": -5, "LCR": -4},
+        "TradeList": ["Adjust loan pricing to reflect increased rates"],
+        "Assumptions": "Commodity prices increase by 20%.",
+        "Signals": ["Commodity index > 150 on 2025-03-30"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Consumer Balance Sheet Stress",
+        "Description": "Increasing defaults among consumers lead to tightening credit conditions.",
+        "Probability": 0.07,
+        "Rationale": "Deterioration of consumer financial health impacts credit quality.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"default_rate": 1.5},
+        "MetricsDelta": {"LCR": -2, "CapitalRatio": -0.3},
+        "TradeList": ["Increase reserves by $1bn"],
+        "Assumptions": "Unemployment rises to 6%.",
+        "Signals": ["Unemployment report > 6% on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Wealth Management Runoff",
+        "Description": "Market volatility leads to significant withdrawals from wealth management accounts.",
+        "Probability": 0.09,
+        "Rationale": "Clients withdraw deposits due to market uncertainties.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"wealth_runoff": 5},
+        "MetricsDelta": {"LCR": -6, "NII": -3},
+        "TradeList": ["Increase liquidity buffers by $1bn"],
+        "Assumptions": "Market remains volatile throughout the period.",
+        "Signals": ["Client withdrawals > $10bn in 2025-04"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Treasury Issuance Surge",
+        "Description": "Increased Treasury issuance leads to higher yields, impacting the HQLA stack.",
+        "Probability": 0.09,
+        "Rationale": "Higher issuance increases supply, impacting UST valuations.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 50},
+        "MetricsDelta": {"LCR": -3, "OCI": -1},
+        "TradeList": ["Reduce UST holdings by $1bn"],
+        "Assumptions": "UST issuance increases by 25%.",
+        "Signals": ["Treasury auction results on 2025-03-01"],
+        "PredictionDate": "2025-12-08"
+    }
+]
+```
+
+## Round 3
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "Long-term rates rise significantly while short-term rates remain stable, resulting in a bear steepening of the yield curve.",
+        "Probability": 0.10,
+        "Rationale": "Expectations of inflation rising due to economic recovery lead to a steepening curve, impacting long-duration assets.",
+        "ImpactChannels": "Rates/Credit",
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "OCI": -1.5},
+        "TradeList": ["Add $2bn 10y USTs", "Reduce $1bn MBS"],
+        "Assumptions": "Inflation remains above 3%, Fed signals no immediate rate hikes.",
+        "Signals": ["CPI release > 3.0% on 2025-01-15", "FOMC meeting on 2025-03-20"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "Credit spreads widen significantly due to increased risk aversion in the market, affecting corporate bond valuations.",
+        "Probability": 0.06,
+        "Rationale": "Deteriorating corporate earnings lead to increased risk premiums, impacting capital ratios.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"ig_oas": 15, "hy_oas": 45},
+        "MetricsDelta": {"CapitalRatio": -0.2, "LCR": -3},
+        "TradeList": ["Reduce $1bn corporate bonds", "Add $500mm cash"],
+        "Assumptions": "Corporate earnings reports are largely negative.",
+        "Signals": ["Earnings reports > 50% misses in 2025-02"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Retail Deposit Beta Increase",
+        "Description": "Increased competition leads to a rise in retail deposit beta, increasing funding costs.",
+        "Probability": 0.15,
+        "Rationale": "Heightened competition in the banking sector results in rising deposit rates.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"depo_beta": 0.15},
+        "MetricsDelta": {"NII": -7, "LCR": -4},
+        "TradeList": ["Increase retail deposit rates by 25bps"],
+        "Assumptions": "Market interest rates rise alongside competition.",
+        "Signals": ["Retail deposit flows > 5% runoff in 2025-03"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Regulatory Changes",
+        "Description": "Implementation of Basel Endgame leads to higher capital requirements and liquidity add-ons.",
+        "Probability": 0.07,
+        "Rationale": "Regulatory pressures increase, impacting capital and liquidity metrics.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"regulatory": "Basel Endgame implementation"},
+        "MetricsDelta": {"CapitalRatio": -0.5, "LCR": -3},
+        "TradeList": ["Prepare for increased capital buffers"],
+        "Assumptions": "Regulatory body announces final rules.",
+        "Signals": ["Basel Committee meeting on 2025-06-01"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "A widening MBS basis impacts the valuation of agency MBS in the HQLA stack.",
+        "Probability": 0.08,
+        "Rationale": "Market liquidity issues lead to reduced investor appetite for MBS.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"mbs_basis": 50},
+        "MetricsDelta": {"OCI": -2, "LCR": -3},
+        "TradeList": ["Reduce MBS holdings by $1bn"],
+        "Assumptions": "Investor sentiment shifts due to market volatility.",
+        "Signals": ["MBS basis > 50bps on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Geopolitical Risk",
+        "Description": "Escalation of geopolitical tensions leads to increased demand for USTs, impacting liquidity conditions.",
+        "Probability": 0.11,
+        "Rationale": "Market uncertainty leads to a flight to quality, affecting funding costs.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": -50},
+        "MetricsDelta": {"LCR": +5, "NII": -2},
+        "TradeList": ["Increase UST holdings by $2bn"],
+        "Assumptions": "Tensions escalate in the Middle East.",
+        "Signals": ["Tension reports escalate on 2025-04-10"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Commodity Price Shock",
+        "Description": "A sharp rise in commodity prices leads to inflation concerns and shifts in monetary policy.",
+        "Probability": 0.08,
+        "Rationale": "Rising inflation prompts a shift in the Fed's stance on interest rates.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 75},
+        "MetricsDelta": {"NII": -5, "LCR": -4},
+        "TradeList": ["Adjust loan pricing to reflect increased rates"],
+        "Assumptions": "Commodity prices increase by 20%.",
+        "Signals": ["Commodity index > 150 on 2025-03-30"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Consumer Balance Sheet Stress",
+        "Description": "Increasing defaults among consumers lead to tightening credit conditions.",
+        "Probability": 0.07,
+        "Rationale": "Deterioration of consumer financial health impacts credit quality.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"default_rate": 1.5},
+        "MetricsDelta": {"LCR": -2, "CapitalRatio": -0.3},
+        "TradeList": ["Increase reserves by $1bn"],
+        "Assumptions": "Unemployment rises to 6%.",
+        "Signals": ["Unemployment report > 6% on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Wealth Management Runoff",
+        "Description": "Market volatility leads to significant withdrawals from wealth management accounts.",
+        "Probability": 0.09,
+        "Rationale": "Clients withdraw deposits due to market uncertainties.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"wealth_runoff": 5},
+        "MetricsDelta": {"LCR": -6, "NII": -3},
+        "TradeList": ["Increase liquidity buffers by $1bn"],
+        "Assumptions": "Market remains volatile throughout the period.",
+        "Signals": ["Client withdrawals > $10bn in 2025-04"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Treasury Issuance Surge",
+        "Description": "Increased Treasury issuance leads to higher yields, impacting the HQLA stack.",
+        "Probability": 0.09,
+        "Rationale": "Higher issuance increases supply, impacting UST valuations.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 50},
+        "MetricsDelta": {"LCR": -3, "OCI": -1},
+        "TradeList": ["Reduce UST holdings by $1bn"],
+        "Assumptions": "UST issuance increases by 25%.",
+        "Signals": ["Treasury auction results on 2025-03-01"],
+        "PredictionDate": "2025-12-08"
+    }
+]
+```
+
+### **Devil's advocate**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "Long-term rates rise significantly while short-term rates remain stable, resulting in a bear steepening of the yield curve.",
+        "Probability": 0.09,
+        "Rationale": "Expectations of inflation rising due to economic recovery lead to a steepening curve, impacting long-duration assets.",
+        "ImpactChannels": "Rates/Credit",
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "OCI": -1.5},
+        "TradeList": ["Add $2bn 10y USTs", "Reduce $1bn MBS"],
+        "Assumptions": "Inflation remains above 3%, Fed signals no immediate rate hikes.",
+        "Signals": ["CPI release > 3.0% on 2025-01-15", "FOMC meeting on 2025-03-20"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "Credit spreads widen significantly due to increased risk aversion in the market, affecting corporate bond valuations.",
+        "Probability": 0.07,
+        "Rationale": "Deteriorating corporate earnings lead to increased risk premiums, impacting capital ratios.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"ig_oas": 15, "hy_oas": 45},
+        "MetricsDelta": {"CapitalRatio": -0.2, "LCR": -3},
+        "TradeList": ["Reduce $1bn corporate bonds", "Add $500mm cash"],
+        "Assumptions": "Corporate earnings reports are largely negative.",
+        "Signals": ["Earnings reports > 50% misses in 2025-02"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Retail Deposit Beta Increase",
+        "Description": "Increased competition leads to a rise in retail deposit beta, increasing funding costs.",
+        "Probability": 0.14,
+        "Rationale": "Heightened competition in the banking sector results in rising deposit rates.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"depo_beta": 0.15},
+        "MetricsDelta": {"NII": -7, "LCR": -4},
+        "TradeList": ["Increase retail deposit rates by 25bps"],
+        "Assumptions": "Market interest rates rise alongside competition.",
+        "Signals": ["Retail deposit flows > 5% runoff in 2025-03"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Regulatory Changes",
+        "Description": "Implementation of Basel Endgame leads to higher capital requirements and liquidity add-ons.",
+        "Probability": 0.07,
+        "Rationale": "Regulatory pressures increase, impacting capital and liquidity metrics.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"regulatory": "Basel Endgame implementation"},
+        "MetricsDelta": {"CapitalRatio": -0.5, "LCR": -3},
+        "TradeList": ["Prepare for increased capital buffers"],
+        "Assumptions": "Regulatory body announces final rules.",
+        "Signals": ["Basel Committee meeting on 2025-06-01"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "A widening MBS basis impacts the valuation of agency MBS in the HQLA stack.",
+        "Probability": 0.08,
+        "Rationale": "Market liquidity issues lead to reduced investor appetite for MBS.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"mbs_basis": 50},
+        "MetricsDelta": {"OCI": -2, "LCR": -3},
+        "TradeList": ["Reduce MBS holdings by $1bn"],
+        "Assumptions": "Investor sentiment shifts due to market volatility.",
+        "Signals": ["MBS basis > 50bps on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Geopolitical Risk",
+        "Description": "Escalation of geopolitical tensions leads to increased demand for USTs, impacting liquidity conditions.",
+        "Probability": 0.10,
+        "Rationale": "Market uncertainty leads to a flight to quality, affecting funding costs.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": -50},
+        "MetricsDelta": {"LCR": +5, "NII": -2},
+        "TradeList": ["Increase UST holdings by $2bn"],
+        "Assumptions": "Tensions escalate in the Middle East.",
+        "Signals": ["Tension reports escalate on 2025-04-10"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Commodity Price Shock",
+        "Description": "A sharp rise in commodity prices leads to inflation concerns and shifts in monetary policy.",
+        "Probability": 0.09,
+        "Rationale": "Rising inflation prompts a shift in the Fed's stance on interest rates.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 75},
+        "MetricsDelta": {"NII": -5, "LCR": -4},
+        "TradeList": ["Adjust loan pricing to reflect increased rates"],
+        "Assumptions": "Commodity prices increase by 20%.",
+        "Signals": ["Commodity index > 150 on 2025-03-30"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Consumer Balance Sheet Stress",
+        "Description": "Increasing defaults among consumers lead to tightening credit conditions.",
+        "Probability": 0.07,
+        "Rationale": "Deterioration of consumer financial health impacts credit quality.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"default_rate": 1.5},
+        "MetricsDelta": {"LCR": -2, "CapitalRatio": -0.3},
+        "TradeList": ["Increase reserves by $1bn"],
+        "Assumptions": "Unemployment rises to 6%.",
+        "Signals": ["Unemployment report > 6% on 2025-05-15"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Wealth Management Runoff",
+        "Description": "Market volatility leads to significant withdrawals from wealth management accounts.",
+        "Probability": 0.09,
+        "Rationale": "Clients withdraw deposits due to market uncertainties.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"wealth_runoff": 5},
+        "MetricsDelta": {"LCR": -6, "NII": -3},
+        "TradeList": ["Increase liquidity buffers by $1bn"],
+        "Assumptions": "Market remains volatile throughout the period.",
+        "Signals": ["Client withdrawals > $10bn in 2025-04"],
+        "PredictionDate": "2025-12-08"
+    },
+    {
+        "Scenario": "Treasury Issuance Surge",
+        "Description": "Increased Treasury issuance leads to higher yields, impacting the HQLA stack.",
+        "Probability": 0.10,
+        "Rationale": "Higher issuance increases supply, impacting UST valuations.",
+        "ImpactChannels": "Rates",
+        "Shocks": {"move": 50},
+        "MetricsDelta": {"LCR": -3, "OCI": -1},
+        "TradeList": ["Reduce UST holdings by $1bn"],
+        "Assumptions": "UST issuance increases by 25%.",
+        "Signals": ["Treasury auction results on 2025-03-01"],
+        "PredictionDate": "2025-12-08"
+    }
+]
+```
+

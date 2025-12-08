@@ -1,0 +1,232 @@
+[
+  {
+    "Scenario": "Bear Steepener with Rising Credit Spreads",
+    "Description": "A bear steepening occurs with the 10-year yield rising by 50 bps; IG OAS widens by 15 bps and HY OAS by 45 bps.",
+    "Probability": 0.111111,
+    "Rationale": "Rising rates and credit spreads impact HQLA valuations and capital ratios, especially in Level 2 assets.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $500mn UST via repo",
+      "Reduce $200mn MBS exposure"
+    ],
+    "Assumptions": "Consumer balance sheets remain resilient; corporate defaults stay low.",
+    "Signals": [
+      "10Y yield > 4.00%",
+      "IG OAS > 135 bps",
+      "HY OAS > 455 bps"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Regulatory Pressure from Basel Endgame",
+    "Description": "Potential increase in TLAC requirements and liquidity add-ons lead to tighter capital ratios.",
+    "Probability": 0.088889,
+    "Rationale": "Regulatory changes could significantly affect capital and liquidity metrics.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {
+      "tlac_increase": 50
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -4
+    },
+    "TradeList": [
+      "Increase liquidity reserves by $1bn"
+    ],
+    "Assumptions": "Regulatory environment remains tight; no major shifts in policy direction.",
+    "Signals": [
+      "Basel Committee meeting on 2025-11-15",
+      "TLAC guidelines release by 2025-10-30"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Deposit Pressures",
+    "Description": "A combination of a 5% decrease in retail deposits and stabilization in deposit beta leads to liquidity pressures.",
+    "Probability": 0.166667,
+    "Rationale": "Consumer sentiment may shift, leading to increased savings withdrawals and higher funding costs.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "retail_runoff": 5,
+      "depo_beta": 2
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -6,
+      "NII": -1
+    },
+    "TradeList": [
+      "Secure $750mn funding via FHLB advances",
+      "Increase wholesale funding by $200mn"
+    ],
+    "Assumptions": "Market conditions remain stable; no large-scale economic shocks.",
+    "Signals": [
+      "Retail deposit levels on 2025-11-30",
+      "Consumer sentiment index > 80",
+      "Retail beta reports on 2025-12-01"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Geopolitical Tensions Spike",
+    "Description": "Heightened geopolitical tensions drive demand for safe-haven assets, lowering yields.",
+    "Probability": 0.133333,
+    "Rationale": "Increased demand for USTs could lead to lower funding costs and tighter spreads.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit"
+    ],
+    "Shocks": {
+      "move_index": -20
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Increase UST holdings by $300mn"
+    ],
+    "Assumptions": "Geopolitical tensions are temporary; market stabilizes quickly.",
+    "Signals": [
+      "VIX > 20 on 2025-10-15",
+      "Geopolitical events updates weekly"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Economic Slowdown",
+    "Description": "A slowdown leads to wider credit spreads, impacting NII.",
+    "Probability": 0.111111,
+    "Rationale": "Slower economic growth typically results in reduced loan demand and tighter spreads.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "ig_oas": 25
+    },
+    "MetricsDelta": {
+      "NII": -3
+    },
+    "TradeList": [
+      "Reduce corporate loan exposure by $400mn"
+    ],
+    "Assumptions": "Economic indicators show no signs of recovery; consumer spending declines.",
+    "Signals": [
+      "GDP growth < 1% on 2025-10-30",
+      "Unemployment rate > 5%"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "The MBS basis widens by 20 bps, affecting the valuation of the MBS portfolio.",
+    "Probability": 0.111111,
+    "Rationale": "Wider MBS basis can lead to a decline in OCI and overall HQLA valuation.",
+    "ImpactChannels": [
+      "MBS"
+    ],
+    "Shocks": {
+      "mbs_basis": 20
+    },
+    "MetricsDelta": {
+      "OCI": -2
+    },
+    "TradeList": [
+      "Sell $250mn MBS"
+    ],
+    "Assumptions": "Market liquidity remains intact; no significant credit events occur.",
+    "Signals": [
+      "MBS basis > 55 bps on 2025-11-15"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Increased Treasury Issuance",
+    "Description": "Higher Treasury issuance leads to a 10 bps increase in yields.",
+    "Probability": 0.088889,
+    "Rationale": "Increased issuance can impact HQLA stack, potentially widening spreads on Level 2 assets.",
+    "ImpactChannels": [
+      "Rates"
+    ],
+    "Shocks": {
+      "move_index": 10
+    },
+    "MetricsDelta": {
+      "LCR": -1
+    },
+    "TradeList": [
+      "Buy $300mn UST to hedge against yield increases"
+    ],
+    "Assumptions": "Market remains liquid; investor appetite for Treasuries stays strong.",
+    "Signals": [
+      "Treasury auction results on 2025-11-10"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Global Financial Instability",
+    "Description": "A major global event leads to increased volatility (VIX > 25).",
+    "Probability": 0.055556,
+    "Rationale": "Increased volatility can tighten credit spreads and impact liquidity.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "vix": 10
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Increase cash reserves by $500mn"
+    ],
+    "Assumptions": "Global markets remain interconnected; no immediate resolution to instability.",
+    "Signals": [
+      "VIX > 25 on 2025-10-20"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Easing Monetary Policy Scenario",
+    "Description": "The Federal Reserve adopts a more accommodative stance, leading to lower funding costs and tighter spreads.",
+    "Probability": 0.133333,
+    "Rationale": "Easing monetary policy could create a favorable environment for both rates and spreads.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit"
+    ],
+    "Shocks": {
+      "fed_funds_rate": -50
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NII": 2
+    },
+    "TradeList": [
+      "Increase agency MBS holdings by $500mn"
+    ],
+    "Assumptions": "Inflation remains controlled; economic growth stabilizes.",
+    "Signals": [
+      "Fed meeting outcomes on 2025-11-15",
+      "Inflation reports < 3%"
+    ],
+    "PredictionDate": "2025-12-08"
+  }
+]

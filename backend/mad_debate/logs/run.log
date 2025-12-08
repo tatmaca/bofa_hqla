@@ -13770,3 +13770,100 @@ A's Position Critique:
 08:40:52 [INFO] [RUN#1 R1-A] tokens: prompt=1373 output=2312 total=3685
 08:41:35 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 08:41:35 [INFO] [RUN#1 R1-B] tokens: prompt=2759 output=1861 total=4620
+08:42:19 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+08:42:19 [INFO] [RUN#1 R2-A] tokens: prompt=4947 output=2103 total=7050
+08:43:08 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+08:43:08 [INFO] [RUN#1 R2-B] tokens: prompt=6731 output=2067 total=8798
+09:00:47 [INFO] Retrying request to /chat/completions in 0.466748 seconds
+09:07:29 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:07:29 [INFO] [RUN#1 R3-A] tokens: prompt=9125 output=2141 total=11266
+09:08:47 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:08:47 [INFO] [RUN#1 R3-B] tokens: prompt=10947 output=2052 total=12999
+09:08:47 [INFO] [RUN#1] Invoking judge model=gpt-4.1
+09:09:09 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:09:09 [INFO] [RUN#1 JUDGE] tokens: prompt=12945 output=1660 total=14605
+09:09:09 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251208_084000/transcript_run_1.{jsonl,md}
+09:09:09 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251208_084000/tmp_run_1.json (count=7)
+09:09:09 [INFO] [RUN#1] finished; scenarios=7
+09:09:09 [INFO] [RUN#2/5] starting debate...
+09:25:17 [INFO] Retrying request to /chat/completions in 0.399026 seconds
+09:26:15 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:26:15 [INFO] [RUN#2 R1-A] tokens: prompt=1373 output=2236 total=3609
+09:27:12 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:27:12 [INFO] [RUN#2 R1-B] tokens: prompt=2683 output=2379 total=5062
+09:28:01 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:28:01 [INFO] [RUN#2 R2-A] tokens: prompt=5392 output=2427 total=7819
+09:32:56 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:32:56 [INFO] [RUN#2 R2-B] tokens: prompt=7503 output=2387 total=9890
+09:33:47 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:33:47 [INFO] [RUN#2 R3-A] tokens: prompt=10220 output=2207 total=12427
+09:34:32 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:34:32 [INFO] [RUN#2 R3-B] tokens: prompt=12111 output=2229 total=14340
+09:34:32 [INFO] [RUN#2] Invoking judge model=gpt-4.1
+09:34:51 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:34:51 [INFO] [RUN#2 JUDGE] tokens: prompt=14289 output=1786 total=16075
+09:34:51 [INFO] [RUN#2] Wrote transcript to data/scenarios/runs/20251208_084000/transcript_run_2.{jsonl,md}
+09:34:51 [ERROR] [RUN#2] JSON parse error on judge output: ValueError: No JSON block or JSONL-style content could be parsed
+09:34:51 [INFO] [RUN#2] Saved intermediate results to data/scenarios/runs/20251208_084000/tmp_run_2.json (count=0)
+09:34:51 [INFO] [RUN#2] finished; scenarios=0
+09:34:51 [INFO] [RUN#3/5] starting debate...
+09:35:32 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:35:32 [INFO] [RUN#3 R1-A] tokens: prompt=1373 output=2196 total=3569
+09:36:12 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:36:13 [INFO] [RUN#3 R1-B] tokens: prompt=2643 output=1978 total=4621
+09:36:53 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:36:53 [INFO] [RUN#3 R2-A] tokens: prompt=4951 output=2028 total=6979
+09:37:42 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:37:42 [INFO] [RUN#3 R2-B] tokens: prompt=6663 output=2226 total=8889
+09:38:28 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:38:28 [INFO] [RUN#3 R3-A] tokens: prompt=9219 output=2271 total=11490
+09:39:16 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:39:16 [INFO] [RUN#3 R3-B] tokens: prompt=11174 output=2184 total=13358
+09:39:16 [INFO] [RUN#3] Invoking judge model=gpt-4.1
+09:39:29 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:39:29 [INFO] [RUN#3 JUDGE] tokens: prompt=13307 output=1700 total=15007
+09:39:29 [INFO] [RUN#3] Wrote transcript to data/scenarios/runs/20251208_084000/transcript_run_3.{jsonl,md}
+09:39:29 [INFO] [RUN#3] Saved intermediate results to data/scenarios/runs/20251208_084000/tmp_run_3.json (count=9)
+09:39:29 [INFO] [RUN#3] finished; scenarios=9
+09:39:29 [INFO] [RUN#4/5] starting debate...
+09:40:24 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:40:24 [INFO] [RUN#4 R1-A] tokens: prompt=1373 output=2249 total=3622
+09:41:06 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:41:06 [INFO] [RUN#4 R1-B] tokens: prompt=2696 output=1946 total=4642
+09:41:49 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:41:49 [INFO] [RUN#4 R2-A] tokens: prompt=4969 output=2004 total=6973
+09:42:39 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:42:39 [INFO] [RUN#4 R2-B] tokens: prompt=6654 output=2005 total=8659
+09:43:32 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:43:32 [INFO] [RUN#4 R3-A] tokens: prompt=8986 output=2185 total=11171
+09:44:19 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:44:19 [INFO] [RUN#4 R3-B] tokens: prompt=10852 output=2172 total=13024
+09:44:19 [INFO] [RUN#4] Invoking judge model=gpt-4.1
+09:44:30 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:44:30 [INFO] [RUN#4 JUDGE] tokens: prompt=12970 output=1720 total=14690
+09:44:30 [INFO] [RUN#4] Wrote transcript to data/scenarios/runs/20251208_084000/transcript_run_4.{jsonl,md}
+09:44:30 [INFO] [RUN#4] Saved intermediate results to data/scenarios/runs/20251208_084000/tmp_run_4.json (count=10)
+09:44:30 [INFO] [RUN#4] finished; scenarios=10
+09:44:30 [INFO] [RUN#5/5] starting debate...
+09:45:04 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:45:04 [INFO] [RUN#5 R1-A] tokens: prompt=1373 output=1543 total=2916
+09:45:41 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:45:41 [INFO] [RUN#5 R1-B] tokens: prompt=1990 output=1677 total=3667
+09:46:28 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:46:28 [INFO] [RUN#5 R2-A] tokens: prompt=3994 output=1828 total=5822
+09:47:05 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:47:05 [INFO] [RUN#5 R2-B] tokens: prompt=5506 output=1749 total=7255
+09:47:44 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:47:44 [INFO] [RUN#5 R3-A] tokens: prompt=7585 output=1825 total=9410
+09:48:27 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:48:27 [INFO] [RUN#5 R3-B] tokens: prompt=9094 output=1763 total=10857
+09:48:27 [INFO] [RUN#5] Invoking judge model=gpt-4.1
+09:48:45 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:48:45 [INFO] [RUN#5 JUDGE] tokens: prompt=10806 output=1363 total=12169
+09:48:45 [INFO] [RUN#5] Wrote transcript to data/scenarios/runs/20251208_084000/transcript_run_5.{jsonl,md}
+09:48:45 [INFO] [RUN#5] Saved intermediate results to data/scenarios/runs/20251208_084000/tmp_run_5.json (count=5)
+09:48:45 [INFO] [RUN#5] finished; scenarios=5
+09:48:45 [INFO] Wrote 10 aggregated scenarios to /tmp/mad_scenarios.json
+09:48:45 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_084000/scenarios_final.json
+09:48:45 [INFO] Wrote run metadata to data/scenarios/runs/20251208_084000/metadata.json
+09:48:45 [INFO] Done.

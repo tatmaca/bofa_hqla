@@ -1,0 +1,133 @@
+[
+  {
+    "Scenario": "Bear Steepener with Widening Credit Spreads",
+    "Description": "A bear steepening yield curve, with 10Y yields rising by 75 bps while 2Y yields rise by 30 bps. IG OAS widens by 15 bps and HY OAS widens by 45 bps.",
+    "Probability": 0.1,
+    "Rationale": "Increased inflation expectations lead to higher long-term rates while short-term rates rise less, causing a bear steepening. Wider credit spreads reflect increasing risk aversion.",
+    "ImpactChannels": "Rates, Curve, Credit",
+    "Shocks": {
+      "yield_curve": "bear_steepener",
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1,
+      "NII": -1.5
+    },
+    "TradeList": [
+      "Add $1bn 10Y USTs via auction",
+      "Sell $500mm IG corporates"
+    ],
+    "Assumptions": "Stable consumer balance sheets; moderate credit quality deterioration.",
+    "Signals": [
+      "CPI release on 2025-01-10 > 3.5%",
+      "FOMC meeting on 2025-01-30 with dot plot indicating 2 hikes",
+      "IG OAS > 135 bps"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Regulatory Change with TLAC Increase",
+    "Description": "Announcement of increased TLAC requirements leading to a 50 bps increase in funding costs and tighter liquidity metrics.",
+    "Probability": 0.15,
+    "Rationale": "Increased regulatory scrutiny leads to higher funding costs and liquidity requirements, impacting LCR and NSFR.",
+    "ImpactChannels": "Regulation, Funding",
+    "Shocks": {
+      "funding_costs": 50
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "NII": -2
+    },
+    "TradeList": [
+      "Increase FHLB advances by $1bn",
+      "Issue $1bn in long-term debt"
+    ],
+    "Assumptions": "Market conditions remain stable; no major economic disruptions.",
+    "Signals": [
+      "Basel Committee meeting on 2025-02-15",
+      "TLAC consultation paper release on 2025-03-01"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Improving Economic Conditions with Rising Deposits",
+    "Description": "Economic recovery leads to a rise in retail deposits by 5% and a reduction in wholesale funding costs by 10 bps.",
+    "Probability": 0.35,
+    "Rationale": "Strengthening consumer balance sheets drive retail deposit growth, while improved market sentiment reduces funding costs.",
+    "ImpactChannels": "Deposits, Funding",
+    "Shocks": {
+      "retail_deposits": 5,
+      "wholesale_spreads": -10
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1,
+      "NII": 3
+    },
+    "TradeList": [
+      "Increase repo funding by $2bn",
+      "Add $500mm in short-term USTs"
+    ],
+    "Assumptions": "Economic growth remains steady; no inflationary pressures.",
+    "Signals": [
+      "Retail sales data on 2025-03-15 > 0.8% growth",
+      "Unemployment rate release on 2025-04-01 < 4.0%"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Geopolitical Tensions Leading to Flight to Safety",
+    "Description": "Escalating geopolitical tensions cause investors to seek safety in USTs, driving yields down by 50 bps and tightening credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Increased uncertainty leads to a flight to quality, benefiting BoA's HQLA portfolio and improving liquidity metrics.",
+    "ImpactChannels": "Rates, Credit",
+    "Shocks": {
+      "ust_yields": -50,
+      "ig_oas": -10,
+      "hy_oas": -20
+    },
+    "MetricsDelta": {
+      "LCR": 4,
+      "NSFR": 3,
+      "NII": 1
+    },
+    "TradeList": [
+      "Sell $1bn corporate bonds",
+      "Add $1bn in USTs via secondary market"
+    ],
+    "Assumptions": "Geopolitical events remain contained; no major disruptions to global trade.",
+    "Signals": [
+      "NATO summit on 2025-05-10",
+      "US-China trade talks on 2025-06-15"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Weakening CRE Market with Rising Default Rates",
+    "Description": "A downturn in the commercial real estate market leads to rising default rates and widening spreads on MBS, with MBS basis increasing by 50 bps.",
+    "Probability": 0.2,
+    "Rationale": "Weakness in the CRE sector impacts the performance of MBS, affecting liquidity and capital ratios.",
+    "ImpactChannels": "MBS, Credit",
+    "Shocks": {
+      "mbs_basis": 50
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3,
+      "NII": -2
+    },
+    "TradeList": [
+      "Reduce MBS holdings by $1bn",
+      "Increase reserves for potential loan losses by $500mm"
+    ],
+    "Assumptions": "CRE sector remains under pressure; economic conditions do not stabilize.",
+    "Signals": [
+      "CRE index report on 2025-07-10 showing > 5% decline",
+      "CMBS delinquency rates > 3% on 2025-08-15"
+    ],
+    "PredictionDate": "2025-12-08"
+  }
+]
