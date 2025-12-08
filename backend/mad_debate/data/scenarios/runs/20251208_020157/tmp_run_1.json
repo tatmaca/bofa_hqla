@@ -1,0 +1,134 @@
+[
+  {
+    "Scenario": "Bear Steepener with Widening Spreads",
+    "Description": "The yield curve steepens as long-term rates rise faster than short-term rates, increasing credit spreads due to heightened risk aversion.",
+    "Probability": 0.2,
+    "Rationale": "Current macroeconomic uncertainty and inflationary pressures create an environment ripe for bear steepening.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Credit OAS (15 bps)",
+      "MBS basis (20 bps)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $1bn in USTs via repo",
+      "Reduce Level 2 MBS holdings by $500mn"
+    ],
+    "Assumptions": "Expect elevated volatility and investor flight to quality."
+  },
+  {
+    "Scenario": "Regulatory Pressure from Basel Endgame",
+    "Description": "Increased capital requirements from Basel III reforms lead to tighter liquidity metrics and adjustments in capital ratios.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing regulatory discussions suggest a likelihood of changes impacting G-SIBs.",
+    "ImpactChannels": [
+      "Reg changes: Basel Endgame"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Increase capital reserves by $2bn",
+      "Adjust liquidity buffers accordingly"
+    ],
+    "Assumptions": "Regulatory changes will be phased in gradually."
+  },
+  {
+    "Scenario": "Retail Deposit Runoff",
+    "Description": "Rising interest rates lead to competition for deposits, resulting in a runoff of retail deposits.",
+    "Probability": 0.15,
+    "Rationale": "Consumers are sensitive to interest rate changes, which could lead to increased withdrawals.",
+    "ImpactChannels": [
+      "Deposits (-10%)"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -6,
+      "NSFR": -4
+    },
+    "TradeList": [
+      "Increase deposit rates by 25 bps",
+      "Diversify funding sources"
+    ],
+    "Assumptions": "Consumer behavior remains aligned with historical patterns."
+  },
+  {
+    "Scenario": "Geopolitical Tensions Impacting Credit Markets",
+    "Description": "Increased geopolitical tensions lead to wider credit spreads and reduced investor appetite for risk.",
+    "Probability": 0.15,
+    "Rationale": "Market volatility often spikes during geopolitical crises, leading to risk aversion.",
+    "ImpactChannels": [
+      "Credit OAS (20 bps)",
+      "MBS basis (30 bps)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "credit_spreads": {
+        "ig_oas": 20,
+        "hy_oas": 50
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Increase holdings in high-quality sovereigns",
+      "Reduce exposure to high-yield corporates"
+    ],
+    "Assumptions": "Tensions remain elevated but do not lead to direct military conflict."
+  },
+  {
+    "Scenario": "Controlled Inflation with Resilient Economic Growth",
+    "Description": "Inflation remains manageable while economic growth continues, leading to stable yields and improved consumer confidence.",
+    "Probability": 0.2,
+    "Rationale": "Historical patterns show that central banks can effectively manage inflation without drastic rate hikes.",
+    "ImpactChannels": [
+      "Inflation rates stabilize",
+      "Consumer spending increases"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Increase exposure to Agency MBS by $1.5bn",
+      "Rotate into longer-duration munis"
+    ],
+    "Assumptions": "Central banks maintain a balanced approach to monetary policy."
+  },
+  {
+    "Scenario": "Stable Economic Growth with Flattening Curve",
+    "Description": "Stable economic growth leads to a flattening yield curve, supporting NII but compressing OCI.",
+    "Probability": 0.15,
+    "Rationale": "An optimistic outlook on growth could stabilize markets and interest rates.",
+    "ImpactChannels": [
+      "Curve (flat)",
+      "Rates (20 bps)"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": 0,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Reallocate $1bn into longer-duration USTs",
+      "Enhance liquidity management strategies"
+    ],
+    "Assumptions": "Economic indicators remain favorable without significant disruptions."
+  }
+]

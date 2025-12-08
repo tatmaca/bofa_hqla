@@ -6,13 +6,14 @@ import sys
 import tempfile
 from pathlib import Path
 
-import hqla_instruments as HQLA
 import numpy as np
 import pandas as pd
 import QuantLib as ql
 from fastapi import Body, FastAPI, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+import hqla_instruments as HQLA
 from hqla_portfolio import Portfolio
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / "tools" / "news_ingestion"))
@@ -139,6 +140,7 @@ async def upload_yield_curve(file: UploadFile = None, request: Request = None):
         try:
             payload = await request.json()
             df = pd.DataFrame(payload)
+            print(df)
         except Exception as e:
             return JSONResponse(
                 status_code=400, content={"error": f"Invalid input: {e}"}
