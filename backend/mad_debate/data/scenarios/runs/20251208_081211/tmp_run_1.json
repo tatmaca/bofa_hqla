@@ -1,0 +1,221 @@
+[
+  {
+    "Scenario": "Base Case",
+    "Description": "Stable interest rates and credit spreads with no significant changes in market conditions.",
+    "Probability": 0.3,
+    "Rationale": "Current market conditions appear stable with low volatility and resilient consumer/SME sectors. This scenario serves as the baseline for capital, liquidity, and NII modeling.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 0,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Maintain current HQLA levels"
+    ],
+    "Assumptions": "No major economic or regulatory surprises.",
+    "Signals": [
+      "3m10y breakeven stable around 2.10%",
+      "VIX below 15",
+      "IG OAS around 120 bps"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Yield curve steepens with long-term rates rising significantly, reflecting persistent inflation and market repricing.",
+    "Probability": 0.15,
+    "Rationale": "Anticipation of higher inflation and/or fiscal concerns leads to a bear steepening effect, impacting long-duration assets and funding costs.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move_index": 120,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $1bn bills via repo"
+    ],
+    "Assumptions": "Inflation persists, prompting Fed action and market repricing.",
+    "Signals": [
+      "CPI > 3.5% in upcoming report",
+      "10-year yield > 4.00%",
+      "FOMC meeting in December"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Credit Widening",
+    "Description": "Widening credit spreads due to increasing defaults in the CRE sector and broader risk aversion.",
+    "Probability": 0.1,
+    "Rationale": "Signs of stress in commercial real estate and risk-off sentiment lead to wider IG and HY spreads, impacting funding and asset valuations.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 50
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Reduce holdings in high-risk corporates"
+    ],
+    "Assumptions": "CRE defaults rise due to economic slowdown and refinancing risk.",
+    "Signals": [
+      "CRE delinquency rates > 5%",
+      "S&P credit rating downgrades increase",
+      "Corporate earnings reports showing stress"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Regulatory Shock",
+    "Description": "Announcement of stricter Basel Endgame capital requirements, requiring immediate adjustment to capital and liquidity buffers.",
+    "Probability": 0.1,
+    "Rationale": "Regulatory changes are anticipated as policymakers adjust capital frameworks, impacting capital planning and liquidity management.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -15,
+      "NSFR": -10
+    },
+    "TradeList": [
+      "Increase capital reserves by $5bn"
+    ],
+    "Assumptions": "New regulations are implemented by year-end, requiring prompt compliance.",
+    "Signals": [
+      "Basel Committee meeting outcomes in December",
+      "Public comments from Fed officials",
+      "Draft rulemaking published"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Deposit Runoff",
+    "Description": "Significant retail deposit outflow triggered by rising interest rates and competitive market offerings.",
+    "Probability": 0.15,
+    "Rationale": "Higher rates prompt depositors to seek better yields elsewhere, leading to runoff and increased funding costs.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -20,
+      "NSFR": -15
+    },
+    "TradeList": [
+      "Increase rates on retail deposits"
+    ],
+    "Assumptions": "Retail depositors react to competitive rates in the market, especially from non-bank alternatives.",
+    "Signals": [
+      "Retail deposit beta > 25%",
+      "Significant withdrawals > $10bn in a month",
+      "Money market fund inflows accelerate"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis widens due to market stresses and reduced liquidity, impacting HQLA valuations.",
+    "Probability": 0.05,
+    "Rationale": "Market liquidity deteriorates, leading to wider spreads in MBS and valuation pressure on HQLA portfolios.",
+    "ImpactChannels": [
+      "MBS"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Reduce MBS exposure by $2bn"
+    ],
+    "Assumptions": "Investors flee to safety, impacting MBS prices and liquidity.",
+    "Signals": [
+      "MBS basis > 50 bps",
+      "Market liquidity indicators decline",
+      "Fed announcements regarding MBS purchases"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Economic Slowdown",
+    "Description": "Unexpected slowdown in economic growth leading to tighter credit conditions and higher defaults.",
+    "Probability": 0.15,
+    "Rationale": "Signs of an economic slowdown can lead to reduced lending, higher defaults, and wider credit spreads, impacting NII and liquidity.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 25,
+        "hy_oas": 40
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Reduce lending exposure to cyclical sectors"
+    ],
+    "Assumptions": "Economic indicators show a significant decline, with rising unemployment and weak GDP.",
+    "Signals": [
+      "GDP growth < 1% in upcoming quarters",
+      "Unemployment rate rises above 5%",
+      "Consumer delinquencies increase"
+    ],
+    "PredictionDate": "2025-12-08"
+  }
+]

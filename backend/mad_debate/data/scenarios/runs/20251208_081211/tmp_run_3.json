@@ -1,0 +1,285 @@
+[
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Long-term rates rise faster than short-term rates, leading to a bear steepening of the yield curve.",
+    "Probability": 0.111111,
+    "Rationale": "With the Fed signaling potential rate hikes, the curve may steepen, impacting the LCR due to Level 1 asset valuations.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move": 120,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2.5,
+      "NSFR": -1.0
+    },
+    "TradeList": [
+      "Add $2bn UST via repo",
+      "Reduce $1bn MBS exposure"
+    ],
+    "Assumptions": "The Fed will raise rates, leading to changes in the yield curve.",
+    "Signals": [
+      "FOMC meeting on 2025-01-30",
+      "10Y UST yield > 4.00%",
+      "3m10y breakeven > 2.40%"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Increased risk perception causes credit spreads to widen significantly.",
+    "Probability": 0.111111,
+    "Rationale": "Heightened economic uncertainty leads to a deterioration in credit quality, impacting Level 2 assets.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3.0,
+      "NSFR": -2.0
+    },
+    "TradeList": [
+      "Reduce $1bn corporate bonds",
+      "Increase $500mn UST holdings"
+    ],
+    "Assumptions": "Market conditions lead to a flight to quality, impacting credit valuations.",
+    "Signals": [
+      "IG OAS > 135bps",
+      "HY OAS > 455bps",
+      "Credit rating downgrades announced by major agencies"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Regulatory TLAC Changes",
+    "Description": "Changes in TLAC requirements impact capital ratios and liquidity metrics.",
+    "Probability": 0.055556,
+    "Rationale": "Anticipated regulatory adjustments could increase capital requirements, affecting liquidity management.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5.0,
+      "NSFR": -3.0
+    },
+    "TradeList": [
+      "Prepare $1bn in TLAC-eligible securities"
+    ],
+    "Assumptions": "Regulatory bodies propose changes that require higher capital buffers.",
+    "Signals": [
+      "Basel Committee meeting on 2025-02-15",
+      "TLAC consultation paper release"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Retail Deposit Runoff",
+    "Description": "Rising interest rates lead to a significant decline in retail deposits.",
+    "Probability": 0.166667,
+    "Rationale": "As rates rise, customers may shift funds to higher-yielding alternatives, increasing reliance on wholesale funding.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4.0,
+      "NSFR": -1.5
+    },
+    "TradeList": [
+      "Increase $1bn FHLB advances",
+      "Reduce $500mn in retail loan originations"
+    ],
+    "Assumptions": "Market conditions prompt depositors to seek higher returns elsewhere.",
+    "Signals": [
+      "Weekly deposit flows report showing -$10bn",
+      "Retail deposit beta > 40%"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Geopolitical Risk Event",
+    "Description": "A significant geopolitical event increases market volatility and risk aversion.",
+    "Probability": 0.077778,
+    "Rationale": "Global tensions could lead to a flight to safety, impacting liquidity and capital ratios.",
+    "ImpactChannels": [
+      "Credit",
+      "Rates"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "bear_flat",
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 60
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3.5,
+      "NSFR": -2.0
+    },
+    "TradeList": [
+      "Increase cash reserves by $2bn",
+      "Add $1bn in USTs"
+    ],
+    "Assumptions": "Market panic leads to increased demand for safe-haven assets.",
+    "Signals": [
+      "VIX > 25",
+      "Major geopolitical event reported",
+      "USD strengthens significantly"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Stable Economic Environment",
+    "Description": "Minor changes in rates and spreads reflect a stable economic outlook.",
+    "Probability": 0.2,
+    "Rationale": "Continued economic growth with stable credit spreads results in neutral effects on liquidity.",
+    "ImpactChannels": [
+      "Rates",
+      "Deposits"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 0,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "No significant trades; maintain current positions"
+    ],
+    "Assumptions": "Economic indicators remain stable with no major shocks.",
+    "Signals": [
+      "GDP growth rate at 2.5% or higher",
+      "Unemployment rate stable at 4.0%"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "Widening of the MBS basis negatively impacts valuations of agency MBS.",
+    "Probability": 0.055556,
+    "Rationale": "Increased supply of MBS may lead to a deterioration of the MBS basis, impacting Level 2 asset valuations.",
+    "ImpactChannels": [
+      "MBS"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2.0,
+      "NSFR": -1.0
+    },
+    "TradeList": [
+      "Reduce $500mn in MBS holdings"
+    ],
+    "Assumptions": "Market conditions lead to increased issuance of MBS, causing basis deterioration.",
+    "Signals": [
+      "MBS basis > 50bps",
+      "Agency MBS supply increases significantly"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Tightening Monetary Policy",
+    "Description": "The Federal Reserve tightens monetary policy, increasing funding costs.",
+    "Probability": 0.055556,
+    "Rationale": "Increased funding costs could negatively impact profitability and liquidity metrics.",
+    "ImpactChannels": [
+      "Rates",
+      "Deposits"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "bear_flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3.0,
+      "NSFR": -1.0
+    },
+    "TradeList": [
+      "Increase reliance on secured funding by $1bn"
+    ],
+    "Assumptions": "The Fed indicates a more aggressive approach to controlling inflation.",
+    "Signals": [
+      "FOMC meeting on 2025-03-20",
+      "CPI > 3.5%"
+    ],
+    "PredictionDate": "2025-12-08"
+  },
+  {
+    "Scenario": "Favorable Economic Outlook",
+    "Description": "Positive economic indicators lead to lower credit spreads and increased deposit stability.",
+    "Probability": 0.166667,
+    "Rationale": "Strong economic growth improves consumer confidence, stabilizing deposits and credit quality.",
+    "ImpactChannels": [
+      "Deposits",
+      "Credit"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "bull_flat",
+      "credit_spreads": {
+        "ig_oas": -15,
+        "hy_oas": -30
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 3.0,
+      "NSFR": 2.0
+    },
+    "TradeList": [
+      "Add $1bn UST holdings",
+      "Increase retail loan originations by $500mn"
+    ],
+    "Assumptions": "The economy shows signs of robust growth, enhancing credit profiles.",
+    "Signals": [
+      "GDP growth rate > 3.0%",
+      "Unemployment rate < 3.5%"
+    ],
+    "PredictionDate": "2025-12-08"
+  }
+]

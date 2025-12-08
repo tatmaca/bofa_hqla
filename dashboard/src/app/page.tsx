@@ -140,24 +140,30 @@ async function runScenarioGen(
     if (!Array.isArray(rows) || !rows.length) return [];
     const probs = rows.map((sc) => {
       const raw =
-        typeof sc?.Probability === "number"
+        typeof sc?.Probability !== "undefined"
           ? sc.Probability
-          : typeof sc?.probability === "number"
+          : typeof sc?.probability !== "undefined"
             ? sc.probability
-            : typeof sc?.p === "number"
-              ? sc.p
-              : 0;
-      return raw > 1 ? raw / 100 : raw;
+            : sc?.p;
+      const num = Number(raw);
+      if (!Number.isFinite(num)) return 0;
+      return num > 1 ? num / 100 : num;
     });
-    const total = probs.reduce(
+    const totalRaw = probs.reduce(
       (a, b) => a + (Number.isFinite(b) ? (b as number) : 0),
       0,
     );
-    const useProbs =
-      total > 0 ? probs.map((p) => p / total) : probs.map(() => 1 / probs.length);
+    const base = totalRaw > 0 ? probs.map((p) => p / totalRaw) : probs.map(() => 1 / probs.length);
+    // force exact sum to 1 by adjusting the last entry
+    let adj = [...base];
+    if (adj.length > 0) {
+      const partial = adj.slice(0, -1).reduce((a, b) => a + b, 0);
+      adj[adj.length - 1] = Math.max(0, 1 - partial);
+    }
     return rows.map((sc, idx) => ({
       ...sc,
-      Probability: Number(useProbs[idx]?.toFixed(6) || 0),
+      Probability: Number(adj[idx]?.toFixed(6) || 0),
+      probability_sum_before: totalRaw,
     }));
   };
 
@@ -284,6 +290,10 @@ async function runScenarioGen(
         .map((sc: any) => (sc && typeof sc === "object" ? sc : null))
         .filter(Boolean),
     );
+    const probabilitySum = scenarioMatrix.reduce(
+      (acc, sc: any) => acc + (typeof sc?.Probability === "number" ? sc.Probability : 0),
+      0,
+    );
     const scenarios = scenarioMatrix.map((sc: any, idx: number) => {
       const name = sc.Scenario || sc.name || `Scenario ${idx + 1}`;
       const p =
@@ -296,6 +306,7 @@ async function runScenarioGen(
       const rationale = sc.Rationale || sc.rationale || "";
       const probability = typeof p === "number" && p > 1 ? p / 100 : p;
       return {
+        ...sc,
         name,
         p: probability,
         channels: Array.isArray(channels) ? channels : [],
@@ -304,25 +315,37 @@ async function runScenarioGen(
     });
 
     const metadata = data?.metadata || null;
-    setter((s: any) => ({
-      ...s,
-      status: "done",
-      pct: 100,
-      logs: [...s.logs, "Loaded live MAD debate + scenarios."],
-      liveStage: "MAD judge consolidated scenarios.",
-      liveDebate: {},
-      liveRunOrder: [],
-      activeLiveRun: null,
-      expectedMessages: 0,
-      seenMessages: 0,
-      output: {
-        ...(s.output || {}),
-        debate: sortedDebate,
-        scenarios,
-        scenarioMatrix,
-        metadata,
-      },
-    }));
+    setter((s: any) => {
+      const renormNote =
+        probabilitySum > 1.001 || probabilitySum < 0.999
+          ? `Probabilities renormalized (was ${probabilitySum.toFixed(3)}, now 1.000).`
+          : null;
+      const newLogs = [
+        ...s.logs,
+        "Loaded live MAD debate + scenarios.",
+        ...(renormNote ? [renormNote] : []),
+      ].slice(-140);
+      return {
+        ...s,
+        status: "done",
+        pct: 100,
+        logs: newLogs,
+        liveStage: "MAD judge consolidated scenarios.",
+        liveDebate: {},
+        liveRunOrder: [],
+        activeLiveRun: null,
+        expectedMessages: 0,
+        seenMessages: 0,
+        output: {
+          ...(s.output || {}),
+          debate: sortedDebate,
+          scenarios,
+          scenarioMatrix,
+          metadata,
+          probabilitySum: probabilitySum > 0 ? 1 : probabilitySum,
+        },
+      };
+    });
     return { scenarios, scenarioMatrix, debate: sortedDebate, metadata };
   };
 
@@ -779,6 +802,10 @@ export default function HqlaE2EDashboard() {
   const [combineMode, setCombineMode] = useState("probability_weighted");
   const [worstBy, setWorstBy] = useState("expected_return");
   const [topK, setTopK] = useState(2);
+  const scenarioDate = useMemo(
+    () => new Date().toISOString().slice(0, 10),
+    [],
+  );
 
   // Debate configuration (mirrors Python MAD config high-level knobs)
   const [debateRounds, setDebateRounds] = useState(3);
@@ -798,14 +825,20 @@ export default function HqlaE2EDashboard() {
   3. **Rationale & Channels:**  
     Tie each scenario to BoA-relevant drivers (consumer balance sheets, CRE, commodities, geopolitics, Treasury issuance).  Cite at least one channel from Rates/Curve/Credit/MBS/Deposits/Regulation/Commodity Prices.
 
-  4. **Probabilities:**  
-    Assign probabilities summing to ~1 across the set with justification.
+  4. **Probabilities (must sum to EXACTLY 1.0 EVERY SINGLE MESSAGE):**  
+    Assign probabilities that sum to exactly 1.000 across the set. If you change any scenario’s probability, you MUST renormalize the whole set so the final sum is 1.000. Compute total_prob at the end; if total_prob != 1.000 (±0.0005), renormalize and REPLACE all Probability values until it equals 1.000. Do not emit JSON unless total_prob == 1.000.
 
-  5. **Portfolio Awareness:**  
+  5. **Signals to watch:**  
+    For each scenario, provide a \`Signals\` array of 3–6 highly specific indicators (e.g., “3m10y breakeven > 2.40%”, “EURUSD basis <-30 bps”, “FHLB advances +$15bn w/w”).
+
+  6. **Portfolio Awareness:**  
     Reference BoA’s Level 1/2 mix, duration/convexity, Level 2 caps, OCI sensitivity, and funding stack.
 
-  6. **Formatting:**  
-    Output a strict JSON array. Every element must include: ["Scenario","Description","Probability","Rationale","ImpactChannels","Shocks","MetricsDelta","TradeList","Assumptions"].  Shocks/Metrics must be numeric; TradeList must list concrete BoA actions (e.g., "Add $1bn bills via repo").`,
+  7. **Formatting (strict JSON array only):**  
+    Output ONLY JSON, no prose. Each element must include exactly these keys: ["Scenario","Description","Probability","Rationale","ImpactChannels","Shocks","MetricsDelta","TradeList","Assumptions","Signals","PredictionDate"].  
+    - Use "PredictionDate": "${scenarioDate}" for every scenario.  
+    - Shocks/Metrics must be numeric; TradeList must list concrete BoA actions (e.g., "Add $1bn bills via repo").  
+    - Probabilities must sum to 1.0.`,
   );
   const [debaterBPrompt, setDebaterBPrompt] = useState(
     `You are the **Devil’s Advocate / soft-landing strategist for Bank of America**.  Respond to the Proponent by emphasizing benign outcomes while still referencing BoA’s HQLA exposures and funding stack.
@@ -816,16 +849,22 @@ export default function HqlaE2EDashboard() {
 
   3. **Portfolio Impact:** Show how BoA can redeploy liquidity (e.g., add Agency MBS, rotate into munis/sovereigns, term out wholesale funding) while protecting OCI/NII.
 
-  4. **Formatting:** Return a JSON array identical to the Proponent’s structure with concrete BoA trades/funding actions in TradeList.`,
+  4. **Probabilities (must sum to EXACTLY 1.0 EVERY SINGLE MESSAGE):** Renormalize so the set sums to 1.000 and state justification. Compute total_prob; if total_prob != 1.000 (±0.0005), renormalize again before emitting.
+
+  5. **Signals to watch:** Add a \`Signals\` array of 3–6 precise, monitorable indicators for each scenario (market levels, funding prints, auction tails, basis moves).
+
+  6. **Formatting:** Return ONLY JSON array with keys ["Scenario","Description","Probability","Rationale","ImpactChannels","Shocks","MetricsDelta","TradeList","Assumptions","Signals","PredictionDate"]; set "PredictionDate"="${scenarioDate}" on each scenario. No prose.`,
   );
   const [judgePrompt, setJudgePrompt] = useState(
     `You are the **Chief Risk Officer for Bank of America’s HQLA Committee**.  
   Review the Proponent and Devil’s Advocate submissions and publish the final scenario set BoA will use for capital, liquidity, and NII modeling.
 
-  - Enforce realism (6-month horizon, quantitative shocks, probabilities ≈ 1).  
-  - Keep 3–6 scenarios spanning stress/base/benign outcomes and touching BoA-relevant channels (Rates, Curve, Credit, MBS, Deposits, Regulation, Commodity Prices).  
-  - Ensure TradeList items are feasible for BoA (balance sheet, funding mix, regulatory constraints).  
-  - Output ONLY the strict JSON array matching the schema (no commentary, no markdown).`,
+  - Enforce realism (6-month horizon, quantitative shocks, probabilities must sum to EXACTLY 1.000). Compute total_prob; if total_prob != 1.000 (±0.0005), renormalize and REWRITE the probabilities until the sum is 1.000, then emit. Note the renormalization in Rationale.
+  - Keep 3–6 scenarios spanning stress/base/benign outcomes and touching BoA-relevant channels (Rates, Curve, Credit, MBS, Deposits, Regulation, Commodity Prices).
+  - Ensure TradeList items are feasible for BoA (balance sheet, funding mix, regulatory constraints).
+  - Each scenario must include a \`Signals\` array of 3–6 concrete watch-fors (e.g., “SOFR-OIS basis > 25bps”, “HY ETF outflows > $2bn w/w”, “UST 10y tail > 3.5bps”).
+  - Add "PredictionDate" = "${scenarioDate}" to every scenario object.
+  - Output ONLY the strict JSON array matching the schema ["Scenario","Description","Probability","Rationale","ImpactChannels","Shocks","MetricsDelta","TradeList","Assumptions","Signals","PredictionDate"]; no commentary, no markdown.`,
   );
 
   // Popups
