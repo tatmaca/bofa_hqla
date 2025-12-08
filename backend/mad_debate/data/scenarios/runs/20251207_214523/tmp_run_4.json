@@ -1,0 +1,157 @@
+[
+  {
+    "Scenario": "Moderate Rate Hike with Flattening Curve",
+    "Description": "Gradual increase in interest rates by 50 bps, bear-flattening of yield curve, slight tightening of credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Current economic indicators suggest stability, allowing for moderate rate hikes while deposits remain stable.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Curve (bear-flattening)",
+      "Credit OAS (IG +10 bps, HY +25 bps)"
+    ],
+    "Shocks": {
+      "move": 50,
+      "slope_2s10s_bps": -15,
+      "ig_oas": 10,
+      "hy_oas": 25
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": 0,
+      "NII": 0.5
+    },
+    "TradeList": [
+      "Add $2bn T-bills via repo",
+      "Reduce Agency MBS by $1bn"
+    ],
+    "Assumptions": "Consumer confidence remains stable, supporting deposit levels."
+  },
+  {
+    "Scenario": "Geopolitical Tensions and Risk Aversion",
+    "Description": "Increased geopolitical tensions lead to wider credit spreads and MBS basis deterioration; potential 5% retail deposit runoff.",
+    "Probability": 0.15,
+    "Rationale": "Heightened risk aversion could lead to significant market shifts impacting credit and liquidity.",
+    "ImpactChannels": [
+      "Credit OAS (IG +30 bps, HY +75 bps)",
+      "MBS basis (20 bps)",
+      "Deposits (-5%)"
+    ],
+    "Shocks": {
+      "ig_oas": 30,
+      "hy_oas": 75,
+      "mbs_basis": 20,
+      "depo_runoff": -5
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -1,
+      "NII": -1
+    },
+    "TradeList": [
+      "Add $1bn cash reserves",
+      "Increase repo funding by $1.5bn"
+    ],
+    "Assumptions": "Geopolitical tensions persist, leading to reduced market confidence."
+  },
+  {
+    "Scenario": "Regulatory Changes and TLAC Adjustments",
+    "Description": "Stricter TLAC requirements increase liquidity costs, impacting funding strategies and capital ratios.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing regulatory discussions make this a likely scenario affecting liquidity metrics.",
+    "ImpactChannels": [
+      "Reg changes",
+      "Credit OAS (IG +20 bps, HY +20 bps)"
+    ],
+    "Shocks": {
+      "tlac_increase": 20,
+      "ig_oas": 20,
+      "hy_oas": 20
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "NII": -0.5
+    },
+    "TradeList": [
+      "Rebalance HQLA portfolio to maintain compliance",
+      "Issue $2bn in TLAC-eligible debt"
+    ],
+    "Assumptions": "Regulatory bodies finalize new requirements affecting capital structure."
+  },
+  {
+    "Scenario": "Economic Recovery and Rising Rates",
+    "Description": "Rapid economic recovery prompts the Fed to increase rates by 75 bps; stable deposit levels but wider credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Positive economic indicators suggest likelihood of rate increases impacting overall market conditions.",
+    "ImpactChannels": [
+      "Rates (75 bps)",
+      "Curve (bear-steepening)",
+      "Credit OAS (IG +20 bps, HY +50 bps)"
+    ],
+    "Shocks": {
+      "move": 75,
+      "slope_2s10s_bps": -10,
+      "ig_oas": 20,
+      "hy_oas": 50
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": 0,
+      "NII": 2
+    },
+    "TradeList": [
+      "Increase short-term funding by $1bn",
+      "Sell $500mm of longer-duration securities"
+    ],
+    "Assumptions": "Economic indicators continue to improve, leading to increased consumer spending."
+  },
+  {
+    "Scenario": "Declining Commodity Prices and Credit Stress",
+    "Description": "A drop in commodity prices results in increased credit stress, leading to wider credit spreads and deposit runoff.",
+    "Probability": 0.1,
+    "Rationale": "External economic shocks could significantly impact corporate balance sheets and liquidity.",
+    "ImpactChannels": [
+      "Credit OAS (IG +40 bps, HY +100 bps)",
+      "Deposits (-10%)"
+    ],
+    "Shocks": {
+      "ig_oas": 40,
+      "hy_oas": 100,
+      "depo_runoff": -10
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -2,
+      "NII": -3
+    },
+    "TradeList": [
+      "Increase liquidity reserves by $1bn",
+      "Adjust MBS portfolio to mitigate credit risk"
+    ],
+    "Assumptions": "Commodity price declines lead to broader economic impacts affecting credit quality."
+  },
+  {
+    "Scenario": "Positive Rate Environment with Convexity Management",
+    "Description": "Rising rates create convexity opportunities, enabling strategic bond market positioning.",
+    "Probability": 0.1,
+    "Rationale": "Effective convexity management can enhance portfolio performance amidst rate changes, but rapid rate increases could lead to market volatility.",
+    "ImpactChannels": [
+      "Curve adjustments",
+      "NII improvements but potential for increased risk"
+    ],
+    "Shocks": {
+      "rate_move": 75,
+      "curve_steepening": 25
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 1,
+      "NII": 3
+    },
+    "TradeList": [
+      "Increase duration of bond holdings cautiously",
+      "Utilize derivatives for convexity management"
+    ],
+    "Assumptions": "Interest rate environment may not stabilize as expected, affecting bond valuations."
+  }
+]

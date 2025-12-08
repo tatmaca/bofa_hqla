@@ -1,0 +1,207 @@
+# Debate Transcript — Run 1
+
+### **JUDGE** (Judge)
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepening with Increased Credit Spreads",
+        "Description": "Long-term rates rise faster than short-term rates with IG/HY credit spreads widening due to market concerns over inflation.",
+        "Probability": 0.22,
+        "Rationale": "Expectations of rising inflation and economic slowdown will lead to a bear steepening yield curve and increased funding costs.",
+        "ImpactChannels": ["Rates (30 bps)", "Curve (bear steepening)", "Credit OAS (IG +15, HY +45)"],
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener", "credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -5, "NII": -300},
+        "TradeList": ["Add $2bn USTs via repo", "Sell $1bn MBS"],
+        "Assumptions": "Consumer spending declines; MBS valuations are under pressure due to higher rates."
+    },
+    {
+        "Scenario": "Regulatory Pressure and TLAC Adjustments",
+        "Description": "Increased regulatory scrutiny results in tighter liquidity requirements, affecting TLAC ratios.",
+        "Probability": 0.16,
+        "Rationale": "Regulatory changes are expected to increase the demand for HQLA to maintain compliance with enhanced liquidity ratios.",
+        "ImpactChannels": ["Reg changes (TLAC adjustments)", "Rates (15 bps)"],
+        "Shocks": {"move": 110, "yield_curve": "flat", "credit_spreads": {"ig_oas": 10, "hy_oas": 20}},
+        "MetricsDelta": {"LCR": -10, "NSFR": -8},
+        "TradeList": ["Add $1bn cash via FHLB", "Increase HQLA by $3bn in USTs"],
+        "Assumptions": "Regulatory environment becomes more stringent; funding costs increase."
+    },
+    {
+        "Scenario": "Consumer Balance Sheet Stress",
+        "Description": "Rising interest rates lead to increased defaults among SMEs, triggering deposit runoff.",
+        "Probability": 0.16,
+        "Rationale": "Higher interest payments and economic slowdown will strain consumer finances, causing liquidity pressures on BoA.",
+        "ImpactChannels": ["Deposits (-5%)", "Credit OAS (HY +30)"],
+        "Shocks": {"move": 120, "yield_curve": "bear steepener", "credit_spreads": {"ig_oas": 20, "hy_oas": 30}},
+        "MetricsDelta": {"LCR": -8, "NSFR": -6, "NII": -400},
+        "TradeList": ["Increase cash reserves by $2bn", "Sell $1bn corporate bonds"],
+        "Assumptions": "Consumer defaults rise; deposit beta increases."
+    },
+    {
+        "Scenario": "Geopolitical Tensions and Commodity Price Shock",
+        "Description": "Escalating geopolitical tensions lead to volatility in commodity prices and widening credit spreads.",
+        "Probability": 0.12,
+        "Rationale": "Global instability increases risk perceptions, leading to wider credit spreads and MBS volatility.",
+        "ImpactChannels": ["Credit OAS (IG +25, HY +50)", "Commodity Prices (20% increase)"],
+        "Shocks": {"move": 130, "yield_curve": "bear steepener", "credit_spreads": {"ig_oas": 25, "hy_oas": 50}},
+        "MetricsDelta": {"LCR": -7, "NSFR": -5, "NII": -350},
+        "TradeList": ["Reduce exposure to commodities by $1bn", "Increase HQLA by $1.5bn USTs"],
+        "Assumptions": "Commodity markets become volatile; investor sentiment declines."
+    },
+    {
+        "Scenario": "Controlled Inflation with Gradual Easing",
+        "Description": "Inflation remains controlled, leading to gradual easing of monetary policy and stable economic growth.",
+        "Probability": 0.18,
+        "Rationale": "The economy shows resilience with stable consumer spending and manageable inflation rates.",
+        "ImpactChannels": ["Rates (10 bps)", "Deposits (+3%)"],
+        "Shocks": {"move": 80, "yield_curve": "bull_flat", "credit_spreads": {"ig_oas": 5, "hy_oas": 10}},
+        "MetricsDelta": {"LCR": 5, "NSFR": 5, "NII": 200},
+        "TradeList": ["Add $2bn Agency MBS", "Increase duration in sovereigns by $1bn"],
+        "Assumptions": "Economic indicators remain stable; gradual rate cuts are implemented."
+    },
+    {
+        "Scenario": "Stable Growth with Low Volatility",
+        "Description": "Economic stability with low interest rate volatility and stable consumer behavior.",
+        "Probability": 0.16,
+        "Rationale": "Continued economic growth leads to stable deposits and minimal fluctuations in credit spreads.",
+        "ImpactChannels": ["Rates (5 bps)", "Deposits (+2%)"],
+        "Shocks": {"move": 100, "yield_curve": "flat", "credit_spreads": {"ig_oas": 5, "hy_oas": 10}},
+        "MetricsDelta": {"LCR": 0, "NSFR": 0, "NII": 100},
+        "TradeList": ["Maintain current HQLA levels", "Optimize funding mix"],
+        "Assumptions": "Economic indicators remain positive; consumer behavior stable."
+    }
+]
+```
+
+## Round 1
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepening with Increased Credit Spreads",
+        "Description": "Long-term rates rise faster than short-term rates with IG/HY credit spreads widening due to market concerns over inflation.",
+        "Probability": 0.25,
+        "Rationale": "Expectations of rising inflation and economic slowdown will lead to a bear steepening yield curve and increased funding costs.",
+        "ImpactChannels": ["Rates (30 bps)", "Curve (bear steepening)", "Credit OAS (IG +15, HY +45)"],
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener", "credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -5, "NII": -300},
+        "TradeList": ["Add $2bn USTs via repo", "Sell $1bn MBS"],
+        "Assumptions": "Consumer spending declines; MBS valuations are under pressure due to higher rates."
+    },
+    {
+        "Scenario": "Regulatory Pressure and TLAC Adjustments",
+        "Description": "Increased regulatory scrutiny results in tighter liquidity requirements, affecting TLAC ratios.",
+        "Probability": 0.20,
+        "Rationale": "Regulatory changes are expected to increase the demand for HQLA to maintain compliance with enhanced liquidity ratios.",
+        "ImpactChannels": ["Reg changes (TLAC adjustments)", "Rates (15 bps)"],
+        "Shocks": {"move": 110, "yield_curve": "flat", "credit_spreads": {"ig_oas": 10, "hy_oas": 20}},
+        "MetricsDelta": {"LCR": -10, "NSFR": -8},
+        "TradeList": ["Add $1bn cash via FHLB", "Increase HQLA by $3bn in USTs"],
+        "Assumptions": "Regulatory environment becomes more stringent; funding costs increase."
+    },
+    {
+        "Scenario": "Consumer Balance Sheet Stress",
+        "Description": "Rising interest rates lead to increased defaults among SMEs, triggering deposit runoff.",
+        "Probability": 0.20,
+        "Rationale": "Higher interest payments and economic slowdown will strain consumer finances, causing liquidity pressures on BoA.",
+        "ImpactChannels": ["Deposits (-5%)", "Credit OAS (HY +30)"],
+        "Shocks": {"move": 120, "yield_curve": "bear steepener", "credit_spreads": {"ig_oas": 20, "hy_oas": 30}},
+        "MetricsDelta": {"LCR": -8, "NSFR": -6, "NII": -400},
+        "TradeList": ["Increase cash reserves by $2bn", "Sell $1bn corporate bonds"],
+        "Assumptions": "Consumer defaults rise; deposit beta increases."
+    },
+    {
+        "Scenario": "Geopolitical Tensions and Commodity Price Shock",
+        "Description": "Escalating geopolitical tensions lead to volatility in commodity prices and widening credit spreads.",
+        "Probability": 0.15,
+        "Rationale": "Global instability increases risk perceptions, leading to wider credit spreads and MBS volatility.",
+        "ImpactChannels": ["Credit OAS (IG +25, HY +50)", "Commodity Prices (20% increase)"],
+        "Shocks": {"move": 130, "yield_curve": "bear steepener", "credit_spreads": {"ig_oas": 25, "hy_oas": 50}},
+        "MetricsDelta": {"LCR": -7, "NSFR": -5, "NII": -350},
+        "TradeList": ["Reduce exposure to commodities by $1bn", "Increase HQLA by $1.5bn USTs"],
+        "Assumptions": "Commodity markets become volatile; investor sentiment declines."
+    },
+    {
+        "Scenario": "Stable Growth with Low Volatility",
+        "Description": "Economic stability with low interest rate volatility and stable consumer behavior.",
+        "Probability": 0.20,
+        "Rationale": "Continued economic growth leads to stable deposits and minimal fluctuations in credit spreads.",
+        "ImpactChannels": ["Rates (5 bps)", "Deposits (+2%)"],
+        "Shocks": {"move": 100, "yield_curve": "flat", "credit_spreads": {"ig_oas": 5, "hy_oas": 10}},
+        "MetricsDelta": {"LCR": 0, "NSFR": 0, "NII": +100},
+        "TradeList": ["Maintain current HQLA levels", "Optimize funding mix"],
+        "Assumptions": "Economic indicators remain positive; consumer behavior stable."
+    }
+]
+```
+
+### **Devil's advocate**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Controlled Inflation with Gradual Easing",
+        "Description": "Inflation remains controlled, leading to gradual easing of monetary policy and stable economic growth.",
+        "Probability": 0.30,
+        "Rationale": "The economy shows resilience with stable consumer spending and manageable inflation rates.",
+        "ImpactChannels": ["Rates (10 bps)", "Deposits (+3%)"],
+        "Shocks": {"move": 80, "yield_curve": "bull_flat", "credit_spreads": {"ig_oas": 5, "hy_oas": 10}},
+        "MetricsDelta": {"LCR": +5, "NSFR": +5, "NII": +200},
+        "TradeList": ["Add $2bn Agency MBS", "Increase duration in sovereigns by $1bn"],
+        "Assumptions": "Economic indicators remain stable; gradual rate cuts are implemented."
+    },
+    {
+        "Scenario": "Resilient Consumer and SME Behavior",
+        "Description": "Strong consumer and SME performance leads to stable deposits and reduced credit risk.",
+        "Probability": 0.25,
+        "Rationale": "Ongoing job growth and consumer confidence support spending and borrowing.",
+        "ImpactChannels": ["Rates (5 bps)", "Deposits (+2%)"],
+        "Shocks": {"move": 70, "yield_curve": "bull_flat", "credit_spreads": {"ig_oas": 3, "hy_oas": 5}},
+        "MetricsDelta": {"LCR": +3, "NSFR": +3, "NII": +150},
+        "TradeList": ["Rotate into $1bn munis", "Extend wholesale funding by $1.5bn"],
+        "Assumptions": "Consumer spending remains robust; credit quality improves."
+    },
+    {
+        "Scenario": "Tighter Spreads with Stable Betas",
+        "Description": "Credit spreads tighten due to improved market conditions and stable deposit betas.",
+        "Probability": 0.20,
+        "Rationale": "Investor confidence returns, leading to tighter spreads and increased demand for HQLA.",
+        "ImpactChannels": ["Rates (15 bps)", "Credit OAS (IG -10, HY -15)"],
+        "Shocks": {"move": 90, "yield_curve": "bull_flat", "credit_spreads": {"ig_oas": -10, "hy_oas": -15}},
+        "MetricsDelta": {"LCR": +4, "NSFR": +4, "NII": +250},
+        "TradeList": ["Add $1bn USTs", "Reallocate $1.5bn to shorter-duration assets"],
+        "Assumptions": "Market conditions improve; deposit betas remain stable."
+    },
+    {
+        "Scenario": "Regulatory Relief and Favorable Conditions",
+        "Description": "Potential regulatory relief enhances liquidity positions and reduces compliance costs.",
+        "Probability": 0.15,
+        "Rationale": "Easing of regulatory constraints allows for more flexibility in managing HQLA.",
+        "ImpactChannels": ["Rates (10 bps)", "LCR (+5%)"],
+        "Shocks": {"move": 85, "yield_curve": "flat", "credit_spreads": {"ig_oas": 0, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": +6, "NSFR": +6, "NII": +100},
+        "TradeList": ["Optimize funding structure by adding $1bn HQLA", "Extend maturities in funding by $1bn"],
+        "Assumptions": "Regulatory environment becomes more favorable; compliance costs decrease."
+    },
+    {
+        "Scenario": "Stable Growth with Low Volatility",
+        "Description": "The economy experiences stable growth with low volatility, supporting the banking sector.",
+        "Probability": 0.10,
+        "Rationale": "A consistent economic backdrop leads to predictable consumer behavior and funding costs.",
+        "ImpactChannels": ["Rates (5 bps)", "Deposits (+1%)"],
+        "Shocks": {"move": 75, "yield_curve": "flat", "credit_spreads": {"ig_oas": 2, "hy_oas": 5}},
+        "MetricsDelta": {"LCR": +2, "NSFR": +2, "NII": +50},
+        "TradeList": ["Maintain current HQLA levels", "Rebalance portfolios towards stable assets"],
+        "Assumptions": "No major economic disruptions; stable interest rates."
+    }
+]
+```
+

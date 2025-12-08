@@ -1,0 +1,121 @@
+[
+  {
+    "Scenario": "Bear Steepening with Rising Credit Spreads",
+    "Description": "A bear steepening of the yield curve with a 50 bps increase in 10-year yields and a 15 bps rise in IG spreads and 45 bps in HY spreads.",
+    "Probability": 0.18,
+    "Rationale": "Inflation concerns may lead to prolonged rate hikes, but economic data shows resilience.",
+    "ImpactChannels": [
+      "Rates (10Y +50 bps)",
+      "Credit OAS (IG +15 bps, HY +45 bps)"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "NII": -150
+    },
+    "TradeList": [
+      "Add $1bn 10-year USTs",
+      "Reduce $500mn Agency MBS"
+    ],
+    "Assumptions": "Inflation remains a concern, leading to prolonged rate hikes, but consumer demand remains strong."
+  },
+  {
+    "Scenario": "Regulatory Tightening on Liquidity Requirements",
+    "Description": "Introduction of new liquidity add-ons increases LCR requirements by 5%, impacting capital ratios.",
+    "Probability": 0.12,
+    "Rationale": "Ongoing discussions in regulatory circles suggest a potential tightening of liquidity requirements.",
+    "ImpactChannels": [
+      "Reg changes (liquidity add-ons)"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4,
+      "NII": -100
+    },
+    "TradeList": [
+      "Increase liquidity reserves by $1bn in cash",
+      "Reassess asset allocation for compliance"
+    ],
+    "Assumptions": "Regulatory environment continues to tighten, but bank adapts effectively."
+  },
+  {
+    "Scenario": "Moderate Deposit Runoff",
+    "Description": "Retail deposit runoff of 3% as consumers shift to higher-yielding accounts.",
+    "Probability": 0.22,
+    "Rationale": "Consumer sensitivity to yield changes may lead to modest deposit outflows, but the bank retains a solid deposit base.",
+    "ImpactChannels": [
+      "Deposits/runoff (3%)"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -5,
+      "NII": -200
+    },
+    "TradeList": [
+      "Enhance deposit product offerings by $300mn",
+      "Launch marketing campaign for retention"
+    ],
+    "Assumptions": "Interest rates increase, leading to consumer behavior changes, but core deposits remain stable."
+  },
+  {
+    "Scenario": "Geopolitical Tensions Leading to Flight to Quality",
+    "Description": "Increased geopolitical tensions drive demand for USTs, tightening liquidity and reducing credit spreads.",
+    "Probability": 0.23,
+    "Rationale": "Global political uncertainties could lead to increased demand for safe assets, benefiting the bank's HQLA.",
+    "ImpactChannels": [
+      "Credit OAS (IG -10 bps, HY -20 bps)"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": -10,
+        "hy_oas": -20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 3,
+      "NII": 100
+    },
+    "TradeList": [
+      "Increase UST holdings by $1bn via repo",
+      "Evaluate MBS portfolio for liquidity optimization"
+    ],
+    "Assumptions": "Geopolitical tensions escalate, creating safe-haven demand, with the bank capitalizing on opportunities."
+  },
+  {
+    "Scenario": "Economic Slowdown with Flat Yield Curve",
+    "Description": "Economic indicators suggest a slowdown, leading to a flat yield curve and a decrease in credit spreads by 20 bps.",
+    "Probability": 0.25,
+    "Rationale": "Mixed signals from economic data indicate a potential recession but also show resilience in certain sectors.",
+    "ImpactChannels": [
+      "Rates (flat curve)",
+      "Credit OAS (-20 bps)"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "credit_spreads": {
+        "ig_oas": -20,
+        "hy_oas": -20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -2,
+      "NII": -250
+    },
+    "TradeList": [
+      "Reallocate $1bn from Level 2 to Level 1 HQLA",
+      "Adjust loan pricing strategies to attract borrowers"
+    ],
+    "Assumptions": "Economic indicators consistently point towards a downturn, but consumer credit demand remains robust."
+  }
+]

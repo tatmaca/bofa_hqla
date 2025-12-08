@@ -1,15 +1,23 @@
 # api_server.py
+import datetime as dt
 import io
+import json
+import sys
+import tempfile
+from pathlib import Path
 
+import hqla_instruments as HQLA
 import numpy as np
 import pandas as pd
 import QuantLib as ql
-from fastapi import FastAPI, Form, Request, UploadFile
+from fastapi import Body, FastAPI, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from hqla_portfolio import Portfolio
 
-from . import hqla_instruments as HQLA
-from .hqla_portfolio import Portfolio
+sys.path.append(str(Path(__file__).resolve().parents[2] / "tools" / "news_ingestion"))
+
+from generate_scenario_predictions import generate_all_scenario_curves
 
 app = FastAPI()
 portfolio = Portfolio()
@@ -308,3 +316,44 @@ async def price_portfolio(is_scenario: bool = False):
             "scenario": summary,
             "status": "scenario_priced",
         }
+
+
+@app.post("/generate-scenario-curves/")
+async def generate_scenario_curves_endpoint(
+    jsonl_input: str = Body(..., description="Scenario JSONL content"),
+    combine_with_news: bool = Body(
+        False, description="Combine scenario factors with news"
+    ),
+    date: str = Body(None, description="Date string YYYY-MM-DD, defaults to today"),
+):
+    """
+    Receives JSONL input for scenarios from the frontend and generates predicted curves.
+    """
+    print("ENTERING CURVE GENERATOR")
+
+    target_date = date if date else dt.date.today().isoformat()
+
+    # Write the JSONL content to a temporary file
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w+", suffix=".jsonl", delete=False
+        ) as tmp_file:
+            tmp_file.write(jsonl_input)
+            tmp_file_path = tmp_file.name
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to write temp file: {e}"}
+
+    # Run the generator
+    try:
+        curves = generate_all_scenario_curves(
+            target_date,
+            scenarios_path=tmp_file_path,
+            combine_with_news=combine_with_news,
+        )
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to generate curves: {e}"}
+
+    if not curves:
+        return {"status": "error", "message": "No curves generated"}
+
+    return {"status": "success", "curves": curves}

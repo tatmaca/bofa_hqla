@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { fs } from "fs";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -923,6 +924,44 @@ export default function HqlaE2EDashboard() {
       setActiveNewsArticle(null);
     }
   }, [newsOutput]);
+  const [predictedCurves, setPredictedCurves] = useState({});
+  useEffect(() => {
+    const matrix = scenario.output?.scenarioMatrix;
+    if (!matrix || matrix.length === 0) return;
+
+    // convert rows → JSONL → request curve predictions
+    const jsonl = matrix.map((row) => JSON.stringify(row)).join("\n");
+    console.log(scenarioRunLabel.slice(0, 8));
+
+    async function fetchPredictions() {
+      console.log("Entering fetch predictions");
+      try {
+        const yyyymmdd = scenarioRunLabel.slice(0, 8);
+        const formatted = `${yyyymmdd.slice(0, 4)}-${yyyymmdd.slice(4, 6)}-${yyyymmdd.slice(6, 8)}`;
+        const resp = await fetch(
+          "http://localhost:8000/generate-scenario-curves",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              jsonl_input: jsonl, // match the key in your FastAPI endpoint
+              combine_with_news: true, // or false depending on UI
+              date: formatted,
+            }),
+          },
+        );
+
+        const out = await resp.json();
+        console.log("API response:", out);
+        setPredictedCurves(out);
+        console.log("Stored predictedCurves:", out.curves);
+      } catch (err) {
+        console.error("Prediction error:", err);
+      }
+    }
+
+    fetchPredictions();
+  }, [scenario.output?.scenarioMatrix]);
 
   const launchScenarioGen = async (options: any) => {
     setSelectedScenario(null);
@@ -1186,7 +1225,8 @@ export default function HqlaE2EDashboard() {
                           {/* YTM */}
                           <TableCell>
                             {scenarioRow.ytm.toFixed(2)}%
-                            {scenarioSummary && renderDelta(deltaYtm, true)}
+                            {scenarioSummary &&
+                              renderDelta(deltaYtm / 100, true)}
                           </TableCell>
 
                           {/* Quantity */}
@@ -1322,120 +1362,128 @@ export default function HqlaE2EDashboard() {
               />
               <div className="flex items-stretch gap-3 overflow-x-auto pb-2">
                 {/* Debate */}
-                <div className="min-w-[280px] flex-1">
-                  <Step
-                    index={1}
-                    title="Debate Preview"
-                    desc="MAD: Proponent vs Devil's advocate + Judge"
-                    status={scenario.status as any}
-                  />
-                  <div className="mt-2 rounded-lg border p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="text-[11px] text-slate-500">
-                        ← Portfolio input feeds MAD debate and scenario
-                        generation
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-[11px] text-slate-500 flex items-center gap-2">
-                          <span>
-                            Runs ×{" "}
-                            <span className="font-medium">{debateRuns}</span>
-                          </span>
-                          <span>•</span>
-                          <span>
-                            Rounds ×{" "}
-                            <span className="font-medium">{debateRounds}</span>
-                          </span>
-                        </div>
-                        {availableRuns.length > 0 && (
-                          <div className="flex items-center gap-1">
-                            <span className="text-[11px] text-slate-500">
-                              Run:
-                            </span>
-                            <select
-                              className="text-[11px] bg-slate-50 border border-slate-300 rounded-full px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-slate-400"
-                              value={activeRun ?? ""}
-                              onChange={(e) => {
-                                const v = e.target.value;
-                                setSelectedDebateRun(v ? Number(v) : null);
-                              }}
-                            >
-                              {availableRuns.map((r) => (
-                                <option key={r} value={r}>
-                                  {r}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        )}
-                        <label className="flex items-center gap-1 text-[11px] text-slate-600">
-                          <input
-                            type="checkbox"
-                            className="h-3.5 w-3.5"
-                            checked={offlineMode}
-                            onChange={(e) => setOfflineMode(e.target.checked)}
-                          />
-                          Offline sample
-                        </label>
-                      </div>
-                    </div>
-                    <DebatePreview
-                      debate={previewDebate}
-                      maxChars={1200}
-                      runOptions={availableRuns}
-                      activeRun={activeRun}
-                      onSelectRun={(run) => setSelectedDebateRun(run)}
-                      onShowMatrix={(payload) => setMatrixModal(payload)}
+                <div
+                  className="mt-2 rounded-lg border p-2 
+                                max-h-300 overflow-y-auto 
+                                max-w-[800px]"
+                >
+                  <div className="min-w-[280px] flex-1">
+                    <Step
+                      index={1}
+                      title="Debate Preview"
+                      desc="MAD: Proponent vs Devil's advocate + Judge"
+                      status={scenario.status as any}
                     />
-                    <div className="mt-2 text-[11px] text-slate-600">
-                      {scenario.liveStage
-                        ? scenario.liveStage
-                        : scenario.status === "running"
-                          ? "MAD debate is running…"
-                          : "Idle. Click Run to launch MAD debate."}
-                    </div>
-                    <div className="mt-2">
-                      <LogView
-                        logs={(scenario.logs || []).slice(-8)}
-                        title="MAD"
+                    <div className="mt-2 rounded-lg border p-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[11px] text-slate-500">
+                          ← Portfolio input feeds MAD debate and scenario
+                          generation
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-[11px] text-slate-500 flex items-center gap-2">
+                            <span>
+                              Runs ×{" "}
+                              <span className="font-medium">{debateRuns}</span>
+                            </span>
+                            <span>•</span>
+                            <span>
+                              Rounds ×{" "}
+                              <span className="font-medium">
+                                {debateRounds}
+                              </span>
+                            </span>
+                          </div>
+                          {availableRuns.length > 0 && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] text-slate-500">
+                                Run:
+                              </span>
+                              <select
+                                className="text-[11px] bg-slate-50 border border-slate-300 rounded-full px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-slate-400"
+                                value={activeRun ?? ""}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  setSelectedDebateRun(v ? Number(v) : null);
+                                }}
+                              >
+                                {availableRuns.map((r) => (
+                                  <option key={r} value={r}>
+                                    {r}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+                          <label className="flex items-center gap-1 text-[11px] text-slate-600">
+                            <input
+                              type="checkbox"
+                              className="h-3.5 w-3.5"
+                              checked={offlineMode}
+                              onChange={(e) => setOfflineMode(e.target.checked)}
+                            />
+                            Offline sample
+                          </label>
+                        </div>
+                      </div>
+                      <DebatePreview
+                        debate={previewDebate}
+                        maxChars={1200}
+                        runOptions={availableRuns}
+                        activeRun={activeRun}
+                        onSelectRun={(run) => setSelectedDebateRun(run)}
+                        onShowMatrix={(payload) => setMatrixModal(payload)}
                       />
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex gap-2">
+                      <div className="mt-2 text-[11px] text-slate-600">
+                        {scenario.liveStage
+                          ? scenario.liveStage
+                          : scenario.status === "running"
+                            ? "MAD debate is running…"
+                            : "Idle. Click Run to launch MAD debate."}
+                      </div>
+                      <div className="mt-2">
+                        <LogView
+                          logs={(scenario.logs || []).slice(-8)}
+                          title="MAD"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setOpenDebate(true)}
+                          >
+                            Details
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setOpenDebateParams(true)}
+                          >
+                            Parameters
+                          </Button>
+                        </div>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          onClick={() => setOpenDebate(true)}
+                          onClick={() =>
+                            launchScenarioGen({
+                              portfolioName,
+                              yaml,
+                              debateRounds,
+                              debateRuns,
+                              debaterAPrompt,
+                              debaterBPrompt,
+                              judgePrompt,
+                              offlineSample: offlineMode,
+                            })
+                          }
                         >
-                          Details
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setOpenDebateParams(true)}
-                        >
-                          Parameters
+                          <PlayCircle className="h-4 w-4 mr-1" />
+                          Run
                         </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          launchScenarioGen({
-                            portfolioName,
-                            yaml,
-                            debateRounds,
-                            debateRuns,
-                            debaterAPrompt,
-                            debaterBPrompt,
-                            judgePrompt,
-                            offlineSample: offlineMode,
-                          })
-                        }
-                      >
-                        <PlayCircle className="h-4 w-4 mr-1" />
-                        Run
-                      </Button>
                     </div>
                   </div>
                 </div>

@@ -1,0 +1,177 @@
+[
+  {
+    "Scenario": "Bear Steepener with Widening Credit Spreads",
+    "Description": "Long-term rates rise by 50 bps while short-term rates increase by only 20 bps, leading to widening credit spreads across investment-grade and high-yield sectors.",
+    "Probability": 0.22,
+    "Rationale": "Economic uncertainties and inflation pressures create volatility in the bond market.",
+    "ImpactChannels": "Rates (20 bps), Curve (bear steepener), Credit OAS (IG +15, HY +30)",
+    "Shocks": {
+      "move": 20,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 30
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -6,
+      "NSFR": -4,
+      "OCI": -1.5
+    },
+    "TradeList": [
+      "Reduce $2bn in IG corporates",
+      "Increase cash reserves by $1bn"
+    ],
+    "Assumptions": "Consumer confidence declines due to inflation fears."
+  },
+  {
+    "Scenario": "Increasing Deposit Betas with Funding Pressure",
+    "Description": "Deposit betas increase to 30%, leading to higher funding costs and pressure on net interest income.",
+    "Probability": 0.18,
+    "Rationale": "Competitive pressures and rising interest rates drive depositors to seek higher yields.",
+    "ImpactChannels": "Deposits (30% beta), Curve (no change)",
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "OCI": -0.8
+    },
+    "TradeList": [
+      "Term out $2bn of wholesale funding",
+      "Diversify into lower beta assets"
+    ],
+    "Assumptions": "Market conditions force banks to offer higher rates to retain deposits."
+  },
+  {
+    "Scenario": "Regulatory Tightening and TLAC Increases",
+    "Description": "New regulations impose a 75 bps increase in TLAC requirements, raising overall funding costs.",
+    "Probability": 0.15,
+    "Rationale": "Regulatory environment becomes more stringent, impacting capital ratios.",
+    "ImpactChannels": "Reg changes (TLAC increase 75 bps), Credit OAS (no change)",
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -7,
+      "NSFR": -5,
+      "OCI": -1.2
+    },
+    "TradeList": [
+      "Adjust capital structure to maintain compliance",
+      "Increase high-quality liquid assets"
+    ],
+    "Assumptions": "Regulatory landscape becomes increasingly complex."
+  },
+  {
+    "Scenario": "Convexity Risk in a Volatile Market",
+    "Description": "Interest rates become volatile, leading to increased convexity risk and potential losses in fixed-income portfolios.",
+    "Probability": 0.13,
+    "Rationale": "Market reactions to economic data create unpredictable rate movements.",
+    "ImpactChannels": "Rates (volatile), Curve (flattening), Credit OAS (no change)",
+    "Shocks": {
+      "move": 30,
+      "yield_curve": "volatile",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -2,
+      "OCI": -0.5
+    },
+    "TradeList": [
+      "Implement hedges against rate movements",
+      "Rebalance portfolio duration"
+    ],
+    "Assumptions": "Increased market volatility impacts fixed-income strategies."
+  },
+  {
+    "Scenario": "Basis Risk from Credit Deterioration",
+    "Description": "A deterioration in credit quality leads to a 50 bps widening of spreads in MBS and corporate bonds.",
+    "Probability": 0.1,
+    "Rationale": "Market sentiment shifts due to economic concerns, impacting credit quality.",
+    "ImpactChannels": "Credit spreads (MBS +50 bps, corporates +25 bps), Curve (no change)",
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 25,
+        "hy_oas": 50
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "OCI": -1
+    },
+    "TradeList": [
+      "Reduce MBS holdings by $1bn",
+      "Increase focus on high-quality credits"
+    ],
+    "Assumptions": "Economic downturn leads to increased credit risk."
+  },
+  {
+    "Scenario": "Bull Steepener with Tighter Spreads",
+    "Description": "Long-term rates rise by 40 bps while short-term rates increase by only 10 bps, leading to tighter credit spreads across investment-grade and high-yield sectors.",
+    "Probability": 0.12,
+    "Rationale": "Resilient economic indicators and consumer confidence support a bull steepening of the yield curve.",
+    "ImpactChannels": "Rates (10 bps), Curve (bull steepener), Credit OAS (IG -10, HY -20)",
+    "Shocks": {
+      "move": 10,
+      "yield_curve": "bull_steepener",
+      "credit_spreads": {
+        "ig_oas": -10,
+        "hy_oas": -20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 3,
+      "OCI": 1
+    },
+    "TradeList": [
+      "Add $1.5bn Agency MBS",
+      "Rotate $1bn into munis"
+    ],
+    "Assumptions": "Steady economic growth with moderate inflation."
+  },
+  {
+    "Scenario": "Stable Deposit Betas with Increased Liquidity",
+    "Description": "Deposit betas remain stable at 20% while overall liquidity ratios improve due to increased customer deposits.",
+    "Probability": 0.1,
+    "Rationale": "Consumer sentiment and spending remain strong, contributing to stable deposit growth.",
+    "ImpactChannels": "Deposits (stable), Curve (no change)",
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 7,
+      "NSFR": 4,
+      "OCI": 0.5
+    },
+    "TradeList": [
+      "Term out $2bn of wholesale funding",
+      "Increase cash reserves by $1bn"
+    ],
+    "Assumptions": "Consumer confidence leads to sustained deposit inflows."
+  }
+]

@@ -1,0 +1,145 @@
+[
+  {
+    "Scenario": "Bear Steepening with Rising Credit Spreads",
+    "Description": "Long-term rates rise due to inflation expectations while credit spreads widen, impacting HQLA valuations.",
+    "Probability": 0.25,
+    "Rationale": "Current market conditions show inflation concerns and increased credit risk perception.",
+    "ImpactChannels": [
+      "Rates (30 bps rise in 10Y)",
+      "Credit OAS (15 bps widening)",
+      "MBS basis (10 bps widening)"
+    ],
+    "Shocks": {
+      "move": 120,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "NII": -0.5
+    },
+    "TradeList": [
+      "Add $1bn in short-term USTs",
+      "Reduce $500mn in MBS holdings"
+    ],
+    "Assumptions": "Consumer balance sheets weaken, impacting credit quality; inflation persists."
+  },
+  {
+    "Scenario": "Regulatory Tightening on Capital and Liquidity",
+    "Description": "New regulations impose higher capital requirements, increasing the cost of funding.",
+    "Probability": 0.2,
+    "Rationale": "Regulatory changes are a consistent risk for G-SIBs, and the Basel Endgame is on the horizon.",
+    "ImpactChannels": [
+      "Reg changes: Basel Endgame",
+      "Funding costs increase (10%)"
+    ],
+    "Shocks": {
+      "move": 100,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 10,
+        "hy_oas": 30
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5,
+      "NII": -1
+    },
+    "TradeList": [
+      "Increase liquidity buffer by $2bn",
+      "Reduce wholesale funding reliance by $1bn"
+    ],
+    "Assumptions": "New capital surcharges implemented; market volatility increases."
+  },
+  {
+    "Scenario": "Economic Slowdown with Deposit Runoff",
+    "Description": "Economic downturn leads to a decline in consumer confidence and deposit runoff.",
+    "Probability": 0.2,
+    "Rationale": "SMEs are particularly sensitive to economic conditions, leading to deposit outflows.",
+    "ImpactChannels": [
+      "Deposits run off (10%)",
+      "Funding costs increase (15 bps)"
+    ],
+    "Shocks": {
+      "move": 90,
+      "yield_curve": "bear_flat",
+      "credit_spreads": {
+        "ig_oas": 20,
+        "hy_oas": 50
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -4,
+      "NII": -2
+    },
+    "TradeList": [
+      "Add $500mn to secured funding via repo",
+      "Reduce asset growth targets by 5%"
+    ],
+    "Assumptions": "Consumer and business sentiment deteriorates significantly."
+  },
+  {
+    "Scenario": "Geopolitical Tensions Impacting Treasury Markets",
+    "Description": "Increased geopolitical tensions lead to flight-to-quality, affecting Treasury yields and credit spreads.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing geopolitical tensions have historically led to volatility in the markets.",
+    "ImpactChannels": [
+      "Rates (10 bps decline in yields)",
+      "Credit OAS (25 bps widening)",
+      "MBS basis (15 bps widening)"
+    ],
+    "Shocks": {
+      "move": 70,
+      "yield_curve": "bear_flat",
+      "credit_spreads": {
+        "ig_oas": 25,
+        "hy_oas": 40
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "NII": 0
+    },
+    "TradeList": [
+      "Increase cash reserves by $1bn",
+      "Monitor geopolitical developments closely"
+    ],
+    "Assumptions": "Market reaction is swift and pronounced due to geopolitical events."
+  },
+  {
+    "Scenario": "Strengthened Economic Data with Stable Credit Conditions",
+    "Description": "Positive economic data leads to a stable credit environment and a flattening yield curve.",
+    "Probability": 0.2,
+    "Rationale": "Surprises in economic data can positively affect market perceptions and liquidity.",
+    "ImpactChannels": [
+      "Rates (15 bps decrease in yields)",
+      "Curve (flattening)",
+      "NII increase (5%)"
+    ],
+    "Shocks": {
+      "move": 110,
+      "yield_curve": "bull_flat",
+      "credit_spreads": {
+        "ig_oas": 5,
+        "hy_oas": 10
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 3,
+      "NII": 2
+    },
+    "TradeList": [
+      "Add $1bn in longer-term USTs",
+      "Expand lending to creditworthy SMEs by $1bn"
+    ],
+    "Assumptions": "Economic growth exceeds expectations; credit quality remains stable."
+  }
+]

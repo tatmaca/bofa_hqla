@@ -1,0 +1,190 @@
+[
+  {
+    "Scenario": "Moderate Economic Recovery",
+    "Description": "Moderate economic recovery leads to a bear steepening of the yield curve; 10Y yields rise by 25 bps, 2Y by 10 bps.",
+    "Probability": 0.18,
+    "Rationale": "Improving consumer balance sheets and increased spending raise inflation expectations, impacting HQLA valuations.",
+    "ImpactChannels": [
+      "Rates: 25bps",
+      "Curve: bear steepener"
+    ],
+    "Shocks": {
+      "move": 110,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Add $1bn in 10Y USTs",
+      "Reduce $500mm in MBS"
+    ],
+    "Assumptions": "Retail deposits remain stable, consumer spending increases."
+  },
+  {
+    "Scenario": "Credit Spread Widening",
+    "Description": "Widening credit spreads due to geopolitical tensions; IG OAS up 30 bps, HY OAS up 70 bps.",
+    "Probability": 0.15,
+    "Rationale": "Increased risk aversion leads to higher borrowing costs for corporates, impacting HQLA values.",
+    "ImpactChannels": [
+      "Credit: IG OAS +30bps",
+      "Credit: HY OAS +70bps"
+    ],
+    "Shocks": {
+      "move": 110,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 70
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Reduce $1bn in corporate bonds",
+      "Add $500mm in cash via repo"
+    ],
+    "Assumptions": "Corporate earnings reports disappoint, increasing credit risk."
+  },
+  {
+    "Scenario": "Deposit Sensitivity to Interest Rates",
+    "Description": "Interest rate increases lead to runoff in sensitive deposits.",
+    "Probability": 0.18,
+    "Rationale": "Higher rates prompt customers to seek better returns elsewhere, impacting liquidity.",
+    "ImpactChannels": [
+      "Increased reliance on wholesale funding",
+      "Higher funding costs"
+    ],
+    "Shocks": {
+      "move": 50,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Term out $1.5bn in wholesale funding",
+      "Add $500mm in Agency MBS"
+    ],
+    "Assumptions": "Retail depositors shift to higher-yielding investments as rates rise."
+  },
+  {
+    "Scenario": "Basis Risk and Convexity Challenges",
+    "Description": "Interest rate movements lead to basis risk and convexity challenges for the portfolio.",
+    "Probability": 0.15,
+    "Rationale": "Misalignment between assets and liabilities can result in increased volatility in net interest income.",
+    "ImpactChannels": [
+      "Negative impact on NII",
+      "Increased hedging costs"
+    ],
+    "Shocks": {
+      "move": -25,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 20,
+        "hy_oas": 30
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Increase hedging positions by $1bn",
+      "Reduce exposure to long-duration bonds"
+    ],
+    "Assumptions": "Interest rate shifts create challenges in asset-liability management."
+  },
+  {
+    "Scenario": "Regulatory Environment Tightening",
+    "Description": "Potential for stricter regulations impacting liquidity and capital management.",
+    "Probability": 0.13,
+    "Rationale": "Increased regulatory scrutiny may require additional capital buffers and liquidity reserves.",
+    "ImpactChannels": [
+      "Higher capital requirements",
+      "Stricter liquidity ratios"
+    ],
+    "Shocks": {
+      "move": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 5
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase HQLA by $1bn in USTs",
+      "Reduce reliance on Level 2 assets"
+    ],
+    "Assumptions": "Regulatory pressures increase, affecting operational flexibility."
+  },
+  {
+    "Scenario": "Stable Economic Environment",
+    "Description": "No major economic or regulatory shocks; HQLA valuations remain stable.",
+    "Probability": 0.11,
+    "Rationale": "Low volatility environment supports stable liquidity metrics and HQLA valuations.",
+    "ImpactChannels": [
+      "Stable economic conditions"
+    ],
+    "Shocks": {
+      "move": 110,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 0,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Maintain current HQLA allocation",
+      "Monitor economic indicators closely"
+    ],
+    "Assumptions": "Ongoing stability in the financial markets and economy."
+  },
+  {
+    "Scenario": "Credit Quality Deterioration",
+    "Description": "Economic downturn leads to increased defaults and deterioration in credit quality.",
+    "Probability": 0.1,
+    "Rationale": "A slowing economy impacts consumer and corporate borrowers, leading to higher credit losses.",
+    "ImpactChannels": [
+      "Increased loan loss provisions",
+      "Decreased loan demand"
+    ],
+    "Shocks": {
+      "move": -50,
+      "yield_curve": "bear steepener",
+      "credit_spreads": {
+        "ig_oas": 50,
+        "hy_oas": 100
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase reserves for credit losses by $1bn",
+      "Limit new loan originations by $500mm"
+    ],
+    "Assumptions": "Economic indicators point towards a potential slowdown."
+  }
+]

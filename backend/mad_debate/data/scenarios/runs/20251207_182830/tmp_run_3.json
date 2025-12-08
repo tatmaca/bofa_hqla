@@ -1,0 +1,190 @@
+[
+  {
+    "Scenario": "Bear Steepening with Increased Credit Spreads",
+    "Description": "Long-term rates rise faster than short-term rates, leading to a bear steepening of the yield curve and widening credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Inflation pressures and cautious risk sentiment prompt investors to reassess credit risks.",
+    "ImpactChannels": [
+      "Rates: +50 bps",
+      "Credit OAS: +30 bps",
+      "MBS basis: +20 bps"
+    ],
+    "Shocks": {
+      "move": 50,
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "OCI": -100
+    },
+    "TradeList": [
+      "Add $2bn USTs via repo",
+      "Reduce $1bn MBS holdings"
+    ],
+    "Assumptions": "Inflation remains a concern; investor sentiment shifts toward safety."
+  },
+  {
+    "Scenario": "Regulatory Tightening and TLAC Changes",
+    "Description": "New regulatory requirements increase capital and liquidity requirements for G-SIBs, impacting lending capacity.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing regulatory discussions suggest potential for increased capital surcharges impacting large banks.",
+    "ImpactChannels": [
+      "Reg changes: Increased TLAC requirements"
+    ],
+    "Shocks": {
+      "move": 0,
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "OCI": 0
+    },
+    "TradeList": [
+      "Increase $1bn liquidity reserves",
+      "Reduce risk-weighted assets by $1.5bn"
+    ],
+    "Assumptions": "Regulatory environment becomes more stringent; BoA adapts proactively."
+  },
+  {
+    "Scenario": "Stable Macroeconomic Recovery",
+    "Description": "Robust consumer spending and SME growth support stable deposit flows and lending activity.",
+    "Probability": 0.2,
+    "Rationale": "Economic resilience mitigates risk-off sentiment and drives banking activities.",
+    "ImpactChannels": [
+      "Deposits: Stable",
+      "Lending: Growth"
+    ],
+    "Shocks": {
+      "move": 0,
+      "credit_spreads": {
+        "ig_oas": -10,
+        "hy_oas": -15
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NSFR": 2,
+      "OCI": 0
+    },
+    "TradeList": [
+      "Increase lending by $2bn from retail deposits",
+      "Add $500mm in short-term USTs through repo"
+    ],
+    "Assumptions": "Continued economic activity; consumer confidence remains high."
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS market experiences a widening basis due to market volatility and a slowdown in prepayments.",
+    "Probability": 0.1,
+    "Rationale": "Market caution leads to increased risk premiums in MBS valuations.",
+    "ImpactChannels": [
+      "MBS basis: +25 bps"
+    ],
+    "Shocks": {
+      "move": 0,
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1,
+      "OCI": -50
+    },
+    "TradeList": [
+      "Reduce MBS holdings by $500mm",
+      "Increase UST holdings by $500mm"
+    ],
+    "Assumptions": "Investor caution remains high; prepayment speeds decline."
+  },
+  {
+    "Scenario": "Yield Curve Dynamics Favorable",
+    "Description": "Interest rate adjustments lead to favorable yield curve dynamics as inflation expectations stabilize.",
+    "Probability": 0.15,
+    "Rationale": "Market adjustments positively impact Bank of America's funding and NII.",
+    "ImpactChannels": [
+      "Rates: +50 bps",
+      "MBS basis: Stable"
+    ],
+    "Shocks": {
+      "move": 50,
+      "credit_spreads": {
+        "ig_oas": -5,
+        "hy_oas": -10
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1,
+      "OCI": 50
+    },
+    "TradeList": [
+      "Increase long-term UST holdings by $1bn funded by deposits",
+      "Rotate $500mm into munis for yield enhancement"
+    ],
+    "Assumptions": "Positive market reaction to stable economic indicators."
+  },
+  {
+    "Scenario": "Proactive Basis and Convexity Management",
+    "Description": "Bank of America employs strategic hedging to manage basis and convexity risks effectively.",
+    "Probability": 0.1,
+    "Rationale": "Risk management can stabilize MBS valuations and protect NII.",
+    "ImpactChannels": [
+      "Basis: Stabilization",
+      "Convexity: Mitigated"
+    ],
+    "Shocks": {
+      "move": 0,
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 1,
+      "OCI": 10
+    },
+    "TradeList": [
+      "Implement hedging strategies on MBS holdings worth $500mm",
+      "Increase short positions in convexity-sensitive assets by $300mm"
+    ],
+    "Assumptions": "Effective execution of risk management strategies."
+  },
+  {
+    "Scenario": "Geopolitical Tensions and Commodities Spike",
+    "Description": "Increased geopolitical tensions lead to rising commodity prices and inflation expectations, prompting Fed rate hikes.",
+    "Probability": 0.1,
+    "Rationale": "Ongoing geopolitical risks could lead to market instability and inflation pressures.",
+    "ImpactChannels": [
+      "Rates: +75 bps",
+      "Curve: bear steepening"
+    ],
+    "Shocks": {
+      "move": 75,
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "OCI": -75
+    },
+    "TradeList": [
+      "Add $1bn to short-term USTs",
+      "Increase commodity hedges by $500mm"
+    ],
+    "Assumptions": "Geopolitical landscape remains volatile; inflation expectations rise."
+  }
+]
