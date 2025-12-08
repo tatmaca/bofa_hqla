@@ -139,6 +139,51 @@ class HQLA_Asset(ABC):
         self.duration = duration
         self.gamma = gamma_1bp
         self.convexity = convexity
+    
+    def clone(self):
+        """
+        Generic clone method for all HQLA asset types.
+        Creates a new instance of the same class with the same core parameters.
+        Dynamic attributes (e.g., computed greeks, prices) are reset.
+        """
+
+        # Create a shallow copy of all init arguments
+        cls = self.__class__
+        new_obj = cls(
+            issue_date=self.issue_date,
+            maturity_date=self.maturity_date,
+            face_value=self.face_value,
+            quantity=self.quantity,
+            name=self.name,
+            isin=self.isin,
+            isRisky=self.isRisky,
+            grade=self.grade,
+        )
+
+        # Copy class-specific attributes when they exist
+        for attr in [
+            "coupon_frequency",
+            "business_day_conv",
+            "day_count",
+            "coupons",
+            "calendar",
+        ]:
+            if hasattr(self, attr):
+                setattr(new_obj, attr, getattr(self, attr))
+
+        # Do NOT copy pricing state (must rebuild bond)
+        new_obj.bond = None
+        new_obj.clean_price = None
+        new_obj.dirty_price = None
+        new_obj.ytm = None
+        new_obj.dv01 = None
+        new_obj.cs01 = None
+        new_obj.duration = None
+        new_obj.convexity = None
+        new_obj.gamma = None
+
+        return new_obj
+
 
 
 class Floating(HQLA_Asset):

@@ -11,8 +11,9 @@ import copy
 from openai import OpenAI
 import QuantLib as ql
 
-from hqla_portfolio_opt import HQLA_Portfolio_Opt_Enhanced
-from hqla_portfolio import Portfolio
+
+from .hqla_portfolio_opt import HQLA_Portfolio_Opt_Enhanced
+from .hqla_portfolio import Portfolio
 
 # ------------------------
 # Scenario dataclass
@@ -129,6 +130,15 @@ class ScenarioRebalancingEngine:
             if method == "mean_lexicographic":
                 out = opt.lexicographic_mean_optimize(**kwargs)
             elif method == "mean_variance_lexicographic":
+                kwargs = {
+                    **kwargs,
+                    "base_curve_handle": scen.yield_curve_handle,
+                    "up_curve": up_curve,
+                    "down_curve": down_curve,
+                    "survival_curves": survival_curves,
+                    "survival_curves_up": survival_curves_up,
+                    "survival_curves_down": survival_curves_down,
+                }
                 out = opt.mean_variance_lexicographic(**kwargs)
             else:
                 raise ValueError(f"Unknown method '{method}'")
@@ -162,7 +172,7 @@ class ScenarioRebalancingEngine:
         except Exception:
             # fallback to Allocated_Amount / NCO
             if "Allocated_Amount" in df.columns and self.optimizer.net_cash_outflow > 0:
-                return np.array(df["Allocated_Amount"].fillna(0.0) / self.optimizer.net_cash_outflow, dtype=float)
+                return np.array(df["Allocated_Amount"].fillna(0.0) / self.net_cash_outflow, dtype=float)
         # last resort: zeros
         return np.zeros(len(df))
 
