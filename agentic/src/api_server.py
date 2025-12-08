@@ -234,6 +234,7 @@ async def upload_yield_curve(file: UploadFile = None, request: Request = None):
         try:
             payload = await request.json()
             df = pd.DataFrame(payload)
+            print(df)
         except Exception as e:
             return JSONResponse(
                 status_code=400, content={"error": f"Invalid input: {e}"}

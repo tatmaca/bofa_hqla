@@ -1,0 +1,148 @@
+[
+  {
+    "Scenario": "Bear Steepening with Rising Credit Spreads",
+    "Description": "Yield curve steepens as short-term rates rise faster than long-term rates, leading to wider credit spreads.",
+    "Probability": 0.22,
+    "Rationale": "Aggressive Fed rate hikes to combat inflation, impacting borrowing costs and credit spreads.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit"
+    ],
+    "Shocks": {
+      "ig_oas": 15,
+      "hy_oas": 45,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $1bn UST 10-year bonds",
+      "Reduce $500mn MBS exposure"
+    ],
+    "Assumptions": "Economic slowdown leads to increased risk aversion; elevated credit risk perceived."
+  },
+  {
+    "Scenario": "Stable Rates but Increased Deposit Runoff",
+    "Description": "Deposits decline by 5% as clients seek higher yields, despite stable interest rates.",
+    "Probability": 0.15,
+    "Rationale": "Current consumer sentiment and competition for deposits drive outflows.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "depo_runoff": -5
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Increase $500mn in retail CDs",
+      "Engage in $200mn repo transactions"
+    ],
+    "Assumptions": "Clients increasingly move to higher-yielding alternatives, affecting liquidity."
+  },
+  {
+    "Scenario": "Regulatory Changes Leading to Higher TLAC Requirements",
+    "Description": "New regulatory requirements increase TLAC, impacting capital ratios and liquidity metrics.",
+    "Probability": 0.1,
+    "Rationale": "Ongoing regulatory discussions may lead to higher capital requirements for G-SIBs.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Issue $1bn TLAC-compliant bonds"
+    ],
+    "Assumptions": "Increased capital buffers will be mandated, impacting funding strategies."
+  },
+  {
+    "Scenario": "Credit Market Deterioration",
+    "Description": "Wider credit spreads due to risk aversion lead to capital ratio impacts.",
+    "Probability": 0.18,
+    "Rationale": "Rising VIX and deteriorating credit conditions increase perceived risk.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "ig_oas": 25,
+      "hy_oas": 60
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Reduce $700mn in corporate bond holdings",
+      "Increase cash reserves by $500mn"
+    ],
+    "Assumptions": "Market sentiment turns negative, affecting lending and investment activities."
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis widens significantly due to supply-demand mismatches in the mortgage market.",
+    "Probability": 0.08,
+    "Rationale": "Current trends in mortgage issuance suggest potential supply issues.",
+    "ImpactChannels": [
+      "MBS"
+    ],
+    "Shocks": {
+      "mbs_basis": 35
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Adjust $300mn in MBS portfolio",
+      "Increase liquidity reserves by $200mn"
+    ],
+    "Assumptions": "Investor demand for MBS decreases, impacting valuations and liquidity."
+  },
+  {
+    "Scenario": "Controlled Inflation with Gradual Easing",
+    "Description": "Inflation remains stable, allowing for gradual easing of monetary policy, supporting consumer spending.",
+    "Probability": 0.17,
+    "Rationale": "Resilient economic fundamentals support steady growth, reducing risks of sudden market shocks.",
+    "ImpactChannels": [
+      "Macro",
+      "Consumer"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": 3,
+      "NSFR": 2
+    },
+    "TradeList": [
+      "Increase $500mn in Agency MBS",
+      "Add $300mn in municipal bonds"
+    ],
+    "Assumptions": "Continued consumer confidence and spending, supported by steady employment rates."
+  },
+  {
+    "Scenario": "Diversified Funding Resilience",
+    "Description": "Bank of America maintains stable funding through diversified sources despite market volatility.",
+    "Probability": 0.08,
+    "Rationale": "A robust funding stack mitigates risks associated with deposit runoff or credit market shifts.",
+    "ImpactChannels": [
+      "Funding",
+      "Liquidity"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 2
+    },
+    "TradeList": [
+      "Engage in $400mn short-term wholesale funding",
+      "Increase long-term bond issuance by $600mn"
+    ],
+    "Assumptions": "Strong investor appetite for Bank of America securities stabilizes funding costs."
+  }
+]

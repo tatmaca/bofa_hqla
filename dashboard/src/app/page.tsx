@@ -619,32 +619,6 @@ export default function HqlaE2EDashboard() {
   );
   const [yieldCurve, setYieldCurve] = useState([]); // Prepare table data safely before rendering
 
-  const scenarioCurves = useMemo(() => {
-    if (!yieldCurve || yieldCurve.length === 0) return {};
-
-    const n = yieldCurve.length;
-    const midIndex = Math.floor(n / 2);
-
-    // Compute mean rate
-    const meanRate = yieldCurve.reduce((sum, p) => sum + p.rate, 0) / n;
-
-    return {
-      "level-up": yieldCurve.map((p) => ({ ...p, rate: p.rate + 0.01 })),
-      "level-down": yieldCurve.map((p) => ({ ...p, rate: p.rate - 0.01 })),
-
-      steepening: yieldCurve.map((p, i) => {
-        const factor = (i - midIndex) / (n - 1);
-        return { ...p, rate: p.rate + factor * 0.01 };
-      }),
-
-      flattening: yieldCurve.map((p) => {
-        // nudge each rate toward the mean by a fixed fraction
-        const adjustment = (meanRate - p.rate) * 0.5; // 0.5 = 50% of difference
-        return { ...p, rate: p.rate + adjustment };
-      }),
-    };
-  }, [yieldCurve]);
-
   const [scenario, setScenario] = useState({
     status: "idle",
     pct: 0,
@@ -937,6 +911,7 @@ export default function HqlaE2EDashboard() {
       setActiveNewsArticle(null);
     }
   }, [newsOutput]);
+
   const [predictedCurves, setPredictedCurves] = useState({});
   useEffect(() => {
     const matrix = scenario.output?.scenarioMatrix;
@@ -944,7 +919,6 @@ export default function HqlaE2EDashboard() {
 
     // convert rows → JSONL → request curve predictions
     const jsonl = matrix.map((row) => JSON.stringify(row)).join("\n");
-    console.log(scenarioRunLabel.slice(0, 8));
 
     async function fetchPredictions() {
       console.log("Entering fetch predictions");
@@ -965,9 +939,26 @@ export default function HqlaE2EDashboard() {
         );
 
         const out = await resp.json();
-        console.log("API response:", out);
-        setPredictedCurves(out);
-        console.log("Stored predictedCurves:", out.curves);
+
+        // Extract only the scenario entries with predictions
+        const extractedPredictions = {};
+        for (const key in out.curves) {
+          if (
+            key === "date" ||
+            key === "base_date" ||
+            key === "prediction_date"
+          )
+            continue;
+
+          const curveEntry = out.curves[key];
+          if (curveEntry?.predictions) {
+            extractedPredictions[key] = curveEntry.predictions;
+          }
+        }
+
+        // Now set only the filtered scenario curves
+        setPredictedCurves(extractedPredictions);
+        console.log(predictedCurves);
       } catch (err) {
         console.error("Prediction error:", err);
       }
@@ -975,6 +966,35 @@ export default function HqlaE2EDashboard() {
 
     fetchPredictions();
   }, [scenario.output?.scenarioMatrix]);
+
+  const scenarioCurves = useMemo(() => {
+    if (!yieldCurve || yieldCurve.length === 0) return {};
+
+    // yieldCurveMap for fast lookup by tenor
+    const yieldCurveMap = Object.fromEntries(
+      yieldCurve.map((p) => [p.tenor, p.rate]),
+    );
+
+    // Build scenario curves by adding scenario deltas to base curve
+    const curves: Record<string, { tenor: string; rate: number }[]> = {};
+
+    Object.keys(predictedCurves).forEach((scenarioKey) => {
+      console.log(scenarioKey);
+      const scenario = predictedCurves[scenarioKey];
+      console.log(scenario);
+      if (!scenario) return;
+
+      // Map each tenor in base curve, add scenario change
+      curves[scenarioKey] = yieldCurve.map((point) => {
+        const delta = scenario[point.tenor] / 1000 ?? 0; // default 0 if missing
+        return { tenor: point.tenor, rate: point.rate + delta };
+      });
+    });
+
+    console.log("see if scenario curves are okay");
+    console.log(curves);
+    return curves;
+  }, [yieldCurve, predictedCurves]);
 
   const launchScenarioGen = async (options: any) => {
     setSelectedScenario(null);
