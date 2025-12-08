@@ -68,20 +68,26 @@ class HQLA_Asset(ABC):
         if self.bond is None:
             raise ValueError("Bond not built yet. Call build_bond first.")
 
-        if self.isRisky:
-            rr = self.RECOVERY_BY_RATING[self.grade]
-            engine = ql.RiskyBondEngine(survival_curve, rr, discount_curve)
-        else:
-            engine = ql.DiscountingBondEngine(discount_curve)
+        use_risky = self.isRisky and survival_curve is not None
+
+        engine = (
+            ql.RiskyBondEngine(survival_curve, self.RECOVERY_BY_RATING[self.grade], discount_curve)
+            if use_risky
+            else ql.DiscountingBondEngine(discount_curve)
+        )
         self.bond.setPricingEngine(engine)
         self.clean_price = self.bond.cleanPrice()
         self.dirty_price = self.bond.dirtyPrice()
+        # Use BondPrice wrapper to satisfy the QuantLib Python overload
+        price_obj = ql.BondPrice(self.clean_price, ql.BondPrice.Clean)
+        settlement = ql.Settings.instance().evaluationDate
         self.ytm = (
             self.bond.bondYield(
-                self.clean_price,
-                ql.Thirty360(ql.Thirty360.USA),
+                price_obj,
+                self.day_count,
                 ql.Compounded,
                 ql.Semiannual,
+                settlement,
             )
             * 100
         )
@@ -96,12 +102,18 @@ class HQLA_Asset(ABC):
         survival_curve_up: ql.YieldTermStructureHandle = None,
         survival_curve_down: ql.YieldTermStructureHandle = None,
     ):
-        if self.isRisky:
+        use_risky = self.isRisky and survival_curve is not None
+
+        if use_risky:
             rr = self.RECOVERY_BY_RATING[self.grade]
-            # first, get cs01
-            og_engine = ql.RiskyBondEngine(survival_curve, rr, discount_curve)
-            up_engine = ql.RiskyBondEngine(survival_curve_up, rr, discount_curve)
-            down_engine = ql.RiskyBondEngine(survival_curve_down, rr, discount_curve)
+            # first, get cs01; guard survival variations
+            base_surv = survival_curve
+            surv_up = survival_curve_up or base_surv
+            surv_down = survival_curve_down or base_surv
+
+            og_engine = ql.RiskyBondEngine(base_surv, rr, discount_curve)
+            up_engine = ql.RiskyBondEngine(surv_up, rr, discount_curve)
+            down_engine = ql.RiskyBondEngine(surv_down, rr, discount_curve)
 
             self.bond.setPricingEngine(up_engine)
             up_price = self.bond.dirtyPrice()
@@ -111,9 +123,8 @@ class HQLA_Asset(ABC):
             cs01 = (down_price - up_price) / 2
             self.cs01 = cs01
 
-            # then, set up dv01 calc
-            up_engine = ql.RiskyBondEngine(survival_curve, rr, up_curve)
-            down_engine = ql.RiskyBondEngine(survival_curve, rr, down_curve)
+            up_engine = ql.RiskyBondEngine(base_surv, rr, up_curve)
+            down_engine = ql.RiskyBondEngine(base_surv, rr, down_curve)
         else:
             og_engine = ql.DiscountingBondEngine(discount_curve)
             up_engine = ql.DiscountingBondEngine(up_curve)

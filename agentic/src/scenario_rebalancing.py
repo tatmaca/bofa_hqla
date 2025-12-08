@@ -158,8 +158,8 @@ class ScenarioRebalancingEngine:
             return x
         except Exception:
             # fallback to Allocated_Amount / NCO
-            if "Allocated_Amount" in df.columns and self.optimizer.net_cash_outflow > 0:
-                return np.array(df["Allocated_Amount"].fillna(0.0) / self.optimizer.net_cash_outflow, dtype=float)
+            if "Allocated_Amount" in df.columns and self.net_cash_outflow > 0:
+                return np.array(df["Allocated_Amount"].fillna(0.0) / self.net_cash_outflow, dtype=float)
         # last resort: zeros
         return np.zeros(len(df))
 
@@ -542,7 +542,5 @@ ABSOLUTE RULES:
             print(df_updated)
         else:
             print("Base portfolio not updated.")
-
-
 
 

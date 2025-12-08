@@ -1,0 +1,391 @@
+# Debate Transcript — Run 1
+
+### **JUDGE** (Judge)
+
+**JSON**
+
+```json
+[
+  {
+    "Scenario": "Bear Steepening Yield Curve",
+    "Description": "Long-term rates rise faster than short-term rates, causing potential increases in borrowing costs and widening credit spreads.",
+    "Probability": 0.18,
+    "Rationale": "Expectations of economic recovery and inflation lead to higher long-term yields.",
+    "ImpactChannels": ["Rates", "Curve"],
+    "Shocks": {"move_index": 120, "yield_curve": "bear_steepener", "credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+    "MetricsDelta": {"LCR": -5, "NSFR": -3, "NII": 2},
+    "TradeList": ["Add $2bn 10Y USTs", "Reduce $1bn 5Y Agency MBS"],
+    "Assumptions": "Economic indicators show signs of recovery, inflation data remains elevated.",
+    "Signals": ["Watch for CPI release on 12/12/2023", "Monitor Fed meeting on 12/13/2023", "Look for employment data on 01/05/2024"]
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Increased credit spreads for IG and HY bonds due to market volatility or weakening fundamentals.",
+    "Probability": 0.15,
+    "Rationale": "Market concerns about corporate defaults lead to risk aversion.",
+    "ImpactChannels": ["Credit"],
+    "Shocks": {"ig_oas": 15, "hy_oas": 45},
+    "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -1},
+    "TradeList": ["Increase allocation to USTs by $1bn", "Reduce exposure to HY bonds by $500mn"],
+    "Assumptions": "Economic data shows slowing growth, increased default rates in key sectors.",
+    "Signals": ["Monitor corporate earnings announcements in January 2024", "Watch for credit rating agency updates on 01/20/2024"]
+  },
+  {
+    "Scenario": "Regulatory Changes Impacting Liquidity",
+    "Description": "Anticipated regulatory changes increase capital and liquidity requirements.",
+    "Probability": 0.13,
+    "Rationale": "Changes in Basel III framework could lead to higher liquidity add-ons.",
+    "ImpactChannels": ["Regulation"],
+    "Shocks": {},
+    "MetricsDelta": {"LCR": -5, "NSFR": -4},
+    "TradeList": ["Prepare for potential liquidity adjustments", "Increase high-quality liquid assets by $1bn"],
+    "Assumptions": "Regulatory discussions indicate increased scrutiny on liquidity metrics.",
+    "Signals": ["Watch for Basel Committee meetings on 12/01/2023", "Monitor proposed regulations in Q1 2024"]
+  },
+  {
+    "Scenario": "Retail Deposit Runoff",
+    "Description": "Increased beta on retail deposits leads to a 5% runoff as consumers seek higher yields.",
+    "Probability": 0.13,
+    "Rationale": "Consumers are increasingly sensitive to interest rate changes.",
+    "ImpactChannels": ["Deposits"],
+    "Shocks": {"deposits": -5},
+    "MetricsDelta": {"LCR": -6, "NSFR": -5, "NII": -2},
+    "TradeList": ["Enhance deposit retention strategies", "Consider raising deposit rates on savings accounts"],
+    "Assumptions": "Rising rates drive consumers to alternative investments.",
+    "Signals": ["Monitor deposit beta trends in Q1 2024", "Watch for competitor rate changes in December 2023"]
+  },
+  {
+    "Scenario": "Stable Market Conditions",
+    "Description": "Minimal changes in rates and spreads, reflecting a stable economic environment.",
+    "Probability": 0.13,
+    "Rationale": "Economic indicators remain stable without significant volatility.",
+    "ImpactChannels": ["Rates", "Curve"],
+    "Shocks": {},
+    "MetricsDelta": {"LCR": 0, "NSFR": 0, "NII": 0},
+    "TradeList": ["Maintain current portfolio allocation", "Reassess risk exposures quarterly"],
+    "Assumptions": "Stable macroeconomic indicators with no major events expected.",
+    "Signals": ["Monitor economic releases for stability indicators", "Watch for Fed commentary on rates"]
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis widens by 35 bps due to increased supply or reduced demand for mortgage-backed securities.",
+    "Probability": 0.07,
+    "Rationale": "Market dynamics shift, affecting MBS valuations.",
+    "ImpactChannels": ["MBS"],
+    "Shocks": {"mbs_basis": 35},
+    "MetricsDelta": {"LCR": -2, "NSFR": -1, "NII": -1},
+    "TradeList": ["Reduce MBS holdings by $500mn", "Increase UST holdings by $300mn"],
+    "Assumptions": "Increased MBS supply leads to downward pressure on prices.",
+    "Signals": ["Watch for mortgage issuance reports in December 2023", "Monitor MBS auction results on 12/15/2023"]
+  },
+  {
+    "Scenario": "Increased Treasury Issuance",
+    "Description": "Higher-than-expected Treasury issuance leads to upward pressure on rates.",
+    "Probability": 0.07,
+    "Rationale": "Government financing needs increase, impacting the yield curve.",
+    "ImpactChannels": ["Rates"],
+    "Shocks": {"move_index": 10},
+    "MetricsDelta": {"LCR": -2, "NSFR": -1, "NII": -1},
+    "TradeList": ["Add $1bn in short-term bills via repo", "Adjust duration exposure"],
+    "Assumptions": "Fiscal policy leads to increased borrowing.",
+    "Signals": ["Monitor Treasury auction results", "Watch for fiscal policy announcements in January 2024"]
+  },
+  {
+    "Scenario": "Geopolitical Risks",
+    "Description": "Escalating geopolitical tensions lead to market volatility and a flight to quality.",
+    "Probability": 0.07,
+    "Rationale": "Global events create uncertainty, impacting risk sentiment.",
+    "ImpactChannels": ["Credit"],
+    "Shocks": {},
+    "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -1},
+    "TradeList": ["Increase allocation to safe-haven assets", "Prepare for potential credit risk assessments"],
+    "Assumptions": "Geopolitical developments create market unease.",
+    "Signals": ["Watch for major geopolitical events", "Monitor credit market reactions in Q1 2024"]
+  },
+  {
+    "Scenario": "Commodity Price Spike",
+    "Description": "A sudden increase in commodity prices impacts consumer behavior and credit conditions.",
+    "Probability": 0.07,
+    "Rationale": "Rising commodity prices could lead to inflationary pressures.",
+    "ImpactChannels": ["Commodity Prices"],
+    "Shocks": {},
+    "MetricsDelta": {"LCR": -4, "NSFR": -3, "NII": -2},
+    "TradeList": ["Adjust commodity exposure", "Reassess consumer credit risk"],
+    "Assumptions": "Global supply chain disruptions lead to price increases.",
+    "Signals": ["Monitor commodity price indices", "Watch for inflation data releases"]
+  },
+  {
+    "Scenario": "Sovereign Spread Widening",
+    "Description": "Increased sovereign spreads due to economic instability in Europe or other regions.",
+    "Probability": 0.07,
+    "Rationale": "Global economic conditions impact funding costs and liquidity.",
+    "ImpactChannels": ["Credit"],
+    "Shocks": {"sovereign_spreads": 10},
+    "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -1},
+    "TradeList": ["Increase liquidity buffer", "Adjust cross-currency funding strategies"],
+    "Assumptions": "Economic instability abroad impacts market sentiment.",
+    "Signals": ["Watch for European economic reports", "Monitor currency market volatility"]
+  }
+]
+```
+
+## Round 1
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepening Yield Curve",
+        "Description": "Long-term rates rise faster than short-term rates, causing potential increases in borrowing costs and widening credit spreads.",
+        "Probability": 0.25,
+        "Rationale": "Expectations of economic recovery and inflation lead to higher long-term yields.",
+        "ImpactChannels": ["Rates", "Curve"],
+        "Shocks": {"move_index": 120, "yield_curve": "bear_steepener", "credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -3, "NII": +2},
+        "TradeList": ["Add $2bn 10Y USTs", "Reduce $1bn 5Y Agency MBS"],
+        "Assumptions": "Economic indicators show signs of recovery, inflation data remains elevated.",
+        "Signals": ["Watch for CPI release on 12/12/2023", "Monitor Fed meeting on 12/13/2023", "Look for employment data on 01/05/2024"]
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "Increased credit spreads for IG and HY bonds due to market volatility or weakening fundamentals.",
+        "Probability": 0.20,
+        "Rationale": "Market concerns about corporate defaults lead to risk aversion.",
+        "ImpactChannels": ["Credit"],
+        "Shocks": {"ig_oas": 15, "hy_oas": 45},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -1},
+        "TradeList": ["Increase allocation to USTs by $1bn", "Reduce exposure to HY bonds by $500mn"],
+        "Assumptions": "Economic data shows slowing growth, increased default rates in key sectors.",
+        "Signals": ["Monitor corporate earnings announcements in January 2024", "Watch for credit rating agency updates on 01/20/2024"]
+    },
+    {
+        "Scenario": "Regulatory Changes Impacting Liquidity",
+        "Description": "Anticipated regulatory changes increase capital and liquidity requirements.",
+        "Probability": 0.15,
+        "Rationale": "Changes in Basel III framework could lead to higher liquidity add-ons.",
+        "ImpactChannels": ["Regulation"],
+        "Shocks": {},
+        "MetricsDelta": {"LCR": -5, "NSFR": -4},
+        "TradeList": ["Prepare for potential liquidity adjustments", "Increase high-quality liquid assets by $1bn"],
+        "Assumptions": "Regulatory discussions indicate increased scrutiny on liquidity metrics.",
+        "Signals": ["Watch for Basel Committee meetings on 12/01/2023", "Monitor proposed regulations in Q1 2024"]
+    },
+    {
+        "Scenario": "Retail Deposit Runoff",
+        "Description": "Increased beta on retail deposits leads to a 5% runoff as consumers seek higher yields.",
+        "Probability": 0.10,
+        "Rationale": "Consumers are increasingly sensitive to interest rate changes.",
+        "ImpactChannels": ["Deposits"],
+        "Shocks": {"deposits": -5},
+        "MetricsDelta": {"LCR": -6, "NSFR": -5, "NII": -2},
+        "TradeList": ["Enhance deposit retention strategies", "Consider raising deposit rates on savings accounts"],
+        "Assumptions": "Rising rates drive consumers to alternative investments.",
+        "Signals": ["Monitor deposit beta trends in Q1 2024", "Watch for competitor rate changes in December 2023"]
+    },
+    {
+        "Scenario": "Stable Market Conditions",
+        "Description": "Minimal changes in rates and spreads, reflecting a stable economic environment.",
+        "Probability": 0.10,
+        "Rationale": "Economic indicators remain stable without significant volatility.",
+        "ImpactChannels": ["Rates", "Curve"],
+        "Shocks": {},
+        "MetricsDelta": {"LCR": 0, "NSFR": 0, "NII": 0},
+        "TradeList": ["Maintain current portfolio allocation", "Reassess risk exposures quarterly"],
+        "Assumptions": "Stable macroeconomic indicators with no major events expected.",
+        "Signals": ["Monitor economic releases for stability indicators", "Watch for Fed commentary on rates"]
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "MBS basis widens by 35 bps due to increased supply or reduced demand for mortgage-backed securities.",
+        "Probability": 0.05,
+        "Rationale": "Market dynamics shift, affecting MBS valuations.",
+        "ImpactChannels": ["MBS"],
+        "Shocks": {"mbs_basis": 35},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1, "NII": -1},
+        "TradeList": ["Reduce MBS holdings by $500mn", "Increase UST holdings by $300mn"],
+        "Assumptions": "Increased MBS supply leads to downward pressure on prices.",
+        "Signals": ["Watch for mortgage issuance reports in December 2023", "Monitor MBS auction results on 12/15/2023"]
+    },
+    {
+        "Scenario": "Increased Treasury Issuance",
+        "Description": "Higher-than-expected Treasury issuance leads to upward pressure on rates.",
+        "Probability": 0.05,
+        "Rationale": "Government financing needs increase, impacting the yield curve.",
+        "ImpactChannels": ["Rates"],
+        "Shocks": {"move_index": 10},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1, "NII": -1},
+        "TradeList": ["Add $1bn in short-term bills via repo", "Adjust duration exposure"],
+        "Assumptions": "Fiscal policy leads to increased borrowing.",
+        "Signals": ["Monitor Treasury auction results", "Watch for fiscal policy announcements in January 2024"]
+    },
+    {
+        "Scenario": "Geopolitical Risks",
+        "Description": "Escalating geopolitical tensions lead to market volatility and a flight to quality.",
+        "Probability": 0.05,
+        "Rationale": "Global events create uncertainty, impacting risk sentiment.",
+        "ImpactChannels": ["Credit"],
+        "Shocks": {},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -1},
+        "TradeList": ["Increase allocation to safe-haven assets", "Prepare for potential credit risk assessments"],
+        "Assumptions": "Geopolitical developments create market unease.",
+        "Signals": ["Watch for major geopolitical events", "Monitor credit market reactions in Q1 2024"]
+    },
+    {
+        "Scenario": "Commodity Price Spike",
+        "Description": "A sudden increase in commodity prices impacts consumer behavior and credit conditions.",
+        "Probability": 0.05,
+        "Rationale": "Rising commodity prices could lead to inflationary pressures.",
+        "ImpactChannels": ["Commodity Prices"],
+        "Shocks": {},
+        "MetricsDelta": {"LCR": -4, "NSFR": -3, "NII": -2},
+        "TradeList": ["Adjust commodity exposure", "Reassess consumer credit risk"],
+        "Assumptions": "Global supply chain disruptions lead to price increases.",
+        "Signals": ["Monitor commodity price indices", "Watch for inflation data releases"]
+    },
+    {
+        "Scenario": "Sovereign Spread Widening",
+        "Description": "Increased sovereign spreads due to economic instability in Europe or other regions.",
+        "Probability": 0.05,
+        "Rationale": "Global economic conditions impact funding costs and liquidity.",
+        "ImpactChannels": ["Credit"],
+        "Shocks": {"sovereign_spreads": 10},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -1},
+        "TradeList": ["Increase liquidity buffer", "Adjust cross-currency funding strategies"],
+        "Assumptions": "Economic instability abroad impacts market sentiment.",
+        "Signals": ["Watch for European economic reports", "Monitor currency market volatility"]
+    }
+]
+```
+
+### **Devil's advocate**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepening Yield Curve",
+        "Description": "Long-term rates rise faster than short-term rates, causing potential increases in borrowing costs and widening credit spreads.",
+        "Probability": 0.20,
+        "Rationale": "Expectations of economic recovery and inflation lead to higher long-term yields.",
+        "ImpactChannels": ["Rates", "Curve"],
+        "Shocks": {"move_index": 120, "yield_curve": "bear_steepener", "credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -3, "NII": +2},
+        "TradeList": ["Add $2bn 10Y USTs", "Reduce $1bn 5Y Agency MBS"],
+        "Assumptions": "Economic indicators show signs of recovery, inflation data remains elevated.",
+        "Signals": ["Watch for CPI release on 12/12/2023", "Monitor Fed meeting on 12/13/2023", "Look for employment data on 01/05/2024"]
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "Increased credit spreads for IG and HY bonds due to market volatility or weakening fundamentals.",
+        "Probability": 0.15,
+        "Rationale": "Market concerns about corporate defaults lead to risk aversion.",
+        "ImpactChannels": ["Credit"],
+        "Shocks": {"ig_oas": 15, "hy_oas": 45},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -1},
+        "TradeList": ["Increase allocation to USTs by $1bn", "Reduce exposure to HY bonds by $500mn"],
+        "Assumptions": "Economic data shows slowing growth, increased default rates in key sectors.",
+        "Signals": ["Monitor corporate earnings announcements in January 2024", "Watch for credit rating agency updates on 01/20/2024"]
+    },
+    {
+        "Scenario": "Regulatory Changes Impacting Liquidity",
+        "Description": "Anticipated regulatory changes increase capital and liquidity requirements.",
+        "Probability": 0.10,
+        "Rationale": "Changes in Basel III framework could lead to higher liquidity add-ons.",
+        "ImpactChannels": ["Regulation"],
+        "Shocks": {},
+        "MetricsDelta": {"LCR": -5, "NSFR": -4},
+        "TradeList": ["Prepare for potential liquidity adjustments", "Increase high-quality liquid assets by $1bn"],
+        "Assumptions": "Regulatory discussions indicate increased scrutiny on liquidity metrics.",
+        "Signals": ["Watch for Basel Committee meetings on 12/01/2023", "Monitor proposed regulations in Q1 2024"]
+    },
+    {
+        "Scenario": "Retail Deposit Runoff",
+        "Description": "Increased beta on retail deposits leads to a 5% runoff as consumers seek higher yields.",
+        "Probability": 0.10,
+        "Rationale": "Consumers are increasingly sensitive to interest rate changes.",
+        "ImpactChannels": ["Deposits"],
+        "Shocks": {"deposits": -5},
+        "MetricsDelta": {"LCR": -6, "NSFR": -5, "NII": -2},
+        "TradeList": ["Enhance deposit retention strategies", "Consider raising deposit rates on savings accounts"],
+        "Assumptions": "Rising rates drive consumers to alternative investments.",
+        "Signals": ["Monitor deposit beta trends in Q1 2024", "Watch for competitor rate changes in December 2023"]
+    },
+    {
+        "Scenario": "Stable Market Conditions",
+        "Description": "Minimal changes in rates and spreads, reflecting a stable economic environment.",
+        "Probability": 0.15,
+        "Rationale": "Economic indicators remain stable without significant volatility.",
+        "ImpactChannels": ["Rates", "Curve"],
+        "Shocks": {},
+        "MetricsDelta": {"LCR": 0, "NSFR": 0, "NII": 0},
+        "TradeList": ["Maintain current portfolio allocation", "Reassess risk exposures quarterly"],
+        "Assumptions": "Stable macroeconomic indicators with no major events expected.",
+        "Signals": ["Monitor economic releases for stability indicators", "Watch for Fed commentary on rates"]
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "MBS basis widens by 35 bps due to increased supply or reduced demand for mortgage-backed securities.",
+        "Probability": 0.05,
+        "Rationale": "Market dynamics shift, affecting MBS valuations.",
+        "ImpactChannels": ["MBS"],
+        "Shocks": {"mbs_basis": 35},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1, "NII": -1},
+        "TradeList": ["Reduce MBS holdings by $500mn", "Increase UST holdings by $300mn"],
+        "Assumptions": "Increased MBS supply leads to downward pressure on prices.",
+        "Signals": ["Watch for mortgage issuance reports in December 2023", "Monitor MBS auction results on 12/15/2023"]
+    },
+    {
+        "Scenario": "Increased Treasury Issuance",
+        "Description": "Higher-than-expected Treasury issuance leads to upward pressure on rates.",
+        "Probability": 0.05,
+        "Rationale": "Government financing needs increase, impacting the yield curve.",
+        "ImpactChannels": ["Rates"],
+        "Shocks": {"move_index": 10},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1, "NII": -1},
+        "TradeList": ["Add $1bn in short-term bills via repo", "Adjust duration exposure"],
+        "Assumptions": "Fiscal policy leads to increased borrowing.",
+        "Signals": ["Monitor Treasury auction results", "Watch for fiscal policy announcements in January 2024"]
+    },
+    {
+        "Scenario": "Geopolitical Risks",
+        "Description": "Escalating geopolitical tensions lead to market volatility and a flight to quality.",
+        "Probability": 0.05,
+        "Rationale": "Global events create uncertainty, impacting risk sentiment.",
+        "ImpactChannels": ["Credit"],
+        "Shocks": {},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -1},
+        "TradeList": ["Increase allocation to safe-haven assets", "Prepare for potential credit risk assessments"],
+        "Assumptions": "Geopolitical developments create market unease.",
+        "Signals": ["Watch for major geopolitical events", "Monitor credit market reactions in Q1 2024"]
+    },
+    {
+        "Scenario": "Commodity Price Spike",
+        "Description": "A sudden increase in commodity prices impacts consumer behavior and credit conditions.",
+        "Probability": 0.05,
+        "Rationale": "Rising commodity prices could lead to inflationary pressures.",
+        "ImpactChannels": ["Commodity Prices"],
+        "Shocks": {},
+        "MetricsDelta": {"LCR": -4, "NSFR": -3, "NII": -2},
+        "TradeList": ["Adjust commodity exposure", "Reassess consumer credit risk"],
+        "Assumptions": "Global supply chain disruptions lead to price increases.",
+        "Signals": ["Monitor commodity price indices", "Watch for inflation data releases"]
+    },
+    {
+        "Scenario": "Sovereign Spread Widening",
+        "Description": "Increased sovereign spreads due to economic instability in Europe or other regions.",
+        "Probability": 0.05,
+        "Rationale": "Global economic conditions impact funding costs and liquidity.",
+        "ImpactChannels": ["Credit"],
+        "Shocks": {"sovereign_spreads": 10},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -1},
+        "TradeList": ["Increase liquidity buffer", "Adjust cross-currency funding strategies"],
+        "Assumptions": "Economic instability abroad impacts market sentiment.",
+        "Signals": ["Watch for European economic reports", "Monitor currency market volatility"]
+    }
+]
+```
+

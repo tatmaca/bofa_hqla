@@ -1,0 +1,327 @@
+# Debate Transcript — Run 1
+
+### **JUDGE** (Judge)
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "10-year Treasury yields rise by 50 bps, while 2-year yields increase by 10 bps, steepening the curve.",
+        "Probability": 0.19,
+        "Rationale": "A bear steepener reflects a market reaction to inflation concerns, impacting NII positively but OCI negatively.",
+        "ImpactChannels": ["Rates", "Curve"],
+        "Shocks": {"move_index": 50, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "NSFR": 0, "NII": "+$200M"},
+        "TradeList": ["Add $2bn 10-year Treasuries", "Reduce $1bn in 2-year holdings"],
+        "Assumptions": "Inflation data remains elevated, impacting Fed policy."
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "IG OAS increases by 15 bps and HY OAS by 45 bps due to rising risk aversion.",
+        "Probability": 0.14,
+        "Rationale": "Increased spreads suggest market stress, leading to lower HQLA valuations.",
+        "ImpactChannels": ["Credit"],
+        "Shocks": {"credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -10, "NSFR": -5, "OCI": "-$150M"},
+        "TradeList": ["Sell $500M in HY bonds", "Add $1bn in cash"],
+        "Assumptions": "Market conditions worsen due to economic uncertainty."
+    },
+    {
+        "Scenario": "Deposit Beta Increase",
+        "Description": "Retail deposit beta rises by 10%, leading to higher funding costs.",
+        "Probability": 0.10,
+        "Rationale": "Higher deposit betas reflect a competitive funding environment as rates rise.",
+        "ImpactChannels": ["Deposits"],
+        "Shocks": {"deposits": {"beta_increase": 10}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": "-$100M"},
+        "TradeList": ["Adjust pricing on savings accounts", "Increase wholesale funding by $1bn"],
+        "Assumptions": "Competitors raise deposit rates to attract funds."
+    },
+    {
+        "Scenario": "Regulatory Tightening",
+        "Description": "Introduction of a new TLAC requirement increases capital requirements.",
+        "Probability": 0.10,
+        "Rationale": "Stricter regulations would necessitate higher capital reserves, affecting liquidity.",
+        "ImpactChannels": ["Regulation"],
+        "Shocks": {"regulatory_changes": "New TLAC rules"},
+        "MetricsDelta": {"LCR": -5, "NSFR": -3},
+        "TradeList": ["Issue $1bn in long-term debt", "Reassess HQLA portfolio"],
+        "Assumptions": "Regulatory bodies finalize TLAC guidelines by Q1 2024."
+    },
+    {
+        "Scenario": "Geopolitical Tensions",
+        "Description": "Escalation of geopolitical conflicts leads to a flight to safety, impacting Treasury yields.",
+        "Probability": 0.10,
+        "Rationale": "Increased demand for USTs drives down yields, impacting OCI positively.",
+        "ImpactChannels": ["Rates", "Curve"],
+        "Shocks": {"move_index": -30},
+        "MetricsDelta": {"LCR": 5, "NSFR": 0, "OCI": "+$100M"},
+        "TradeList": ["Increase UST holdings by $1bn", "Sell $500M in risky assets"],
+        "Assumptions": "Geopolitical events unfold, leading to increased market volatility."
+    },
+    {
+        "Scenario": "Commodity Price Surge",
+        "Description": "Oil prices increase by 20%, leading to inflationary pressures.",
+        "Probability": 0.09,
+        "Rationale": "Rising commodity prices could lead to higher inflation, affecting interest rates and market stability.",
+        "ImpactChannels": ["Commodity Prices"],
+        "Shocks": {"commodity_prices": {"oil": 20}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -2, "NII": "+$50M"},
+        "TradeList": ["Add $500M in inflation-linked bonds", "Rebalance commodity exposure"],
+        "Assumptions": "Global demand increases, impacting commodity markets."
+    },
+    {
+        "Scenario": "Slowdown in Economic Growth",
+        "Description": "GDP growth slows to 1%, leading to a mild recession.",
+        "Probability": 0.05,
+        "Rationale": "Economic slowdown could lead to lower credit demand and higher default rates.",
+        "ImpactChannels": ["Macro"],
+        "Shocks": {"gdp_growth": -1},
+        "MetricsDelta": {"LCR": -7, "NSFR": -3, "NII": "-$200M"},
+        "TradeList": ["Increase reserves by $1bn", "Reevaluate loan portfolios"],
+        "Assumptions": "Economic indicators show signs of stagnation."
+    },
+    {
+        "Scenario": "Positive Economic Data Surprise",
+        "Description": "Unexpected positive economic data leads to a rally in risk assets.",
+        "Probability": 0.14,
+        "Rationale": "Better-than-expected economic indicators could lead to tightening credit spreads.",
+        "ImpactChannels": ["Rates", "Credit"],
+        "Shocks": {"move_index": -15, "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": 3, "NSFR": 2, "NII": "+$150M"},
+        "TradeList": ["Add $1bn in corporate bonds", "Reduce liquidity reserves by $500M"],
+        "Assumptions": "Economic growth indicators surprise to the upside."
+    },
+    {
+        "Scenario": "Market Correction",
+        "Description": "A significant correction in equity markets leads to increased market volatility.",
+        "Probability": 0.09,
+        "Rationale": "Market corrections can lead to liquidity stress and tightening spreads across asset classes.",
+        "ImpactChannels": ["Market Micro"],
+        "Shocks": {"vix": 30},
+        "MetricsDelta": {"LCR": -6, "NSFR": -4, "OCI": "-$200M"},
+        "TradeList": ["Increase liquidity reserves by $1bn", "Sell $1bn in equities"],
+        "Assumptions": "Investor sentiment deteriorates, causing market sell-offs."
+    }
+]
+```
+
+## Round 1
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "10-year Treasury yields rise by 50 bps, while 2-year yields increase by 10 bps, steepening the curve.",
+        "Probability": 0.25,
+        "Rationale": "A bear steepener reflects a market reaction to inflation concerns, impacting NII positively but OCI negatively.",
+        "ImpactChannels": ["Rates", "Curve"],
+        "Shocks": {"move_index": 50, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "NSFR": 0, "NII": +$200M},
+        "TradeList": ["Add $2bn 10-year Treasuries", "Reduce $1bn in 2-year holdings"],
+        "Assumptions": "Inflation data remains elevated, impacting Fed policy."
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "IG OAS increases by 15 bps and HY OAS by 45 bps due to rising risk aversion.",
+        "Probability": 0.20,
+        "Rationale": "Increased spreads suggest market stress, leading to lower HQLA valuations.",
+        "ImpactChannels": ["Credit"],
+        "Shocks": {"credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -10, "NSFR": -5, "OCI": -$150M},
+        "TradeList": ["Sell $500M in HY bonds", "Add $1bn in cash"],
+        "Assumptions": "Market conditions worsen due to economic uncertainty."
+    },
+    {
+        "Scenario": "Deposit Beta Increase",
+        "Description": "Retail deposit beta rises by 10%, leading to higher funding costs.",
+        "Probability": 0.15,
+        "Rationale": "Higher deposit betas reflect a competitive funding environment as rates rise.",
+        "ImpactChannels": ["Deposits"],
+        "Shocks": {"deposits": {"beta_increase": 10}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -$100M},
+        "TradeList": ["Adjust pricing on savings accounts", "Increase wholesale funding by $1bn"],
+        "Assumptions": "Competitors raise deposit rates to attract funds."
+    },
+    {
+        "Scenario": "Regulatory Tightening",
+        "Description": "Introduction of a new TLAC requirement increases capital requirements.",
+        "Probability": 0.15,
+        "Rationale": "Stricter regulations would necessitate higher capital reserves, affecting liquidity.",
+        "ImpactChannels": ["Regulation"],
+        "Shocks": {"regulatory_changes": "New TLAC rules"},
+        "MetricsDelta": {"LCR": -5, "NSFR": -3},
+        "TradeList": ["Issue $1bn in long-term debt", "Reassess HQLA portfolio"],
+        "Assumptions": "Regulatory bodies finalize TLAC guidelines by Q1 2024."
+    },
+    {
+        "Scenario": "Geopolitical Tensions",
+        "Description": "Escalation of geopolitical conflicts leads to a flight to safety, impacting Treasury yields.",
+        "Probability": 0.10,
+        "Rationale": "Increased demand for USTs drives down yields, impacting OCI positively.",
+        "ImpactChannels": ["Rates", "Curve"],
+        "Shocks": {"move_index": -30},
+        "MetricsDelta": {"LCR": +5, "NSFR": 0, "OCI": +$100M},
+        "TradeList": ["Increase UST holdings by $1bn", "Sell $500M in risky assets"],
+        "Assumptions": "Geopolitical events unfold, leading to increased market volatility."
+    },
+    {
+        "Scenario": "Commodity Price Surge",
+        "Description": "Oil prices increase by 20%, leading to inflationary pressures.",
+        "Probability": 0.10,
+        "Rationale": "Rising commodity prices could lead to higher inflation, affecting interest rates and market stability.",
+        "ImpactChannels": ["Commodity Prices"],
+        "Shocks": {"commodity_prices": {"oil": 20}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -2, "NII": +$50M},
+        "TradeList": ["Add $500M in inflation-linked bonds", "Rebalance commodity exposure"],
+        "Assumptions": "Global demand increases, impacting commodity markets."
+    },
+    {
+        "Scenario": "Slowdown in Economic Growth",
+        "Description": "GDP growth slows to 1%, leading to a mild recession.",
+        "Probability": 0.05,
+        "Rationale": "Economic slowdown could lead to lower credit demand and higher default rates.",
+        "ImpactChannels": ["Macro"],
+        "Shocks": {"gdp_growth": -1},
+        "MetricsDelta": {"LCR": -7, "NSFR": -3, "NII": -$200M},
+        "TradeList": ["Increase reserves by $1bn", "Reevaluate loan portfolios"],
+        "Assumptions": "Economic indicators show signs of stagnation."
+    },
+    {
+        "Scenario": "Positive Economic Data Surprise",
+        "Description": "Unexpected positive economic data leads to a rally in risk assets.",
+        "Probability": 0.05,
+        "Rationale": "Better-than-expected economic indicators could lead to tightening credit spreads.",
+        "ImpactChannels": ["Rates", "Credit"],
+        "Shocks": {"move_index": -15, "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": +3, "NSFR": +2, "NII": +$150M},
+        "TradeList": ["Add $1bn in corporate bonds", "Reduce liquidity reserves by $500M"],
+        "Assumptions": "Economic growth indicators surprise to the upside."
+    },
+    {
+        "Scenario": "Market Correction",
+        "Description": "A significant correction in equity markets leads to increased market volatility.",
+        "Probability": 0.05,
+        "Rationale": "Market corrections can lead to liquidity stress and tightening spreads across asset classes.",
+        "ImpactChannels": ["Market Micro"],
+        "Shocks": {"vix": 30},
+        "MetricsDelta": {"LCR": -6, "NSFR": -4, "OCI": -$200M},
+        "TradeList": ["Increase liquidity reserves by $1bn", "Sell $1bn in equities"],
+        "Assumptions": "Investor sentiment deteriorates, causing market sell-offs."
+    }
+]
+```
+
+### **Devil's advocate**
+
+**Reasoning**
+
+The Proponent's position presents a rather narrow view of the current economic landscape, focusing on potential downturns without adequately addressing the macroeconomic resilience observed in recent data. Controlled inflation, for example, has been conducive to maintaining consumer spending and supporting small and medium enterprises (SMEs). The ability of Bank of America to diversify its deposits and trading flows plays a crucial role in mitigating risks associated with funding and liquidity. 
+
+Furthermore, the analysis seems to overlook the importance of convexity in the current environment. A bear steepener scenario may indeed impact the bank's net interest income negatively, but a well-managed convexity profile could protect against extreme moves in rates. Additionally, the funding stack should be considered in light of stable deposit betas and the potential for regulatory relief, which can enhance the bank's liquidity position.
+
+The risk-off narrative fails to account for the potential for tighter spreads, which could favor Bank of America’s HQLA mix. In a more favorable economic scenario, the bank could redeploy liquidity into Agency MBS or municipal bonds, thus enhancing its overall portfolio resilience. This strategic positioning could safeguard both other comprehensive income (OCI) and net interest income (NII) amidst varying market conditions.
+
+Given these considerations, the probabilities of the scenarios should reflect a more balanced view of potential outcomes. We can adjust the probabilities, ensuring they sum to exactly 1.00 while retaining the integrity of the original scenarios.
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "10-year Treasury yields rise by 50 bps, while 2-year yields increase by 10 bps, steepening the curve.",
+        "Probability": 0.20,
+        "Rationale": "A bear steepener reflects a market reaction to inflation concerns, impacting NII positively but OCI negatively.",
+        "ImpactChannels": ["Rates", "Curve"],
+        "Shocks": {"move_index": 50, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "NSFR": 0, "NII": +$200M},
+        "TradeList": ["Add $2bn 10-year Treasuries", "Reduce $1bn in 2-year holdings"],
+        "Assumptions": "Inflation data remains elevated, impacting Fed policy."
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "IG OAS increases by 15 bps and HY OAS by 45 bps due to rising risk aversion.",
+        "Probability": 0.15,
+        "Rationale": "Increased spreads suggest market stress, leading to lower HQLA valuations.",
+        "ImpactChannels": ["Credit"],
+        "Shocks": {"credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -10, "NSFR": -5, "OCI": -$150M},
+        "TradeList": ["Sell $500M in HY bonds", "Add $1bn in cash"],
+        "Assumptions": "Market conditions worsen due to economic uncertainty."
+    },
+    {
+        "Scenario": "Deposit Beta Increase",
+        "Description": "Retail deposit beta rises by 10%, leading to higher funding costs.",
+        "Probability": 0.10,
+        "Rationale": "Higher deposit betas reflect a competitive funding environment as rates rise.",
+        "ImpactChannels": ["Deposits"],
+        "Shocks": {"deposits": {"beta_increase": 10}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -$100M},
+        "TradeList": ["Adjust pricing on savings accounts", "Increase wholesale funding by $1bn"],
+        "Assumptions": "Competitors raise deposit rates to attract funds."
+    },
+    {
+        "Scenario": "Regulatory Tightening",
+        "Description": "Introduction of a new TLAC requirement increases capital requirements.",
+        "Probability": 0.10,
+        "Rationale": "Stricter regulations would necessitate higher capital reserves, affecting liquidity.",
+        "ImpactChannels": ["Regulation"],
+        "Shocks": {"regulatory_changes": "New TLAC rules"},
+        "MetricsDelta": {"LCR": -5, "NSFR": -3},
+        "TradeList": ["Issue $1bn in long-term debt", "Reassess HQLA portfolio"],
+        "Assumptions": "Regulatory bodies finalize TLAC guidelines by Q1 2024."
+    },
+    {
+        "Scenario": "Geopolitical Tensions",
+        "Description": "Escalation of geopolitical conflicts leads to a flight to safety, impacting Treasury yields.",
+        "Probability": 0.10,
+        "Rationale": "Increased demand for USTs drives down yields, impacting OCI positively.",
+        "ImpactChannels": ["Rates", "Curve"],
+        "Shocks": {"move_index": -30},
+        "MetricsDelta": {"LCR": +5, "NSFR": 0, "OCI": +$100M},
+        "TradeList": ["Increase UST holdings by $1bn", "Sell $500M in risky assets"],
+        "Assumptions": "Geopolitical events unfold, leading to increased market volatility."
+    },
+    {
+        "Scenario": "Slowdown in Economic Growth",
+        "Description": "GDP growth slows to 1%, leading to a mild recession.",
+        "Probability": 0.05,
+        "Rationale": "Economic slowdown could lead to lower credit demand and higher default rates.",
+        "ImpactChannels": ["Macro"],
+        "Shocks": {"gdp_growth": -1},
+        "MetricsDelta": {"LCR": -7, "NSFR": -3, "NII": -$200M},
+        "TradeList": ["Increase reserves by $1bn", "Reevaluate loan portfolios"],
+        "Assumptions": "Economic indicators show signs of stagnation."
+    },
+    {
+        "Scenario": "Positive Economic Data Surprise",
+        "Description": "Unexpected positive economic data leads to a rally in risk assets.",
+        "Probability": 0.15,
+        "Rationale": "Better-than-expected economic indicators could lead to tightening credit spreads.",
+        "ImpactChannels": ["Rates", "Credit"],
+        "Shocks": {"move_index": -15, "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": +3, "NSFR": +2, "NII": +$150M},
+        "TradeList": ["Add $1bn in corporate bonds", "Reduce liquidity reserves by $500M"],
+        "Assumptions": "Economic growth indicators surprise to the upside."
+    },
+    {
+        "Scenario": "Market Correction",
+        "Description": "A significant correction in equity markets leads to increased market volatility.",
+        "Probability": 0.05,
+        "Rationale": "Market corrections can lead to liquidity stress and tightening spreads across asset classes.",
+        "ImpactChannels": ["Market Micro"],
+        "Shocks": {"vix": 30},
+        "MetricsDelta": {"LCR": -6, "NSFR": -4, "OCI": -$200M},
+        "TradeList": ["Increase liquidity reserves by $1bn", "Sell $1bn in equities"],
+        "Assumptions": "Investor sentiment deteriorates, causing market sell-offs."
+    }
+]
+```
+

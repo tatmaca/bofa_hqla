@@ -21,13 +21,16 @@ from hqla_portfolio import Portfolio
 sys.path.append(str(Path(__file__).resolve().parents[2] / "tools" / "news_ingestion"))
 
 from generate_scenario_predictions import generate_all_scenario_curves
+from scenario_rebalancing import ScenarioRebalancingEngine, Scenario as RebalanceScenario
 
 app = FastAPI()
 portfolio = Portfolio()
+_last_portfolio_df = None
 
 # Global placeholder for the base curve
 base_curve_tenor_strs = None
 realized_portfolio_summary = None
+_last_rebalance = {}
 
 app.add_middleware(
     CORSMiddleware,
@@ -65,6 +68,69 @@ def _filter_images(pngs: list[Path], image_mode: str) -> list[Path]:
     if image_mode == "none":
         return []
     return [p for p in pngs if _classify_image(p) == image_mode]
+
+
+def _current_net_cash_outflow(default: float = 1_000_000_000.0) -> float:
+    """Return net cash outflow if set on portfolio; fallback to default."""
+    try:
+        return float(getattr(portfolio, "net_cash_outflow", default))
+    except Exception:
+        return default
+
+
+def _hydrate_portfolio_from_df(df: pd.DataFrame):
+    """Construct Portfolio from a DataFrame (shared by upload + rehydrate)."""
+    global portfolio
+    today = ql.Date.todaysDate()
+    ql.Settings.instance().evaluationDate = today
+    soft_rate = 5 * 1e-2
+    day_count_floater = ql.Actual360()
+    rate_handle = ql.QuoteHandle(ql.SimpleQuote(soft_rate))
+    sofr_term_structure = ql.FlatForward(
+        today, rate_handle, day_count_floater, ql.Continuous
+    )
+    sofr_term_structure_handle = ql.YieldTermStructureHandle(sofr_term_structure)
+    sofr_index = ql.Sofr(sofr_term_structure_handle)
+    sofr_index.clearFixings()
+    calendar = sofr_index.fixingCalendar()
+
+    # Reset all categories
+    for cat in portfolio.assets:
+        portfolio.assets[cat] = []
+
+    for _, row in df.iterrows():
+        cls = getattr(HQLA, f"Level{row['level']}{row['type']}")
+        issue = ql.DateParser.parseISO(row["issue_date"])
+        maturity = ql.DateParser.parseISO(row["maturity_date"])
+        grade = row.get("rating", "-")
+        grade = "-" if pd.isna(grade) else grade
+
+        kwargs = {
+            "issue_date": issue,
+            "maturity_date": maturity,
+            "face_value": float(row.get("face_value", 100)),
+            "quantity": float(row.get("quantity", 0)),
+            "name": row.get("name", ""),
+            "isin": row.get("isin", ""),
+            "grade": grade,
+            "isRisky": False if grade == "-" else True,
+        }
+
+        if row["type"] == "Fixed":
+            kwargs["coupons"] = [float(row["coupon"])]
+            inst = cls(**kwargs)
+            inst.build_bond()
+        elif row["type"] == "Floating":
+            inst = cls(**kwargs)
+            inst.build_bond(index=sofr_index)
+            for dt in inst.schedule:
+                adj_date = calendar.adjust(dt, ql.Preceding)
+                sofr_index.addFixing(adj_date, soft_rate)
+        else:  # Zero coupon
+            inst = cls(**kwargs)
+            inst.build_bond()
+
+        portfolio.add_instrument(inst)
 
 
 def _load_attribution_payload(
@@ -134,7 +200,7 @@ def _load_attribution_payload(
 async def upload_portfolio(file: UploadFile):
     """Upload portfolio CSV and build instrument objects."""
     global portfolio, base_curve_handle, base_curve, base_curve_up, base_curve_down
-    global survival_curves, survival_curves_up, survival_curves_down
+    global survival_curves, survival_curves_up, survival_curves_down, _last_portfolio_df
 
     # Full reset
     portfolio = Portfolio()
@@ -147,58 +213,8 @@ async def upload_portfolio(file: UploadFile):
     survival_curves_down = {}
 
     df = pd.read_csv(file.file)
-    today = ql.Date.todaysDate()
-    ql.Settings.instance().evaluationDate = today
-    soft_rate = 5 * 1e-2
-    day_count_floater = ql.Actual360()
-    rate_handle = ql.QuoteHandle(ql.SimpleQuote(soft_rate))
-    sofr_term_structure = ql.FlatForward(
-        today, rate_handle, day_count_floater, ql.Continuous
-    )
-    sofr_term_structure_handle = ql.YieldTermStructureHandle(sofr_term_structure)
-    # Set SOFR index history
-    sofr_index = ql.Sofr(sofr_term_structure_handle)
-    sofr_index.clearFixings()
-    calendar = sofr_index.fixingCalendar()
-
-    # Reset all categories
-    for cat in portfolio.assets:
-        portfolio.assets[cat] = []
-
-    for _, row in df.iterrows():
-        cls = getattr(HQLA, f"Level{row['level']}{row['type']}")
-        issue = ql.DateParser.parseISO(row["issue_date"])
-        maturity = ql.DateParser.parseISO(row["maturity_date"])
-        grade = row.get("rating", "-")
-        grade = "-" if pd.isna(grade) else grade
-
-        kwargs = {
-            "issue_date": issue,
-            "maturity_date": maturity,
-            "face_value": float(row.get("face_value", 100)),
-            "quantity": float(row.get("quantity", 0)),
-            "name": row.get("name", ""),
-            "isin": row.get("isin", ""),
-            "grade": grade,
-            "isRisky": False if grade == "-" else True,
-        }
-
-        if row["type"] == "Fixed":
-            kwargs["coupons"] = [float(row["coupon"])]
-            inst = cls(**kwargs)
-            inst.build_bond()
-        elif row["type"] == "Floating":
-            inst = cls(**kwargs)
-            inst.build_bond(index=sofr_index)
-            # Add SOFR fixings for each scheduled date
-            for dt in inst.schedule:
-                adj_date = calendar.adjust(dt, ql.Preceding)
-                sofr_index.addFixing(adj_date, soft_rate)
-        else:  # Zero coupon
-            inst = cls(**kwargs)
-            inst.build_bond()
-
-        portfolio.add_instrument(inst)
+    _hydrate_portfolio_from_df(df)
+    _last_portfolio_df = df.copy()
 
     return {"status": "Portfolio created", "count": len(df)}
 
@@ -370,15 +386,21 @@ async def price_portfolio(is_scenario: bool = False):
 
     global realized_portfolio_summary
 
-    # --- Reprice all instruments using the portfolio method ---
-    portfolio.update_prices(
-        base_curve_handle,
-        base_curve_up,
-        base_curve_down,
-        survival_curves,
-        survival_curves_up,
-        survival_curves_down,
-    )
+    try:
+        # --- Reprice all instruments using the portfolio method ---
+        portfolio.update_prices(
+          base_curve_handle,
+          base_curve_up,
+          base_curve_down,
+          survival_curves,
+          survival_curves_up,
+          survival_curves_down,
+        )
+    except Exception as exc:
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Pricing failed: {exc.__class__.__name__}: {exc}"},
+        )
 
     # --- Build summary for API response ---
     summary = []
@@ -410,8 +432,120 @@ async def price_portfolio(is_scenario: bool = False):
         return {
             "realized": realized_portfolio_summary,
             "scenario": summary,
-            "status": "scenario_priced",
+        "status": "scenario_priced",
+    }
+
+# ------------------------
+# Scenario rebalancing endpoint
+# ------------------------
+@app.post("/scenario-rebalance/")
+async def scenario_rebalance(request: Request):
+    """Run full scenario rebalancing using uploaded portfolio + current curve."""
+    global portfolio
+    if not any(portfolio.assets.values()):
+        # Try to rehydrate from last uploaded CSV to survive dev reloads
+        global _last_portfolio_df
+        if _last_portfolio_df is not None:
+            _hydrate_portfolio_from_df(_last_portfolio_df)
+        if not any(portfolio.assets.values()):
+            counts = {k: len(v) for k, v in portfolio.assets.items()}
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "error": "No instruments in portfolio",
+                    "detail": {
+                        "counts": counts,
+                        "hint": "Upload a portfolio CSV via /upload-portfolio before running the optimizer.",
+                    },
+                },
+            )
+    if not base_curve_handle:
+        return JSONResponse(
+            status_code=400, content={"error": "No yield curve uploaded"}
+        )
+
+    payload = await request.json()
+    scenarios = payload.get("scenarios") or []
+    if not isinstance(scenarios, list) or not scenarios:
+        return JSONResponse(status_code=400, content={"error": "No scenarios provided"})
+
+    # Params
+    net_cash_outflow = float(payload.get("net_cash_outflow") or _current_net_cash_outflow())
+    min_lcr = float(payload.get("min_lcr") or 1.0)
+    max_lcr = float(payload.get("max_lcr") or 1.5)
+    target_duration = payload.get("target_duration")
+    duration_tolerance = float(payload.get("duration_tolerance") or 0.5)
+    allocation_buffer = float(payload.get("allocation_buffer") or 0.02)
+    method = payload.get("method") or "mean_lexicographic"
+    combine_mode = payload.get("combine_mode") or "probability_weighted"
+    worst_by = payload.get("worst_by") or "expected_return"
+    top_k = int(payload.get("top_k") or 2)
+    custom_weights = payload.get("custom_weights") or None
+
+    engine = ScenarioRebalancingEngine(
+        base_portfolio=portfolio,
+        net_cash_outflow=net_cash_outflow,
+        min_lcr=min_lcr,
+        max_lcr=max_lcr,
+        target_duration=target_duration,
+        duration_tolerance=duration_tolerance,
+        allocation_buffer=allocation_buffer,
+    )
+
+    # Add scenarios
+    for sc in scenarios:
+        try:
+            name = sc.get("Scenario") or sc.get("name") or "Scenario"
+            prob = float(sc.get("Probability") or sc.get("probability") or sc.get("p") or 0.0)
+            if prob > 1:
+                prob = prob / 100.0
+            desc = sc.get("Description") or sc.get("Rationale") or ""
+            scen = RebalanceScenario(
+                name=name,
+                yield_curve_handle=base_curve_handle,
+                sofr_handle=None,
+                probability=prob,
+                metadata={"description": desc},
+            )
+            engine.add_scenario(scen)
+        except Exception as exc:
+            return JSONResponse(
+                status_code=400, content={"error": f"Bad scenario: {exc}"}
+            )
+
+    # Run rebalancing
+    try:
+        engine.run_rebalancing(method=method)
+        engine.combine_portfolios(
+            mode=combine_mode,
+            worst_by=worst_by,
+            top_k=top_k,
+            custom_weights=custom_weights,
+        )
+        combined_df = engine.build_combined_dataframe().to_dict(orient="records")
+    except Exception as exc:
+        return JSONResponse(status_code=500, content={"error": f"Rebalance failed: {exc}"})
+
+    # Collect outputs
+    scenario_results = {}
+    for name, info in engine.results.items():
+        scenario_results[name] = {
+            "probability": info["scenario"].probability,
+            "metrics": info["metrics"],
+            "weights": info["weights"].tolist(),
+            "per_asset": info["df"].to_dict(orient="records"),
+            "description": info["scenario"].metadata.get("description", ""),
         }
+
+    return {
+        "method": method,
+        "combine_mode": combine_mode,
+        "net_cash_outflow": net_cash_outflow,
+        "scenario_count": len(engine.results),
+        "scenario_results": scenario_results,
+        "combined_portfolio": combined_df,
+        "final_weights": engine.final_portfolio_weights.tolist() if engine.final_portfolio_weights is not None else [],
+    }
 
 
 @app.get("/attribution/html")

@@ -22,7 +22,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { fs } from "fs";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -134,6 +133,31 @@ async function runScenarioGen(
       ...s,
       logs: [...(s.logs || []), `${prefix}${raw}`].slice(-120),
       pct: s.status === "running" ? Math.min(s.pct + 3, 96) : s.pct,
+    }));
+  };
+
+  const normalizeScenarioMatrix = (rows: any[]) => {
+    if (!Array.isArray(rows) || !rows.length) return [];
+    const probs = rows.map((sc) => {
+      const raw =
+        typeof sc?.Probability === "number"
+          ? sc.Probability
+          : typeof sc?.probability === "number"
+            ? sc.probability
+            : typeof sc?.p === "number"
+              ? sc.p
+              : 0;
+      return raw > 1 ? raw / 100 : raw;
+    });
+    const total = probs.reduce(
+      (a, b) => a + (Number.isFinite(b) ? (b as number) : 0),
+      0,
+    );
+    const useProbs =
+      total > 0 ? probs.map((p) => p / total) : probs.map(() => 1 / probs.length);
+    return rows.map((sc, idx) => ({
+      ...sc,
+      Probability: Number(useProbs[idx]?.toFixed(6) || 0),
     }));
   };
 
@@ -255,9 +279,11 @@ async function runScenarioGen(
     });
 
     const rawScenarios = Array.isArray(data?.scenarios) ? data.scenarios : [];
-    const scenarioMatrix = rawScenarios
-      .map((sc: any) => (sc && typeof sc === "object" ? sc : null))
-      .filter(Boolean);
+    const scenarioMatrix = normalizeScenarioMatrix(
+      rawScenarios
+        .map((sc: any) => (sc && typeof sc === "object" ? sc : null))
+        .filter(Boolean),
+    );
     const scenarios = scenarioMatrix.map((sc: any, idx: number) => {
       const name = sc.Scenario || sc.name || `Scenario ${idx + 1}`;
       const p =
@@ -503,48 +529,139 @@ async function runImpact(setter: (s: any) => void, scenarioMatrix: any[] = []) {
   }));
 }
 
-async function runOptimize(setter: (s: any) => void) {
+async function runOptimize(
+  setter: (s: any) => void,
+  scenarioMatrix?: any[],
+  focusScenario?: string | null,
+  options?: {
+    method?: string;
+    combineMode?: string;
+    worstBy?: string;
+    topK?: number;
+    netCashOutflow?: number;
+    minLcr?: number;
+    maxLcr?: number;
+    targetDuration?: number | null;
+    durationTolerance?: number;
+    allocationBuffer?: number;
+    customWeights?: Record<string, number>;
+  },
+) {
+  const payload = {
+    scenarios: Array.isArray(scenarioMatrix) ? scenarioMatrix : [],
+    combine_mode: options?.combineMode || "probability_weighted",
+    method: options?.method || "mean_lexicographic",
+    worst_by: options?.worstBy || "expected_return",
+    top_k: options?.topK ?? 2,
+    net_cash_outflow: options?.netCashOutflow,
+    min_lcr: options?.minLcr,
+    max_lcr: options?.maxLcr,
+    target_duration:
+      typeof options?.targetDuration === "number"
+        ? options.targetDuration
+        : undefined,
+    duration_tolerance: options?.durationTolerance,
+    allocation_buffer: options?.allocationBuffer,
+    custom_weights: options?.customWeights,
+    focusScenario: focusScenario || undefined,
+  };
+
+  const cleanPayload = Object.fromEntries(
+    Object.entries(payload).filter(
+      ([, v]) => v !== undefined && v !== null && v !== "",
+    ),
+  );
+
+  if (!payload.scenarios.length) {
+    setter((s: any) => ({
+      ...s,
+      status: "error",
+      pct: 100,
+      logs: [...s.logs, "Optimizer: no scenario matrix available."],
+    }));
+    return;
+  }
+
   setter((s: any) => ({
     ...s,
     status: "running",
-    pct: 12,
-    logs: [...s.logs, "Building guardrails (L2 caps, LCR≥110%)…"],
+    pct: 10,
+    logs: [
+      ...s.logs,
+      `Running scenario rebalancing (${cleanPayload.method} • ${cleanPayload.combine_mode})`,
+    ],
   }));
-  await fakeWait(700);
-  setter((s: any) => ({
-    ...s,
-    pct: 64,
-    logs: [...s.logs, "Solving QP for risk-adjusted NII…"],
-  }));
-  await fakeWait(700);
-  setter((s: any) => ({
-    ...s,
-    status: "done",
-    pct: 100,
-    logs: [...s.logs, "Trade list v1 posted."],
-    output: {
-      trades: [
-        {
-          action: "BUY",
-          instr: "UST 2y",
-          size: "+$500mm",
-          reason: "LCR support; bear-steepener hedge",
-        },
-        {
-          action: "SELL",
-          instr: "MBS 30y 2.0%",
-          size: "-$300mm",
-          reason: "Neg. convexity under stress",
-        },
-        {
-          action: "HOLD",
-          instr: "UST Bills",
-          size: "–",
-          reason: "Cash buffer for outflows",
-        },
-      ],
-    },
-  }));
+
+  try {
+    const resp = await fetch("/api/optimizer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cleanPayload),
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      const topMsg = data?.error || "Optimizer failed";
+      const backendMsg =
+        typeof data?.detail?.error === "string"
+          ? data.detail.error
+          : typeof data?.detail === "string"
+            ? data.detail
+            : null;
+      const extra = backendMsg ? `Backend: ${backendMsg}` : null;
+      const msg = extra ? `${topMsg} (${extra})` : topMsg;
+      throw new Error(msg);
+    }
+
+    const combinedPortfolio = Array.isArray(data?.combined_portfolio)
+      ? data.combined_portfolio
+      : [];
+    const scenarioResults = data?.scenario_results || {};
+    const scenarioList = Object.entries(scenarioResults).map(
+      ([name, val]: any) => ({
+        name,
+        probability:
+          typeof val?.probability === "number" ? val.probability : null,
+        metrics: val?.metrics || {},
+        weights: Array.isArray(val?.weights) ? val.weights : [],
+        description: val?.description || "",
+      }),
+    );
+    const normalizedScenarios = scenarioList.map((entry: any) => ({
+      Scenario: entry.name,
+      Probability: entry.probability,
+    }));
+    const probabilitySum = scenarioList.reduce((acc: number, entry: any) => {
+      const p = typeof entry.probability === "number" ? entry.probability : 0;
+      return acc + p;
+    }, 0);
+
+    setter((s: any) => ({
+      ...s,
+      status: "done",
+      pct: 100,
+      logs: [...s.logs, "Scenario rebalancing finished."],
+      output: {
+        combinedPortfolio,
+        scenarioResults,
+        finalWeights: Array.isArray(data?.final_weights)
+          ? data.final_weights
+          : [],
+        method: data?.method,
+        combineMode: data?.combine_mode,
+        normalizedScenarios,
+        probabilitySum,
+        inputParams: cleanPayload,
+        scenarioList,
+      },
+    }));
+  } catch (err: any) {
+    setter((s: any) => ({
+      ...s,
+      status: "error",
+      pct: 100,
+      logs: [...s.logs, `Optimizer error: ${err?.message || err}`],
+    }));
+  }
 }
 
 async function runMonitor(setter: (s: any) => void) {
@@ -652,6 +769,16 @@ export default function HqlaE2EDashboard() {
   const [activeNewsArticle, setActiveNewsArticle] = useState<any | null>(null);
   const [attributionDate, setAttributionDate] = useState("2025-11-27");
   const [attributionMode, setAttributionMode] = useState("all");
+  const [netCashOutflow, setNetCashOutflow] = useState(1_000_000_000);
+  const [minLcr, setMinLcr] = useState(1.0);
+  const [maxLcr, setMaxLcr] = useState(1.5);
+  const [targetDuration, setTargetDuration] = useState<number | "">("");
+  const [durationTolerance, setDurationTolerance] = useState(0.5);
+  const [allocationBuffer, setAllocationBuffer] = useState(0.02);
+  const [optMethod, setOptMethod] = useState("mean_lexicographic");
+  const [combineMode, setCombineMode] = useState("probability_weighted");
+  const [worstBy, setWorstBy] = useState("expected_return");
+  const [topK, setTopK] = useState(2);
 
   // Debate configuration (mirrors Python MAD config high-level knobs)
   const [debateRounds, setDebateRounds] = useState(3);
@@ -706,6 +833,7 @@ export default function HqlaE2EDashboard() {
   const [openDebate, setOpenDebate] = useState(false);
   const [openImpact, setOpenImpact] = useState(false);
   const [openOpt, setOpenOpt] = useState(false);
+  const [openOptParams, setOpenOptParams] = useState(false);
   const [openMon, setOpenMon] = useState(false);
   const [openDebateParams, setOpenDebateParams] = useState(false);
   const [matrixModal, setMatrixModal] = useState<{
@@ -753,11 +881,10 @@ export default function HqlaE2EDashboard() {
     const formData = new FormData();
     formData.append("file", portfolioFile);
     try {
-      await fetch("http://localhost:8000/upload-portfolio", {
+      await fetch("http://localhost:8000/upload-portfolio/", {
         method: "POST",
         body: formData,
       });
-      //await handlePricePortfolio(); // auto-price after upload
     } catch (err) {
       console.error(err);
     } finally {
@@ -771,7 +898,7 @@ export default function HqlaE2EDashboard() {
     const formData = new FormData();
     formData.append("file", yieldCurveFile);
     try {
-      await fetch("http://localhost:8000/upload-yield-curve", {
+      await fetch("http://localhost:8000/upload-yield-curve/", {
         method: "POST",
         body: formData,
       });
@@ -787,8 +914,12 @@ export default function HqlaE2EDashboard() {
   }
 
   async function handlePricePortfolio() {
-    const res = await fetch("http://localhost:8000/price-portfolio");
-    if (!res.ok) return console.error(await res.json());
+    const res = await fetch("http://localhost:8000/price-portfolio/");
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({}));
+      console.error(detail);
+      throw new Error(detail?.error || "Price portfolio failed");
+    }
     const data = await res.json();
     setPortfolioSummary(data);
   }
@@ -904,6 +1035,114 @@ export default function HqlaE2EDashboard() {
     scenarioMetadata?.run_directory ||
     scenarioMetadata?.runDirectory ||
     null;
+  const scenarioInputs = Array.isArray(scenario.output?.scenarioMatrix)
+    ? scenario.output.scenarioMatrix
+    : [];
+  const scenarioInputPreview = scenarioInputs.map((sc: any, idx: number) => {
+    const probability =
+      typeof sc?.Probability === "number"
+        ? sc.Probability
+        : typeof sc?.p === "number"
+          ? sc.p
+          : null;
+    const channels = Array.isArray(sc?.ImpactChannels)
+      ? sc.ImpactChannels
+      : Array.isArray(sc?.channels)
+        ? sc.channels
+        : [];
+    const name = sc?.Scenario || sc?.name || `Scenario ${idx + 1}`;
+    return { name, probability, channels };
+  });
+  const optimizerParams = useMemo(
+    () => ({
+      method: optMethod,
+      combineMode,
+      worstBy,
+      topK,
+      netCashOutflow,
+      minLcr,
+      maxLcr,
+      targetDuration: targetDuration === "" ? undefined : Number(targetDuration),
+      durationTolerance,
+      allocationBuffer,
+    }),
+    [
+      optMethod,
+      combineMode,
+      worstBy,
+      topK,
+      netCashOutflow,
+      minLcr,
+      maxLcr,
+      targetDuration,
+      durationTolerance,
+      allocationBuffer,
+    ],
+  );
+  const scenarioResultPreview = useMemo(() => {
+    if (!opt.output?.scenarioResults) return [];
+    return Object.entries(opt.output.scenarioResults).map(
+      ([name, val]: any) => ({
+        name,
+        probability:
+          typeof val?.probability === "number" ? val.probability : null,
+        metrics: val?.metrics || {},
+        description: val?.description || "",
+      }),
+    );
+  }, [opt.output?.scenarioResults]);
+  const latestOptInputs = opt.output?.inputParams || optimizerParams;
+  const resolvedNetCashOutflow =
+    typeof (latestOptInputs as any)?.net_cash_outflow === "number"
+      ? (latestOptInputs as any).net_cash_outflow
+      : typeof (latestOptInputs as any)?.netCashOutflow === "number"
+        ? (latestOptInputs as any).netCashOutflow
+        : netCashOutflow;
+  const resolvedCombineMode =
+    opt.output?.combineMode ||
+    (latestOptInputs as any)?.combine_mode ||
+    (latestOptInputs as any)?.combineMode ||
+    "probability_weighted";
+  const resolvedMethod =
+    opt.output?.method ||
+    (latestOptInputs as any)?.method ||
+    "mean_lexicographic";
+  const resolvedWorstBy =
+    (latestOptInputs as any)?.worst_by ||
+    (latestOptInputs as any)?.worstBy ||
+    "expected_return";
+  const resolvedTopK =
+    (latestOptInputs as any)?.top_k ??
+    (latestOptInputs as any)?.topK ??
+    topK;
+  const resolvedMinLcr =
+    (latestOptInputs as any)?.min_lcr ??
+    (latestOptInputs as any)?.minLcr ??
+    minLcr;
+  const resolvedMaxLcr =
+    (latestOptInputs as any)?.max_lcr ??
+    (latestOptInputs as any)?.maxLcr ??
+    maxLcr;
+  const resolvedTargetDuration =
+    (latestOptInputs as any)?.target_duration ??
+    (latestOptInputs as any)?.targetDuration ??
+    targetDuration;
+  const resolvedDurationTolerance =
+    (latestOptInputs as any)?.duration_tolerance ??
+    (latestOptInputs as any)?.durationTolerance ??
+    durationTolerance;
+  const resolvedAllocationBuffer =
+    (latestOptInputs as any)?.allocation_buffer ??
+    (latestOptInputs as any)?.allocationBuffer ??
+    allocationBuffer;
+  const normalizedRows =
+    Array.isArray(opt.output?.normalizedScenarios) &&
+    opt.output.normalizedScenarios.length
+      ? opt.output.normalizedScenarios
+      : scenarioInputPreview.map((s: any) => ({
+          Scenario: s.name,
+          Probability: s.probability,
+        }));
   useEffect(() => {
     if (newsArticles.length) {
       setActiveNewsArticle(newsArticles[0]);
@@ -1044,7 +1283,7 @@ export default function HqlaE2EDashboard() {
     const scenarioMatrix =
       scenarioResult?.scenarioMatrix || scenario.output?.scenarioMatrix || [];
     await runImpact(setImpact, scenarioMatrix);
-    await runOptimize(setOpt, scenarioMatrix);
+    await runOptimize(setOpt, scenarioMatrix, null, optimizerParams);
   };
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
@@ -1095,7 +1334,7 @@ export default function HqlaE2EDashboard() {
                   scenario.output?.scenarioMatrix ||
                   [];
                 await runImpact(setImpact, scenarioMatrix);
-                await runOptimize(setOpt, scenarioMatrix);
+                await runOptimize(setOpt, scenarioMatrix, null, optimizerParams);
                 await runMonitor(setMon, scenarioMatrix);
               }}
             >
@@ -1566,57 +1805,197 @@ export default function HqlaE2EDashboard() {
                 <div className="min-w-[420px] flex-1">
                   <Step
                     index={3}
-                    title="Impact & Optimization"
-                    desc="Compute ΔLCR/ΔNSFR/NII; click a row to optimize"
-                    status={impact.status as any}
+                    title="Scenario Rebalancing"
+                    desc="Optimize portfolio weights against judge scenarios"
+                    status={opt.status as any}
                   />
-                  <div className="mt-2 rounded-lg border p-2">
-                    <ImpactMiniTable
-                      data={impact.output?.metrics || []}
-                      worst={worst?.scenario}
-                      onOptimize={(name) => {
-                        setSelectedScenario(name);
-                        runOptimize(
-                          setOpt,
-                          scenario.output?.scenarioMatrix || [],
-                          name,
-                        );
-                      }}
-                      open={() => setOpenImpact(true)}
-                    />
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center gap-2">
+                  <div className="mt-2 rounded-lg border p-2 space-y-3">
+                    <div className="flex flex-wrap items-center gap-2 justify-between">
+                      <div className="flex flex-wrap gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            runImpact(
-                              setImpact,
+                            runOptimize(
+                              setOpt,
                               scenario.output?.scenarioMatrix || [],
+                              selectedScenario,
+                              optimizerParams,
                             )
                           }
                         >
                           <PlayCircle className="h-4 w-4 mr-1" />
-                          Run Impact
+                          Run Scenario Rebalancing
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setOpenImpact(true)}
+                          onClick={() => setOpenOptParams(true)}
+                        >
+                          Parameters
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setOpenOpt(true)}
                         >
                           Details
                         </Button>
                       </div>
+                      <div className="flex items-center gap-2">
+                        {opt.status === "running" && (
+                          <Badge variant="secondary">running…</Badge>
+                        )}
+                        {opt.output?.scenarioResults &&
+                          Object.keys(opt.output.scenarioResults).length > 0 && (
+                            <Badge variant="secondary">
+                              {Object.keys(opt.output.scenarioResults).length} scenario
+                              {Object.keys(opt.output.scenarioResults).length > 1 ? "s" : ""} priced
+                            </Badge>
+                          )}
+                      </div>
                     </div>
-                    <div className="flex justify-end mt-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setOpenOpt(true)}
-                      >
-                        Optimization Details
-                      </Button>
+
+                    <div className="grid lg:grid-cols-2 gap-3">
+                      <div className="rounded-md border bg-white/70 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[12px] font-semibold text-slate-700">
+                            Scenario inputs
+                          </p>
+                          <span className="text-[11px] text-slate-500">
+                            from judge matrix
+                          </span>
+                        </div>
+                        {scenarioInputPreview.length ? (
+                          <ul className="text-xs space-y-1">
+                            {scenarioInputPreview.slice(0, 6).map((s, i) => (
+                              <li key={s.name + i}>
+                                <span className="font-medium text-slate-800">
+                                  {s.name}
+                                </span>{" "}
+                                {typeof s.probability === "number" && (
+                                  <span className="text-slate-600">
+                                    · {(s.probability * 100).toFixed(1)}%
+                                  </span>
+                                )}
+                                {s.channels?.length ? (
+                                  <span className="text-slate-500">
+                                    {" "}
+                                    · {s.channels.slice(0, 3).join(", ")}
+                                    {s.channels.length > 3 ? "…" : ""}
+                                  </span>
+                                ) : null}
+                              </li>
+                            ))}
+                            {scenarioInputPreview.length > 6 && (
+                              <li className="text-slate-500">
+                                +{scenarioInputPreview.length - 6} more
+                              </li>
+                            )}
+                          </ul>
+                        ) : (
+                          <div className="text-xs text-muted-foreground">
+                            Run scenario generation to populate optimizer inputs.
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="rounded-md border bg-white/70 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[12px] font-semibold text-slate-700">
+                            Optimizer snapshot
+                          </p>
+                          {typeof opt.output?.probabilitySum === "number" && (
+                            <span className="text-[11px] text-slate-500">
+                              Prob sum {(opt.output.probabilitySum * 100).toFixed(1)}%
+                            </span>
+                          )}
+                        </div>
+                        {scenarioResultPreview.length ? (
+                          <div className="max-h-44 overflow-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Scenario</TableHead>
+                                  <TableHead>Prob.</TableHead>
+                                  <TableHead>Exp. Return</TableHead>
+                                  <TableHead>LCR</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {scenarioResultPreview.map((row: any) => (
+                                  <TableRow key={row.name}>
+                                    <TableCell className="font-medium">
+                                      {row.name}
+                                    </TableCell>
+                                    <TableCell>
+                                      {typeof row.probability === "number"
+                                        ? `${(row.probability * 100).toFixed(1)}%`
+                                        : "—"}
+                                    </TableCell>
+                                    <TableCell>
+                                      {typeof row.metrics?.expected_return === "number"
+                                        ? row.metrics.expected_return.toFixed(2)
+                                        : "—"}
+                                    </TableCell>
+                                    <TableCell>
+                                      {typeof row.metrics?.lcr === "number"
+                                        ? row.metrics.lcr.toFixed(2)
+                                        : "—"}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        ) : (
+                          <div className="text-xs text-muted-foreground">
+                            No optimizer results yet.
+                          </div>
+                        )}
+                        {opt.output?.combinedPortfolio?.length ? (
+                          <div className="border-t pt-2">
+                            <p className="text-[11px] text-slate-600 mb-1">
+                              Combined portfolio (top 4)
+                            </p>
+                            <div className="max-h-32 overflow-auto rounded border">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Asset</TableHead>
+                                    <TableHead>Weight</TableHead>
+                                    <TableHead>Allocated</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {(opt.output.combinedPortfolio || [])
+                                    .slice(0, 4)
+                                    .map((row: any, idx: number) => (
+                                      <TableRow key={`${row.Name || row.name}-${idx}`}>
+                                        <TableCell className="font-medium">
+                                          {row.Name || row.name || `Asset ${idx + 1}`}
+                                        </TableCell>
+                                        <TableCell>
+                                          {typeof row.Combined_Weight === "number"
+                                            ? `${(row.Combined_Weight * 100).toFixed(2)}%`
+                                            : "—"}
+                                        </TableCell>
+                                        <TableCell>
+                                          {typeof row.Allocated_Amount === "number"
+                                            ? `$${row.Allocated_Amount.toLocaleString()}`
+                                            : "—"}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
+
+                    <LogView logs={(opt.logs || []).slice(-8)} title="Optimizer" />
                   </div>
                 </div>
 
@@ -2206,58 +2585,382 @@ export default function HqlaE2EDashboard() {
               </DialogTitle>
             </DialogHeader>
             <div className="rounded-lg border overflow-auto max-w-full max-h-[86vh]">
-              <Table className="w-full table-auto">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-[15px] md:text-[16px]">
-                      Action
-                    </TableHead>
-                    <TableHead className="text-[15px] md:text-[16px]">
-                      Instrument
-                    </TableHead>
-                    <TableHead className="text-[15px] md:text-[16px]">
-                      Size
-                    </TableHead>
-                    <TableHead className="text-[15px] md:text-[16px]">
-                      Reason
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(opt.output?.trades || []).map((t: any, i: number) => (
-                    <TableRow key={i}>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            t.action === "BUY"
-                              ? "default"
-                              : t.action === "SELL"
-                                ? "destructive"
-                                : "secondary"
-                          }
-                        >
-                          {t.action}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-medium">{t.instr}</TableCell>
-                      <TableCell>{t.size}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {t.reason}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {!opt.output?.trades?.length && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={4}
-                        className="text-center text-muted-foreground"
-                      >
-                        No trades yet. Run the step.
-                      </TableCell>
-                    </TableRow>
+              <div className="p-4 border-b bg-white/70 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-semibold">
+                    Scenario rebalancing inputs
+                  </div>
+                  <Badge variant="outline">{resolvedMethod}</Badge>
+                </div>
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs text-slate-700">
+                  <div>
+                    Combine mode:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {resolvedCombineMode}
+                    </span>
+                  </div>
+                  <div>
+                    Worst by:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {resolvedWorstBy}
+                    </span>
+                  </div>
+                  <div>
+                    Top K:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {resolvedTopK}
+                    </span>
+                  </div>
+                  <div>
+                    Net cash outflow:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {typeof resolvedNetCashOutflow === "number"
+                        ? `$${resolvedNetCashOutflow.toLocaleString()}`
+                        : "—"}
+                    </span>
+                  </div>
+                  <div>
+                    Min LCR:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {typeof resolvedMinLcr === "number"
+                        ? resolvedMinLcr.toFixed(2)
+                        : "—"}
+                    </span>
+                  </div>
+                  <div>
+                    Max LCR:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {typeof resolvedMaxLcr === "number"
+                        ? resolvedMaxLcr.toFixed(2)
+                        : "—"}
+                    </span>
+                  </div>
+                  <div>
+                    Target duration:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {resolvedTargetDuration === "" ||
+                      resolvedTargetDuration == null
+                        ? "—"
+                        : Number(resolvedTargetDuration).toFixed(2)}
+                    </span>
+                  </div>
+                  <div>
+                    Duration tolerance:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {typeof resolvedDurationTolerance === "number"
+                        ? resolvedDurationTolerance.toFixed(2)
+                        : "—"}
+                    </span>
+                  </div>
+                  <div>
+                    Allocation buffer:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {typeof resolvedAllocationBuffer === "number"
+                        ? resolvedAllocationBuffer.toFixed(3)
+                        : "—"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 border-b bg-white/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-semibold">
+                    Scenarios forwarded to optimizer
+                  </div>
+                  {typeof opt.output?.probabilitySum === "number" && (
+                    <span className="text-[11px] text-slate-500">
+                      Prob sum {(opt.output.probabilitySum * 100).toFixed(2)}%
+                    </span>
                   )}
-                </TableBody>
-              </Table>
+                </div>
+                <div className="overflow-auto">
+                  <Table className="w-full table-auto">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Scenario</TableHead>
+                        <TableHead>Probability</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {normalizedRows.map((s: any, i: number) => (
+                        <TableRow key={s.Scenario || s.name || i}>
+                          <TableCell className="font-medium">
+                            {s.Scenario || s.name || `Scenario ${i + 1}`}
+                          </TableCell>
+                          <TableCell>
+                            {typeof s.Probability === "number"
+                              ? (s.Probability * 100).toFixed(2) + "%"
+                              : "—"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+              <div className="p-4 border-b bg-white/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-semibold">
+                    Scenario metrics from scenario_rebalancing.py
+                  </div>
+                  {opt.output?.scenarioResults && (
+                    <span className="text-[11px] text-slate-500">
+                      {Object.keys(opt.output.scenarioResults).length} scenario
+                      {Object.keys(opt.output.scenarioResults).length === 1
+                        ? ""
+                        : "s"}
+                    </span>
+                  )}
+                </div>
+                {scenarioResultPreview.length ? (
+                  <div className="overflow-auto">
+                    <Table className="w-full table-auto">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Scenario</TableHead>
+                          <TableHead>Prob.</TableHead>
+                          <TableHead>Exp. Return</TableHead>
+                          <TableHead>LCR</TableHead>
+                          <TableHead>Total Allocated</TableHead>
+                          <TableHead>Weights Sum</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {scenarioResultPreview.map((row: any) => (
+                          <TableRow key={row.name}>
+                            <TableCell className="font-medium">
+                              {row.name}
+                            </TableCell>
+                            <TableCell>
+                              {typeof row.probability === "number"
+                                ? `${(row.probability * 100).toFixed(1)}%`
+                                : "—"}
+                            </TableCell>
+                            <TableCell>
+                              {typeof row.metrics?.expected_return === "number"
+                                ? row.metrics.expected_return.toFixed(2)
+                                : "—"}
+                            </TableCell>
+                            <TableCell>
+                              {typeof row.metrics?.lcr === "number"
+                                ? row.metrics.lcr.toFixed(2)
+                                : "—"}
+                            </TableCell>
+                            <TableCell>
+                              {typeof row.metrics?.total_allocated === "number"
+                                ? `$${row.metrics.total_allocated.toLocaleString()}`
+                                : "—"}
+                            </TableCell>
+                            <TableCell>
+                              {typeof row.metrics?.weights_sum === "number"
+                                ? row.metrics.weights_sum.toFixed(3)
+                                : "—"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="text-xs text-muted-foreground">
+                    Run scenario rebalancing to populate metrics.
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <div className="text-sm font-semibold mb-2">
+                  Combined portfolio (optimizer output)
+                </div>
+                <div className="overflow-auto">
+                  <Table className="w-full table-auto">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-[15px] md:text-[16px]">
+                          Asset
+                        </TableHead>
+                        <TableHead className="text-[15px] md:text-[16px]">
+                          Combined Weight
+                        </TableHead>
+                        <TableHead className="text-[15px] md:text-[16px]">
+                          Allocated Amount
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(opt.output?.combinedPortfolio || []).map((row: any, i: number) => {
+                        const w = typeof row.Combined_Weight === "number" ? row.Combined_Weight : null;
+                        const alloc = typeof row.Allocated_Amount === "number" ? row.Allocated_Amount : null;
+                        return (
+                          <TableRow key={i}>
+                            <TableCell className="font-medium">
+                              {row.Name || row.name || `Asset ${i + 1}`}
+                            </TableCell>
+                            <TableCell>
+                              {w !== null ? `${(w * 100).toFixed(2)}%` : "—"}
+                            </TableCell>
+                            <TableCell>
+                              {alloc !== null ? `$${alloc.toLocaleString()}` : "—"}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                      {!opt.output?.combinedPortfolio?.length && (
+                        <TableRow>
+                          <TableCell
+                            colSpan={3}
+                            className="text-center text-muted-foreground"
+                          >
+                            No combined portfolio yet. Run optimization after uploading portfolio and curve.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openOptParams} onOpenChange={setOpenOptParams}>
+          <DialogContent className="max-w-none w-[95vw] sm:max-w-[90vw] md:max-w-[80vw] h-[88vh] overflow-auto text-[15px] px-8 py-6">
+            <DialogHeader>
+              <DialogTitle>Optimizer Parameters</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 max-h-[78vh] overflow-auto">
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Net cash outflow</label>
+                  <Input
+                    type="number"
+                    value={netCashOutflow}
+                    onChange={(e) =>
+                      setNetCashOutflow(Number.parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Allocation buffer</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={allocationBuffer}
+                    onChange={(e) =>
+                      setAllocationBuffer(Number.parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Min LCR</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={minLcr}
+                    onChange={(e) =>
+                      setMinLcr(Number.parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Max LCR</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={maxLcr}
+                    onChange={(e) =>
+                      setMaxLcr(Number.parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Target duration (yrs)</label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={targetDuration}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setTargetDuration(v === "" ? "" : Number(v));
+                    }}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Duration tolerance</label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={durationTolerance}
+                    onChange={(e) =>
+                      setDurationTolerance(Number.parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Method</label>
+                  <select
+                    className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm shadow-sm"
+                    value={optMethod}
+                    onChange={(e) => setOptMethod(e.target.value)}
+                  >
+                    <option value="mean_lexicographic">mean_lexicographic</option>
+                    <option value="mean_variance_lexicographic">
+                      mean_variance_lexicographic
+                    </option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Combine mode</label>
+                  <select
+                    className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm shadow-sm"
+                    value={combineMode}
+                    onChange={(e) => setCombineMode(e.target.value)}
+                  >
+                    <option value="probability_weighted">probability_weighted</option>
+                    <option value="worst_case">worst_case</option>
+                    <option value="top_k_worst_avg">top_k_worst_avg</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Worst by</label>
+                  <select
+                    className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm shadow-sm"
+                    value={worstBy}
+                    onChange={(e) => setWorstBy(e.target.value)}
+                  >
+                    <option value="expected_return">expected_return</option>
+                    <option value="lcr">lcr</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Top K (worst avg)</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={topK}
+                    onChange={(e) =>
+                      setTopK(Math.max(1, Number.parseInt(e.target.value || "1", 10)))
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={() =>
+                    runOptimize(
+                      setOpt,
+                      scenario.output?.scenarioMatrix || [],
+                      selectedScenario,
+                      optimizerParams,
+                    )
+                  }
+                >
+                  <PlayCircle className="h-4 w-4 mr-2" />
+                  Run with these parameters
+                </Button>
+                <Button variant="outline" onClick={() => setOpenOptParams(false)}>
+                  Close
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>

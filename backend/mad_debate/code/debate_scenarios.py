@@ -160,6 +160,33 @@ def validate_schema_one(obj: Dict[str, Any]) -> List[str]:
             missing.append(k)
     return missing
 
+
+def _extract_prob(sc: Dict[str, Any]) -> float:
+    val = sc.get("Probability", sc.get("probability", sc.get("p", 0.0)))
+    try:
+        v = float(val)
+        return v / 100.0 if v > 1 else v
+    except Exception:
+        return 0.0
+
+
+def normalize_probabilities(arr: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Return a deep-copied list with Probability normalized to sum to 1.0."""
+    if not isinstance(arr, list):
+        return []
+    probs = [_extract_prob(sc) for sc in arr]
+    total = float(sum(probs))
+    if total <= 0:
+        probs = [1.0 / max(len(arr), 1)] * len(arr)
+    else:
+        probs = [p / total for p in probs]
+    normed: List[Dict[str, Any]] = []
+    for sc, p in zip(arr, probs):
+        dup = copy.deepcopy(sc)
+        dup["Probability"] = round(float(p), 6)
+        normed.append(dup)
+    return normed
+
 def extract_json_block(s: str) -> Optional[str]:
     """Return a JSON string extracted from s.
     Prefers fenced ```json blocks; falls back to first top-level [] or {}."""
@@ -364,9 +391,9 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
 
     instructions = textwrap.dedent("""\
         Task:
-        Propose and DEFEND *exactly five* distinct 6-month scenarios with quantitative shocks and probabilities that ~sum to 1.
-        Use finance-consistent channels: {Rates (bps), Curve (bull/bear & steep/flat), Credit OAS (bps), MBS basis (bps),
-        Deposits/runoff (%), Reg changes (brief text)}.
+        Propose and DEFEND roughly ten distinct 6-month scenarios (target 9–11) with quantitative shocks and probabilities that MUST sum to exactly 1.00 (100%) every round. If you drop or add a scenario, immediately redistribute probability so the total stays at 1.00—no orphaned probability mass.
+        Use finance-consistent channels: Rates (bps), Curve (bull/bear & steep/flat), Credit OAS (bps), MBS basis (bps),
+        Deposits/runoff (%), Reg changes (brief text).
 
         Respond in TWO parts every time:
         (1) Reasoning: critique, assumptions, and why your shocks/probabilities make sense (NO JSON here).
@@ -376,7 +403,8 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
         ["Scenario","Description","Probability","Rationale","ImpactChannels","Shocks","MetricsDelta","TradeList","Assumptions"]
 
         EVERY element must include ALL schema keys with realistic values. Missing fields = invalid output.
-        Be specific: quantify shocks (bps, %, $bn), describe deposit behavior, and list concrete trades/liquidity actions.
+        Be specific: quantify shocks (bps, %, $bn), describe deposit behavior, and list concrete trades/liquidity actions. Spell out dated milestones or key markers to watch between now and {horizon_date.isoformat()} (e.g., policy meetings, large bill paydowns, earnings, big roll dates) and make event descriptions concrete. Do NOT use past dates (e.g., 2024); all dates must fall between today and {horizon_date.isoformat()}.
+        Include a Signals array per scenario with 3–5 specific "watch for X/Y" items (dated releases/meetings/auctions with levels or thresholds) so the matrix clearly shows what to monitor as the scenario materializes; ensure those signals are within the current-to-{horizon_date.isoformat()} window and avoid stale years.
     """)
 
     seed_user = f"{header_block}\n\n{instructions}"
@@ -401,6 +429,7 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
         round_tag = f"R{r + 1}-A"
         promptA = seed_user if r == 0 else textwrap.dedent("""\
             Critique the Devil's advocate's last JSON in words first (no numbers can be hand-wavy; be precise).
+            Rebalance probabilities so the set sums to 1.00 exactly; if you removed/added scenarios, redistribute the freed mass.
             Then produce: 
             Revised JSON: <STRICT JSON array per schema, no backticks, no prose after>
         """)
@@ -436,6 +465,7 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
         round_tag = f"R{r + 1}-B"
         promptB = textwrap.dedent("""\
             Critique the Proponent's position in words first (focus on macro/flows, funding, basis, convexity). Never refer to them as "A" or "B".
+            Rebalance probabilities so the set sums to 1.00 exactly; if you removed/added scenarios, redistribute the freed mass.
             Then produce:
             Revised JSON: <STRICT JSON array per schema, no backticks, no prose after>
         """)
@@ -483,7 +513,7 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
     runtime_cfg.setdefault("judge_prompt_effective", judge_sys)
     judge_user = (
         "From the above A/B reasoning and JSON proposals, produce a FINAL merged JSON array of scenarios "
-        "that EXACTLY matches the schema. Reject duplicates; ensure probabilities sum to ~1 across the set. "
+        "that EXACTLY matches the schema. Reject duplicates; probabilities MUST sum to exactly 1.00 across the set—renormalize if needed. "
         "Output RAW JSON only (no markdown, no backticks, no labels)."
     )
     logging.info(f"[{run_tag}] Invoking judge model={cfg['debate']['judge_model']}")
@@ -531,6 +561,9 @@ def debate_once(cfg: Dict[str, Any], run_idx: int, artifacts_dir: str, save_wip:
         logging.error(f"[{run_tag}] JSON parse error on judge output: {type(e).__name__}: {e}")
         data = []
 
+    # Normalize probabilities to force sum=1.0 even if a debater dropped/added rows
+    data = normalize_probabilities(data)
+
     # Validate schema minimally
     for i, obj in enumerate(data):
         miss = validate_schema_one(obj)
@@ -567,7 +600,8 @@ def aggregate(runs_outputs: List[List[Dict[str, Any]]], keep_k: int = 10) -> Lis
         one["Probability"] = round(float(median_prob(probs)), 4)
         merged.append(one)
     merged.sort(key=lambda x: x.get("Probability", 0), reverse=True)
-    return merged[:keep_k]
+    merged = merged[:keep_k]
+    return normalize_probabilities(merged)
 
 def run_offline_sample(sample_dir: str, dest_dir: str, out_path: str, output_format: str) -> List[Dict[str, Any]]:
     logging.info(f"Offline mode enabled. Loading sample from {sample_dir}")

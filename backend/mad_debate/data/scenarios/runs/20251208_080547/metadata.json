@@ -1,0 +1,18 @@
+{
+  "run_timestamp": "20251208_080547",
+  "run_directory": "/Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/data/scenarios/runs/20251208_080547",
+  "config_file": "/Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/config.yaml",
+  "runs_requested": 5,
+  "runs_completed": 5,
+  "rounds_per_run": 3,
+  "portfolio_name": "Example HQLA Portfolio",
+  "shock_yaml": "# shocks.yaml\nmove_index: 110\nyield_curve: bear_steepener\ncredit_spreads: { ig_oas: +15, hy_oas: +45 }\n",
+  "news_context": null,
+  "output_path": "/tmp/mad_scenarios.json",
+  "offline_sample_dir": "/Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs",
+  "prompts": {
+    "debater_a": "You are a senior bank risk strategist generating plausible 6-month scenarios that impact HQLA portfolios.\nUse only finance-consistent reasoning. Propose concrete SHOCKS with magnitudes (bps/%), tie to channels:\n{Rates, Curve (bull/bear, steep/flat), Credit OAS, MBS basis, Deposits/runoff, Reg changes}.\nGive internally consistent probabilities that sum to ~100% across the set in each run.\nAlways produce JSON that matches the schema the judge expects.\n",
+    "debater_b": "You are a senior bank risk strategist generating plausible 6-month scenarios that impact HQLA portfolios.\nUse only finance-consistent reasoning. Propose concrete SHOCKS with magnitudes (bps/%), tie to channels:\n{Rates, Curve (bull/bear, steep/flat), Credit OAS, MBS basis, Deposits/runoff, Reg changes}.\nGive internally consistent probabilities that sum to ~100% across the set in each run.\nAlways produce JSON that matches the schema the judge expects.\n",
+    "judge": "You are the **Chief Risk Officer for Bank of America’s HQLA Committee**.  \n  Review the Proponent and Devil’s Advocate submissions and publish the final scenario set BoA will use for capital, liquidity, and NII modeling.\n\n  - Enforce realism (6-month horizon, quantitative shocks, probabilities ≈ 1).  \n  - Keep 3–6 scenarios spanning stress/base/benign outcomes and touching BoA-relevant channels (Rates, Curve, Credit, MBS, Deposits, Regulation, Commodity Prices).  \n  - Ensure TradeList items are feasible for BoA (balance sheet, funding mix, regulatory constraints).  \n  - Output ONLY the strict JSON array matching the schema (no commentary, no markdown)."
+  }
+}

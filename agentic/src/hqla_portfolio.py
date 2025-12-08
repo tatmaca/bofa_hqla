@@ -9,6 +9,8 @@ Updated: 2025-11-17
 """
 
 from typing import Dict, List
+import copy
+import pandas as pd
 
 import hqla_instruments as HQLA
 import QuantLib as ql
@@ -39,6 +41,15 @@ class Portfolio:
         cat = self._category(inst)
         self.assets[cat].append(inst)
 
+    def clone(self) -> "Portfolio":
+        """
+        Return a deep copy of the portfolio (used by scenario_rebalancing).
+        """
+        dup = Portfolio()
+        # shallow copy instrument references; avoids pickling QuantLib objects
+        dup.assets = {k: list(v) for k, v in self.assets.items()}
+        return dup
+
     def remove_instrument(self, name: str):
         for cat, group in self.assets.items():
             self.assets[cat] = [i for i in group if i.name != name]
@@ -54,29 +65,43 @@ class Portfolio:
     def update_prices(
         self,
         yield_curve: ql.YieldTermStructureHandle,
-        up_curve: ql.YieldTermStructureHandle,
-        down_curve: ql.YieldTermStructureHandle,
-        survival_curves: Dict[str, ql.DefaultProbabilityTermStructureHandle],
-        survival_curves_up: Dict[str, ql.DefaultProbabilityTermStructureHandle],
-        survival_curves_down: Dict[str, ql.DefaultProbabilityTermStructureHandle],
+        up_curve: ql.YieldTermStructureHandle | None = None,
+        down_curve: ql.YieldTermStructureHandle | None = None,
+        survival_curves: Dict[str, ql.DefaultProbabilityTermStructureHandle] | None = None,
+        survival_curves_up: Dict[str, ql.DefaultProbabilityTermStructureHandle] | None = None,
+        survival_curves_down: Dict[str, ql.DefaultProbabilityTermStructureHandle] | None = None,
     ) -> None:
         """Reprice all instruments using QuantLib dirty price."""
+        up_curve = up_curve or yield_curve
+        down_curve = down_curve or yield_curve
+        survival_curves = survival_curves or {}
+        survival_curves_up = survival_curves_up or {}
+        survival_curves_down = survival_curves_down or {}
+
         for group in self.assets.values():
             for inst in group:
-                if inst.isRisky:
-                    survival_curve = survival_curves[inst.grade]
-                    survival_curve_up = survival_curves_up[inst.grade]
-                    survival_curve_down = survival_curves_down[inst.grade]
-                    inst.price_from_curve(yield_curve, survival_curve)
+                surv = None
+                surv_up = None
+                surv_down = None
+                if inst.isRisky and inst.grade in survival_curves:
+                    candidate = survival_curves.get(inst.grade)
+                    if candidate is not None:
+                        surv = candidate
+                        surv_up = survival_curves_up.get(inst.grade, surv)
+                        surv_down = survival_curves_down.get(inst.grade, surv)
+
+                if surv is not None:
+                    inst.price_from_curve(yield_curve, surv)
                     inst.bond_greeks(
                         yield_curve,
                         up_curve,
                         down_curve,
-                        survival_curve,
-                        survival_curve_up,
-                        survival_curve_down,
+                        surv,
+                        surv_up or surv,
+                        surv_down or surv,
                     )
                 else:
+                    # fallback to plain discounting when no survival curves
                     inst.price_from_curve(yield_curve)
                     inst.bond_greeks(yield_curve, up_curve, down_curve)
 
@@ -105,6 +130,28 @@ class Portfolio:
                 )
                 total += adj_val
         return total
+
+    def build_assets_summary(self) -> pd.DataFrame:
+        """
+        Build a pandas DataFrame summarizing current holdings.
+        Includes columns expected by scenario rebalancer.
+        """
+        rows = []
+        for level, group in self.assets.items():
+            for inst in group:
+                rows.append(
+                    {
+                        "Name": inst.name,
+                        "Level": level,
+                        "DirtyPrice": getattr(inst, "dirty_price", None),
+                        "YTM": getattr(inst, "ytm", None),
+                        "ModDuration": getattr(inst, "duration", None),
+                        "Quantity": getattr(inst, "quantity", None),
+                        "Haircut": getattr(inst, "haircut", None),
+                        "LCRWeight": getattr(inst, "max_lcr_weight", None),
+                    }
+                )
+        return pd.DataFrame(rows)
 
     def summary(self) -> None:
         """Print detailed portfolio summary per category."""

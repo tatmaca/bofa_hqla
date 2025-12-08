@@ -1,0 +1,197 @@
+[
+  {
+    "Scenario": "Moderate Interest Rate Hike",
+    "Description": "25bps hike across the curve, causing minor deposit outflows and improving NII.",
+    "Probability": 0.2,
+    "Rationale": "Inflation remains persistent, leading to a moderate interest rate hike.",
+    "ImpactChannels": [
+      "Rates (25 bps)",
+      "Curve (flattening)",
+      "Deposits (-2%)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "bear_flattening",
+      "credit_spreads": {
+        "ig_oas": 10,
+        "hy_oas": 20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Add $2bn USTs via auctions",
+      "Reduce $1bn in MBS holdings"
+    ],
+    "Assumptions": "Consumer spending slows slightly due to inflation."
+  },
+  {
+    "Scenario": "Credit Spread Widening",
+    "Description": "Widening credit spreads due to economic slowdown, impacting corporate bond valuations.",
+    "Probability": 0.15,
+    "Rationale": "Increased credit risk leads to wider spreads and lower HQLA valuations.",
+    "ImpactChannels": [
+      "Credit (30 bps)",
+      "MBS basis (increased by 25 bps)",
+      "Deposits (stable)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "bear_flat",
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 70
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Sell $1bn corporate bonds",
+      "Increase repo funding by $500mn"
+    ],
+    "Assumptions": "Corporate earnings weaken, leading to higher defaults."
+  },
+  {
+    "Scenario": "Regulatory Tightening",
+    "Description": "Increased capital requirements due to new regulatory measures under Basel Endgame.",
+    "Probability": 0.1,
+    "Rationale": "Regulators increase capital requirements amid economic uncertainty.",
+    "ImpactChannels": [
+      "Regulation (increased capital requirements)",
+      "Deposits (stable)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "stable",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 0,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Increase capital reserves by $1bn",
+      "Reduce risk-weighted assets by $2bn"
+    ],
+    "Assumptions": "Regulatory environment becomes more stringent."
+  },
+  {
+    "Scenario": "MBS Basis Convergence",
+    "Description": "Tightening of MBS spreads due to lower mortgage rates, increasing MBS valuations.",
+    "Probability": 0.1,
+    "Rationale": "Lower mortgage rates drive refinancing, increasing demand for MBS.",
+    "ImpactChannels": [
+      "MBS basis (-20 bps)",
+      "Rates (stable)",
+      "Deposits (+3%)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "bear_steepening",
+      "credit_spreads": {
+        "ig_oas": 5,
+        "hy_oas": 10
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 7,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Add $1bn MBS via secondary markets",
+      "Target $500mn in retail deposit growth"
+    ],
+    "Assumptions": "Refinancing activity increases due to lower mortgage rates."
+  },
+  {
+    "Scenario": "Moderate Economic Growth",
+    "Description": "Gradual economic growth leads to stable inflation and improved consumer sentiment.",
+    "Probability": 0.2,
+    "Rationale": "Controlled inflation and resilient consumer spending support a stable economic environment.",
+    "ImpactChannels": [
+      "Rates (stable)",
+      "Curve (bull-steepening)",
+      "Deposits (+5%)"
+    ],
+    "Shocks": {
+      "move_index": 105,
+      "yield_curve": "bull_steepening",
+      "credit_spreads": {
+        "ig_oas": -5,
+        "hy_oas": -10
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Add $3bn Agency MBS",
+      "Target $1bn in corporate bonds"
+    ],
+    "Assumptions": "Economic recovery continues with stable inflation."
+  },
+  {
+    "Scenario": "Global Geopolitical Tensions",
+    "Description": "Increased market volatility due to geopolitical tensions, impacting credit spreads.",
+    "Probability": 0.15,
+    "Rationale": "Flight to quality benefits USTs while impacting corporate and MBS valuations.",
+    "ImpactChannels": [
+      "Credit (15 bps)",
+      "Rates (stable)",
+      "Deposits (-1%)"
+    ],
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "bear_flat",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 40
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Increase UST holdings by $1.5bn",
+      "Reduce corporate exposure by $700mn"
+    ],
+    "Assumptions": "Investors seek safety in USTs amid heightened geopolitical risks."
+  },
+  {
+    "Scenario": "Liquidity Surge",
+    "Description": "Increased liquidity from deposit inflows due to market volatility.",
+    "Probability": 0.1,
+    "Rationale": "Market uncertainty drives depositors to seek safety, boosting Bank of America's liquidity.",
+    "ImpactChannels": [
+      "Liquidity (increased)",
+      "Funding (lower costs)",
+      "Deposits (+10%)"
+    ],
+    "Shocks": {
+      "move_index": 100,
+      "yield_curve": "stable",
+      "credit_spreads": {
+        "ig_oas": -10,
+        "hy_oas": -15
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 10,
+      "NSFR": 5
+    },
+    "TradeList": [
+      "Increase liquidity by adding $2bn in USTs",
+      "Rotate into $1.5bn in munis"
+    ],
+    "Assumptions": "Market volatility increases deposit activity."
+  }
+]

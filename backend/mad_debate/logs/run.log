@@ -13150,3 +13150,446 @@ A's Position Critique:
 03:04:25 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_030309/scenarios_final.json
 03:04:25 [INFO] Wrote run metadata to data/scenarios/runs/20251208_030309/metadata.json
 03:04:25 [INFO] Done.
+06:30:19 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+06:30:19 [INFO] Detected OPENAI_API_KEY (length=164).
+06:30:19 [INFO] openai package version: 2.6.1
+06:30:19 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+06:30:19 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+06:30:19 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+06:30:19 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+06:30:19 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+06:30:19 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+06:30:19 [INFO] Rounds=2 Runs=1 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+06:30:19 [INFO] [RUN#1/1] starting debate...
+06:30:55 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:30:55 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=1520 total=2505
+06:31:19 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:31:19 [INFO] [RUN#1 R1-B] tokens: prompt=1802 output=1071 total=2873
+06:31:40 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:31:40 [INFO] [RUN#1 R2-A] tokens: prompt=3127 output=1059 total=4186
+06:31:59 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:32:00 [INFO] [RUN#1 R2-B] tokens: prompt=3940 output=947 total=4887
+06:32:00 [INFO] [RUN#1] Invoking judge model=gpt-4.1
+06:32:10 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:32:10 [INFO] [RUN#1 JUDGE] tokens: prompt=4827 output=1449 total=6276
+06:32:10 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251208_063019/transcript_run_1.{jsonl,md}
+06:32:10 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251208_063019/tmp_run_1.json (count=8)
+06:32:10 [INFO] [RUN#1] finished; scenarios=8
+06:32:10 [INFO] Wrote 8 aggregated scenarios to /tmp/mad_scenarios.json
+06:32:10 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_063019/scenarios_final.json
+06:32:10 [INFO] Wrote run metadata to data/scenarios/runs/20251208_063019/metadata.json
+06:32:10 [INFO] Done.
+06:38:33 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+06:38:33 [INFO] Detected OPENAI_API_KEY (length=164).
+06:38:33 [INFO] openai package version: 2.6.1
+06:38:33 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+06:38:33 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+06:38:33 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+06:38:33 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+06:38:33 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+06:38:33 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+06:38:33 [INFO] Rounds=2 Runs=1 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+06:38:33 [INFO] [RUN#1/1] starting debate...
+06:39:07 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:39:07 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=1375 total=2360
+06:39:34 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:39:34 [INFO] [RUN#1 R1-B] tokens: prompt=1657 output=1084 total=2741
+06:40:03 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:40:03 [INFO] [RUN#1 R2-A] tokens: prompt=2995 output=1249 total=4244
+06:40:26 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:40:26 [INFO] [RUN#1 R2-B] tokens: prompt=4001 output=1129 total=5130
+06:40:26 [INFO] [RUN#1] Invoking judge model=gpt-4.1
+06:40:34 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:40:34 [INFO] [RUN#1 JUDGE] tokens: prompt=5070 output=890 total=5960
+06:40:34 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251208_063833/transcript_run_1.{jsonl,md}
+06:40:34 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251208_063833/tmp_run_1.json (count=5)
+06:40:34 [INFO] [RUN#1] finished; scenarios=5
+06:40:34 [INFO] Wrote 5 aggregated scenarios to /tmp/mad_scenarios.json
+06:40:34 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_063833/scenarios_final.json
+06:40:34 [INFO] Wrote run metadata to data/scenarios/runs/20251208_063833/metadata.json
+06:40:34 [INFO] Done.
+06:41:02 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+06:41:02 [INFO] Detected OPENAI_API_KEY (length=164).
+06:41:02 [INFO] openai package version: 2.6.1
+06:41:02 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+06:41:02 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+06:41:02 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+06:41:02 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+06:41:02 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+06:41:02 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+06:41:02 [INFO] Rounds=2 Runs=1 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+06:41:02 [INFO] [RUN#1/1] starting debate...
+06:41:06 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+06:41:06 [INFO] Detected OPENAI_API_KEY (length=164).
+06:41:06 [INFO] openai package version: 2.6.1
+06:41:06 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+06:41:06 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+06:41:06 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+06:41:06 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+06:41:06 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+06:41:06 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+06:41:06 [INFO] Rounds=2 Runs=1 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+06:41:06 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+06:41:06 [INFO] Offline sample copied to data/scenarios/runs/20251208_064106
+06:41:06 [INFO] Wrote run metadata to data/scenarios/runs/20251208_064106/metadata.json
+06:41:06 [INFO] Done.
+06:41:47 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:41:47 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=2026 total=3011
+06:42:16 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:42:16 [INFO] [RUN#1 R1-B] tokens: prompt=2308 output=1199 total=3507
+06:42:42 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:42:42 [INFO] [RUN#1 R2-A] tokens: prompt=3764 output=1253 total=5017
+06:43:12 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:43:12 [INFO] [RUN#1 R2-B] tokens: prompt=4774 output=1222 total=5996
+06:43:12 [INFO] [RUN#1] Invoking judge model=gpt-4.1
+06:43:23 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:43:23 [INFO] [RUN#1 JUDGE] tokens: prompt=5936 output=1328 total=7264
+06:43:23 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251208_064102/transcript_run_1.{jsonl,md}
+06:43:23 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251208_064102/tmp_run_1.json (count=7)
+06:43:23 [INFO] [RUN#1] finished; scenarios=7
+06:43:23 [INFO] Wrote 7 aggregated scenarios to /tmp/mad_scenarios.json
+06:43:23 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_064102/scenarios_final.json
+06:43:23 [INFO] Wrote run metadata to data/scenarios/runs/20251208_064102/metadata.json
+06:43:23 [INFO] Done.
+06:45:27 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+06:45:27 [INFO] Detected OPENAI_API_KEY (length=164).
+06:45:27 [INFO] openai package version: 2.6.1
+06:45:27 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+06:45:27 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+06:45:27 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+06:45:27 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+06:45:27 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+06:45:27 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+06:45:27 [INFO] Rounds=1 Runs=1 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+06:45:27 [INFO] [RUN#1/1] starting debate...
+06:46:07 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:46:07 [INFO] [RUN#1 R1-A] tokens: prompt=1112 output=1877 total=2989
+06:46:37 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:46:37 [INFO] [RUN#1 R1-B] tokens: prompt=2185 output=1631 total=3816
+06:46:37 [INFO] [RUN#1] Invoking judge model=gpt-4.1
+06:46:46 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:46:46 [INFO] [RUN#1 JUDGE] tokens: prompt=3739 output=1246 total=4985
+06:46:46 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251208_064527/transcript_run_1.{jsonl,md}
+06:46:46 [ERROR] [RUN#1] JSON parse error on judge output: ValueError: No JSON block or JSONL-style content could be parsed
+06:46:46 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251208_064527/tmp_run_1.json (count=0)
+06:46:46 [INFO] [RUN#1] finished; scenarios=0
+06:46:46 [INFO] Wrote 0 aggregated scenarios to /tmp/mad_scenarios.json
+06:46:46 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_064527/scenarios_final.json
+06:46:46 [INFO] Wrote run metadata to data/scenarios/runs/20251208_064527/metadata.json
+06:46:46 [INFO] Done.
+06:47:38 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+06:47:38 [INFO] Detected OPENAI_API_KEY (length=164).
+06:47:38 [INFO] openai package version: 2.6.1
+06:47:38 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+06:47:38 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+06:47:38 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+06:47:38 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+06:47:38 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+06:47:38 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+06:47:38 [INFO] Rounds=1 Runs=1 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+06:47:38 [INFO] [RUN#1/1] starting debate...
+06:48:24 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:48:24 [INFO] [RUN#1 R1-A] tokens: prompt=1112 output=2412 total=3524
+06:49:02 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:49:02 [INFO] [RUN#1 R1-B] tokens: prompt=2720 output=2068 total=4788
+06:49:02 [INFO] [RUN#1] Invoking judge model=gpt-4.1
+06:49:14 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:49:14 [INFO] [RUN#1 JUDGE] tokens: prompt=4711 output=1757 total=6468
+06:49:14 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251208_064738/transcript_run_1.{jsonl,md}
+06:49:14 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251208_064738/tmp_run_1.json (count=10)
+06:49:14 [INFO] [RUN#1] finished; scenarios=10
+06:49:14 [INFO] Wrote 10 aggregated scenarios to /tmp/mad_scenarios.json
+06:49:14 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_064738/scenarios_final.json
+06:49:14 [INFO] Wrote run metadata to data/scenarios/runs/20251208_064738/metadata.json
+06:49:14 [INFO] Done.
+06:53:33 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+06:53:33 [INFO] Detected OPENAI_API_KEY (length=164).
+06:53:33 [INFO] openai package version: 2.6.1
+06:53:34 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+06:53:34 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+06:53:34 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+06:53:34 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+06:53:34 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+06:53:34 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+06:53:34 [INFO] Rounds=1 Runs=8 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+06:53:34 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+06:53:34 [INFO] Offline sample copied to data/scenarios/runs/20251208_065334
+06:53:34 [INFO] Wrote run metadata to data/scenarios/runs/20251208_065334/metadata.json
+06:53:34 [INFO] Done.
+06:55:24 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+06:55:24 [INFO] Detected OPENAI_API_KEY (length=164).
+06:55:24 [INFO] openai package version: 2.6.1
+06:55:24 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+06:55:24 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+06:55:24 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+06:55:24 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+06:55:24 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+06:55:24 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+06:55:24 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+06:55:24 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+06:55:24 [INFO] Offline sample copied to data/scenarios/runs/20251208_065524
+06:55:24 [INFO] Wrote run metadata to data/scenarios/runs/20251208_065524/metadata.json
+06:55:24 [INFO] Done.
+06:56:55 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+06:56:55 [INFO] Detected OPENAI_API_KEY (length=164).
+06:56:55 [INFO] openai package version: 2.6.1
+06:56:55 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+06:56:55 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+06:56:55 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+06:56:55 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+06:56:55 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+06:56:55 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+06:56:55 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+06:56:55 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+06:56:55 [INFO] Offline sample copied to data/scenarios/runs/20251208_065655
+06:56:55 [INFO] Wrote run metadata to data/scenarios/runs/20251208_065655/metadata.json
+06:56:55 [INFO] Done.
+06:58:17 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+06:58:17 [INFO] Detected OPENAI_API_KEY (length=164).
+06:58:17 [INFO] openai package version: 2.6.1
+06:58:17 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+06:58:17 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+06:58:17 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+06:58:17 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+06:58:17 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+06:58:17 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+06:58:17 [INFO] Rounds=1 Runs=1 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+06:58:17 [INFO] [RUN#1/1] starting debate...
+06:58:45 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:58:45 [INFO] [RUN#1 R1-A] tokens: prompt=1161 output=1748 total=2909
+06:59:17 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:59:17 [INFO] [RUN#1 R1-B] tokens: prompt=2056 output=1571 total=3627
+06:59:17 [INFO] [RUN#1] Invoking judge model=gpt-4.1
+06:59:29 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+06:59:29 [INFO] [RUN#1 JUDGE] tokens: prompt=3553 output=1434 total=4987
+06:59:29 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251208_065817/transcript_run_1.{jsonl,md}
+06:59:29 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251208_065817/tmp_run_1.json (count=9)
+06:59:29 [INFO] [RUN#1] finished; scenarios=9
+06:59:29 [INFO] Wrote 9 aggregated scenarios to /tmp/mad_scenarios.json
+06:59:29 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_065817/scenarios_final.json
+06:59:29 [INFO] Wrote run metadata to data/scenarios/runs/20251208_065817/metadata.json
+06:59:29 [INFO] Done.
+07:08:02 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:08:02 [INFO] Detected OPENAI_API_KEY (length=164).
+07:08:02 [INFO] openai package version: 2.6.1
+07:08:02 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:08:02 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:08:02 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:08:02 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:08:02 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:08:02 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:08:02 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:08:02 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:08:02 [INFO] Offline sample copied to data/scenarios/runs/20251208_070802
+07:08:02 [INFO] Wrote run metadata to data/scenarios/runs/20251208_070802/metadata.json
+07:08:02 [INFO] Done.
+07:09:34 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:09:34 [INFO] Detected OPENAI_API_KEY (length=164).
+07:09:34 [INFO] openai package version: 2.6.1
+07:09:34 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:09:34 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:09:34 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:09:34 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:09:34 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:09:34 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:09:34 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:09:34 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:09:34 [INFO] Offline sample copied to data/scenarios/runs/20251208_070934
+07:09:34 [INFO] Wrote run metadata to data/scenarios/runs/20251208_070934/metadata.json
+07:09:34 [INFO] Done.
+07:13:58 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:13:58 [INFO] Detected OPENAI_API_KEY (length=164).
+07:13:58 [INFO] openai package version: 2.6.1
+07:13:58 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:13:58 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:13:58 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:13:58 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:13:58 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:13:58 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:13:58 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:13:58 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:13:58 [INFO] Offline sample copied to data/scenarios/runs/20251208_071358
+07:13:58 [INFO] Wrote run metadata to data/scenarios/runs/20251208_071358/metadata.json
+07:13:58 [INFO] Done.
+07:32:11 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:32:11 [INFO] Detected OPENAI_API_KEY (length=164).
+07:32:11 [INFO] openai package version: 2.6.1
+07:32:11 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:32:11 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:32:11 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:32:11 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:32:11 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:32:11 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:32:11 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:32:11 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:32:11 [INFO] Offline sample copied to data/scenarios/runs/20251208_073211
+07:32:11 [INFO] Wrote run metadata to data/scenarios/runs/20251208_073211/metadata.json
+07:32:11 [INFO] Done.
+07:39:35 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:39:35 [INFO] Detected OPENAI_API_KEY (length=164).
+07:39:35 [INFO] openai package version: 2.6.1
+07:39:35 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:39:35 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:39:35 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:39:35 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:39:35 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:39:35 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:39:35 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:39:35 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:39:35 [INFO] Offline sample copied to data/scenarios/runs/20251208_073935
+07:39:35 [INFO] Wrote run metadata to data/scenarios/runs/20251208_073935/metadata.json
+07:39:35 [INFO] Done.
+07:41:33 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:41:33 [INFO] Detected OPENAI_API_KEY (length=164).
+07:41:33 [INFO] openai package version: 2.6.1
+07:41:33 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:41:33 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:41:33 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:41:33 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:41:33 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:41:33 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:41:33 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:41:33 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:41:33 [INFO] Offline sample copied to data/scenarios/runs/20251208_074133
+07:41:33 [INFO] Wrote run metadata to data/scenarios/runs/20251208_074133/metadata.json
+07:41:33 [INFO] Done.
+07:42:41 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:42:41 [INFO] Detected OPENAI_API_KEY (length=164).
+07:42:41 [INFO] openai package version: 2.6.1
+07:42:41 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:42:41 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:42:41 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:42:41 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:42:41 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:42:41 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:42:41 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:42:41 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:42:41 [INFO] Offline sample copied to data/scenarios/runs/20251208_074241
+07:42:41 [INFO] Wrote run metadata to data/scenarios/runs/20251208_074241/metadata.json
+07:42:41 [INFO] Done.
+07:43:42 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:43:42 [INFO] Detected OPENAI_API_KEY (length=164).
+07:43:42 [INFO] openai package version: 2.6.1
+07:43:42 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:43:42 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:43:42 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:43:42 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:43:42 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:43:42 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:43:42 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:43:42 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:43:42 [INFO] Offline sample copied to data/scenarios/runs/20251208_074342
+07:43:42 [INFO] Wrote run metadata to data/scenarios/runs/20251208_074342/metadata.json
+07:43:42 [INFO] Done.
+07:50:43 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:50:43 [INFO] Detected OPENAI_API_KEY (length=164).
+07:50:43 [INFO] openai package version: 2.6.1
+07:50:43 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:50:43 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:50:43 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:50:43 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:50:43 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:50:43 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:50:43 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:50:43 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:50:43 [INFO] Offline sample copied to data/scenarios/runs/20251208_075043
+07:50:43 [INFO] Wrote run metadata to data/scenarios/runs/20251208_075043/metadata.json
+07:50:43 [INFO] Done.
+07:54:15 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:54:15 [INFO] Detected OPENAI_API_KEY (length=164).
+07:54:15 [INFO] openai package version: 2.6.1
+07:54:15 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:54:15 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:54:15 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:54:15 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:54:15 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:54:15 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:54:15 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:54:15 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:54:15 [INFO] Offline sample copied to data/scenarios/runs/20251208_075415
+07:54:15 [INFO] Wrote run metadata to data/scenarios/runs/20251208_075415/metadata.json
+07:54:15 [INFO] Done.
+07:56:53 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:56:53 [INFO] Detected OPENAI_API_KEY (length=164).
+07:56:53 [INFO] openai package version: 2.6.1
+07:56:53 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:56:53 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:56:53 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:56:53 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:56:53 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:56:53 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:56:53 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:56:53 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:56:53 [INFO] Offline sample copied to data/scenarios/runs/20251208_075653
+07:56:53 [INFO] Wrote run metadata to data/scenarios/runs/20251208_075653/metadata.json
+07:56:53 [INFO] Done.
+07:58:03 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:58:03 [INFO] Detected OPENAI_API_KEY (length=164).
+07:58:03 [INFO] openai package version: 2.6.1
+07:58:03 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:58:03 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:58:03 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:58:03 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:58:03 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:58:03 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:58:03 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:58:03 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:58:03 [INFO] Offline sample copied to data/scenarios/runs/20251208_075803
+07:58:03 [INFO] Wrote run metadata to data/scenarios/runs/20251208_075803/metadata.json
+07:58:03 [INFO] Done.
+07:58:44 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:58:44 [INFO] Detected OPENAI_API_KEY (length=164).
+07:58:44 [INFO] openai package version: 2.6.1
+07:58:44 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:58:44 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:58:44 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:58:44 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:58:44 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:58:44 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:58:44 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:58:44 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:58:44 [INFO] Offline sample copied to data/scenarios/runs/20251208_075844
+07:58:44 [INFO] Wrote run metadata to data/scenarios/runs/20251208_075844/metadata.json
+07:58:44 [INFO] Done.
+07:59:59 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+07:59:59 [INFO] Detected OPENAI_API_KEY (length=164).
+07:59:59 [INFO] openai package version: 2.6.1
+07:59:59 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+07:59:59 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+07:59:59 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+07:59:59 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+07:59:59 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+07:59:59 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+07:59:59 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+07:59:59 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+07:59:59 [INFO] Offline sample copied to data/scenarios/runs/20251208_075959
+07:59:59 [INFO] Wrote run metadata to data/scenarios/runs/20251208_075959/metadata.json
+07:59:59 [INFO] Done.
+08:04:46 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+08:04:46 [INFO] Detected OPENAI_API_KEY (length=164).
+08:04:46 [INFO] openai package version: 2.6.1
+08:04:46 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+08:04:46 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+08:04:46 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+08:04:46 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+08:04:46 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+08:04:46 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+08:04:46 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+08:04:46 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+08:04:47 [INFO] Offline sample copied to data/scenarios/runs/20251208_080446
+08:04:47 [INFO] Wrote run metadata to data/scenarios/runs/20251208_080446/metadata.json
+08:04:47 [INFO] Done.
+08:05:47 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+08:05:47 [INFO] Detected OPENAI_API_KEY (length=164).
+08:05:47 [INFO] openai package version: 2.6.1
+08:05:47 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+08:05:47 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+08:05:47 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+08:05:47 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+08:05:47 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+08:05:47 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+08:05:47 [INFO] Rounds=3 Runs=5 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+08:05:47 [INFO] Offline mode enabled. Loading sample from /Users/cmbenello/Coding/uchicago/grad/bofa/bofa_hqla/backend/mad_debate/sample_outputs
+08:05:47 [INFO] Offline sample copied to data/scenarios/runs/20251208_080547
+08:05:47 [INFO] Wrote run metadata to data/scenarios/runs/20251208_080547/metadata.json
+08:05:47 [INFO] Done.

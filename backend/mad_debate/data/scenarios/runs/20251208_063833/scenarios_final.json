@@ -1,0 +1,124 @@
+[
+  {
+    "Scenario": "Financial Market Volatility",
+    "Description": "Increased volatility leads to wider credit spreads and MBS basis.",
+    "Probability": 0.25,
+    "Rationale": "Current market volatility supports the likelihood of this scenario.",
+    "ImpactChannels": [
+      "Credit OAS (30 bps)",
+      "MBS basis (45 bps)"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "ig_oas": 30,
+      "hy_oas": 50
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Add $1bn in high-quality corporates",
+      "Monitor MBS basis closely",
+      "Adjust portfolio duration"
+    ],
+    "Assumptions": "Market conditions remain volatile; investor sentiment shifts towards risk aversion."
+  },
+  {
+    "Scenario": "Economic Growth Surprises",
+    "Description": "Stronger-than-expected U.S. economic growth leads to rising interest rates and widening credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "The U.S. economy shows resilience, with GDP growth exceeding expectations.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Credit OAS (20 bps)"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "ig_oas": 20,
+      "hy_oas": 20
+    },
+    "MetricsDelta": {
+      "LCR": -1.5,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Add $1bn 10-year USTs",
+      "Reduce $500m in Agency MBS",
+      "Increase exposure to floating-rate notes"
+    ],
+    "Assumptions": "GDP growth rates exceed 3%; inflation remains controlled."
+  },
+  {
+    "Scenario": "Regulatory Changes Impacting Capital Requirements",
+    "Description": "New regulations increase GSIB surcharge affecting capital ratios.",
+    "Probability": 0.2,
+    "Rationale": "Ongoing regulatory pressures present a significant risk to capital metrics.",
+    "ImpactChannels": [
+      "Reg changes",
+      "LCR (+2%)"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1.5
+    },
+    "TradeList": [
+      "Reduce $500m in Level 2 assets",
+      "Increase capital reserves by $1bn"
+    ],
+    "Assumptions": "New capital regulations are enacted; compliance timelines are tightened."
+  },
+  {
+    "Scenario": "Deposit Outflows Due to Economic Uncertainty",
+    "Description": "Rising economic uncertainty causes retail and wealth deposit outflows, increasing funding costs.",
+    "Probability": 0.2,
+    "Rationale": "Economic indicators signal potential uncertainty, leading to outflows.",
+    "ImpactChannels": [
+      "Deposits (-5%)",
+      "Retail beta (+10%)"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Add $500m in secured funding",
+      "Review deposit pricing strategy to retain customers"
+    ],
+    "Assumptions": "Consumer sentiment declines; inflation exceeds 4%, impacting savings behavior."
+  },
+  {
+    "Scenario": "Geopolitical Tensions Escalate",
+    "Description": "Increased geopolitical tensions lead to flight-to-quality dynamics in the bond market.",
+    "Probability": 0.15,
+    "Rationale": "Current geopolitical risks create a plausible environment for this scenario.",
+    "ImpactChannels": [
+      "Rates (-30 bps)",
+      "Credit OAS (40 bps)"
+    ],
+    "Shocks": {
+      "move_index": -30,
+      "ig_oas": 40,
+      "hy_oas": 60
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Add $750m in USTs via repo",
+      "Increase cash reserves by $500m"
+    ],
+    "Assumptions": "Geopolitical instability persists; investors prioritize safe-haven assets."
+  }
+]
