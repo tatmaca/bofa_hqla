@@ -26,26 +26,6 @@ class Scenario:
     metadata: Dict = None  # Optional extra info (description)
 
 # ------------------------
-# Optimizer Singleton wrapper
-# ------------------------
-class OptimizerSingleton:
-    """
-    Single optimizer instance and swap inputs.
-    Use get_instance() to retrieve.
-    """
-    _instance = None
-
-    @classmethod
-    def set_instance(cls, optimizer: HQLA_Portfolio_Opt_Enhanced):
-        cls._instance = optimizer
-
-    @classmethod
-    def get_instance(cls) -> HQLA_Portfolio_Opt_Enhanced:
-        if cls._instance is None:
-            raise RuntimeError("OptimizerSingleton: optimizer instance not set. Call set_instance() first.")
-        return cls._instance
-
-# ------------------------
 # ScenarioRebalancingEngine
 # ------------------------
 class ScenarioRebalancingEngine:
@@ -109,8 +89,31 @@ class ScenarioRebalancingEngine:
             # Create a deep copy
             scen_portfolio = self.base_portfolio.clone()
 
-            # Reprice the portfolio 
-            scen_portfolio.update_prices(scen.yield_curve_handle)
+            # Reprice the portfolio with all curves (up/down and survival curves)
+            # Extract curves from scenario metadata (built in convert_frontend_scenarios_with_curves)
+            up_curve = scen.metadata.get("up_curve")
+            down_curve = scen.metadata.get("down_curve")
+            survival_curves = scen.metadata.get("survival_curves", {})
+            survival_curves_up = scen.metadata.get("survival_curves_up", {})
+            survival_curves_down = scen.metadata.get("survival_curves_down", {})
+            
+            # If curves are in metadata, use them; otherwise fallback to base curves
+            if up_curve and down_curve:
+                scen_portfolio.update_prices(
+                    scen.yield_curve_handle,
+                    up_curve,
+                    down_curve,
+                    survival_curves,
+                    survival_curves_up,
+                    survival_curves_down,
+                )
+            else:
+                # Fallback: use base curves if scenario curves not available
+                # This shouldn't happen if convert_frontend_scenarios_with_curves is used correctly
+                raise RuntimeError(
+                    f"Scenario '{name}' missing required curves in metadata. "
+                    "Ensure convert_frontend_scenarios_with_curves builds all curves."
+                )
 
             # Construct optimizer for THIS scenario
             opt = HQLA_Portfolio_Opt_Enhanced(portfolio=scen_portfolio,
@@ -261,14 +264,28 @@ class ScenarioRebalancingEngine:
     def build_combined_dataframe(self) -> pd.DataFrame:
         """
         Build a DataFrame for the final combined portfolio compatible with your existing output schema.
+        Uses today's prices from base_portfolio.
         """
         if self.final_portfolio_weights is None:
             raise RuntimeError("No final portfolio computed. Call combine_portfolios() first.")
-        # Use assets_summary from optimizer to get asset names and metadata
-        assets_df = self.base_portfolio.build_assets_summary().copy()
+        
+        # Build dataframe from base_portfolio instruments (using today's prices)
+        rows = []
+        for level, group in self.base_portfolio.assets.items():
+            for inst in group:
+                rows.append({
+                    "Name": inst.name,
+                    "Level": level,
+                    "DirtyPrice": getattr(inst, "dirty_price", np.nan),
+                    "YTM": getattr(inst, "ytm", np.nan),
+                    "ModDuration": getattr(inst, "duration", np.nan),
+                })
+        
+        assets_df = pd.DataFrame(rows)
         w = np.array(self.final_portfolio_weights, dtype=float)
         assets_df["Combined_Weight"] = w
         assets_df["Allocated_Amount"] = w * self.net_cash_outflow
+        
         # Keep key columns
         cols = [c for c in ["Name", "Level", "DirtyPrice", "YTM", "ModDuration"] if c in assets_df.columns]
         return assets_df[cols + ["Combined_Weight", "Allocated_Amount"]]
@@ -276,25 +293,27 @@ class ScenarioRebalancingEngine:
     def apply_final_portfolio(self, update_quantities: bool = True):
         """
         Optionally update the underlying Portfolio instrument quantities using
-        the Allocated_Amount / DirtyPrice as a simple conversion:
-            new_qty = Allocated_Amount / DirtyPrice
-        (This is a straightforward heuristic. In production you'd consider face value, lot sizes, rounding.)
+        today's prices from base_portfolio to calculate quantities:
+            new_qty = Allocated_Amount / inst.dirty_price
+        (This uses today's prices, not scenario prices, since we're buying today.)
         """
         df = self.build_combined_dataframe()
         if update_quantities:
             for _, row in df.iterrows():
                 name = row["Name"]
                 alloc = float(row["Allocated_Amount"])
-                price = float(row.get("DirtyPrice", np.nan))
-                if np.isnan(price) or price == 0:
-                    new_qty = 0.0
-                else:
-                    new_qty = alloc / price
-                # find instrument in portfolio and set quantity
+                # Find instrument in base_portfolio and use its current dirty_price (today's price)
                 for lev, group in self.base_portfolio.assets.items():
                     for inst in group:
                         if inst.name == name:
+                            # Use today's price from the instrument, not scenario price
+                            price = getattr(inst, "dirty_price", None)
+                            if price is None or price == 0:
+                                new_qty = 0.0
+                            else:
+                                new_qty = alloc / price
                             inst.quantity = new_qty
+                            break
         return df
 
     # ------------------------
@@ -367,11 +386,18 @@ class ScenarioRebalancingEngine:
             metrics = info["metrics"]
 
             scenario_payload[name] = {
-                "description": scenario_descriptions.get(name, ""),
+                "description": scen.metadata.get("description", ""),
                 "probability": scen.probability,
-                "net_cash_outflow": self.net_cash_outflow,
+                "net_cash_outflow": scen.metadata.get("net_cash_outflow", self.net_cash_outflow),
                 "metrics": metrics,
                 "per_asset": df.to_dict(orient="records"),
+                "rationale": scen.metadata.get("rationale", ""),
+                "impact_channels": scen.metadata.get("impact_channels", ""),
+                "trade_list": scen.metadata.get("trade_list", []),
+                "shock_type": scen.metadata.get("shock_type", ""),
+                "shock_magnitude_bp": scen.metadata.get("shock_magnitude_bp", 0),
+                "credit_spreads": scen.metadata.get("credit_spreads", {}),
+                "metrics_delta": scen.metadata.get("metrics_delta", {}),
             }
 
         combined_payload = combined_df.to_dict(orient="records")

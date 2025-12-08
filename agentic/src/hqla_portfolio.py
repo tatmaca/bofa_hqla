@@ -5,13 +5,11 @@ Manages collections of HQLA instruments (Fixed, Floating, Discount)
 across Basel III liquidity levels.
 
 Author: Togay Atmaca (tatmaca), Aryaa Gunavante
-Updated: 2025-11-17
+Updated: 2025-12-06
 """
 
 from typing import Dict, List
-
 import QuantLib as ql
-
 from . import hqla_instruments as HQLA
 
 
@@ -106,6 +104,12 @@ class Portfolio:
                 )
                 total += adj_val
         return total
+
+    def clone(self):    
+        new_portfolio = Portfolio()
+        for level, group in self.assets.items():
+            new_portfolio.assets[level] = [inst.clone() for inst in group]
+        return new_portfolio
 
     def summary(self) -> None:
         """Print detailed portfolio summary per category."""
