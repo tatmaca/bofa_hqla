@@ -10,9 +10,8 @@ Updated: 2025-11-17
 
 from typing import Dict, List
 
+import hqla_instruments as HQLA
 import QuantLib as ql
-
-from . import hqla_instruments as HQLA
 
 
 class Portfolio:

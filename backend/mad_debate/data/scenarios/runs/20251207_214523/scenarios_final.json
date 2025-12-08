@@ -1,0 +1,229 @@
+[
+  {
+    "Scenario": "Bear Steepening with Inflationary Pressures",
+    "Description": "Moderate inflation leads to a bear steepening of the yield curve with a 30bps increase in long-term rates, while credit spreads widen by 10bps.",
+    "Probability": 0.28,
+    "Rationale": "Inflationary pressures can lead to higher long-term yields, impacting consumer spending and credit quality.",
+    "ImpactChannels": "Rates (30 bps), Curve (bear steepener), Credit OAS (10 bps)",
+    "Shocks": {
+      "move": 30,
+      "ig_oas": 10,
+      "hy_oas": 20
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4,
+      "NII": -250
+    },
+    "TradeList": [
+      "Reduce $1bn in MBS",
+      "Add $500mm USTs"
+    ],
+    "Assumptions": "Consumer confidence weakens due to rising inflation indicators such as CPI."
+  },
+  {
+    "Scenario": "Regulatory Shock from Basel Endgame",
+    "Description": "Tighter capital requirements from Basel reforms increase G-SIB surcharges, impacting capital ratios.",
+    "Probability": 0.22,
+    "Rationale": "Ongoing discussions on regulatory reforms suggest an increased likelihood of stricter liquidity requirements.",
+    "ImpactChannels": "Regulatory changes (increased capital requirements)",
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Increase liquidity reserves by $1bn",
+      "Proactively engage with regulators to influence outcomes"
+    ],
+    "Assumptions": "Regulatory environment changes rapidly; market adapts efficiently to new requirements."
+  },
+  {
+    "Scenario": "Tighter Funding Conditions with Deposit Volatility",
+    "Description": "Increased competition for deposits leads to a 7% reduction in deposits, adversely affecting liquidity metrics and increasing funding costs.",
+    "Probability": 0.22,
+    "Rationale": "Tighter funding conditions could lead to increased deposit betas, impacting NII and liquidity.",
+    "ImpactChannels": "Deposits (-7%), NII contraction due to increased funding costs",
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 5,
+      "hy_oas": 15
+    },
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -5,
+      "NII": -300
+    },
+    "TradeList": [
+      "Increase cash reserves by $1bn",
+      "Sell $500mm corporate bonds"
+    ],
+    "Assumptions": "Investor behavior shifts due to rising interest rates, leading to deposit outflows."
+  },
+  {
+    "Scenario": "Bear Steepener with Rising Credit Spreads",
+    "Description": "A bear steepening yield curve, with a 50 bps rise in the 10-year yield and a 15 bps increase in IG OAS.",
+    "Probability": 0.2,
+    "Rationale": "Current inflation fears and Fed policy lead to higher long-term rates and credit spreads.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Credit OAS (15 bps)"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "credit_spreads": {
+        "ig_oas": 15
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $1bn in 10Y USTs via auction",
+      "Reduce agency MBS by $500mn"
+    ],
+    "Assumptions": "Inflation persists; Fed maintains a hawkish stance."
+  },
+  {
+    "Scenario": "Moderate Rate Hike with Flattening Curve",
+    "Description": "Gradual increase in interest rates by 50 bps, bear-flattening of yield curve, slight tightening of credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Current economic indicators suggest stability, allowing for moderate rate hikes while deposits remain stable.",
+    "ImpactChannels": [
+      "Rates (50 bps)",
+      "Curve (bear-flattening)",
+      "Credit OAS (IG +10 bps, HY +25 bps)"
+    ],
+    "Shocks": {
+      "move": 50,
+      "slope_2s10s_bps": -15,
+      "ig_oas": 10,
+      "hy_oas": 25
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": 0,
+      "NII": 0.5
+    },
+    "TradeList": [
+      "Add $2bn T-bills via repo",
+      "Reduce Agency MBS by $1bn"
+    ],
+    "Assumptions": "Consumer confidence remains stable, supporting deposit levels."
+  },
+  {
+    "Scenario": "Economic Recovery and Rising Rates",
+    "Description": "Rapid economic recovery prompts the Fed to increase rates by 75 bps; stable deposit levels but wider credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Positive economic indicators suggest likelihood of rate increases impacting overall market conditions.",
+    "ImpactChannels": [
+      "Rates (75 bps)",
+      "Curve (bear-steepening)",
+      "Credit OAS (IG +20 bps, HY +50 bps)"
+    ],
+    "Shocks": {
+      "move": 75,
+      "slope_2s10s_bps": -10,
+      "ig_oas": 20,
+      "hy_oas": 50
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": 0,
+      "NII": 2
+    },
+    "TradeList": [
+      "Increase short-term funding by $1bn",
+      "Sell $500mm of longer-duration securities"
+    ],
+    "Assumptions": "Economic indicators continue to improve, leading to increased consumer spending."
+  },
+  {
+    "Scenario": "Bear Steepener with Rising Spreads",
+    "Description": "Interest rates rise with a bear steepening of the yield curve; IG credit spreads widen by 15 bps and HY spreads by 45 bps.",
+    "Probability": 0.18,
+    "Rationale": "Controlled inflation and stable economic growth lead to a gradual bear steepening, but consumer resilience limits extreme impacts on funding.",
+    "ImpactChannels": "Rates (20 bps increase), Curve (bear steepener), Credit OAS (15 bps IG, 45 bps HY)",
+    "Shocks": {
+      "move": 120,
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $1bn T-bills via repo",
+      "Engage in interest rate hedging strategies"
+    ],
+    "Assumptions": "Inflation stabilizes; economic growth remains consistent; credit quality holds firm."
+  },
+  {
+    "Scenario": "MBS Market Dislocation",
+    "Description": "MBS basis widens by 35 bps due to increased supply and reduced refinancing activity.",
+    "Probability": 0.18,
+    "Rationale": "Market dislocations may affect MBS valuations, but BoA's active management can mitigate negative impacts.",
+    "ImpactChannels": "MBS basis (35 bps widening)",
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -6,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Reduce MBS holdings by $500mn",
+      "Reallocate funds to T-bills to optimize portfolio"
+    ],
+    "Assumptions": "Increased Treasury issuance; mortgage rates remain elevated but stable."
+  },
+  {
+    "Scenario": "Widening Credit Spreads and Market Volatility",
+    "Description": "Market volatility leads to a 15bps widening in credit spreads, negatively impacting the valuation of corporate bonds and MBS.",
+    "Probability": 0.18,
+    "Rationale": "Increased uncertainty in the market could lead to higher risk premiums, affecting the bank's portfolio.",
+    "ImpactChannels": "Credit OAS (15 bps), Asset valuations decline due to increased spreads",
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 15,
+      "hy_oas": 30
+    },
+    "MetricsDelta": {
+      "LCR": -6,
+      "NSFR": -3,
+      "NII": -150
+    },
+    "TradeList": [
+      "Reduce exposure to high-yield assets by $500mm",
+      "Add $1bn in cash equivalents"
+    ],
+    "Assumptions": "Market participants react negatively to economic signals, leading to increased volatility."
+  },
+  {
+    "Scenario": "Moderate Economic Recovery",
+    "Description": "Moderate economic recovery leads to a bear steepening of the yield curve; 10Y yields rise by 25 bps, 2Y by 10 bps.",
+    "Probability": 0.18,
+    "Rationale": "Improving consumer balance sheets and increased spending raise inflation expectations, impacting HQLA valuations.",
+    "ImpactChannels": [
+      "Rates: 25bps",
+      "Curve: bear steepener"
+    ],
+    "Shocks": {
+      "move": 110,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Add $1bn in 10Y USTs",
+      "Reduce $500mm in MBS"
+    ],
+    "Assumptions": "Retail deposits remain stable, consumer spending increases."
+  }
+]

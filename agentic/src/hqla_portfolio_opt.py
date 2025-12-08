@@ -13,14 +13,13 @@ Updated: 2025-11-24
 
 from typing import Dict, Optional, Tuple
 
+import hqla_portfolio as HQLA
+import hqla_scenarios as SCENARIO
 import numpy as np
 import pandas as pd
 import QuantLib as ql
 from scipy import linalg
 from scipy.optimize import minimize
-
-from . import hqla_portfolio as HQLA
-from . import hqla_scenarios as SCENARIO
 
 
 class HQLA_Portfolio_Opt_Enhanced:

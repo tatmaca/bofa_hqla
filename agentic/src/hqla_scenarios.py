@@ -10,11 +10,10 @@ Updated: 2025-11-17
 
 from typing import Dict, List
 
+import hqla_portfolio as HQLA
 import numpy as np
 import QuantLib as ql
 import scipy.linalg as la
-
-from . import hqla_portfolio as HQLA
 
 
 class ScenarioGenerator:

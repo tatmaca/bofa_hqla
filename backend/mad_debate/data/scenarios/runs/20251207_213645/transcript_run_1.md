@@ -1,0 +1,218 @@
+# Debate Transcript — Run 1
+
+### **JUDGE** (Judge)
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Rising Interest Rates and Bear Steepening",
+        "Description": "Fed raises rates by 50 bps, steepening the yield curve.",
+        "Probability": 0.22,
+        "Rationale": "Persistent inflation and strong economic data suggest continued tightening.",
+        "ImpactChannels": "Rates (50 bps), Curve (bear steepening)",
+        "Shocks": {"move_index": 50, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "NSFR": -5, "OCI": -200},
+        "TradeList": ["Add $1bn T-bills via repo", "Reduce $500mm agency MBS holdings"],
+        "Assumptions": "Interest rate hikes will lead to higher funding costs but may improve asset yields."
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "Credit spreads widen by 25 bps (IG) and 50 bps (HY).",
+        "Probability": 0.17,
+        "Rationale": "Economic slowdown fears increase default risk perception.",
+        "ImpactChannels": "Credit OAS (25 bps IG, 50 bps HY)",
+        "Shocks": {"credit_spreads": {"ig_oas": 25, "hy_oas": 50}},
+        "MetricsDelta": {"LCR": -10, "NSFR": -10, "OCI": -150},
+        "TradeList": ["Increase credit risk exposure by $250mm", "Tighten underwriting standards"],
+        "Assumptions": "Wider spreads will impact asset valuations but may create buying opportunities."
+    },
+    {
+        "Scenario": "Regulatory Changes Impacting Capital Requirements",
+        "Description": "New regulations increase GSIB surcharge by 50 bps.",
+        "Probability": 0.13,
+        "Rationale": "Ongoing regulatory discussions indicate potential for increased capital requirements.",
+        "ImpactChannels": "Reg changes (GSIB surcharge increase)",
+        "Shocks": {"regulatory": "GSIB surcharge +50 bps"},
+        "MetricsDelta": {"LCR": -15, "NSFR": -15, "OCI": -100},
+        "TradeList": ["Prepare for regulatory compliance adjustments", "Increase capital reserves by $1bn"],
+        "Assumptions": "Higher capital requirements will constrain lending and affect profitability."
+    },
+    {
+        "Scenario": "Deposit Runoff from Wealth Management",
+        "Description": "10% runoff in wealth management deposits due to market volatility.",
+        "Probability": 0.10,
+        "Rationale": "Market volatility can lead to increased withdrawals from wealth accounts.",
+        "ImpactChannels": "Deposits/runoff (10%)",
+        "Shocks": {"deposits": -10},
+        "MetricsDelta": {"LCR": -20, "NSFR": -20, "OCI": -50},
+        "TradeList": ["Raise retail deposit rates by 25 bps", "Enhance liquidity management strategies"],
+        "Assumptions": "Withdrawal trends may stabilize with improved market conditions."
+    },
+    {
+        "Scenario": "Controlled Inflation and Economic Resilience",
+        "Description": "Stable inflation rates and strong consumer spending support the economy.",
+        "Probability": 0.18,
+        "Rationale": "Strong economic indicators suggest a more resilient outlook than anticipated.",
+        "ImpactChannels": "Inflation control, consumer spending stability",
+        "Shocks": {"inflation": "stable", "consumer_spending": "strong"},
+        "MetricsDelta": {"LCR": 5, "NSFR": 5, "OCI": 200},
+        "TradeList": ["Increase allocation to consumer loans by $500mm", "Add $1bn Agency MBS"],
+        "Assumptions": "Stable inflation and consumer behavior will support credit quality and lending opportunities."
+    },
+    {
+        "Scenario": "Gradual Easing of Monetary Policy",
+        "Description": "The Fed gradually eases rates, leading to a bull flattening of the yield curve.",
+        "Probability": 0.13,
+        "Rationale": "Market expectations suggest potential for easing as inflation stabilizes.",
+        "ImpactChannels": "Yield curve flattening",
+        "Shocks": {"short_rates": -25, "long_rates": -15},
+        "MetricsDelta": {"LCR": 10, "NSFR": 10, "OCI": 150},
+        "TradeList": ["Extend duration on bond portfolio by $750mm", "Increase holdings in long-dated Treasuries"],
+        "Assumptions": "Easing will improve borrowing conditions and support economic activity."
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "MBS basis widens by 25 bps due to increased supply.",
+        "Probability": 0.07,
+        "Rationale": "Increased MBS supply and investor aversion are impacting valuations.",
+        "ImpactChannels": "MBS basis (25 bps)",
+        "Shocks": {"mbs_basis": 25},
+        "MetricsDelta": {"LCR": -5, "NSFR": -5, "OCI": -75},
+        "TradeList": ["Reduce MBS portfolio by $300mm", "Explore hedging strategies for MBS exposure"],
+        "Assumptions": "Wider basis will negatively impact MBS valuations, necessitating a portfolio review."
+    }
+]
+```
+
+## Round 1
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Rising Interest Rates and Bear Steepening",
+        "Description": "Fed raises rates by 50 bps, steepening the yield curve.",
+        "Probability": 0.30,
+        "Rationale": "Persistent inflation and strong economic data suggest continued tightening.",
+        "ImpactChannels": "Rates (50 bps), Curve (bear steepening)",
+        "Shocks": {"move_index": 50, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -5, "NSFR": -5, "OCI": -200},
+        "TradeList": ["Add $1bn T-bills via repo", "Reduce $500mm agency MBS holdings"],
+        "Assumptions": "Interest rate hikes will lead to higher funding costs but may improve asset yields."
+    },
+    {
+        "Scenario": "Widening Credit Spreads",
+        "Description": "Credit spreads widen by 25 bps (IG) and 50 bps (HY).",
+        "Probability": 0.25,
+        "Rationale": "Economic slowdown fears increase default risk perception.",
+        "ImpactChannels": "Credit OAS (25 bps IG, 50 bps HY)",
+        "Shocks": {"credit_spreads": {"ig_oas": 25, "hy_oas": 50}},
+        "MetricsDelta": {"LCR": -10, "NSFR": -10, "OCI": -150},
+        "TradeList": ["Increase credit risk exposure by $250mm", "Tighten underwriting standards"],
+        "Assumptions": "Wider spreads will impact asset valuations but may create buying opportunities."
+    },
+    {
+        "Scenario": "Regulatory Changes Impacting Capital Requirements",
+        "Description": "New regulations increase GSIB surcharge by 50 bps.",
+        "Probability": 0.20,
+        "Rationale": "Ongoing regulatory discussions indicate potential for increased capital requirements.",
+        "ImpactChannels": "Reg changes (GSIB surcharge increase)",
+        "Shocks": {"regulatory": "GSIB surcharge +50 bps"},
+        "MetricsDelta": {"LCR": -15, "NSFR": -15, "OCI": -100},
+        "TradeList": ["Prepare for regulatory compliance adjustments", "Increase capital reserves by $1bn"],
+        "Assumptions": "Higher capital requirements will constrain lending and affect profitability."
+    },
+    {
+        "Scenario": "Deposit Runoff from Wealth Management",
+        "Description": "10% runoff in wealth management deposits due to market volatility.",
+        "Probability": 0.15,
+        "Rationale": "Market volatility can lead to increased withdrawals from wealth accounts.",
+        "ImpactChannels": "Deposits/runoff (10%)",
+        "Shocks": {"deposits": -10},
+        "MetricsDelta": {"LCR": -20, "NSFR": -20, "OCI": -50},
+        "TradeList": ["Raise retail deposit rates by 25 bps", "Enhance liquidity management strategies"],
+        "Assumptions": "Withdrawal trends may stabilize with improved market conditions."
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "MBS basis widens by 25 bps due to increased supply.",
+        "Probability": 0.10,
+        "Rationale": "Increased MBS supply and investor aversion are impacting valuations.",
+        "ImpactChannels": "MBS basis (25 bps)",
+        "Shocks": {"mbs_basis": 25},
+        "MetricsDelta": {"LCR": -5, "NSFR": -5, "OCI": -75},
+        "TradeList": ["Reduce MBS portfolio by $300mm", "Explore hedging strategies for MBS exposure"],
+        "Assumptions": "Wider basis will negatively impact MBS valuations, necessitating a portfolio review."
+    }
+]
+```
+
+### **Devil's advocate**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Controlled Inflation and Economic Resilience",
+        "Description": "Stable inflation rates and strong consumer spending support the economy.",
+        "Probability": 0.35,
+        "Rationale": "Strong economic indicators suggest a more resilient outlook than anticipated.",
+        "ImpactChannels": "Inflation control, consumer spending stability",
+        "Shocks": {"inflation": "stable", "consumer_spending": "strong"},
+        "MetricsDelta": {"LCR": 5, "NSFR": 5, "OCI": 200},
+        "TradeList": ["Increase allocation to consumer loans by $500mm", "Add $1bn Agency MBS"],
+        "Assumptions": "Stable inflation and consumer behavior will support credit quality and lending opportunities."
+    },
+    {
+        "Scenario": "Gradual Easing of Monetary Policy",
+        "Description": "The Fed gradually eases rates, leading to a bull flattening of the yield curve.",
+        "Probability": 0.30,
+        "Rationale": "Market expectations suggest potential for easing as inflation stabilizes.",
+        "ImpactChannels": "Yield curve flattening",
+        "Shocks": {"short_rates": -25, "long_rates": -15},
+        "MetricsDelta": {"LCR": 10, "NSFR": 10, "OCI": 150},
+        "TradeList": ["Extend duration on bond portfolio by $750mm", "Increase holdings in long-dated Treasuries"],
+        "Assumptions": "Easing will improve borrowing conditions and support economic activity."
+    },
+    {
+        "Scenario": "Regulatory Relief Benefits Capital Ratios",
+        "Description": "Potential regulatory changes reduce capital requirements for GSIBs.",
+        "Probability": 0.20,
+        "Rationale": "Ongoing discussions around regulatory frameworks indicate potential easing.",
+        "ImpactChannels": "Capital requirements reduction",
+        "Shocks": {"regulatory": "capital relief"},
+        "MetricsDelta": {"LCR": 15, "NSFR": 15, "OCI": 100},
+        "TradeList": ["Optimize capital structure by reallocating $1bn to risk-weighted assets", "Enhance liquidity buffers"],
+        "Assumptions": "Regulatory relief will provide greater flexibility in capital management."
+    },
+    {
+        "Scenario": "Stable Deposit Betas and Liquidity Management",
+        "Description": "Deposit betas remain stable, ensuring strong liquidity positions.",
+        "Probability": 0.15,
+        "Rationale": "Consumer confidence and strong deposit base support stable funding.",
+        "ImpactChannels": "Deposit stability",
+        "Shocks": {"deposit_betas": "stable"},
+        "MetricsDelta": {"LCR": 5, "NSFR": 5, "OCI": 50},
+        "TradeList": ["Maintain competitive deposit rates", "Implement targeted marketing for savings products"],
+        "Assumptions": "Stable deposit betas will sustain funding levels and NII."
+    },
+    {
+        "Scenario": "MBS Basis Improvement and Portfolio Rotation",
+        "Description": "MBS basis tightens due to improved demand and supply dynamics.",
+        "Probability": 0.10,
+        "Rationale": "Market adjustments may lead to a more favorable MBS valuation environment.",
+        "ImpactChannels": "Tightening MBS basis",
+        "Shocks": {"mbs_basis": -25},
+        "MetricsDelta": {"LCR": 5, "NSFR": 5, "OCI": 75},
+        "TradeList": ["Rotate into higher-quality MBS", "Reduce exposure to riskier credit assets by $300mm"],
+        "Assumptions": "Tightening basis will enhance MBS valuations and overall portfolio performance."
+    }
+]
+```
+

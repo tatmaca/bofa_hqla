@@ -1,0 +1,196 @@
+# Debate Transcript — Run 1
+
+### **JUDGE** (Judge)
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Hawkish Fed with Rapid Rate Hikes",
+        "Description": "Rapid Fed rate hikes lead to bear steepening of yield curve and wider credit spreads.",
+        "Probability": 0.25,
+        "Rationale": "Inflationary pressures force the Fed to act aggressively, impacting deposit behavior.",
+        "ImpactChannels": ["Rates (75 bps)", "Curve (bear steepener)", "Credit OAS (IG +30, HY +100 bps)", "Deposits (-5%)"],
+        "Shocks": {"move": 75, "yield_curve": "bear_steepener", "credit_spreads": {"ig_oas": 30, "hy_oas": 100}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -3, "NII": -0.5},
+        "TradeList": ["Add $1bn UST via repo", "Reduce MBS exposure by $2bn"],
+        "Assumptions": "Depositors may seek higher yields elsewhere, impacting retail deposit stability."
+    },
+    {
+        "Scenario": "Economic Slowdown and Widening Credit Spreads",
+        "Description": "Economic slowdown leads to wider credit spreads and a potential runoff in deposits.",
+        "Probability": 0.20,
+        "Rationale": "Increased defaults and risk aversion lead to tighter credit conditions.",
+        "ImpactChannels": ["Credit OAS (IG +30, HY +100 bps)", "Deposits (-5%)"],
+        "Shocks": {"move": 0, "yield_curve": "flat", "credit_spreads": {"ig_oas": 30, "hy_oas": 100}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -4, "NII": -1},
+        "TradeList": ["Increase cash holdings by $2bn", "Reduce corporate lending by $1bn"],
+        "Assumptions": "Consumer balance sheets deteriorate, impacting loan demand."
+    },
+    {
+        "Scenario": "Regulatory Changes and Increased Liquidity Requirements",
+        "Description": "New regulations impose higher liquidity requirements, affecting funding costs.",
+        "Probability": 0.15,
+        "Rationale": "Regulatory environment tightens, increasing capital requirements for G-SIBs.",
+        "ImpactChannels": ["Reg changes", "Credit OAS (+20 bps)"],
+        "Shocks": {"move": 0, "yield_curve": "flat", "credit_spreads": {"ig_oas": 20, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -0.3},
+        "TradeList": ["Raise $1bn in long-term debt", "Increase liquidity reserves by $1.5bn"],
+        "Assumptions": "Tighter regulations lead to higher costs and reduced lending capacity."
+    },
+    {
+        "Scenario": "Strong Economic Recovery and Interest Rate Stability",
+        "Description": "Economic recovery stabilizes rates, improving credit quality and NII.",
+        "Probability": 0.20,
+        "Rationale": "Improved economic indicators lead to stable rates and tighter credit spreads.",
+        "ImpactChannels": ["Rates (0 bps)", "Credit OAS (IG -10, HY -20 bps)", "MBS basis (-25 bps)"],
+        "Shocks": {"move": 0, "yield_curve": "flat", "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": 3, "NSFR": 2, "NII": 1},
+        "TradeList": ["Add $1bn MBS via repo", "Increase corporate lending by $2bn"],
+        "Assumptions": "Stable economic growth enhances consumer confidence and spending."
+    },
+    {
+        "Scenario": "Geopolitical Tensions and Market Volatility",
+        "Description": "Escalating geopolitical tensions lead to increased volatility and a flight to quality.",
+        "Probability": 0.20,
+        "Rationale": "Increased risk aversion may lead to inflows into safe assets like USTs.",
+        "ImpactChannels": ["Rates (-25 bps)", "Credit OAS (IG -10, HY -20 bps)"],
+        "Shocks": {"move": -25, "yield_curve": "bull flattening", "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": 4, "NSFR": 3, "NII": 0.5},
+        "TradeList": ["Add $1.5bn UST via repo", "Increase secured funding by $2bn"],
+        "Assumptions": "Investors seek safe havens, impacting funding dynamics."
+    }
+]
+```
+
+## Round 1
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Hawkish Fed with Rapid Rate Hikes",
+        "Description": "Rapid Fed rate hikes lead to bear steepening of yield curve and wider credit spreads.",
+        "Probability": 0.25,
+        "Rationale": "Inflationary pressures force the Fed to act aggressively, impacting deposit behavior.",
+        "ImpactChannels": ["Rates (75 bps)", "Curve (bear steepener)", "Credit OAS (IG +30, HY +100 bps)", "Deposits (-5%)"],
+        "Shocks": {"move": 75, "yield_curve": "bear_steepener", "credit_spreads": {"ig_oas": 30, "hy_oas": 100}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -3, "NII": -0.5},
+        "TradeList": ["Add $1bn UST via repo", "Reduce MBS exposure by $2bn"],
+        "Assumptions": "Depositors may seek higher yields elsewhere, impacting retail deposit stability."
+    },
+    {
+        "Scenario": "Economic Slowdown and Widening Credit Spreads",
+        "Description": "Economic slowdown leads to wider credit spreads and a potential runoff in deposits.",
+        "Probability": 0.20,
+        "Rationale": "Increased defaults and risk aversion lead to tighter credit conditions.",
+        "ImpactChannels": ["Credit OAS (IG +30, HY +100 bps)", "Deposits (-5%)"],
+        "Shocks": {"move": 0, "yield_curve": "flat", "credit_spreads": {"ig_oas": 30, "hy_oas": 100}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -4, "NII": -1},
+        "TradeList": ["Increase cash holdings by $2bn", "Reduce corporate lending by $1bn"],
+        "Assumptions": "Consumer balance sheets deteriorate, impacting loan demand."
+    },
+    {
+        "Scenario": "Regulatory Changes and Increased Liquidity Requirements",
+        "Description": "New regulations impose higher liquidity requirements, affecting funding costs.",
+        "Probability": 0.15,
+        "Rationale": "Regulatory environment tightens, increasing capital requirements for G-SIBs.",
+        "ImpactChannels": ["Reg changes", "Credit OAS (+20 bps)"],
+        "Shocks": {"move": 0, "yield_curve": "flat", "credit_spreads": {"ig_oas": 20, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -0.3},
+        "TradeList": ["Raise $1bn in long-term debt", "Increase liquidity reserves by $1.5bn"],
+        "Assumptions": "Tighter regulations lead to higher costs and reduced lending capacity."
+    },
+    {
+        "Scenario": "Strong Economic Recovery and Interest Rate Stability",
+        "Description": "Economic recovery stabilizes rates, improving credit quality and NII.",
+        "Probability": 0.20,
+        "Rationale": "Improved economic indicators lead to stable rates and tighter credit spreads.",
+        "ImpactChannels": ["Rates (0 bps)", "Credit OAS (IG -10, HY -20 bps)", "MBS basis (-25 bps)"],
+        "Shocks": {"move": 0, "yield_curve": "flat", "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": +3, "NSFR": +2, "NII": +1},
+        "TradeList": ["Add $1bn MBS via repo", "Increase corporate lending by $2bn"],
+        "Assumptions": "Stable economic growth enhances consumer confidence and spending."
+    },
+    {
+        "Scenario": "Geopolitical Tensions and Market Volatility",
+        "Description": "Escalating geopolitical tensions lead to increased volatility and a flight to quality.",
+        "Probability": 0.20,
+        "Rationale": "Increased risk aversion may lead to inflows into safe assets like USTs.",
+        "ImpactChannels": ["Rates (-25 bps)", "Credit OAS (IG -10, HY -20 bps)"],
+        "Shocks": {"move": -25, "yield_curve": "bull flattening", "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": +4, "NSFR": +3, "NII": +0.5},
+        "TradeList": ["Add $1.5bn UST via repo", "Increase secured funding by $2bn"],
+        "Assumptions": "Investors seek safe havens, impacting funding dynamics."
+    }
+]
+```
+
+### **Devil's advocate**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Hawkish Fed with Rapid Rate Hikes",
+        "Description": "Rapid Fed rate hikes lead to bear steepening of yield curve and wider credit spreads.",
+        "Probability": 0.25,
+        "Rationale": "Inflationary pressures force the Fed to act aggressively, impacting deposit behavior.",
+        "ImpactChannels": ["Rates (75 bps)", "Curve (bear steepener)", "Credit OAS (IG +30, HY +100 bps)", "Deposits (-5%)"],
+        "Shocks": {"move": 75, "yield_curve": "bear_steepener", "credit_spreads": {"ig_oas": 30, "hy_oas": 100}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -3, "NII": -0.5},
+        "TradeList": ["Add $1bn UST via repo", "Reduce MBS exposure by $2bn"],
+        "Assumptions": "Depositors may seek higher yields elsewhere, impacting retail deposit stability."
+    },
+    {
+        "Scenario": "Economic Slowdown and Widening Credit Spreads",
+        "Description": "Economic slowdown leads to wider credit spreads and a potential runoff in deposits.",
+        "Probability": 0.20,
+        "Rationale": "Increased defaults and risk aversion lead to tighter credit conditions.",
+        "ImpactChannels": ["Credit OAS (IG +30, HY +100 bps)", "Deposits (-5%)"],
+        "Shocks": {"move": 0, "yield_curve": "flat", "credit_spreads": {"ig_oas": 30, "hy_oas": 100}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -4, "NII": -1},
+        "TradeList": ["Increase cash holdings by $2bn", "Reduce corporate lending by $1bn"],
+        "Assumptions": "Consumer balance sheets deteriorate, impacting loan demand."
+    },
+    {
+        "Scenario": "Regulatory Changes and Increased Liquidity Requirements",
+        "Description": "New regulations impose higher liquidity requirements, affecting funding costs.",
+        "Probability": 0.15,
+        "Rationale": "Regulatory environment tightens, increasing capital requirements for G-SIBs.",
+        "ImpactChannels": ["Reg changes", "Credit OAS (+20 bps)"],
+        "Shocks": {"move": 0, "yield_curve": "flat", "credit_spreads": {"ig_oas": 20, "hy_oas": 0}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2, "NII": -0.3},
+        "TradeList": ["Raise $1bn in long-term debt", "Increase liquidity reserves by $1.5bn"],
+        "Assumptions": "Tighter regulations lead to higher costs and reduced lending capacity."
+    },
+    {
+        "Scenario": "Strong Economic Recovery and Interest Rate Stability",
+        "Description": "Economic recovery stabilizes rates, improving credit quality and NII.",
+        "Probability": 0.20,
+        "Rationale": "Improved economic indicators lead to stable rates and tighter credit spreads.",
+        "ImpactChannels": ["Rates (0 bps)", "Credit OAS (IG -10, HY -20 bps)", "MBS basis (-25 bps)"],
+        "Shocks": {"move": 0, "yield_curve": "flat", "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": +3, "NSFR": +2, "NII": +1},
+        "TradeList": ["Add $1bn MBS via repo", "Increase corporate lending by $2bn"],
+        "Assumptions": "Stable economic growth enhances consumer confidence and spending."
+    },
+    {
+        "Scenario": "Geopolitical Tensions and Market Volatility",
+        "Description": "Escalating geopolitical tensions lead to increased volatility and a flight to quality.",
+        "Probability": 0.20,
+        "Rationale": "Increased risk aversion may lead to inflows into safe assets like USTs.",
+        "ImpactChannels": ["Rates (-25 bps)", "Credit OAS (IG -10, HY -20 bps)"],
+        "Shocks": {"move": -25, "yield_curve": "bull flattening", "credit_spreads": {"ig_oas": -10, "hy_oas": -20}},
+        "MetricsDelta": {"LCR": +4, "NSFR": +3, "NII": +0.5},
+        "TradeList": ["Add $1.5bn UST via repo", "Increase secured funding by $2bn"],
+        "Assumptions": "Investors seek safe havens, impacting funding dynamics."
+    }
+]
+```
+
