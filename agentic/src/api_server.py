@@ -6,7 +6,12 @@ import pandas as pd
 import QuantLib as ql
 from fastapi import FastAPI, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from pathlib import Path
+import json
+import datetime as _dt
+import base64
+from fastapi.staticfiles import StaticFiles
 
 from . import hqla_instruments as HQLA
 from .hqla_portfolio import Portfolio
@@ -25,6 +30,92 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve attribution PNG/JSON as static for convenience
+_repo_root = Path(__file__).resolve().parents[2]
+_attr_dir = _repo_root / "tools" / "news_ingestion" / "attribution_analysis"
+if _attr_dir.exists():
+    app.mount("/attribution-static", StaticFiles(directory=_attr_dir), name="attribution-static")
+
+ALLOWED_IMAGE_MODES = {"report", "heatmap", "all", "none"}
+
+
+def _classify_image(p: Path) -> str:
+    name = p.name.lower()
+    if "heatmap" in name:
+        return "heatmap"
+    if "attribution" in name:
+        return "report"
+    return "other"
+
+
+def _filter_images(pngs: list[Path], image_mode: str) -> list[Path]:
+    if image_mode == "all":
+        return pngs
+    if image_mode == "none":
+        return []
+    return [p for p in pngs if _classify_image(p) == image_mode]
+
+
+def _load_attribution_payload(
+    target_date: str, image_mode: str, embed_images: bool, request: Request
+):
+    """Load attribution JSON and attach chart links/base64 per options."""
+    report_path = (
+        _repo_root
+        / "tools"
+        / "news_ingestion"
+        / "attribution_analysis"
+        / f"attribution_report_{target_date}.json"
+    )
+
+    if not report_path.exists():
+        return None, JSONResponse(
+            status_code=404,
+            content={
+                "error": f"No attribution report found for {target_date}",
+                "path": str(report_path),
+                "hint": "Run daily_pipeline.py or generate the report first.",
+            },
+        )
+
+    try:
+        with open(report_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        pngs = sorted(_attr_dir.glob(f"*{target_date}*.png")) if _attr_dir.exists() else []
+        pngs = _filter_images(pngs, image_mode)
+
+        base_url = str(request.base_url).rstrip("/")
+        data["chart_files"] = [f"/attribution-static/{p.name}" for p in pngs]
+        data["chart_urls"] = [f"{base_url}/attribution-static/{p.name}" for p in pngs]
+
+        if pngs:
+            images = []
+            for p in pngs:
+                item = {
+                    "name": p.name,
+                    "type": _classify_image(p),
+                    "url": f"/attribution-static/{p.name}",
+                    "abs_url": f"{base_url}/attribution-static/{p.name}",
+                }
+                if embed_images:
+                    try:
+                        b64 = base64.b64encode(p.read_bytes()).decode("ascii")
+                        item["data_uri"] = f"data:image/png;base64,{b64}"
+                    except Exception as e:
+                        item["error"] = str(e)
+                images.append(item)
+            data["chart_images"] = images
+        return data, None
+    except Exception as e:
+        return None, JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Failed to read attribution report: {e}",
+                "path": str(report_path),
+            },
+        )
 
 
 @app.post("/upload-portfolio/")
@@ -308,3 +399,61 @@ async def price_portfolio(is_scenario: bool = False):
             "scenario": summary,
             "status": "scenario_priced",
         }
+
+
+@app.get("/attribution/html")
+async def get_attribution_html(
+    request: Request,
+    date: str | None = None,
+    image_mode: str = "all",
+    embed_images: bool = False,
+):
+    """Return attribution HTML as a downloadable file (helps Swagger show an open button)."""
+    try:
+        target_date = date or _dt.date.today().isoformat()
+    except Exception:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Invalid date format, expected YYYY-MM-DD"},
+        )
+
+    image_mode = (image_mode or "all").lower()
+    if image_mode not in ALLOWED_IMAGE_MODES:
+        return JSONResponse(
+            status_code=400,
+            content={"error": f"image_mode must be one of {sorted(ALLOWED_IMAGE_MODES)}"},
+        )
+
+    data, err = _load_attribution_payload(
+        target_date=target_date,
+        image_mode=image_mode,
+        embed_images=embed_images,
+        request=request,
+    )
+    if err:
+        return err
+
+    rows = []
+    rows.append("<h2>Attribution Report</h2>")
+    rows.append(f"<p>Date: {target_date}</p>")
+    rows.append("<h3>Charts</h3>")
+    charts = data.get("chart_images") or []
+    if charts:
+        rows.append("<ul>")
+        for item in charts:
+            link = item.get("abs_url") or item.get("url")
+            name = item.get("name", link)
+            rows.append(
+                f'<li><a href="{link}" target="_blank" rel="noopener noreferrer">Open {name}</a></li>'
+            )
+        rows.append("</ul>")
+    else:
+        rows.append("<p>No charts found for this date.</p>")
+    rows.append("<h3>Numbers (JSON)</h3>")
+    rows.append("<pre>")
+    rows.append(json.dumps(data, indent=2))
+    rows.append("</pre>")
+    html = "\n".join(rows)
+
+    headers = {"Content-Disposition": f'attachment; filename="attribution_{target_date}.html"'}
+    return HTMLResponse(content=html, media_type="text/html", headers=headers)
