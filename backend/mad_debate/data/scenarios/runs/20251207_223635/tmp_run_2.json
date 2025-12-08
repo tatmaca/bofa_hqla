@@ -1,0 +1,129 @@
+[
+  {
+    "Scenario": "Persistently High Inflation with Monetary Tightening",
+    "Description": "Inflation remains elevated, prompting the Fed to maintain or increase interest rates, impacting consumer spending and borrowing.",
+    "Probability": 0.2,
+    "Rationale": "Continued inflationary pressures could lead to sustained higher rates, negatively affecting liquidity and spending.",
+    "ImpactChannels": [
+      "Consumer spending",
+      "Monetary policy"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "NII": -1200000000,
+      "LCR": -3
+    },
+    "TradeList": [
+      "Reduce exposure to rate-sensitive assets",
+      "Increase cash reserves"
+    ],
+    "Assumptions": "Economic conditions remain volatile, with inflation risks impacting consumer behavior."
+  },
+  {
+    "Scenario": "Bear Steepener in Yield Curve",
+    "Description": "Short-term rates remain stable while long-term rates increase, leading to a bear steepening of the yield curve.",
+    "Probability": 0.2,
+    "Rationale": "Market reactions to prolonged inflation could lead to higher long-term rates, impacting funding costs.",
+    "ImpactChannels": [
+      "Interest rate curve",
+      "Asset yield enhancement"
+    ],
+    "Shocks": {
+      "move": 50,
+      "slope_2s10s_bps": 30
+    },
+    "MetricsDelta": {
+      "NII": -800000000,
+      "LCR": -2
+    },
+    "TradeList": [
+      "Decrease duration in bond portfolio",
+      "Increase investments in short-term securities"
+    ],
+    "Assumptions": "Investor expectations shift towards long-term inflation risk."
+  },
+  {
+    "Scenario": "Rising Deposit Betas Amidst Competition",
+    "Description": "Increased competition leads to higher deposit betas as banks raise rates to attract customers.",
+    "Probability": 0.18,
+    "Rationale": "Higher rates in the market drive depositors to seek better yields, increasing funding costs.",
+    "ImpactChannels": [
+      "Deposit stability",
+      "Funding costs"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "NII": -500000000,
+      "LCR": -4
+    },
+    "TradeList": [
+      "Enhance marketing for competitive deposit products",
+      "Review pricing strategies for deposits"
+    ],
+    "Assumptions": "Depositors respond to competitive pressures for higher returns."
+  },
+  {
+    "Scenario": "Widening MBS Basis Risk",
+    "Description": "MBS basis widens due to supply-demand imbalances, negatively affecting valuations.",
+    "Probability": 0.12,
+    "Rationale": "Market conditions may lead to reduced demand for MBS amidst rising rates, impacting valuations.",
+    "ImpactChannels": [
+      "MBS basis",
+      "Asset valuations"
+    ],
+    "Shocks": {
+      "mbs_basis": 50
+    },
+    "MetricsDelta": {
+      "OCI": -600000000,
+      "LCR": -3
+    },
+    "TradeList": [
+      "Reduce MBS holdings to mitigate OCI impact",
+      "Increase cash positions"
+    ],
+    "Assumptions": "Market dynamics shift, leading to wider spreads in MBS."
+  },
+  {
+    "Scenario": "Tighter Spreads in Credit Markets",
+    "Description": "Credit spreads tighten by 20 bps as investor confidence improves, benefiting Bank of America's bond portfolio.",
+    "Probability": 0.15,
+    "Rationale": "Improving economic conditions lead to enhanced credit quality across sectors.",
+    "ImpactChannels": [
+      "Credit spreads",
+      "Asset valuations"
+    ],
+    "Shocks": {
+      "ig_oas": -20
+    },
+    "MetricsDelta": {
+      "NII": 300000000,
+      "OCI": 150000000
+    },
+    "TradeList": [
+      "Increase exposure to investment-grade bonds",
+      "Reduce high-yield allocations"
+    ],
+    "Assumptions": "Positive economic indicators lead to tighter spreads in credit markets."
+  },
+  {
+    "Scenario": "Increased Regulatory Scrutiny on Liquidity",
+    "Description": "Regulatory bodies impose stricter liquidity requirements, limiting operational flexibility.",
+    "Probability": 0.15,
+    "Rationale": "Ongoing regulatory scrutiny may lead to heightened capital and liquidity requirements.",
+    "ImpactChannels": [
+      "Regulatory environment",
+      "Liquidity management"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Prepare for potential regulatory changes",
+      "Optimize HQLA portfolio"
+    ],
+    "Assumptions": "Regulatory environment remains stringent, impacting liquidity management."
+  }
+]

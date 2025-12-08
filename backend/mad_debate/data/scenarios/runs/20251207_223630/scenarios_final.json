@@ -1,0 +1,231 @@
+[
+  {
+    "Scenario": "Bear Steepening with Increased Credit Spreads",
+    "Description": "A bear steepening of the yield curve occurs, alongside a 15 bps increase in IG credit spreads and a 45 bps increase in HY credit spreads.",
+    "Probability": 0.22,
+    "Rationale": "The bear steepener impacts HQLA valuations negatively due to a rise in long-term rates, while widening credit spreads could impair asset valuations.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Credit OAS (bps)"
+    ],
+    "Shocks": {
+      "move": 120,
+      "yield_curve": "bear_steepener",
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $2bn in UST 10-year securities via repo to enhance LCR."
+    ],
+    "Assumptions": "Retail deposit beta remains stable, while wholesale funding costs increase."
+  },
+  {
+    "Scenario": "Bear Steepener with Rising Credit Spreads",
+    "Description": "A bear steepening of the yield curve occurs with a rise in inflation expectations, leading to higher short-term rates and wider credit spreads.",
+    "Probability": 0.2,
+    "Rationale": "Current inflation pressures and market uncertainty support this scenario, affecting consumer and corporate borrowing costs.",
+    "ImpactChannels": [
+      "Rates (bps)",
+      "Credit OAS (bps)"
+    ],
+    "Shocks": {
+      "move": 120,
+      "ig_oas": 15,
+      "hy_oas": 45
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "NII": -200
+    },
+    "TradeList": [
+      "Add $2bn USTs via repo",
+      "Reduce $1bn MBS holdings"
+    ],
+    "Assumptions": "Inflation remains elevated, consumer spending slows, and corporate credit risks increase."
+  },
+  {
+    "Scenario": "Resilient Economic Growth with Controlled Inflation",
+    "Description": "Moderate inflation persists alongside strong consumer spending, fostering a stable economic environment.",
+    "Probability": 0.2,
+    "Rationale": "Consumer sentiment indicators reflect resilience, supporting steady demand and mitigating deposit outflows.",
+    "ImpactChannels": [
+      "Consumer Spending Growth (%)",
+      "Credit Spreads (bps)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": -5,
+      "hy_oas": -10
+    },
+    "MetricsDelta": {
+      "LCR": 5,
+      "NSFR": 3,
+      "NII": 90
+    },
+    "TradeList": [
+      "Add $1bn Agency MBS",
+      "Rotate $300mn into high-grade corporates"
+    ],
+    "Assumptions": "Inflation stabilizes and consumer confidence drives sustained lending activity."
+  },
+  {
+    "Scenario": "Consumer Spending Shock with Deposit Runoff",
+    "Description": "A sudden decline in consumer confidence leads to a 10% increase in deposit runoff, particularly in wealth management accounts.",
+    "Probability": 0.18,
+    "Rationale": "Increased deposit runoff affects liquidity, impacting the LCR and NSFR metrics.",
+    "ImpactChannels": [
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "Deposit_runoff": 10
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase short-term funding via CP issuance by $1.5bn."
+    ],
+    "Assumptions": "Consumer balance sheets deteriorate due to inflation pressures."
+  },
+  {
+    "Scenario": "Significant Deposit Runoff",
+    "Description": "A 10% runoff in retail deposits occurs due to rising interest rates, leading to a liquidity squeeze.",
+    "Probability": 0.15,
+    "Rationale": "Rising rates may drive consumers to seek higher-yielding investments, impacting Bank of America's deposit base.",
+    "ImpactChannels": [
+      "Deposits/runoff (%)"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -4,
+      "NII": -150
+    },
+    "TradeList": [
+      "Increase $1bn in wholesale funding",
+      "Optimize deposit pricing strategy"
+    ],
+    "Assumptions": "Consumer sentiment shifts towards higher returns, affecting deposit stability."
+  },
+  {
+    "Scenario": "Regulatory Flexibility Enhancing Liquidity Management",
+    "Description": "Increased regulatory flexibility allows for optimized liquidity management, enhancing the bank's funding profile.",
+    "Probability": 0.15,
+    "Rationale": "Policymakers may relax certain requirements to promote lending and economic recovery, benefiting the bank.",
+    "ImpactChannels": [
+      "Regulatory Ratios",
+      "Funding Flexibility"
+    ],
+    "Shocks": {
+      "move": 0,
+      "ig_oas": 0,
+      "hy_oas": 0
+    },
+    "MetricsDelta": {
+      "LCR": 6,
+      "NSFR": 4,
+      "NII": 100
+    },
+    "TradeList": [
+      "Prepare for $2bn TLAC issuance",
+      "Engage in $1bn green bond purchases"
+    ],
+    "Assumptions": "Regulatory environment becomes more favorable, enhancing the bank's ability to manage liquidity effectively."
+  },
+  {
+    "Scenario": "Regulatory Changes and TLAC Adjustments",
+    "Description": "Introduction of stricter TLAC requirements and adjustments to GSIB surcharges, increasing liquidity add-ons by 50bps.",
+    "Probability": 0.14,
+    "Rationale": "Increased capital requirements could lead to tighter liquidity conditions and may necessitate adjustments in the HQLA stack.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {
+      "TLAC": 50
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Shift $1bn from Level 2A to Level 1 HQLA to meet new TLAC standards."
+    ],
+    "Assumptions": "Market conditions remain stable; no major economic shocks."
+  },
+  {
+    "Scenario": "Macro Resilience with Consumer Demand",
+    "Description": "Consumer confidence remains strong, leading to stable credit demand and a resilient deposit base.",
+    "Probability": 0.13,
+    "Rationale": "Strong consumer demand supports lending and mitigates risks associated with deposit outflows.",
+    "ImpactChannels": [
+      "Consumer Confidence",
+      "Credit Demand"
+    ],
+    "Shocks": {
+      "consumer_confidence": "high"
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Increase lending by $1bn to SMEs."
+    ],
+    "Assumptions": "Stable economic growth with no significant disruptions."
+  },
+  {
+    "Scenario": "Diverse Funding Sources Stabilizing Liquidity",
+    "Description": "Bank of America leverages diverse funding sources to maintain liquidity in a rising rate environment.",
+    "Probability": 0.13,
+    "Rationale": "Access to various funding mechanisms provides resilience against liquidity pressures.",
+    "ImpactChannels": [
+      "Funding Stability"
+    ],
+    "Shocks": {
+      "wholesale_funding": "stable"
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 2
+    },
+    "TradeList": [
+      "Issue $1bn in long-term bonds to enhance liquidity."
+    ],
+    "Assumptions": "Funding markets remain favorable."
+  },
+  {
+    "Scenario": "MBS Basis Widening and Lower Treasury Yields",
+    "Description": "The MBS basis widens by 50 bps while Treasury yields decline due to safe-haven demand.",
+    "Probability": 0.1,
+    "Rationale": "Increased volatility in the mortgage market and shifts in investor sentiment can widen the MBS basis significantly.",
+    "ImpactChannels": [
+      "MBS basis (bps)"
+    ],
+    "Shocks": {
+      "move": -30,
+      "ig_oas": 0,
+      "hy_oas": 0,
+      "mbs_basis": 50
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "NII": -100
+    },
+    "TradeList": [
+      "Add $500mn MBS via direct purchase",
+      "Reduce UST holdings by $300mn"
+    ],
+    "Assumptions": "Market reacts to geopolitical tensions, increasing prepayment risks and volatility in MBS."
+  }
+]
