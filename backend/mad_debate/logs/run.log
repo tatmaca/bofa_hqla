@@ -13125,3 +13125,28 @@ A's Position Critique:
 02:43:51 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_024243/scenarios_final.json
 02:43:51 [INFO] Wrote run metadata to data/scenarios/runs/20251208_024243/metadata.json
 02:43:51 [INFO] Done.
+03:03:09 [INFO] Starting HQLA MAD Scenario Generator (max-debug rewrite).
+03:03:09 [INFO] Detected OPENAI_API_KEY (length=164).
+03:03:09 [INFO] openai package version: 2.6.1
+03:03:09 [INFO] Override debater A prompt via MAD_PROMPT_DEBATER_A
+03:03:09 [INFO] Override debater B prompt via MAD_PROMPT_DEBATER_B
+03:03:09 [INFO] Override judge prompt via MAD_PROMPT_JUDGE
+03:03:09 [INFO] Override portfolio name via MAD_PORTFOLIO_NAME
+03:03:09 [INFO] Attach user shock YAML via MAD_SHOCK_YAML
+03:03:09 [INFO] Debaters: ['gpt-4o-mini', 'gpt-4o-mini'] | Judge: gpt-4.1
+03:03:09 [INFO] Rounds=1 Runs=1 Temp(deb)=0.7 Temp(judge)=0.2 Top_p=0.9 MaxTokens(deb)=10000 JudgeMaxTokens=2000
+03:03:09 [INFO] [RUN#1/1] starting debate...
+03:03:45 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:03:45 [INFO] [RUN#1 R1-A] tokens: prompt=985 output=1576 total=2561
+03:04:16 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:04:16 [INFO] [RUN#1 R1-B] tokens: prompt=1858 output=1178 total=3036
+03:04:16 [INFO] [RUN#1] Invoking judge model=gpt-4.1
+03:04:25 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:04:25 [INFO] [RUN#1 JUDGE] tokens: prompt=2976 output=1165 total=4141
+03:04:25 [INFO] [RUN#1] Wrote transcript to data/scenarios/runs/20251208_030309/transcript_run_1.{jsonl,md}
+03:04:25 [INFO] [RUN#1] Saved intermediate results to data/scenarios/runs/20251208_030309/tmp_run_1.json (count=6)
+03:04:25 [INFO] [RUN#1] finished; scenarios=6
+03:04:25 [INFO] Wrote 6 aggregated scenarios to /tmp/mad_scenarios.json
+03:04:25 [INFO] Wrote run-local scenario copy to data/scenarios/runs/20251208_030309/scenarios_final.json
+03:04:25 [INFO] Wrote run metadata to data/scenarios/runs/20251208_030309/metadata.json
+03:04:25 [INFO] Done.

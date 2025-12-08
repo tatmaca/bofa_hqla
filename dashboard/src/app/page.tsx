@@ -1174,59 +1174,6 @@ export default function HqlaE2EDashboard() {
           </Card>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.08 }}
-        >
-          <Card className="shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle>Attribution Viewer</CardTitle>
-              <CardDescription>
-                One-click open of the attribution HTML with chart links.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-4 gap-3 items-end">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none">
-                    Report date
-                  </label>
-                  <Input
-                    type="date"
-                    className="h-9"
-                    value={attributionDate}
-                    onChange={(e) => setAttributionDate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none">
-                    Image type
-                  </label>
-                  <select
-                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                    value={attributionMode}
-                    onChange={(e) => setAttributionMode(e.target.value)}
-                  >
-                    <option value="all">All</option>
-                    <option value="report">Report</option>
-                    <option value="heatmap">Heatmap</option>
-                    <option value="none">None</option>
-                  </select>
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-medium leading-none">
-                    Open
-                  </label>
-                  <Button className="w-full" onClick={openAttributionPage}>
-                    Open attribution HTML
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
         {/* Portfolio summary table */}
         {portfolioSummary && (
           <Card className="shadow-sm">
@@ -1908,6 +1855,61 @@ export default function HqlaE2EDashboard() {
                   </div>
                 </div>
               </div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.08 }}
+              >
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle>Attribution Viewer</CardTitle>
+                    <CardDescription>
+                      One-click open of the attribution HTML with chart links.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-4 gap-3 items-end">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium leading-none">
+                          Report date
+                        </label>
+                        <Input
+                          type="date"
+                          className="h-9"
+                          value={attributionDate}
+                          onChange={(e) => setAttributionDate(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium leading-none">
+                          Image type
+                        </label>
+                        <select
+                          className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                          value={attributionMode}
+                          onChange={(e) => setAttributionMode(e.target.value)}
+                        >
+                          <option value="all">All</option>
+                          <option value="report">Report</option>
+                          <option value="heatmap">Heatmap</option>
+                          <option value="none">None</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-sm font-medium leading-none">
+                          Open
+                        </label>
+                        <Button
+                          className="w-full"
+                          onClick={openAttributionPage}
+                        >
+                          Open attribution HTML
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
               <div className="mt-3">
                 <Progress value={pipelinePct} />
                 <p className="mt-2 text-xs text-muted-foreground">
