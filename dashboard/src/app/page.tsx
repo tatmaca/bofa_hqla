@@ -67,6 +67,8 @@ function cleanStageLine(line?: string | null) {
   return txt.trim();
 }
 
+const API_BASE = "http://127.0.0.1:8000";
+
 async function runScenarioGen(
   setter: (s: any) => void,
   params: {
@@ -673,6 +675,8 @@ export default function HqlaE2EDashboard() {
   );
   const [offlineMode, setOfflineMode] = useState(false);
   const [activeNewsArticle, setActiveNewsArticle] = useState<any | null>(null);
+  const [attributionDate, setAttributionDate] = useState("2025-11-27");
+  const [attributionMode, setAttributionMode] = useState("all");
 
   // Debate configuration (mirrors Python MAD config high-level knobs)
   const [debateRounds, setDebateRounds] = useState(3);
@@ -813,6 +817,15 @@ export default function HqlaE2EDashboard() {
     const data = await res.json();
     setPortfolioSummary(data);
   }
+
+  const openAttributionPage = () => {
+    const fallbackDate = new Date().toISOString().slice(0, 10);
+    const dateParam = attributionDate || fallbackDate;
+    const url = `${API_BASE}/attribution/html?date=${dateParam}&image_mode=${attributionMode}&embed_images=false`;
+    if (typeof window !== "undefined") {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
 
   // Function to handle scenario pricing
   async function handleScenarioPricing(selectedScenarioKey: string | null) {
@@ -1095,6 +1108,59 @@ export default function HqlaE2EDashboard() {
                     disabled={!yieldCurveFile || loadingCurve}
                   >
                     {loadingCurve ? "Uploading..." : "Upload Yield Curve"}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.08 }}
+        >
+          <Card className="shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle>Attribution Viewer</CardTitle>
+              <CardDescription>
+                One-click open of the attribution HTML with chart links.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-4 gap-3 items-end">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">
+                    Report date
+                  </label>
+                  <Input
+                    type="date"
+                    className="h-9"
+                    value={attributionDate}
+                    onChange={(e) => setAttributionDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">
+                    Image type
+                  </label>
+                  <select
+                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    value={attributionMode}
+                    onChange={(e) => setAttributionMode(e.target.value)}
+                  >
+                    <option value="all">All</option>
+                    <option value="report">Report</option>
+                    <option value="heatmap">Heatmap</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium leading-none">
+                    Open
+                  </label>
+                  <Button className="w-full" onClick={openAttributionPage}>
+                    Open attribution HTML
                   </Button>
                 </div>
               </div>
