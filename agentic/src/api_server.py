@@ -610,6 +610,43 @@ async def get_attribution_html(
     return HTMLResponse(content=html, media_type="text/html", headers=headers)
 
 
+@app.get("/attribution/json")
+async def get_attribution_json(
+    request: Request,
+    date: str | None = None,
+    image_mode: str = "all",
+    embed_images: bool = False,
+):
+    """Return attribution payload as JSON (with chart urls / optional base64)."""
+    try:
+        target_date = date or _dt.date.today().isoformat()
+    except Exception:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Invalid date format, expected YYYY-MM-DD"},
+        )
+
+    image_mode = (image_mode or "all").lower()
+    if image_mode not in ALLOWED_IMAGE_MODES:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": f"image_mode must be one of {sorted(ALLOWED_IMAGE_MODES)}"
+            },
+        )
+
+    data, err = _load_attribution_payload(
+        target_date=target_date,
+        image_mode=image_mode,
+        embed_images=embed_images,
+        request=request,
+    )
+    if err:
+        return err
+
+    return JSONResponse(content={"date": target_date, **data})
+
+
 @app.post("/generate-scenario-curves/")
 async def generate_scenario_curves_endpoint(
     jsonl_input: str = Body(..., description="Scenario JSONL content"),

@@ -51,11 +51,12 @@ import {
   Newspaper,
   Settings,
   ChevronRight,
+  ChevronLeft,
   Download,
   ArrowRight,
   RefreshCw,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 // --- Replace these with real API calls / events wired to your Python backend --- //
 function fakeWait(ms: number) {
@@ -800,6 +801,15 @@ export default function HqlaE2EDashboard() {
   const [activeNewsArticle, setActiveNewsArticle] = useState<any | null>(null);
   const [attributionDate, setAttributionDate] = useState("2025-11-27");
   const [attributionMode, setAttributionMode] = useState("all");
+  const [attributionImages, setAttributionImages] = useState<any[]>([]);
+  const [loadingAttribution, setLoadingAttribution] = useState(false);
+  const [attributionError, setAttributionError] = useState<string | null>(null);
+  const [attributionIdx, setAttributionIdx] = useState(0);
+  const [attributionZoom, setAttributionZoom] = useState<{
+    open: boolean;
+    src: string | null;
+    title: string;
+  }>({ open: false, src: null, title: "" });
   const [netCashOutflow, setNetCashOutflow] = useState(1_000_000_000);
   const [minLcr, setMinLcr] = useState(1.0);
   const [maxLcr, setMaxLcr] = useState(1.5);
@@ -972,12 +982,34 @@ export default function HqlaE2EDashboard() {
     setPortfolioSummary(data);
   }
 
-  const openAttributionPage = () => {
+  const loadAttributionInline = async () => {
     const fallbackDate = new Date().toISOString().slice(0, 10);
     const dateParam = attributionDate || fallbackDate;
-    const url = `${API_BASE}/attribution/html?date=${dateParam}&image_mode=${attributionMode}&embed_images=false`;
-    if (typeof window !== "undefined") {
-      window.open(url, "_blank", "noopener,noreferrer");
+    setLoadingAttribution(true);
+    setAttributionError(null);
+    try {
+      const res = await fetch(
+        `${API_BASE}/attribution/json?date=${dateParam}&image_mode=${attributionMode}&embed_images=true`,
+      );
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({}));
+        throw new Error(detail?.error || "Failed to load attribution");
+      }
+      const data = await res.json();
+      const imgs =
+        data?.chart_images?.length && Array.isArray(data.chart_images)
+          ? data.chart_images
+          : (data?.chart_urls || []).map((url: string, i: number) => ({
+              name: `chart_${i + 1}`,
+              url,
+            }));
+      setAttributionImages(imgs || []);
+      setAttributionIdx(0);
+    } catch (err: any) {
+      setAttributionError(err?.message || "Failed to load attribution");
+      setAttributionImages([]);
+    } finally {
+      setLoadingAttribution(false);
     }
   };
 
@@ -2355,17 +2387,20 @@ export default function HqlaE2EDashboard() {
                           <option value="none">None</option>
                         </select>
                       </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-sm font-medium leading-none">
-                          Open
-                        </label>
-                        <Button
-                          className="w-full"
-                          onClick={openAttributionPage}
-                        >
-                          Open attribution HTML
-                        </Button>
-                      </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-medium leading-none">
+                          Load inline
+                    </label>
+                    <Button
+                      className="w-full"
+                      onClick={loadAttributionInline}
+                      disabled={loadingAttribution}
+                    >
+                      {loadingAttribution
+                        ? "Loading attribution..."
+                        : "Load attribution inline"}
+                    </Button>
+                  </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -2379,6 +2414,147 @@ export default function HqlaE2EDashboard() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Inline attribution images */}
+        {(attributionImages.length > 0 || attributionError) && (
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle>Attribution Charts</CardTitle>
+              <CardDescription>
+                Factor attribution and heatmap images loaded inline for the
+                selected date.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {attributionError && (
+                <div className="text-sm text-red-600 mb-3">
+                  {attributionError}
+                </div>
+              )}
+              {attributionImages.length > 0 && (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative w-full max-w-5xl">
+                    <div className="absolute inset-y-1/2 left-0 -translate-y-1/2 z-20">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="pointer-events-auto"
+                        onClick={() =>
+                          setAttributionIdx((i) =>
+                            (i - 1 + attributionImages.length) %
+                            Math.max(attributionImages.length, 1),
+                          )
+                        }
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="absolute inset-y-1/2 right-0 -translate-y-1/2 z-20">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="pointer-events-auto"
+                        onClick={() =>
+                          setAttributionIdx((i) =>
+                            (i + 1) % Math.max(attributionImages.length, 1),
+                          )
+                        }
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="w-full rounded-lg border bg-white overflow-hidden shadow-sm h-[540px] flex items-center justify-center relative">
+                      <AnimatePresence mode="wait">
+                        {(() => {
+                          const img =
+                            attributionImages[
+                              ((attributionIdx % attributionImages.length) +
+                                attributionImages.length) %
+                                attributionImages.length
+                            ];
+                          const src = img?.data_uri || img?.abs_url || img?.url;
+                          return (
+                            <motion.div
+                              key={attributionIdx}
+                              className="w-full h-full flex flex-col"
+                              initial={{ opacity: 0, x: 40 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -40 }}
+                              transition={{ duration: 0.25 }}
+                            >
+                              <div className="flex items-center justify-between px-3 py-2 border-b text-xs font-semibold text-slate-700">
+                                <span>{img?.name || `Chart ${attributionIdx + 1}`}</span>
+                                <span className="text-slate-500">
+                                  {attributionIdx + 1} / {attributionImages.length}
+                                </span>
+                              </div>
+                              <button
+                                className="flex-1 bg-slate-50 flex items-center justify-center"
+                                onClick={() =>
+                                  src &&
+                                  setAttributionZoom({
+                                    open: true,
+                                    src: null, // derive from idx
+                                    title: img?.name || `Chart ${attributionIdx + 1}`,
+                                  })
+                                }
+                              >
+                                {src ? (
+                                  <img
+                                    src={src}
+                                    alt={img?.name || `chart-${attributionIdx + 1}`}
+                                    className="max-h-[480px] w-full object-contain transition-transform duration-200 hover:scale-[1.03]"
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <div className="p-4 text-sm text-slate-500">
+                                    No image available
+                                  </div>
+                                )}
+                              </button>
+                            </motion.div>
+                          );
+                        })()}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 overflow-x-auto max-w-5xl w-full pt-2 justify-center">
+                    {attributionImages.map((img: any, idx: number) => {
+                      const src = img?.data_uri || img?.abs_url || img?.url;
+                      const isActive = idx === attributionIdx;
+                      return (
+                        <button
+                          key={`${img?.name || "thumb"}-${idx}`}
+                          className={`relative rounded-md border bg-white overflow-hidden min-w-[160px] max-w-[180px] h-[120px] flex-shrink-0 ${
+                            isActive ? "ring-2 ring-blue-500" : ""
+                          }`}
+                          onClick={() => setAttributionIdx(idx)}
+                        >
+                          {src ? (
+                            <img
+                              src={src}
+                              alt={img?.name || `thumb-${idx + 1}`}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="p-2 text-[11px] text-slate-500 text-left">
+                              No image
+                            </div>
+                          )}
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[11px] px-2 py-1 line-clamp-1">
+                            {img?.name || `Chart ${idx + 1}`}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Hidden sections kept for future use */}
         <div className="hidden" />
@@ -2515,6 +2691,84 @@ export default function HqlaE2EDashboard() {
                 into your YAML / run config.
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Zoom modal for attribution images */}
+        <Dialog
+          open={attributionZoom.open}
+          onOpenChange={(v) =>
+            setAttributionZoom((prev) => ({ ...prev, open: v }))
+          }
+        >
+          <DialogContent className="sm:max-w-[95vw] max-w-[98vw] max-h-[92vh] overflow-auto text-[15px] p-4 flex flex-col gap-3">
+            <DialogHeader>
+              <DialogTitle>
+                {attributionZoom.title || "Attribution chart"}
+              </DialogTitle>
+            </DialogHeader>
+            {(() => {
+              const img =
+                attributionImages[
+                  ((attributionIdx % Math.max(attributionImages.length, 1)) +
+                    Math.max(attributionImages.length, 1)) %
+                    Math.max(attributionImages.length, 1)
+                ];
+              const src = img?.data_uri || img?.abs_url || img?.url;
+              return (
+                <>
+                  <div className="flex-1 relative flex items-center justify-center">
+                    {attributionImages.length > 1 && (
+                      <>
+                        <div className="absolute left-2 top-1/2 -translate-y-1/2 z-30">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setAttributionIdx((i) =>
+                                (i - 1 + Math.max(attributionImages.length, 1)) %
+                                Math.max(attributionImages.length, 1),
+                              );
+                            }}
+                          >
+                            <ChevronLeft className="h-5 w-5" />
+                          </Button>
+                        </div>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 z-30">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setAttributionIdx((i) =>
+                                (i + 1) % Math.max(attributionImages.length, 1),
+                              );
+                            }}
+                          >
+                            <ChevronRight className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                    {src ? (
+                      <img
+                        src={src}
+                        alt={img?.name || attributionZoom.title || "attribution-chart"}
+                        className="max-h-[80vh] max-w-[92vw] w-auto object-contain"
+                      />
+                    ) : (
+                      <div className="text-sm text-slate-500">No image</div>
+                    )}
+                  </div>
+                  {attributionImages.length > 1 && (
+                    <div className="flex items-center justify-center gap-3 pt-1">
+                      <span className="text-xs text-slate-500">
+                        {attributionIdx + 1} / {attributionImages.length}
+                      </span>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </DialogContent>
         </Dialog>
 
