@@ -1393,7 +1393,7 @@ export default function HqlaE2EDashboard() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-none px-4 py-6 grid gap-6">
+      <main className="mx-auto w-full max-w-none px-4 py-6 space-y-6">
         {/* Inputs — compact */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -3743,7 +3743,7 @@ function PortfolioCharts({
   );
 
   return (
-    <div className="grid gap-6 max-w-5xl w-full mx-auto">
+    <div className="grid gap-6 w-full mx-auto">
       <div className="grid gap-4 md:grid-cols-2">
         <ChartCard
           title="Rating mix"
