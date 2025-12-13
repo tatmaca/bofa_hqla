@@ -6,6 +6,11 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -910,6 +915,7 @@ export default function HqlaE2EDashboard() {
   const [scenarioSummary, setScenarioSummary] = useState<any>(null);
   const [loadingPortfolio, setLoadingPortfolio] = useState(false);
   const [loadingCurve, setLoadingCurve] = useState(false);
+  const [showDetailsTable, setShowDetailsTable] = useState(false);
   const allDone = [scenario, impact, opt, mon].every(
     (s) => s.status === "done",
   );
@@ -1455,11 +1461,44 @@ export default function HqlaE2EDashboard() {
           </Card>
         </motion.div>
 
-        {/* Portfolio summary table */}
+        {/* Portfolio impact visualized (default view) */}
         {portfolioSummary && (
           <Card className="shadow-sm">
+            <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle>Portfolio Impact (Charts)</CardTitle>
+                <CardDescription>
+                  Hover to see numbers. Charts show before vs after any selected
+                  scenario. Click "Show details" for the full table.
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant={scenarioSummary ? "default" : "outline"}>
+                  {scenarioSummary ? "Scenario pricing" : "Realized"}
+                </Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDetailsTable((v) => !v)}
+                >
+                  {showDetailsTable ? "Hide details" : "Show details"}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <PortfolioCharts
+                baseRows={portfolioSummary.assets || []}
+                scenarioRows={scenarioSummary?.scenario || []}
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Portfolio summary table (hidden until requested) */}
+        {portfolioSummary && showDetailsTable && (
+          <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle>Portfolio Summary</CardTitle>
+              <CardTitle>Portfolio Details</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="max-h-64 overflow-y-auto">
@@ -3570,6 +3609,272 @@ function formatScenarioField(key: string, value: any): string {
   if (Array.isArray(value)) return value.join(", ");
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
+}
+
+// --- Portfolio chart helpers ---
+
+// Bank-of-America-inspired palette
+const SLICE_COLORS = [
+  "#012169", // navy
+  "#BA0C2F", // red
+  "#0057B8", // bright blue
+  "#6A8DFF", // soft blue
+  "#FFC72C", // gold
+  "#8C9FB1", // slate
+  "#B31B34", // deep red
+];
+
+function calcWeight(row: any) {
+  const qty = Number(row?.quantity);
+  const clean = Number(row?.clean_price);
+  const weight =
+    (Number.isFinite(clean) ? clean : 1) * (Number.isFinite(qty) ? qty : 1);
+  return weight > 0 ? weight : 1;
+}
+
+function buildDistribution(rows: any[], key: string) {
+  const totals = new Map<string, number>();
+  (rows || []).forEach((r) => {
+    const name = (r?.[key] || "Unknown").toString();
+    const w = calcWeight(r);
+    totals.set(name, (totals.get(name) || 0) + w);
+  });
+  return Array.from(totals.entries()).map(([name, value]) => ({ name, value }));
+}
+
+function calcMetric(rows: any[], key: string) {
+  if (!rows?.length) return 0;
+  let total = 0;
+  let weightSum = 0;
+  rows.forEach((r) => {
+    const v = Number(r?.[key]);
+    if (!Number.isFinite(v)) return;
+    const w = calcWeight(r);
+    if (key === "dv01" || key === "cs01") {
+      total += v * w; // sums of risk measures
+    } else {
+      total += v * w;
+      weightSum += w;
+    }
+  });
+  if (key === "dv01" || key === "cs01") return total;
+  return weightSum > 0 ? total / weightSum : 0;
+}
+
+function buildMetricBars(baseRows: any[], scenarioRows: any[] | null) {
+  const defs = [
+    { key: "duration", label: "Duration (wtd avg)" },
+    { key: "dv01", label: "DV01 (sum)" },
+    { key: "cs01", label: "CS01 (sum)" },
+    { key: "convexity", label: "Convexity (wtd avg)" },
+  ];
+  const hasScenario = !!(scenarioRows && scenarioRows.length);
+  return defs.map(({ key, label }) => ({
+    metric: label,
+    Base: calcMetric(baseRows, key),
+    Scenario: hasScenario ? calcMetric(scenarioRows || [], key) : null,
+  }));
+}
+
+function ChartCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white/70 p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="mb-2">
+        <div className="text-sm font-semibold text-slate-800">{title}</div>
+        {subtitle && (
+          <div className="text-xs text-slate-500 leading-snug">{subtitle}</div>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function PortfolioCharts({
+  baseRows = [],
+  scenarioRows = [],
+}: {
+  baseRows: any[];
+  scenarioRows: any[];
+}) {
+  const hasScenario = Array.isArray(scenarioRows) && scenarioRows.length > 0;
+  const scenarioSet = hasScenario ? scenarioRows : baseRows;
+
+  const ratingBase = buildDistribution(baseRows, "rating");
+  const ratingScenario = buildDistribution(scenarioSet, "rating");
+  const ratingLabels = Array.from(
+    new Set([...ratingBase, ...ratingScenario].map((d) => d.name)),
+  );
+  const colorForRating = (name: string) => {
+    const idx = ratingLabels.indexOf(name);
+    return SLICE_COLORS[(idx === -1 ? 0 : idx) % SLICE_COLORS.length];
+  };
+  const ratingLegend = ratingLabels.map((name, idx) => ({
+    value: name,
+    type: "square",
+    color: SLICE_COLORS[idx % SLICE_COLORS.length],
+  }));
+
+  const categoryBase = buildDistribution(baseRows, "category");
+  const categoryScenario = buildDistribution(scenarioSet, "category");
+  const categoryLabels = Array.from(
+    new Set([...categoryBase, ...categoryScenario].map((d) => d.name)),
+  );
+  const colorForCategory = (name: string) => {
+    const idx = categoryLabels.indexOf(name);
+    return SLICE_COLORS[(idx === -1 ? 0 : idx) % SLICE_COLORS.length];
+  };
+  const categoryLegend = categoryLabels.map((name, idx) => ({
+    value: name,
+    type: "square",
+    color: SLICE_COLORS[idx % SLICE_COLORS.length],
+  }));
+  const metricBars = buildMetricBars(
+    baseRows,
+    hasScenario ? scenarioSet : null,
+  );
+
+  return (
+    <div className="grid gap-6 max-w-5xl w-full mx-auto">
+      <div className="grid gap-4 md:grid-cols-2">
+        <ChartCard
+          title="Rating mix"
+          subtitle="Inner ring = before, outer ring = after scenario"
+        >
+          <ResponsiveContainer width="100%" height={260}>
+            <PieChart>
+              <Tooltip />
+              <Legend payload={ratingLegend} />
+              <Pie
+                data={ratingBase}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={30}
+                outerRadius={70}
+                stroke="none"
+                labelLine={false}
+              >
+                {ratingBase.map((entry, idx) => (
+                  <Cell key={idx} fill={colorForRating(entry.name)} />
+                ))}
+              </Pie>
+              {hasScenario && (
+                <Pie
+                  data={ratingScenario}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={80}
+                  outerRadius={110}
+                  stroke="none"
+                  labelLine={false}
+                >
+                  {ratingScenario.map((entry, idx) => (
+                    <Cell
+                      key={idx}
+                      fill={colorForRating(entry.name)}
+                      opacity={0.8}
+                    />
+                  ))}
+                </Pie>
+              )}
+            </PieChart>
+          </ResponsiveContainer>
+        </ChartCard>
+
+        <ChartCard
+          title="Category mix"
+          subtitle="Inner ring = before, outer ring = after scenario"
+        >
+          <ResponsiveContainer width="100%" height={260}>
+            <PieChart>
+              <Tooltip />
+              <Legend payload={categoryLegend} />
+              <Pie
+                data={categoryBase}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={30}
+                outerRadius={70}
+                stroke="none"
+                labelLine={false}
+              >
+                {categoryBase.map((entry, idx) => (
+                  <Cell key={idx} fill={colorForCategory(entry.name)} />
+                ))}
+              </Pie>
+              {hasScenario && (
+                <Pie
+                  data={categoryScenario}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={80}
+                  outerRadius={110}
+                  stroke="none"
+                  labelLine={false}
+                >
+                  {categoryScenario.map((entry, idx) => (
+                    <Cell
+                      key={idx}
+                      fill={colorForCategory(entry.name)}
+                      opacity={0.8}
+                    />
+                  ))}
+                </Pie>
+              )}
+            </PieChart>
+          </ResponsiveContainer>
+        </ChartCard>
+      </div>
+
+      <ChartCard
+        title="Risk profile before/after"
+        subtitle="Hover to see weighted metrics; bars are scaled, not labeled."
+      >
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart
+            data={metricBars}
+            margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="metric" interval={0} tick={{ fontSize: 11 }} />
+            <YAxis tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Legend />
+            <Bar
+              dataKey="Base"
+              fill={SLICE_COLORS[0]}
+              radius={[4, 4, 0, 0]}
+              name="Base"
+            />
+            {hasScenario && (
+              <Bar
+                dataKey="Scenario"
+                fill={SLICE_COLORS[1]}
+                radius={[4, 4, 0, 0]}
+                name="Scenario"
+              />
+            )}
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartCard>
+    </div>
+  );
 }
 
 function buildScenarioTableColumns(data: any[]) {

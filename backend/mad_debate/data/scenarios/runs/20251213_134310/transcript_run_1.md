@@ -1,0 +1,267 @@
+# Debate Transcript — Run 1
+
+### **JUDGE** (Judge)
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "A bear steepening of the yield curve occurs as long-term rates rise due to economic growth signals, while short-term rates remain stable.",
+        "Probability": 0.20,
+        "Rationale": "This scenario reflects expectations of improved economic performance, leading to higher long-term yields and potential capital gains losses on fixed-income holdings.",
+        "ImpactChannels": "Rates, Curve",
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -10, "NSFR": -5},
+        "TradeList": ["Add $1bn bills via repo", "Reduce $500m in Level 2A MBS"],
+        "Assumptions": "Interest rates remain stable in the near term with moderate economic growth.",
+        "Signals": ["10-year Treasury yield > 3.50%", "GDP growth forecast > 2.5%", "FOMC meeting on 2025-01-30"],
+        "PredictionDate": "2025-12-13"
+    },
+    {
+        "Scenario": "Credit Spread Widening",
+        "Description": "A significant widening of credit spreads occurs due to increased risk aversion in the market, impacting valuations of corporate bonds and MBS.",
+        "Probability": 0.15,
+        "Rationale": "Deteriorating market sentiment could lead to wider credit spreads, negatively impacting HQLA valuations and increasing funding costs.",
+        "ImpactChannels": "Credit, MBS",
+        "Shocks": {"credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -5, "OCI": -15},
+        "TradeList": ["Sell $250m corporate bonds", "Increase repo funding by $1bn"],
+        "Assumptions": "Economic indicators show signs of stress, leading to heightened risk aversion.",
+        "Signals": ["IG OAS > 135 bps", "HY OAS > 455 bps", "Credit rating downgrades in the sector before 2025-03-01"],
+        "PredictionDate": "2025-12-13"
+    },
+    {
+        "Scenario": "Regulatory Tightening",
+        "Description": "New regulations are introduced that increase capital and liquidity requirements for G-SIBs, affecting BoA's funding strategy.",
+        "Probability": 0.10,
+        "Rationale": "Regulatory changes could impose additional liquidity add-ons, necessitating a shift in funding strategies and impacting profitability.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"regulatory": "Increased liquidity add-ons"},
+        "MetricsDelta": {"LCR": -7, "NSFR": -8},
+        "TradeList": ["Increase retail deposit rates", "Reduce wholesale funding by $1bn"],
+        "Assumptions": "Regulatory bodies push for stricter compliance in light of market conditions.",
+        "Signals": ["Basel III revisions announced on 2025-01-15", "FOMC feedback on regulatory impacts on 2025-02-20"],
+        "PredictionDate": "2025-12-13"
+    },
+    {
+        "Scenario": "Deposits Runoff",
+        "Description": "A significant runoff in retail and wealth deposits occurs as consumers shift funds to higher-yielding alternatives.",
+        "Probability": 0.20,
+        "Rationale": "As interest rates rise, depositors may seek better returns elsewhere, impacting BoA's liquidity position.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"deposits": -5},
+        "MetricsDelta": {"LCR": -8, "NSFR": -6},
+        "TradeList": ["Increase marketing for retail deposits", "Adjust interest rates on CDs"],
+        "Assumptions": "Market conditions lead to increased competition for deposits.",
+        "Signals": ["Retail deposit growth rate < 2% by 2025-03-31", "Wealth management outflows > $2bn in Q1 2025"],
+        "PredictionDate": "2025-12-13"
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "The MBS basis widens significantly due to market dislocations, impacting the valuation of BoA's Level 2A assets.",
+        "Probability": 0.15,
+        "Rationale": "Wider MBS basis could lead to decreased valuations of MBS, affecting overall liquidity metrics.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"mbs_basis": 50},
+        "MetricsDelta": {"OCI": -20, "LCR": -6},
+        "TradeList": ["Sell $300m MBS", "Increase repo funding for MBS by $500m"],
+        "Assumptions": "Market conditions lead to liquidity pressures in the MBS market.",
+        "Signals": ["MBS basis > 85 bps by 2025-04-15", "Monthly MBS issuance below $30bn"],
+        "PredictionDate": "2025-12-13"
+    },
+    {
+        "Scenario": "Economic Recovery with Stable Rates",
+        "Description": "An economic recovery occurs without significant rate hikes, leading to stable funding conditions and improved consumer confidence.",
+        "Probability": 0.20,
+        "Rationale": "If economic growth continues, it could enhance Bank of America's funding stability and asset performance.",
+        "ImpactChannels": "Growth, Stability",
+        "Shocks": {"economic_growth": 2.5},
+        "MetricsDelta": {"NII": 15, "LCR": 10},
+        "TradeList": ["Increase investments in growth sectors", "Hold steady on deposit rates"],
+        "Assumptions": "Consumer spending remains strong with steady inflation.",
+        "Signals": ["Consumer confidence index > 90", "Retail sales growth > 4% annually", "Unemployment rate < 4%"],
+        "PredictionDate": "2025-12-13"
+    }
+]
+```
+
+## Round 1
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "A bear steepening of the yield curve occurs as long-term rates rise due to economic growth signals, while short-term rates remain stable.",
+        "Probability": 0.25,
+        "Rationale": "This scenario reflects expectations of improved economic performance, leading to higher long-term yields and potential capital gains losses on fixed-income holdings.",
+        "ImpactChannels": "Rates, Curve",
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -10, "NSFR": -5},
+        "TradeList": ["Add $1bn bills via repo", "Reduce $500m in Level 2A MBS"],
+        "Assumptions": "Interest rates remain stable in the near term with moderate economic growth.",
+        "Signals": ["10-year Treasury yield > 3.50%", "GDP growth forecast > 2.5%", "FOMC meeting on 2025-01-30"]
+    },
+    {
+        "Scenario": "Credit Spread Widening",
+        "Description": "A significant widening of credit spreads occurs due to increased risk aversion in the market, impacting valuations of corporate bonds and MBS.",
+        "Probability": 0.20,
+        "Rationale": "Deteriorating market sentiment could lead to wider credit spreads, negatively impacting HQLA valuations and increasing funding costs.",
+        "ImpactChannels": "Credit, MBS",
+        "Shocks": {"credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -5, "OCI": -15},
+        "TradeList": ["Sell $250m corporate bonds", "Increase repo funding by $1bn"],
+        "Assumptions": "Economic indicators show signs of stress, leading to heightened risk aversion.",
+        "Signals": ["IG OAS > 135 bps", "HY OAS > 455 bps", "Credit rating downgrades in the sector before 2025-03-01"]
+    },
+    {
+        "Scenario": "Regulatory Tightening",
+        "Description": "New regulations are introduced that increase capital and liquidity requirements for G-SIBs, affecting BoA's funding strategy.",
+        "Probability": 0.15,
+        "Rationale": "Regulatory changes could impose additional liquidity add-ons, necessitating a shift in funding strategies and impacting profitability.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"regulatory": "Increased liquidity add-ons"},
+        "MetricsDelta": {"LCR": -7, "NSFR": -8},
+        "TradeList": ["Increase retail deposit rates", "Reduce wholesale funding by $1bn"],
+        "Assumptions": "Regulatory bodies push for stricter compliance in light of market conditions.",
+        "Signals": ["Basel III revisions announced on 2025-01-15", "FOMC feedback on regulatory impacts on 2025-02-20"]
+    },
+    {
+        "Scenario": "Deposits Runoff",
+        "Description": "A significant runoff in retail and wealth deposits occurs as consumers shift funds to higher-yielding alternatives.",
+        "Probability": 0.20,
+        "Rationale": "As interest rates rise, depositors may seek better returns elsewhere, impacting BoA's liquidity position.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"deposits": -5},
+        "MetricsDelta": {"LCR": -8, "NSFR": -6},
+        "TradeList": ["Increase marketing for retail deposits", "Adjust interest rates on CDs"],
+        "Assumptions": "Market conditions lead to increased competition for deposits.",
+        "Signals": ["Retail deposit growth rate < 2% by 2025-03-31", "Wealth management outflows > $2bn in Q1 2025"]
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "The MBS basis widens significantly due to market dislocations, impacting the valuation of BoA's Level 2A assets.",
+        "Probability": 0.20,
+        "Rationale": "Wider MBS basis could lead to decreased valuations of MBS, affecting overall liquidity metrics.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"mbs_basis": 50},
+        "MetricsDelta": {"OCI": -20, "LCR": -6},
+        "TradeList": ["Sell $300m MBS", "Increase repo funding for MBS by $500m"],
+        "Assumptions": "Market conditions lead to liquidity pressures in the MBS market.",
+        "Signals": ["MBS basis > 85 bps by 2025-04-15", "Monthly MBS issuance below $30bn"]
+    }
+]
+```
+
+### **Devil's advocate**
+
+**Reasoning**
+
+The Proponent’s position primarily emphasizes a risk-off outlook, which may overlook the more nuanced macroeconomic environment we currently face. While concerns about inflation and rising interest rates are valid, it is essential to recognize the controlled inflationary landscape we are in, supported by resilient consumer spending and robust SME growth. This resilience can drive stable deposit inflows and provide a more diversified funding stack, mitigating risk exposure.
+
+Additionally, the Proponent’s focus on potential funding issues may underestimate Bank of America’s ability to manage its HQLA exposures effectively. The bank's diverse funding sources can adapt to changing market conditions, allowing for strategic redeployment of liquidity. For instance, the opportunity to add Agency MBS or rotate into municipal bonds could enhance portfolio performance while managing convexity risk effectively.
+
+The Proponent’s position on basis risk also requires careful scrutiny. While wider credit spreads might signal market distress, this could also open up investment opportunities for Bank of America to enhance returns on its Level 2A assets. Moreover, the potential for regulatory relief could ease pressures on capital and liquidity metrics, allowing for a more favorable operating environment.
+
+In light of this analysis, it is essential to re-evaluate the assigned probabilities to reflect a more balanced outlook. By doing so, we can ensure a comprehensive understanding of the potential scenarios Bank of America faces.
+
+Revised probabilities:
+- Bear Steepener: 0.20
+- Credit Spread Widening: 0.15
+- Regulatory Tightening: 0.10
+- Deposits Runoff: 0.20
+- MBS Basis Widening: 0.15
+- Economic Recovery with Stable Rates: 0.20
+
+Total probability sums to 1.00.
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepener",
+        "Description": "A bear steepening of the yield curve occurs as long-term rates rise due to economic growth signals, while short-term rates remain stable.",
+        "Probability": 0.20,
+        "Rationale": "This scenario reflects expectations of improved economic performance, leading to higher long-term yields and potential capital gains losses on fixed-income holdings.",
+        "ImpactChannels": "Rates, Curve",
+        "Shocks": {"move": 120, "yield_curve": "bear_steepener"},
+        "MetricsDelta": {"LCR": -10, "NSFR": -5},
+        "TradeList": ["Add $1bn bills via repo", "Reduce $500m in Level 2A MBS"],
+        "Assumptions": "Interest rates remain stable in the near term with moderate economic growth.",
+        "Signals": ["10-year Treasury yield > 3.50%", "GDP growth forecast > 2.5%", "FOMC meeting on 2025-01-30"],
+        "PredictionDate": "2025-12-13"
+    },
+    {
+        "Scenario": "Credit Spread Widening",
+        "Description": "A significant widening of credit spreads occurs due to increased risk aversion in the market, impacting valuations of corporate bonds and MBS.",
+        "Probability": 0.15,
+        "Rationale": "Deteriorating market sentiment could lead to wider credit spreads, negatively impacting HQLA valuations and increasing funding costs.",
+        "ImpactChannels": "Credit, MBS",
+        "Shocks": {"credit_spreads": {"ig_oas": 15, "hy_oas": 45}},
+        "MetricsDelta": {"LCR": -5, "OCI": -15},
+        "TradeList": ["Sell $250m corporate bonds", "Increase repo funding by $1bn"],
+        "Assumptions": "Economic indicators show signs of stress, leading to heightened risk aversion.",
+        "Signals": ["IG OAS > 135 bps", "HY OAS > 455 bps", "Credit rating downgrades in the sector before 2025-03-01"],
+        "PredictionDate": "2025-12-13"
+    },
+    {
+        "Scenario": "Regulatory Tightening",
+        "Description": "New regulations are introduced that increase capital and liquidity requirements for G-SIBs, affecting BoA's funding strategy.",
+        "Probability": 0.10,
+        "Rationale": "Regulatory changes could impose additional liquidity add-ons, necessitating a shift in funding strategies and impacting profitability.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"regulatory": "Increased liquidity add-ons"},
+        "MetricsDelta": {"LCR": -7, "NSFR": -8},
+        "TradeList": ["Increase retail deposit rates", "Reduce wholesale funding by $1bn"],
+        "Assumptions": "Regulatory bodies push for stricter compliance in light of market conditions.",
+        "Signals": ["Basel III revisions announced on 2025-01-15", "FOMC feedback on regulatory impacts on 2025-02-20"],
+        "PredictionDate": "2025-12-13"
+    },
+    {
+        "Scenario": "Deposits Runoff",
+        "Description": "A significant runoff in retail and wealth deposits occurs as consumers shift funds to higher-yielding alternatives.",
+        "Probability": 0.20,
+        "Rationale": "As interest rates rise, depositors may seek better returns elsewhere, impacting BoA's liquidity position.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"deposits": -5},
+        "MetricsDelta": {"LCR": -8, "NSFR": -6},
+        "TradeList": ["Increase marketing for retail deposits", "Adjust interest rates on CDs"],
+        "Assumptions": "Market conditions lead to increased competition for deposits.",
+        "Signals": ["Retail deposit growth rate < 2% by 2025-03-31", "Wealth management outflows > $2bn in Q1 2025"],
+        "PredictionDate": "2025-12-13"
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "The MBS basis widens significantly due to market dislocations, impacting the valuation of BoA's Level 2A assets.",
+        "Probability": 0.15,
+        "Rationale": "Wider MBS basis could lead to decreased valuations of MBS, affecting overall liquidity metrics.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"mbs_basis": 50},
+        "MetricsDelta": {"OCI": -20, "LCR": -6},
+        "TradeList": ["Sell $300m MBS", "Increase repo funding for MBS by $500m"],
+        "Assumptions": "Market conditions lead to liquidity pressures in the MBS market.",
+        "Signals": ["MBS basis > 85 bps by 2025-04-15", "Monthly MBS issuance below $30bn"],
+        "PredictionDate": "2025-12-13"
+    },
+    {
+        "Scenario": "Economic Recovery with Stable Rates",
+        "Description": "An economic recovery occurs without significant rate hikes, leading to stable funding conditions and improved consumer confidence.",
+        "Probability": 0.20,
+        "Rationale": "If economic growth continues, it could enhance Bank of America's funding stability and asset performance.",
+        "ImpactChannels": "Growth, Stability",
+        "Shocks": {"economic_growth": 2.5},
+        "MetricsDelta": {"NII": +15, "LCR": +10},
+        "TradeList": ["Increase investments in growth sectors", "Hold steady on deposit rates"],
+        "Assumptions": "Consumer spending remains strong with steady inflation.",
+        "Signals": ["Consumer confidence index > 90", "Retail sales growth > 4% annually", "Unemployment rate < 4%"],
+        "PredictionDate": "2025-12-13"
+    }
+]
+```
+

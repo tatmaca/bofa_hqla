@@ -45,6 +45,7 @@ P30:credit/compress={P30_credit_compress:.4f}, P90:credit/compress={P90_credit_c
 P30:liquidity/stress={P30_liq_stress:.4f},   P90:liquidity/stress={P90_liq_stress:.4f}       (Liquidity Stress)
 P30:interest_rate/bear_steepen={P30_bear:.4f}, P90:interest_rate/bear_steepen={P90_bear:.4f} (Bear Steepening)
 P30:interest_rate/bull_flatten={P30_bull:.4f}, P90:interest_rate/bull_flatten={P90_bull:.4f} (Bull Flattening)
+All scenario probabilities must sum to exactly 1.0 (100%). If you subtract X from one scenario, add X back to the others before finalizing. Renormalize after rounding so the total stays 100%.
 
 ### B) Shock Vectors (from YAML; do not change magnitudes)
 credit/mild: {{IG_OAS_bp: {shock_credit_mild_IG}, HY_OAS_bp: {shock_credit_mild_HY}}}
@@ -70,8 +71,9 @@ SLOPE_2s10s_bps_chg_21d ↔ MOVE_chg_21d   = {corr_slope_move:+.2f}
 2) Columns: Scenario | Description | Probability | Rationale | Impact Channels
 3) 4–6 rows; include at least one from Credit, Liquidity, and Interest Rate.
 4) For Probability, use the 90d value provided above, as a single percent with one decimal (e.g., 27.3 %).
-5) Keep cells ≤ 2 lines; reference shocks and correlation cues in Rationale and Impact Channels.
-6) Do not invent probabilities or scenarios beyond the provided keys.
+5) Ensure the probabilities across all rows sum to exactly 100.0%. If you reduce one scenario by X, add X back across the others so the total remains 1.0. Double-check the sum before output.
+6) Keep cells ≤ 2 lines; reference shocks and correlation cues in Rationale and Impact Channels.
+7) Do not invent probabilities or scenarios beyond the provided keys.
 
 ## Friendly names for the “Scenario” column
 - credit/mild → Mild Credit Tightening

@@ -1,0 +1,247 @@
+[
+  {
+    "Scenario": "Bear Steepening",
+    "Description": "Yield curve bear steepens with a 50 bps rise in long-term rates, increasing NII but pressuring HQLA valuations.",
+    "Probability": 0.08,
+    "Rationale": "Higher rates could enhance interest income while reducing the value of long-dated HQLA. Probability reflects moderate likelihood given current Fed stance and macro conditions.",
+    "ImpactChannels": "Rates, Curve",
+    "Shocks": {
+      "move_index": 50,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NII": "+$500M"
+    },
+    "TradeList": [
+      "Add $1bn in 3-month T-bills via repo",
+      "Sell $500M of long-dated MBS"
+    ],
+    "Assumptions": "Stable consumer demand; no major credit events.",
+    "Signals": [
+      "10y yield > 4.00%",
+      "3m10y spread > 80 bps",
+      "NFP > 300k"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Credit spreads widen by 30 bps across IG and 50 bps in HY, impacting capital ratios and increasing funding costs.",
+    "Probability": 0.09,
+    "Rationale": "Deteriorating corporate earnings lead to wider spreads, stressing liquidity metrics. Probability reflects moderate risk of credit deterioration.",
+    "ImpactChannels": "Credit",
+    "Shocks": {
+      "ig_oas": 30,
+      "hy_oas": 50
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Increase repo funding by $2bn",
+      "Reduce MBS holdings by $1bn"
+    ],
+    "Assumptions": "Continued economic slowdown; increased defaults.",
+    "Signals": [
+      "IG spreads > 150 bps",
+      "Earnings reports show > 5% misses",
+      "HY defaults > 3%"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Deposit Runoff",
+    "Description": "Retail and wealth deposits decrease by 10%, necessitating reliance on wholesale funding.",
+    "Probability": 0.07,
+    "Rationale": "Economic uncertainty leads to increased consumer withdrawals and lower deposit levels. Probability reflects moderate risk given current consumer sentiment.",
+    "ImpactChannels": "Deposits",
+    "Shocks": {
+      "deposits": -10
+    },
+    "MetricsDelta": {
+      "LCR": -8,
+      "NSFR": -6
+    },
+    "TradeList": [
+      "Raise $3bn in term debt",
+      "Utilize $1bn in FHLB advances"
+    ],
+    "Assumptions": "Consumer sentiment declines; inflation concerns rise.",
+    "Signals": [
+      "Retail deposits < $1T",
+      "Consumer confidence < 70",
+      "SME withdrawals > 5%"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Regulatory Liquidity Changes",
+    "Description": "New regulatory changes require a 5% increase in LCR, impacting HQLA management.",
+    "Probability": 0.15,
+    "Rationale": "Potential Basel Endgame adjustments could tighten liquidity requirements. Probability reflects elevated regulatory scrutiny.",
+    "ImpactChannels": "Regulation",
+    "Shocks": {
+      "LCR": "+5"
+    },
+    "MetricsDelta": {
+      "LCR": -15,
+      "OCI": "-$200M"
+    },
+    "TradeList": [
+      "Increase cash reserves by $1bn",
+      "Sell $500M in equities"
+    ],
+    "Assumptions": "No significant market disruptions; steady economic growth.",
+    "Signals": [
+      "Final Basel IV rules published",
+      "Liquidity stress tests results released"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Geopolitical Tensions",
+    "Description": "Escalating geopolitical tensions lead to increased market volatility and credit risk.",
+    "Probability": 0.07,
+    "Rationale": "Geopolitical events can significantly impact market confidence and liquidity. Probability reflects moderate risk given current global tensions.",
+    "ImpactChannels": "Credit, Regulation",
+    "Shocks": {
+      "credit_spreads": 50
+    },
+    "MetricsDelta": {
+      "LCR": -10,
+      "NSFR": -8
+    },
+    "TradeList": [
+      "Increase MBS holdings by $1bn",
+      "Add $500M in sovereign bonds"
+    ],
+    "Assumptions": "Continued geopolitical instability; consumer behavior remains stable.",
+    "Signals": [
+      "Geopolitical events escalate",
+      "VIX > 25",
+      "Credit ratings downgrade announcements"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Commodity Price Surge",
+    "Description": "Commodity prices rise significantly, influencing credit spreads and overall economic outlook.",
+    "Probability": 0.13,
+    "Rationale": "Higher commodity prices can lead to inflationary pressures and impact corporate earnings. Probability reflects recent trends in commodity markets.",
+    "ImpactChannels": "Commodity Prices",
+    "Shocks": {
+      "commodity_prices": "+20%"
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NII": "+$300M"
+    },
+    "TradeList": [
+      "Increase commodity-related loans by $1bn",
+      "Hedge commodity exposure"
+    ],
+    "Assumptions": "Global demand for commodities remains strong.",
+    "Signals": [
+      "Crude oil > $80/barrel",
+      "Commodity indices > 1200"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Flattening Yield Curve",
+    "Description": "A flattening yield curve leads to reduced NII but stabilizes HQLA valuations.",
+    "Probability": 0.03,
+    "Rationale": "Market expectations of slower growth can lead to a flat yield curve. Probability reflects lower likelihood in current environment.",
+    "ImpactChannels": "Curve",
+    "Shocks": {
+      "yield_curve": "flattening"
+    },
+    "MetricsDelta": {
+      "LCR": 0,
+      "NII": "-$200M"
+    },
+    "TradeList": [
+      "Adjust HQLA mix to include more short-term securities"
+    ],
+    "Assumptions": "No major monetary policy changes.",
+    "Signals": [
+      "2s10s spread < 50 bps",
+      "Market growth forecasts downgraded"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Tightening MBS Basis",
+    "Description": "MBS basis tightens by 20 bps, enhancing HQLA valuations but increasing prepayment risk.",
+    "Probability": 0.05,
+    "Rationale": "Tightening spreads can improve the valuation of MBS in the HQLA stack. Probability reflects moderate likelihood given current MBS dynamics.",
+    "ImpactChannels": "MBS",
+    "Shocks": {
+      "mbs_basis": -20
+    },
+    "MetricsDelta": {
+      "OCI": "+$100M"
+    },
+    "TradeList": [
+      "Increase MBS holdings by $1bn"
+    ],
+    "Assumptions": "Market conditions remain stable; prepayment risk is manageable.",
+    "Signals": [
+      "MBS spreads < 50 bps",
+      "Prepayment rates remain stable"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Fed Signals Rate Pause",
+    "Description": "The Federal Reserve signals a pause in rate hikes, providing market stability.",
+    "Probability": 0.06,
+    "Rationale": "A pause can improve market sentiment and stabilize capital ratios. Probability reflects dovish Fed guidance.",
+    "ImpactChannels": "Rates",
+    "Shocks": {
+      "move_index": 0
+    },
+    "MetricsDelta": {
+      "LCR": "+5",
+      "NII": "+$200M"
+    },
+    "TradeList": [
+      "Hold current cash levels; reassess portfolio"
+    ],
+    "Assumptions": "Inflationary pressures stabilize; economic growth continues.",
+    "Signals": [
+      "FOMC meeting outcome favors no rate hikes",
+      "Inflation data < 3%"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Benign Base Case",
+    "Description": "No major shocks; rates and spreads stable, moderate deposit growth, and regulatory status quo.",
+    "Probability": 0.27,
+    "Rationale": "Reflects the most likely outcome given current macro trends, with no significant disruptions expected.",
+    "ImpactChannels": "Rates, Credit, Deposits, Regulation",
+    "Shocks": {
+      "move_index": 0,
+      "ig_oas": 0,
+      "deposits": "+2%"
+    },
+    "MetricsDelta": {
+      "LCR": "+2",
+      "NII": "+$100M"
+    },
+    "TradeList": [
+      "Maintain current HQLA mix",
+      "Monitor deposit flows"
+    ],
+    "Assumptions": "Steady economic growth; no major policy changes.",
+    "Signals": [
+      "GDP growth > 1.5% annualized",
+      "Unemployment < 4.5%",
+      "No major regulatory announcements"
+    ],
+    "PredictionDate": "2025-12-13"
+  }
+]

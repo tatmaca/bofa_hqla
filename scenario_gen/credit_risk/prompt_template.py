@@ -20,6 +20,7 @@ Use these probabilities (do not invent new ones):
 - Mild Credit Tightening: 30d={P30_mild:.1%}, 90d={P90_mild:.1%}
 - Severe Credit Shock:    30d={P30_severe:.1%}, 90d={P90_severe:.1%}
 - Spread Compression:     30d={P30_compress:.1%}, 90d={P90_compress:.1%}
+- Probabilities must sum to 100%. If you subtract X from one scenario, add X back to the others so the total stays exactly 100% (1.0). Renormalize after rounding.
 
 Now generate exactly one GitHub-flavored Markdown table with five columns and 4–6 rows:
 
@@ -30,6 +31,7 @@ Formatting rules (strict):
 - Columns must appear in this order: Scenario | Description | Probability | Rationale | Impact Channels.
 - Each cell <= 2 lines. Keep wording concise and factual.
 - Probability must be a single percent value (e.g., 30.0 %).
+- Probabilities across all rows must total exactly 100.0%. Double-check the sum equals 1.0 before output.
 - Use plain ASCII only.
 - Impact Channels must reference at least one of: Delta LCR, Delta NSFR, Level 1 vs 2A/2B, haircuts, NII.
 

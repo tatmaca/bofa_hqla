@@ -13,6 +13,7 @@ Indicators snapshot (today):
 
 Use these probabilities (do not invent new ones):
 - Liquidity Stress (funding/market-depth): 30d={P30:.1%}, 90d={P90:.1%}
+- Probabilities must sum to 100%. If you subtract X from one scenario, add X back to the others so the total stays exactly 100% (1.0). Renormalize after rounding.
 
 Now generate exactly **one** GitHub-flavored Markdown table with **five columns** and **4–6 rows**:
 
@@ -23,6 +24,7 @@ Scenario | Description | Probability | Rationale | Impact Channels
 - Columns must appear **in this order**: Scenario | Description | Probability | Rationale | Impact Channels.
 - Each cell ≤ 2 lines. Keep wording concise and factual.
 - Probability must be a **single percent value** (e.g., 30.0 %).
+- Probabilities across all rows must total exactly 100.0%. Double-check the sum equals 1.0 before output.
 - Use plain ASCII (no tildes, en-dashes, or smart quotes).
 - Impact Channels must reference at least one of: ΔLCR, ΔNSFR, Level 1 vs 2A/2B, haircuts, NII.
 

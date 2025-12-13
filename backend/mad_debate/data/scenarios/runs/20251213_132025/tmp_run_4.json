@@ -1,0 +1,255 @@
+[
+  {
+    "Scenario": "Bear Steepening with Rising Credit Spreads",
+    "Description": "A bear steepening of the yield curve occurs alongside a 15 bps rise in IG OAS and a 45 bps rise in HY OAS, leading to decreased HQLA valuations.",
+    "Probability": 0.12,
+    "Rationale": "Increased uncertainty in the market may lead to wider credit spreads as investors demand higher premiums, impacting the valuations of Level 2 assets.",
+    "ImpactChannels": "Rates, Credit",
+    "Shocks": {
+      "move_index": 110,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3,
+      "NII": -2
+    },
+    "TradeList": [
+      "Add $1bn USTs via repo",
+      "Reduce $500mm in corporate bonds"
+    ],
+    "Assumptions": "Consumer balance sheets remain stable, but credit conditions tighten due to economic uncertainty.",
+    "Signals": [
+      "IG OAS > 135 bps",
+      "HY OAS > 455 bps",
+      "10y Treasury yield > 3.5%"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "The MBS basis widens by 50 bps, leading to a decline in MBS valuations and negatively impacting liquidity ratios.",
+    "Probability": 0.05,
+    "Rationale": "Increased prepayment risks and market volatility could lead to a wider MBS basis, affecting the HQLA mix.",
+    "ImpactChannels": "MBS",
+    "Shocks": {
+      "mbs_basis": 50
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2,
+      "OCI": -1
+    },
+    "TradeList": [
+      "Sell $500mm MBS to manage basis risk"
+    ],
+    "Assumptions": "Stable interest rates but increased refinancing activity among consumers.",
+    "Signals": [
+      "MBS basis > 40 bps",
+      "Prepayment speeds > 20%"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Retail Deposit Runoff",
+    "Description": "A significant rise in interest rates leads to a 5% runoff in retail deposits, impacting funding costs and liquidity.",
+    "Probability": 0.09,
+    "Rationale": "Higher rates may incentivize consumers to seek higher-yielding investments, leading to deposit runoff.",
+    "ImpactChannels": "Deposits",
+    "Shocks": {
+      "deposits_runoff": 5
+    },
+    "MetricsDelta": {
+      "LCR": -7,
+      "NSFR": -4
+    },
+    "TradeList": [
+      "Increase wholesale funding by $1bn",
+      "Issue $500mm CP to manage liquidity"
+    ],
+    "Assumptions": "Consumer sentiment shifts towards seeking better yields.",
+    "Signals": [
+      "Retail deposit growth < 1%",
+      "Inflation readings > 3%"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Regulatory Changes Impacting Capital Requirements",
+    "Description": "Implementation of Basel Endgame regulations increases TLAC requirements, tightening capital ratios.",
+    "Probability": 0.06,
+    "Rationale": "New regulations could require increased capital buffers, affecting profitability and capital planning.",
+    "ImpactChannels": "Regulation",
+    "Shocks": {
+      "regulatory_changes": "Basel Endgame"
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -5
+    },
+    "TradeList": [
+      "Adjust capital allocation towards higher quality assets"
+    ],
+    "Assumptions": "Regulatory scrutiny intensifies across the banking sector.",
+    "Signals": [
+      "FOMC meeting on capital requirements",
+      "Public comments on Basel III revisions"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Commodity Price Shock",
+    "Description": "A sudden spike in oil prices increases inflation expectations, leading to a flattening of the yield curve.",
+    "Probability": 0.07,
+    "Rationale": "Higher commodity prices could lead to increased inflation, impacting consumer behavior and central bank policies.",
+    "ImpactChannels": "Rates, Curve",
+    "Shocks": {
+      "commodity_prices": {
+        "oil": 20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $1bn TIPS to hedge inflation risks"
+    ],
+    "Assumptions": "Global supply chains remain disrupted, affecting commodity prices.",
+    "Signals": [
+      "WTI crude > $90/barrel",
+      "CPI readings > 4%"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Increased Funding Costs from Wholesale Markets",
+    "Description": "Wholesale funding spreads increase by 20 bps, raising overall funding costs and impacting net interest income.",
+    "Probability": 0.06,
+    "Rationale": "Market volatility and credit concerns could lead to wider spreads in wholesale funding markets.",
+    "ImpactChannels": "Deposits, Funding",
+    "Shocks": {
+      "wholesale_spread": 20
+    },
+    "MetricsDelta": {
+      "NII": -3
+    },
+    "TradeList": [
+      "Reduce reliance on wholesale funding"
+    ],
+    "Assumptions": "Credit conditions tighten, leading to increased funding costs.",
+    "Signals": [
+      "CDS spreads on major banks > 100 bps",
+      "Funding spreads > 50 bps"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Global Economic Slowdown",
+    "Description": "A slowdown in global growth leads to a flight to quality, decreasing yields on USTs and widening credit spreads.",
+    "Probability": 0.09,
+    "Rationale": "Geopolitical tensions or economic indicators could lead to increased risk aversion among investors.",
+    "ImpactChannels": "Rates, Credit",
+    "Shocks": {
+      "move_index": 100,
+      "credit_spreads": {
+        "ig_oas": 20,
+        "hy_oas": 50
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -6,
+      "NII": -2
+    },
+    "TradeList": [
+      "Increase UST holdings by $1bn"
+    ],
+    "Assumptions": "Central banks respond with easing measures, but global conditions remain weak.",
+    "Signals": [
+      "GDP growth < 1%",
+      "PMI readings < 50"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Labor Market Tightening",
+    "Description": "A tightening labor market leads to wage inflation, increasing interest rate expectations and impacting the yield curve.",
+    "Probability": 0.05,
+    "Rationale": "Rising wages could prompt the Fed to adopt a more hawkish stance, impacting the overall yield curve.",
+    "ImpactChannels": "Rates, Curve",
+    "Shocks": {
+      "move_index": 150
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -2,
+      "NII": -3
+    },
+    "TradeList": [
+      "Adjust interest rate derivatives to hedge against rate rises"
+    ],
+    "Assumptions": "Consumer spending remains strong, but inflationary pressures build.",
+    "Signals": [
+      "Unemployment rate < 3.5%",
+      "Average hourly earnings growth > 4%"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Geopolitical Risk Increase",
+    "Description": "Escalating geopolitical tensions lead to a risk-off environment, impacting credit spreads and market liquidity.",
+    "Probability": 0.08,
+    "Rationale": "Increased geopolitical risks can lead to wider credit spreads and lower asset valuations.",
+    "ImpactChannels": "Credit, Liquidity",
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": 25,
+        "hy_oas": 60
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NII": -3
+    },
+    "TradeList": [
+      "Increase cash reserves by $1bn"
+    ],
+    "Assumptions": "Markets react negatively to geopolitical developments, leading to a flight to safety.",
+    "Signals": [
+      "Increased military activity in key regions",
+      "Market volatility index (VIX) > 20"
+    ],
+    "PredictionDate": "2025-12-13"
+  },
+  {
+    "Scenario": "Improved Economic Outlook",
+    "Description": "A positive economic outlook leads to a flattening of the yield curve, with stable credit spreads.",
+    "Probability": 0.33,
+    "Rationale": "Improved economic indicators may lead to a more stable interest rate environment and tighter credit spreads.",
+    "ImpactChannels": "Rates, Curve",
+    "Shocks": {
+      "move_index": 90,
+      "credit_spreads": {
+        "ig_oas": -10,
+        "hy_oas": -20
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 3,
+      "NII": 2
+    },
+    "TradeList": [
+      "Increase exposure to corporate credit by $500mm"
+    ],
+    "Assumptions": "Positive consumer sentiment supports growth and reduces default risks.",
+    "Signals": [
+      "GDP growth > 3%",
+      "PMI readings > 55"
+    ],
+    "PredictionDate": "2025-12-13"
+  }
+]
