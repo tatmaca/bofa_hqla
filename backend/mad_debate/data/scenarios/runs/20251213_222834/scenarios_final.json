@@ -1,0 +1,269 @@
+[
+  {
+    "Scenario": "Base Case Stability",
+    "Description": "Economic conditions remain stable with no significant changes in interest rates or credit spreads.",
+    "Probability": 0.263174,
+    "Rationale": "This scenario reflects the current economic stability, providing a benchmark for other scenarios.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": 0,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "No action needed"
+    ],
+    "Assumptions": "Economic indicators remain stable with no significant external shocks.",
+    "Signals": [
+      "FOMC meeting on 2025-01-31",
+      "CPI release on 2025-02-15",
+      "NFP report on 2025-02-02"
+    ],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Long-term rates rise while short-term rates remain unchanged, steepening the yield curve.",
+    "Probability": 0.157884,
+    "Rationale": "Inflationary pressures and Fed tightening could lead to this scenario.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move_index": 120,
+      "yield_curve": "bear_steepener",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $2bn 10-year USTs"
+    ],
+    "Assumptions": "Inflation remains above target, prompting Fed action.",
+    "Signals": [
+      "10-year Treasury auction on 2025-01-10",
+      "CPI report on 2025-01-15"
+    ],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "Increased risk perception leads to wider credit spreads, particularly in high yield.",
+    "Probability": 0.105289,
+    "Rationale": "Market stress could trigger this outcome, impacting HQLA valuations.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 15,
+        "hy_oas": 45
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Monitor credit exposure and adjust holdings accordingly"
+    ],
+    "Assumptions": "Market sentiment worsens due to economic data.",
+    "Signals": [
+      "High yield bond index update on 2025-01-25"
+    ],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Retail Deposit Runoff",
+    "Description": "A shift in consumer sentiment leads to a decrease in retail deposits.",
+    "Probability": 0.105289,
+    "Rationale": "Economic uncertainty could trigger consumer withdrawals, impacting liquidity.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase reliance on secured funding"
+    ],
+    "Assumptions": "Consumer confidence drops significantly.",
+    "Signals": [
+      "Consumer confidence index release on 2025-02-01"
+    ],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Changes in regulations impact capital requirements and liquidity metrics.",
+    "Probability": 0.105289,
+    "Rationale": "Potential shifts in Basel frameworks could alter BoA's capital landscape.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -4
+    },
+    "TradeList": [
+      "Prepare for potential capital adjustments"
+    ],
+    "Assumptions": "Regulatory body proposes new capital requirements.",
+    "Signals": [
+      "Basel Committee meeting on 2025-03-15"
+    ],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "Increased supply or reduced demand leads to a widening MBS basis.",
+    "Probability": 0.105289,
+    "Rationale": "Market dynamics could pressure MBS valuations.",
+    "ImpactChannels": [
+      "MBS"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Evaluate MBS holdings and adjust if necessary"
+    ],
+    "Assumptions": "Increased issuance leads to market oversupply.",
+    "Signals": [
+      "MBS issuance report on 2025-02-10"
+    ],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Commodity Price Shock",
+    "Description": "Significant rise in commodity prices triggers inflation concerns.",
+    "Probability": 0.052595,
+    "Rationale": "Higher commodity prices could lead to a tightening of monetary policy.",
+    "ImpactChannels": [
+      "Rates",
+      "Commodity Prices"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Hedge against rising rates"
+    ],
+    "Assumptions": "Global supply chain disruptions lead to price increases.",
+    "Signals": [
+      "Crude oil inventory report on 2025-02-20"
+    ],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Geopolitical Tensions",
+    "Description": "Increased geopolitical tensions lead to market volatility.",
+    "Probability": 0.052595,
+    "Rationale": "Geopolitical events can create uncertainty and impact liquidity.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 20,
+        "hy_oas": 30
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase cash reserves"
+    ],
+    "Assumptions": "Events escalate, leading to market instability.",
+    "Signals": [
+      "International relations updates on 2025-01-15"
+    ],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Consumer Balance Sheet Deterioration",
+    "Description": "Decline in consumer balance sheets leads to increased loan defaults.",
+    "Probability": 0.052595,
+    "Rationale": "Negative economic conditions could impact consumer credit quality.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "move_index": 0,
+      "yield_curve": "flat",
+      "credit_spreads": {
+        "ig_oas": 0,
+        "hy_oas": 0
+      }
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Monitor loan portfolio closely"
+    ],
+    "Assumptions": "Economic downturn leads to higher default rates.",
+    "Signals": [
+      "Credit quality report on 2025-03-01"
+    ],
+    "PredictionDate": "2025-12-14"
+  }
+]

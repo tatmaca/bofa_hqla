@@ -12,7 +12,7 @@ import hqla_instruments as HQLA
 import numpy as np
 import pandas as pd
 import QuantLib as ql
-from fastapi import Body, FastAPI, Form, Request, UploadFile
+from fastapi import Body, FastAPI, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -20,8 +20,49 @@ from hqla_portfolio import Portfolio
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / "tools" / "news_ingestion"))
 
+from typing import List, Optional
+
+from bucket_news import get_bucket_counts
+from db import get_conn
 from generate_scenario_predictions import generate_all_scenario_curves
-from scenario_rebalancing import ScenarioRebalancingEngine, Scenario as RebalanceScenario
+from pydantic import BaseModel
+from scenario_rebalancing import Scenario as RebalanceScenario
+from scenario_rebalancing import ScenarioRebalancingEngine
+
+
+class NewsArticle(BaseModel):
+    title: str
+    bucket: str
+    bucketLabel: str
+    summary: Optional[str]
+    source: Optional[str]
+    url: Optional[str]
+
+
+class NewsBucket(BaseModel):
+    name: str
+    label: str
+    count: int
+    uncovered: bool
+    description: str
+    coverage: list[str]
+    topHeadlines: list[dict]
+
+
+class NewsSummary(BaseModel):
+    headline: str
+    detail: str
+    reason: Optional[str]
+    date: str
+    shouldUpdate: bool
+
+
+class NewsMonitorResponse(BaseModel):
+    summary: NewsSummary
+    buckets: List[NewsBucket]
+    articles: List[NewsArticle]
+    metadata: dict
+
 
 app = FastAPI()
 portfolio = Portfolio()
@@ -131,6 +172,37 @@ def _hydrate_portfolio_from_df(df: pd.DataFrame):
             inst.build_bond()
 
         portfolio.add_instrument(inst)
+
+
+def _load_analysis_for_today():
+    import datetime as dt
+    import os
+    from pathlib import Path
+
+    # Absolute path to news.db
+    db_path = (
+        Path(__file__).resolve().parent.parent.parent
+        / "tools"
+        / "news_ingestion"
+        / "news.db"
+    )
+    os.environ["NEWS_DB_PATH"] = str(db_path)
+
+    from db import get_conn
+
+    today = dt.date.today().isoformat()
+
+    with get_conn() as conn:
+        rows = conn.execute(
+            """
+            SELECT *
+            FROM articles
+            WHERE DATE(fetched_at) = DATE(?)
+            """,
+            (today,),
+        ).fetchall()
+
+    return [dict(row) for row in rows] if rows else None
 
 
 def _load_attribution_payload(
@@ -389,12 +461,12 @@ async def price_portfolio(is_scenario: bool = False):
     try:
         # --- Reprice all instruments using the portfolio method ---
         portfolio.update_prices(
-          base_curve_handle,
-          base_curve_up,
-          base_curve_down,
-          survival_curves,
-          survival_curves_up,
-          survival_curves_down,
+            base_curve_handle,
+            base_curve_up,
+            base_curve_down,
+            survival_curves,
+            survival_curves_up,
+            survival_curves_down,
         )
     except Exception as exc:
         return JSONResponse(
@@ -432,8 +504,9 @@ async def price_portfolio(is_scenario: bool = False):
         return {
             "realized": realized_portfolio_summary,
             "scenario": summary,
-        "status": "scenario_priced",
-    }
+            "status": "scenario_priced",
+        }
+
 
 # ------------------------
 # Scenario rebalancing endpoint
@@ -470,7 +543,9 @@ async def scenario_rebalance(request: Request):
         return JSONResponse(status_code=400, content={"error": "No scenarios provided"})
 
     # Params
-    net_cash_outflow = float(payload.get("net_cash_outflow") or _current_net_cash_outflow())
+    net_cash_outflow = float(
+        payload.get("net_cash_outflow") or _current_net_cash_outflow()
+    )
     min_lcr = float(payload.get("min_lcr") or 1.0)
     max_lcr = float(payload.get("max_lcr") or 1.5)
     target_duration = payload.get("target_duration")
@@ -496,7 +571,9 @@ async def scenario_rebalance(request: Request):
     for sc in scenarios:
         try:
             name = sc.get("Scenario") or sc.get("name") or "Scenario"
-            prob = float(sc.get("Probability") or sc.get("probability") or sc.get("p") or 0.0)
+            prob = float(
+                sc.get("Probability") or sc.get("probability") or sc.get("p") or 0.0
+            )
             if prob > 1:
                 prob = prob / 100.0
             desc = sc.get("Description") or sc.get("Rationale") or ""
@@ -524,7 +601,9 @@ async def scenario_rebalance(request: Request):
         )
         combined_df = engine.build_combined_dataframe().to_dict(orient="records")
     except Exception as exc:
-        return JSONResponse(status_code=500, content={"error": f"Rebalance failed: {exc}"})
+        return JSONResponse(
+            status_code=500, content={"error": f"Rebalance failed: {exc}"}
+        )
 
     # Collect outputs
     scenario_results = {}
@@ -544,7 +623,11 @@ async def scenario_rebalance(request: Request):
         "scenario_count": len(engine.results),
         "scenario_results": scenario_results,
         "combined_portfolio": combined_df,
-        "final_weights": engine.final_portfolio_weights.tolist() if engine.final_portfolio_weights is not None else [],
+        "final_weights": (
+            engine.final_portfolio_weights.tolist()
+            if engine.final_portfolio_weights is not None
+            else []
+        ),
     }
 
 
@@ -686,3 +769,25 @@ async def generate_scenario_curves_endpoint(
         return {"status": "error", "message": "No curves generated"}
 
     return {"status": "success", "curves": curves}
+
+
+@app.get("/news-monitor")
+def get_news_monitor(date: str | None = None):
+
+    print("[news-monitor] called")
+
+    # --- Load analysis (optional) ---
+    analysis = _load_analysis_for_today()
+    print(
+        "[news-monitor] analysis loaded:",
+        "FOUND" if analysis else "NOT FOUND",
+        f"type={type(analysis)}",
+    )
+    if not analysis:
+        print("[news-monitor] ERROR: no analysis available")
+        raise HTTPException(status_code=405, detail="No news analysis available")
+
+    return {
+        "message": f"Returned {len(analysis)} article rows for inspection",
+        "articles": analysis,  # optional: return full article data
+    }
