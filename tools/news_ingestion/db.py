@@ -18,12 +18,11 @@ def get_conn():
 
 
 def init_db():
-    with get_conn() as c, open("schema.sql", "r") as f:
-        c.executescript(f.read())
-    with get_conn() as c, open("schema_accuracy.sql", "r") as f:
-        c.executescript(f.read())
-    with get_conn() as c, open("schema_factors.sql", "r") as f:
-        c.executescript(f.read())
+    schema_files = ["schema.sql", "schema_accuracy.sql", "schema_factors.sql"]
+    for name in schema_files:
+        schema_path = _script_dir / name
+        with get_conn() as c, open(schema_path, "r", encoding="utf-8") as f:
+            c.executescript(f.read())
 
 
 def upsert_article(rec):

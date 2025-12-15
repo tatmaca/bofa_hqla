@@ -4,6 +4,7 @@ import datetime as dt
 import datetime as _dt
 import io
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -84,6 +85,7 @@ app.add_middleware(
 # Serve attribution PNG/JSON as static for convenience
 _repo_root = Path(__file__).resolve().parents[2]
 _attr_dir = _repo_root / "tools" / "news_ingestion" / "attribution_analysis"
+_news_db_path = _repo_root / "news.db"
 if _attr_dir.exists():
     app.mount(
         "/attribution-static",
@@ -109,6 +111,12 @@ def _filter_images(pngs: list[Path], image_mode: str) -> list[Path]:
     if image_mode == "none":
         return []
     return [p for p in pngs if _classify_image(p) == image_mode]
+
+
+def _ensure_news_db_env() -> Path:
+    """Ensure NEWS_DB_PATH points to the repo-level news.db and return the path."""
+    os.environ.setdefault("NEWS_DB_PATH", str(_news_db_path))
+    return _news_db_path
 
 
 def _current_net_cash_outflow(default: float = 1_000_000_000.0) -> float:
@@ -176,17 +184,8 @@ def _hydrate_portfolio_from_df(df: pd.DataFrame):
 
 def _load_analysis_for_today():
     import datetime as dt
-    import os
     from pathlib import Path
-
-    # Absolute path to news.db
-    db_path = (
-        Path(__file__).resolve().parent.parent.parent
-        / "tools"
-        / "news_ingestion"
-        / "news.db"
-    )
-    os.environ["NEWS_DB_PATH"] = str(db_path)
+    db_path = _ensure_news_db_env()
 
     from db import get_conn
 
@@ -203,6 +202,57 @@ def _load_analysis_for_today():
         ).fetchall()
 
     return [dict(row) for row in rows] if rows else None
+
+
+def _top_factors_with_articles(
+    date: str, top_factors: int = 3, top_articles: int = 3
+) -> list[dict]:
+    """Return top factors by absolute daily score with their top articles."""
+    _ensure_news_db_env()
+    with get_conn() as conn:
+        rows = conn.execute(
+            """
+            SELECT factor_name, factor_score, total_articles
+            FROM daily_factor_scores
+            WHERE date = ?
+            ORDER BY ABS(factor_score) DESC
+            LIMIT ?
+            """,
+            (date, top_factors),
+        ).fetchall()
+
+        factors = []
+        for r in rows:
+            factor_name = r["factor_name"]
+            articles = conn.execute(
+                """
+                SELECT
+                    a.title,
+                    a.source,
+                    a.url,
+                    a.published_at,
+                    af.intensity,
+                    af.confidence,
+                    (af.intensity * af.confidence) AS score
+                FROM article_factors af
+                JOIN articles a ON af.article_id = a.id
+                WHERE af.date = ?
+                  AND af.factor_name = ?
+                ORDER BY ABS(score) DESC
+                LIMIT ?
+                """,
+                (date, factor_name, top_articles),
+            ).fetchall()
+
+            factors.append(
+                {
+                    "name": factor_name,
+                    "score": r["factor_score"],
+                    "total_articles": r["total_articles"],
+                    "articles": [dict(a) for a in articles],
+                }
+            )
+    return factors
 
 
 def _load_attribution_payload(
@@ -769,6 +819,41 @@ async def generate_scenario_curves_endpoint(
         return {"status": "error", "message": "No curves generated"}
 
     return {"status": "success", "curves": curves}
+
+
+@app.get("/news-top-factors")
+async def get_news_top_factors(
+    date: str | None = None, top_factors: int = 3, top_articles: int = 3
+):
+    """Return top factors by absolute score with their top news articles."""
+    target_date = date or _dt.date.today().isoformat()
+
+    if top_factors <= 0 or top_articles <= 0:
+        raise HTTPException(
+            status_code=400, detail="top_factors and top_articles must be > 0"
+        )
+
+    db_path = _ensure_news_db_env()
+    if (not db_path.exists()) or db_path.stat().st_size == 0:
+        raise HTTPException(
+            status_code=404, detail="news.db not found or empty; run ingestion first"
+        )
+
+    factors = _top_factors_with_articles(
+        target_date, top_factors=top_factors, top_articles=top_articles
+    )
+    if not factors:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No factor scores found for {target_date}. Run factor extraction/aggregation first.",
+        )
+
+    return {
+        "date": target_date,
+        "top_factors": top_factors,
+        "top_articles": top_articles,
+        "factors": factors,
+    }
 
 
 @app.get("/news-monitor")

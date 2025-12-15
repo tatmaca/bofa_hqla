@@ -766,6 +766,7 @@ const Step = ({
 };
 
 export default function HqlaE2EDashboard() {
+  const [newsTopFactors, setNewsTopFactors] = useState<any[]>([]);
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
   const [activeNewsArticle, setActiveNewsArticle] = useState<any>(null);
   const [portfolioName, setPortfolioName] = useState("Example HQLA Portfolio");
@@ -803,6 +804,8 @@ export default function HqlaE2EDashboard() {
   const [attributionImages, setAttributionImages] = useState<any[]>([]);
   const [loadingAttribution, setLoadingAttribution] = useState(false);
   const [attributionError, setAttributionError] = useState<string | null>(null);
+  const [newsAttribution, setNewsAttribution] = useState<any[]>([]);
+  const [newsAttrError, setNewsAttrError] = useState<string | null>(null);
   const [attributionIdx, setAttributionIdx] = useState(0);
   const [attributionZoom, setAttributionZoom] = useState<{
     open: boolean;
@@ -950,7 +953,7 @@ export default function HqlaE2EDashboard() {
     try {
       setMon({ status: "loading" });
 
-      const res = await fetch("http://localhost:8000/news-monitor/");
+      const res = await fetch(`${API_BASE}/news-monitor/`);
       if (!res.ok) {
         console.error("API call failed:", res.status, res.statusText);
         setMon({ status: "error" });
@@ -966,6 +969,25 @@ export default function HqlaE2EDashboard() {
 
       // optionally select the first article to display in preview
       setActiveNewsArticle(articles[0] || null);
+
+      // fetch top factors + top articles for context
+      const today = new Date().toISOString().slice(0, 10);
+      try {
+        const tfRes = await fetch(
+          `${API_BASE}/news-top-factors?date=${today}&top_factors=3&top_articles=3`,
+        );
+        if (tfRes.ok) {
+          const tfData = await tfRes.json();
+          setNewsTopFactors(
+            Array.isArray(tfData?.factors) ? tfData.factors : [],
+          );
+        } else {
+          setNewsTopFactors([]);
+        }
+      } catch (err) {
+        console.error("Top factor fetch error:", err);
+        setNewsTopFactors([]);
+      }
 
       setMon({ status: "done" });
     } catch (err) {
@@ -1006,11 +1028,18 @@ export default function HqlaE2EDashboard() {
     setPortfolioSummary(data);
   }
 
+  const normalizeDate = (dateStr: string) => {
+    if (!dateStr) return dateStr;
+    return dateStr.replace(/\//g, "-");
+  };
+
   const loadAttributionInline = async () => {
     const fallbackDate = new Date().toISOString().slice(0, 10);
-    const dateParam = attributionDate || fallbackDate;
+    const dateParam = normalizeDate(attributionDate || fallbackDate);
     setLoadingAttribution(true);
     setAttributionError(null);
+    setNewsAttrError(null);
+    setNewsAttribution([]);
     try {
       const res = await fetch(
         `${API_BASE}/attribution/json?date=${dateParam}&image_mode=${attributionMode}&embed_images=true`,
@@ -1024,11 +1053,29 @@ export default function HqlaE2EDashboard() {
         data?.chart_images?.length && Array.isArray(data.chart_images)
           ? data.chart_images
           : (data?.chart_urls || []).map((url: string, i: number) => ({
-              name: `chart_${i + 1}`,
-              url,
-            }));
+            name: `chart_${i + 1}`,
+            url,
+          }));
       setAttributionImages(imgs || []);
       setAttributionIdx(0);
+
+      // Load news-driven attribution (top factors + headlines)
+      try {
+        const nfRes = await fetch(
+          `${API_BASE}/news-top-factors?date=${dateParam}&top_factors=3&top_articles=3`,
+        );
+        if (nfRes.ok) {
+          const nfData = await nfRes.json();
+          setNewsAttribution(Array.isArray(nfData?.factors) ? nfData.factors : []);
+        } else {
+          setNewsAttribution([]);
+          setNewsAttrError("新闻归因加载失败");
+        }
+      } catch (err) {
+        console.error("News attribution fetch error:", err);
+        setNewsAttribution([]);
+        setNewsAttrError("新闻归因加载失败");
+      }
     } catch (err: any) {
       setAttributionError(err?.message || "Failed to load attribution");
       setAttributionImages([]);
@@ -2166,6 +2213,59 @@ export default function HqlaE2EDashboard() {
 
                   <div className="mt-2 rounded-lg border p-2">
                     <div className="rounded-lg border p-3 bg-white/70 space-y-3">
+                      {newsTopFactors.length > 0 && (
+                        <div className="space-y-2 text-xs">
+                          <p className="text-sm font-semibold text-slate-800">
+                            Top factors (news-driven)
+                          </p>
+                          <div className="space-y-2">
+                            {newsTopFactors.map((f: any, idx: number) => (
+                              <div
+                                key={f?.name || idx}
+                                className="border rounded-md p-2 bg-slate-50"
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-semibold text-slate-800">
+                                    {idx + 1}. {f?.name || "Factor"}
+                                  </span>
+                                  <span className="text-[11px] text-slate-600">
+                                    {typeof f?.score === "number"
+                                      ? f.score.toFixed(3)
+                                      : "-"}
+                                  </span>
+                                </div>
+                                {Array.isArray(f?.articles) &&
+                                  f.articles.length > 0 && (
+                                    <ul className="mt-1 space-y-1">
+                                      {f.articles.slice(0, 3).map(
+                                        (a: any, i: number) => (
+                                          <li
+                                            key={i}
+                                            className="flex items-center justify-between gap-2"
+                                          >
+                                            <a
+                                              href={a?.url}
+                                              target="_blank"
+                                              rel="noreferrer"
+                                              className="text-sky-600 underline"
+                                            >
+                                              {a?.title || "Article"}
+                                            </a>
+                                            <span className="text-[11px] text-slate-500">
+                                              {typeof a?.score === "number"
+                                                ? a.score.toFixed(3)
+                                                : ""}
+                                            </span>
+                                          </li>
+                                        ),
+                                      )}
+                                    </ul>
+                                  )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       {newsArticles.length > 0 ? (
                         <>
                           {/* Table of articles */}
@@ -2516,6 +2616,73 @@ export default function HqlaE2EDashboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* News attribution (top factors + headlines) */}
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle>News Attribution</CardTitle>
+            <CardDescription>
+              Top news-driven factors and their key headlines for the selected
+              date.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {newsAttrError && (
+              <div className="text-sm text-red-600 mb-3">{newsAttrError}</div>
+            )}
+            {newsAttribution.length > 0 ? (
+              <div className="grid md:grid-cols-3 gap-3">
+                {newsAttribution.map((f: any, idx: number) => (
+                  <div
+                    key={f?.name || idx}
+                    className="border rounded-md p-3 bg-white/80 space-y-2"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-slate-800 text-sm">
+                        {idx + 1}. {f?.name || "Factor"}
+                      </span>
+                      <span className="text-[11px] text-slate-600">
+                        {typeof f?.score === "number"
+                          ? f.score.toFixed(3)
+                          : "-"}
+                      </span>
+                    </div>
+                    {Array.isArray(f?.articles) && f.articles.length > 0 ? (
+                      <ul className="space-y-1 text-xs">
+                        {f.articles.slice(0, 3).map((a: any, i: number) => (
+                          <li key={i} className="flex justify-between gap-2">
+                            <a
+                              href={a?.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-sky-600 underline"
+                            >
+                              {a?.title || "Article"}
+                            </a>
+                            <span className="text-[11px] text-slate-500">
+                              {typeof a?.score === "number"
+                                ? a.score.toFixed(2)
+                                : ""}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        No articles available for this factor.
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No news attribution yet. Click “Load attribution inline” above to
+                load factor and news attribution for the selected date.
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Hidden sections kept for future use */}
         <div className="hidden" />
