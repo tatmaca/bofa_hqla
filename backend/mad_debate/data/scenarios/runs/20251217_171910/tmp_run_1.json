@@ -1,0 +1,287 @@
+[
+  {
+    "Scenario": "Bear Steepener",
+    "Description": "Long-term rates rise by 50 bps while short-term rates remain stable, leading to a bear steepening of the yield curve.",
+    "Probability": 0.05,
+    "Rationale": "Expectations of rising inflation push long-term rates higher, negatively impacting Level 1 HQLA valuations but increasing NII.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "lcr": -2,
+      "nsfr": 0,
+      "nni": 5
+    },
+    "TradeList": [
+      "Add $1bn 10Y USTs",
+      "Reduce $500mn in short-term repos"
+    ],
+    "Assumptions": "Inflation expectations rise due to strong economic data.",
+    "Signals": [
+      "CPI > 3.0% on 2025-01-15",
+      "FOMC meeting on 2025-01-31",
+      "10Y UST yield > 3.5%"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Increased Credit Spreads",
+    "Description": "IG spreads widen by 20 bps and HY spreads by 50 bps, reflecting economic uncertainty.",
+    "Probability": 0.1,
+    "Rationale": "Market sentiment deteriorates, leading to increased credit risk perceptions and lower Level 2 asset valuations.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": 20,
+        "hy_oas": 50
+      }
+    },
+    "MetricsDelta": {
+      "lcr": -3,
+      "nsfr": -2,
+      "nni": -10
+    },
+    "TradeList": [
+      "Reduce $1bn in corporate bonds",
+      "Increase cash reserves by $500mn"
+    ],
+    "Assumptions": "Economic indicators show signs of slowing growth.",
+    "Signals": [
+      "IG OAS > 140 bps on 2025-02-10",
+      "HY OAS > 460 bps on 2025-03-15",
+      "Credit rating agency downgrade alerts"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Retail Deposit Outflow",
+    "Description": "A 5% outflow in retail deposits due to rising rates, impacting liquidity.",
+    "Probability": 0.05,
+    "Rationale": "Higher rates prompt customers to seek better yields, straining liquidity metrics.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "deposits": -5
+    },
+    "MetricsDelta": {
+      "lcr": -5,
+      "nsfr": -3,
+      "nni": -5
+    },
+    "TradeList": [
+      "Increase FHLB advances by $1bn",
+      "Issue $500mn in CP"
+    ],
+    "Assumptions": "Consumer sentiment shifts towards riskier assets.",
+    "Signals": [
+      "Retail deposit growth < 2% on 2025-01-31",
+      "Consumer confidence index < 90 on 2025-02-20",
+      "Weekly deposit flows report"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Introduction of new TLAC requirements increases capital requirements.",
+    "Probability": 0.05,
+    "Rationale": "Regulatory environment tightens, impacting capital ratios.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {
+      "regulatory": "TLAC increase by 50 bps"
+    },
+    "MetricsDelta": {
+      "lcr": -4,
+      "nsfr": -2,
+      "nni": -2
+    },
+    "TradeList": [
+      "Prepare to issue $1bn in new TLAC securities"
+    ],
+    "Assumptions": "Regulatory authorities push for increased capital buffers.",
+    "Signals": [
+      "TLAC proposal announcement on 2025-03-01",
+      "Regulatory review meetings"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Stable Interest Rates",
+    "Description": "Interest rates remain stable with no significant changes, providing a neutral environment.",
+    "Probability": 0.15,
+    "Rationale": "A period of stability allows for strategic positioning without immediate pressures.",
+    "ImpactChannels": [
+      "Rates"
+    ],
+    "Shocks": {
+      "move_index": 0
+    },
+    "MetricsDelta": {
+      "lcr": 0,
+      "nsfr": 0,
+      "nni": 0
+    },
+    "TradeList": [
+      "Reassess portfolio allocation",
+      "Maintain current HQLA levels"
+    ],
+    "Assumptions": "Economic indicators remain balanced, avoiding shocks.",
+    "Signals": [
+      "Federal Reserve meeting outcomes on 2025-02-14",
+      "Stable inflation readings"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis widens by 25 bps, reflecting reduced demand for MBS.",
+    "Probability": 0.1,
+    "Rationale": "Investor sentiment shifts, negatively impacting Level 2 MBS valuations.",
+    "ImpactChannels": [
+      "MBS"
+    ],
+    "Shocks": {
+      "mbs_basis": 25
+    },
+    "MetricsDelta": {
+      "lcr": -2,
+      "nsfr": -1,
+      "nni": -5
+    },
+    "TradeList": [
+      "Reduce MBS holdings by $500mn",
+      "Increase USTs by $300mn"
+    ],
+    "Assumptions": "Market liquidity conditions deteriorate.",
+    "Signals": [
+      "MBS issuance calendar on 2025-04-01",
+      "Market sentiment reports"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Global Market Turmoil",
+    "Description": "An external shock causes increased volatility and flight to quality, affecting spreads.",
+    "Probability": 0.05,
+    "Rationale": "Geopolitical events lead to a sudden drop in corporate bond valuations.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": 30,
+        "hy_oas": 70
+      }
+    },
+    "MetricsDelta": {
+      "lcr": -3,
+      "nsfr": -1,
+      "nni": -8
+    },
+    "TradeList": [
+      "Increase cash reserves by $1bn",
+      "Sell $500mn in corporate bonds"
+    ],
+    "Assumptions": "Unexpected geopolitical events trigger market reactions.",
+    "Signals": [
+      "Global market volatility index > 25 on 2025-05-15",
+      "Major geopolitical news releases"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Commodity Price Surge",
+    "Description": "A significant rise in commodity prices leads to inflationary pressures.",
+    "Probability": 0.05,
+    "Rationale": "Increased commodity prices drive inflation, impacting rates and HQLA.",
+    "ImpactChannels": [
+      "Rates",
+      "Commodities"
+    ],
+    "Shocks": {
+      "move_index": 30
+    },
+    "MetricsDelta": {
+      "lcr": -2,
+      "nsfr": -1,
+      "nni": -4
+    },
+    "TradeList": [
+      "Adjust commodity exposure",
+      "Increase HQLA allocation"
+    ],
+    "Assumptions": "Supply chain disruptions impact commodity markets.",
+    "Signals": [
+      "Commodity prices > 10% on 2025-06-10",
+      "Inflation reports on 2025-06-20"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Wealth Management Runoff",
+    "Description": "A 10% runoff in wealth management deposits occurs as clients seek higher returns.",
+    "Probability": 0.05,
+    "Rationale": "Market conditions prompt clients to withdraw funds for better yields.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "deposits": -10
+    },
+    "MetricsDelta": {
+      "lcr": -3,
+      "nsfr": -2,
+      "nni": -5
+    },
+    "TradeList": [
+      "Increase funding through repos by $500mn",
+      "Adjust investment strategies"
+    ],
+    "Assumptions": "Higher interest rates drive clients to alternative investments.",
+    "Signals": [
+      "Weekly deposit flows reports",
+      "Client surveys on investment preferences"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Improved Economic Outlook",
+    "Description": "A stronger-than-expected economic recovery leads to tighter credit spreads and increased deposits.",
+    "Probability": 0.35,
+    "Rationale": "Positive economic indicators boost consumer confidence and bank deposits.",
+    "ImpactChannels": [
+      "Credit",
+      "Deposits"
+    ],
+    "Shocks": {
+      "credit_spreads": {
+        "ig_oas": -15,
+        "hy_oas": -25
+      }
+    },
+    "MetricsDelta": {
+      "lcr": 2,
+      "nsfr": 3,
+      "nni": 7
+    },
+    "TradeList": [
+      "Expand lending portfolio by $1bn",
+      "Increase retail deposit offerings"
+    ],
+    "Assumptions": "Economic growth surpasses expectations, leading to improved market conditions.",
+    "Signals": [
+      "GDP growth > 3% on 2025-07-15",
+      "Consumer confidence index > 100 on 2025-08-01"
+    ],
+    "PredictionDate": "2025-12-17"
+  }
+]

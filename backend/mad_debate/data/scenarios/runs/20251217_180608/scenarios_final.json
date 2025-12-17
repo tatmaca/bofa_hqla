@@ -2,7 +2,7 @@
   {
     "Scenario": "Regulatory Capital Changes",
     "Description": "Changes in regulatory capital requirements that increase the GSIB surcharge.",
-    "Probability": 0.15733984,
+    "Probability": 0.15734,
     "Rationale": "Increased capital requirements could pressure BoA's capital ratios and limit growth. Probability renormalized for total sum of 1.00.",
     "ImpactChannels": "Regulation",
     "Shocks": {
@@ -32,7 +32,7 @@
   {
     "Scenario": "Robust Recovery",
     "Description": "Strong economic growth narrows IG spreads by 20 bps and HY spreads by 30 bps.",
-    "Probability": 0.15246185,
+    "Probability": 0.152462,
     "Rationale": "A robust recovery would lead to increased consumer confidence and higher deposit inflows.",
     "ImpactChannels": [
       "Credit",
@@ -63,7 +63,7 @@
   {
     "Scenario": "Retail Deposit Beta Rise",
     "Description": "Increased beta on retail deposits leading to higher funding costs.",
-    "Probability": 0.13111687,
+    "Probability": 0.131117,
     "Rationale": "As rates rise, depositors may seek higher interest returns, increasing the cost of funding for BoA. Probability renormalized for total sum of 1.00.",
     "ImpactChannels": "Deposits",
     "Shocks": {
@@ -93,7 +93,7 @@
   {
     "Scenario": "MBS Basis Tightening",
     "Description": "A tightening of the MBS basis due to reduced supply and increased demand for mortgage-backed securities.",
-    "Probability": 0.13111687,
+    "Probability": 0.131117,
     "Rationale": "A tighter MBS basis would enhance the value of BoA's Level 2A Agency MBS holdings. Probability renormalized for total sum of 1.00.",
     "ImpactChannels": "MBS",
     "Shocks": {
@@ -123,7 +123,7 @@
   {
     "Scenario": "Stable Economic Growth",
     "Description": "Stable growth environment with inflation around target; no significant shocks.",
-    "Probability": 0.12235788,
+    "Probability": 0.122358,
     "Rationale": "Continued stable growth supports existing levels of rates and spreads.",
     "ImpactChannels": [
       "Rates"
@@ -149,7 +149,7 @@
   {
     "Scenario": "Macro Slowdown",
     "Description": "Economic growth slows, leading to a 25 bps increase in IG credit spreads and a 60 bps increase in HY spreads.",
-    "Probability": 0.06707893,
+    "Probability": 0.067079,
     "Rationale": "A slowdown could decrease consumer spending and increase defaults, impacting deposits.",
     "ImpactChannels": [
       "Credit",
@@ -180,7 +180,7 @@
   {
     "Scenario": "Bear Steepening",
     "Description": "Significant bear steepening of the yield curve; long rates up by 50bps.",
-    "Probability": 0.06246394,
+    "Probability": 0.062464,
     "Rationale": "Rising inflation expectations lead to higher long-term rates, impacting Level 1 HQLA valuations.",
     "ImpactChannels": [
       "Rates",
@@ -208,7 +208,7 @@
   {
     "Scenario": "Widening Credit Spreads",
     "Description": "IG OAS increases by 25 bps and HY OAS increases by 60 bps.",
-    "Probability": 0.06136294,
+    "Probability": 0.061363,
     "Rationale": "Increased concerns over corporate defaults lead to wider credit spreads.",
     "ImpactChannels": [
       "Credit"
@@ -235,7 +235,7 @@
   {
     "Scenario": "Bear Steepener",
     "Description": "Yield curve steepens with long rates rising by 50 bps while short rates rise by 10 bps.",
-    "Probability": 0.05889794,
+    "Probability": 0.058898,
     "Rationale": "A steepening curve may lead to increased funding costs for BoA, affecting NII and OCI.",
     "ImpactChannels": [
       "Rates",
@@ -268,7 +268,7 @@
   {
     "Scenario": "Retail Deposit Beta Increase",
     "Description": "Retail deposit beta rises to 30%, leading to a $20bn outflow.",
-    "Probability": 0.05580294,
+    "Probability": 0.055803,
     "Rationale": "Rising interest rates lead customers to seek higher yields, impacting liquidity.",
     "ImpactChannels": [
       "Deposits"

@@ -1,0 +1,268 @@
+[
+  {
+    "Scenario": "Bear Steepening",
+    "Description": "Significant bear steepening of the yield curve; long rates up by 50bps.",
+    "Probability": 0.1,
+    "Rationale": "Rising inflation expectations lead to higher long-term rates, impacting Level 1 HQLA valuations.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move_index": 50,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "LCR": -5,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Add $2bn in 5Y USTs via auction"
+    ],
+    "Assumptions": "Inflation remains persistent, consumer spending increases.",
+    "Signals": [
+      "CPI release > 3.5% (2025-01-12)",
+      "10Y UST yield > 4.0% (2025-02-01)",
+      "FOMC meeting outcome (2025-01-30)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Credit Spread Widening",
+    "Description": "Credit spreads widen by 20bps for IG and 50bps for HY.",
+    "Probability": 0.088889,
+    "Rationale": "Deteriorating credit conditions in the corporate sector affect asset valuations.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "ig_oas": 20,
+      "hy_oas": 50
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Reduce exposure to HY bonds by $1bn"
+    ],
+    "Assumptions": "Corporate earnings decline, leading to increased defaults.",
+    "Signals": [
+      "Corporate earnings reports below expectations (2025-02-15)",
+      "IG bond issuance drops significantly (2025-01-20)",
+      "Credit rating downgrades increase (2025-03-01)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Deposit Runoff",
+    "Description": "Retail deposit beta increases by 5% with 2% wealth runoff.",
+    "Probability": 0.088889,
+    "Rationale": "Higher interest rates lead to increased withdrawal rates, affecting liquidity metrics.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "deposit_runoff": 2
+    },
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase retail deposit rates by 25bps"
+    ],
+    "Assumptions": "Consumers react to rising rates by reallocating savings.",
+    "Signals": [
+      "Consumer confidence index < 90 (2025-01-25)",
+      "Retail deposit growth slows (2025-02-10)",
+      "SME loan demand drops (2025-03-15)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Implementation of Basel Endgame regulations increases GSIB surcharge by 20bps.",
+    "Probability": 0.077778,
+    "Rationale": "Increased regulatory scrutiny impacts capital ratios, requiring adjustments.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {
+      "regulatory_changes": "20bps GSIB surcharge"
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Prepare for additional capital buffer requirements"
+    ],
+    "Assumptions": "Regulatory environment becomes more stringent.",
+    "Signals": [
+      "Basel Committee meeting outcomes (2025-03-20)",
+      "New capital requirements announced (2025-02-15)",
+      "Market reactions to regulatory changes (2025-04-01)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis widens by 50bps due to increasing mortgage rates.",
+    "Probability": 0.077778,
+    "Rationale": "Higher mortgage rates lead to reduced prepayment speeds and impact MBS valuations.",
+    "ImpactChannels": [
+      "MBS"
+    ],
+    "Shocks": {
+      "mbs_basis": 50
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Reallocate $1bn from MBS to USTs"
+    ],
+    "Assumptions": "Mortgage rates continue to rise.",
+    "Signals": [
+      "Mortgage application rates < 200,000 (2025-02-01)",
+      "MBS issuance slows (2025-03-10)",
+      "Fed comments on mortgage market (2025-03-15)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Commodity Price Shock",
+    "Description": "Oil prices increase by 10%, leading to inflationary pressures.",
+    "Probability": 0.077778,
+    "Rationale": "Higher oil prices could lead to inflation, impacting economic growth.",
+    "ImpactChannels": [
+      "Rates",
+      "Commodity Prices"
+    ],
+    "Shocks": {
+      "move_index": 10
+    },
+    "MetricsDelta": {
+      "LCR": -1,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Review commodity-linked exposures"
+    ],
+    "Assumptions": "Inflation expectations rise due to commodity prices.",
+    "Signals": [
+      "Oil prices > $80/barrel (2025-01-15)",
+      "CPI forecasts increase (2025-02-12)",
+      "Fed comments on inflation outlook (2025-03-10)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Global Geopolitical Tensions",
+    "Description": "Increased geopolitical tensions lead to flight-to-quality behavior.",
+    "Probability": 0.1,
+    "Rationale": "Investors seek safety, tightening spreads across asset classes.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "ig_oas": -25
+    },
+    "MetricsDelta": {
+      "LCR": 2,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Increase holdings in USTs by $1bn"
+    ],
+    "Assumptions": "Market volatility increases, leading to risk aversion.",
+    "Signals": [
+      "Geopolitical news headlines (2025-01-05)",
+      "Market reactions to global events (2025-02-01)",
+      "U.S. sanctions announcements (2025-03-15)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Fed Policy Shift",
+    "Description": "Unexpected Fed rate hike of 25bps impacts funding costs.",
+    "Probability": 0.077778,
+    "Rationale": "A surprise rate hike could prompt a rapid adjustment in deposit behaviors and funding costs.",
+    "ImpactChannels": [
+      "Rates",
+      "Deposits"
+    ],
+    "Shocks": {
+      "move_index": 25
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Adjust funding strategy in response to rate change"
+    ],
+    "Assumptions": "Market reacts quickly to Fed policy changes.",
+    "Signals": [
+      "FOMC meeting outcome (2025-03-20)",
+      "Market expectations for future rate hikes (2025-02-01)",
+      "Interest rate futures movements (2025-01-15)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Treasury Issuance Surge",
+    "Description": "Surge in Treasury issuance of $200bn leads to supply pressures.",
+    "Probability": 0.077778,
+    "Rationale": "Increased Treasury supply could lead to a bear flattening of the curve.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move_index": 40
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Prepare for increased Treasury auctions"
+    ],
+    "Assumptions": "Government increases borrowing to fund spending.",
+    "Signals": [
+      "Treasury auction announcements (2025-01-10)",
+      "Market reactions to new issuance (2025-02-15)",
+      "Budget proposals (2025-03-01)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Stable Economic Growth",
+    "Description": "Stable growth environment with inflation around target; no significant shocks.",
+    "Probability": 0.233333,
+    "Rationale": "Continued stable growth supports existing levels of rates and spreads.",
+    "ImpactChannels": [
+      "Rates"
+    ],
+    "Shocks": {
+      "move_index": 0
+    },
+    "MetricsDelta": {
+      "LCR": 0,
+      "NSFR": 0
+    },
+    "TradeList": [
+      "Maintain current portfolio allocation"
+    ],
+    "Assumptions": "Economic indicators remain stable.",
+    "Signals": [
+      "GDP growth above 2% (2025-01-30)",
+      "Stable employment figures (2025-02-05)",
+      "Inflation remains below 3% (2025-03-10)"
+    ],
+    "PredictionDate": "2025-12-17"
+  }
+]
