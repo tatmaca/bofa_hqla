@@ -122,16 +122,3 @@ class ScenarioGenerator:
                 R[s_idx, i] = r
 
         return R, base_prices, inst_list
-
-    def make_psd_cov(self, R):
-        # R: scenarios × assets
-        Omega_star = np.cov(R, rowvar=False, ddof=1)  # shape N×N
-        # symmetric eigh
-        eigvals, eigvecs = la.eigh(Omega_star)
-        eigvals_clipped = np.clip(eigvals, a_min=0.0, a_max=None)
-        Omega_psd = (eigvecs * eigvals_clipped) @ eigvecs.T
-        # numeric stabilization
-        eps = 1e-12
-        Omega_psd += eps * np.eye(Omega_psd.shape[0])
-        # print(Omega_psd)
-        return Omega_psd

@@ -1,0 +1,33 @@
+**HQLA Scenario Optimization & Rebalancing Analysis**
+
+1. **Executive Summary**
+   - The exercise aimed to optimize and rebalance a High-Quality Liquid Asset (HQLA) portfolio across four distinct scenarios.
+   - The scenarios were "Lingering Inflation + Fed on Hold", "Bull Steepener on Growth Scare", "Geopolitical Shock + Commodity Spike", and "Reg Relief / Capital Recalibration".
+   - The optimization method focused on maximizing expected return while maintaining a Liquidity Coverage Ratio (LCR) above 1.
+   - The exercise resulted in a shift in allocations with a general increase in LCR across all scenarios.
+   - The risk characterization of the portfolio varied across scenarios, with the highest expected return in the "Geopolitical Shock + Commodity Spike" scenario.
+
+2. **Scenario Set Description**
+   - "Lingering Inflation + Fed on Hold": This scenario, with a probability of 0.32, assumes a stall in Core PCE at 2.8% and a re-acceleration of services inflation. The Fed is forced to keep rates at 5.50% into late 2025. The scenario puts pressure on government bonds and T-bills, with significant allocations in GOV-8053 and GOV-9355.
+   - "Bull Steepener on Growth Scare": With a probability of 0.28, this scenario assumes a rollover in payrolls and a collapse in small-business surveys, leading to an early Fed cut sequence. The scenario results in a significant allocation in GOV-9355, GOV-8053, and TBILL-6372.
+   - "Geopolitical Shock + Commodity Spike": This scenario, with a probability of 0.22, assumes an energy supply disruption that lifts Brent above $110, rekindling breakevens and widening MBS basis. The scenario results in a significant allocation in GOV-9355, GOV-8053, and TBILL-6372.
+   - "Reg Relief / Capital Recalibration": With a probability of 0.18, this scenario assumes agencies finalize Endgame tweaks that soften G-SIB surcharge and Level 2 caps for HQLA. The scenario results in a significant allocation in GOV-8053, GOV-9355, and TBILL-6372.
+
+3. **Portfolio Behavior Under Scenarios**
+   - In the "Lingering Inflation + Fed on Hold" scenario, the portfolio reacts by allocating heavily to government bonds and T-bills, maximizing yield pickup while maintaining LCR constraints. There is a concentration risk in GOV-8053 and GOV-9355.
+   - In the "Bull Steepener on Growth Scare" scenario, the portfolio reacts similarly to the first scenario, with a significant allocation to government bonds and T-bills. The most constraining scenario is this one due to the early Fed cut sequence.
+   - In the "Geopolitical Shock + Commodity Spike" scenario, the portfolio reacts by maximizing yield pickup in government bonds and T-bills. This scenario provides the most return-enhancing opportunity due to the energy supply disruption.
+   - In the "Reg Relief / Capital Recalibration" scenario, the portfolio reacts by allocating heavily to government bonds and T-bills, taking advantage of the softened G-SIB surcharge and Level 2 caps for HQLA.
+
+4. **Final Combined Portfolio Recommendation**
+   - The overall allocation profile is heavily weighted towards government bonds and T-bills, specifically GOV-9355, GOV-8053, and TBILL-6372.
+   - The portfolio is overweight in these assets compared to the base portfolio.
+   - The portfolio maintains a robust LCR buffer and manages haircut implications effectively. The portfolio's duration is managed effectively across all scenarios.
+
+5. **Recommendations**
+   - Maintain a robust liquidity buffer to withstand potential stress scenarios.
+   - Consider adjusting asset class allocations to diversify portfolio and reduce concentration risk.
+   - Monitor curve exposure to manage interest rate risk effectively.
+   - Maintain a balanced portfolio duration to manage interest rate risk.
+   - Consider the implications of haircut constraints on portfolio allocations.
+   - Ensure the portfolio remains robust to severe stress scenarios.

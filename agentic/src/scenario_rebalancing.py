@@ -1,4 +1,16 @@
-# scenario_rebalancing.py
+"""
+scenario_rebalancing.py
+-------------
+Manages portfolio rebalancing across multiple stress scenarios for HQLA instruments.
+Supports scenario-specific optimizations, combination of scenario portfolios
+(probability-weighted, worst-case, top-k, or custom), and generation of structured AI reports.
+Includes utilities for comparing the combined portfolio to the original portfolio
+and updating underlying portfolio quantities.
+
+Author: Aryaa Gunavante (agunavante)
+Updated: 2025-12-15
+"""
+
 from __future__ import annotations
 import numpy as np
 import pandas as pd
@@ -21,29 +33,20 @@ from hqla_portfolio import Portfolio
 class Scenario:
     name: str
     yield_curve_handle: ql.YieldTermStructureHandle
-    sofr_handle: Optional[Any]
+    sofr_handle: Optional[Any] = None
     probability: float = 0.0
     metadata: Dict = None  # Optional extra info (description)
 
-# ------------------------
-# Optimizer Singleton wrapper
-# ------------------------
-class OptimizerSingleton:
-    """
-    Single optimizer instance and swap inputs.
-    Use get_instance() to retrieve.
-    """
-    _instance = None
-
-    @classmethod
-    def set_instance(cls, optimizer: HQLA_Portfolio_Opt_Enhanced):
-        cls._instance = optimizer
-
-    @classmethod
-    def get_instance(cls) -> HQLA_Portfolio_Opt_Enhanced:
-        if cls._instance is None:
-            raise RuntimeError("OptimizerSingleton: optimizer instance not set. Call set_instance() first.")
-        return cls._instance
+    def build_sofr_handle(self):
+        # Create a SOFR index using the scenario yield curve
+        self.sofr_handle = ql.OvernightIndex( 
+            "SOFR",
+            0,
+            ql.USDCurrency(),
+            ql.TARGET(),
+            ql.Actual360(),
+            self.yield_curve_handle
+        )
 
 # ------------------------
 # ScenarioRebalancingEngine
@@ -143,7 +146,7 @@ class ScenarioRebalancingEngine:
 
     def _extract_weights(self, df: pd.DataFrame, res_obj) -> np.ndarray:
         """
-        Robust extraction of weights vector from returned df/result:
+        Extraction of weights vector from returned df/result:
         - Prefer df column 'Opt_Weight' or 'Opt_Weight_MV' if present
         - Else, try res_obj.x (scipy optimize result)
         - Else, try from Allocated_Amount normalized by net_cash_outflow
@@ -190,7 +193,7 @@ class ScenarioRebalancingEngine:
         first_weights = next(iter(self.results.values()))["weights"]
         N = len(first_weights)
 
-        # Helper: build mapping name -> weights and metrics
+        # Map scenario name -> weights and metrics
         w_map = {name: info["weights"] for name, info in self.results.items()}
         metrics_map = {name: info["metrics"] for name, info in self.results.items()}
 
@@ -238,7 +241,7 @@ class ScenarioRebalancingEngine:
         elif mode == "custom":
             if not custom_weights:
                 raise ValueError("custom_weights must be provided for mode='custom'")
-            # Normalize provided weights
+            # Normalize weights
             keys = list(custom_weights.keys())
             vals = np.array([custom_weights[k] for k in keys], dtype=float)
             if vals.sum() <= 0:
@@ -256,7 +259,7 @@ class ScenarioRebalancingEngine:
             raise ValueError(f"Unknown combine mode '{mode}'")
 
     # ------------------------
-    # Apply / show final portfolio
+    # Apply final portfolio
     # ------------------------
     def build_combined_dataframe(self) -> pd.DataFrame:
         """
@@ -298,7 +301,7 @@ class ScenarioRebalancingEngine:
         return df
 
     # ------------------------
-    # User interactions (simple CLI)
+    # User interaction
     # ------------------------
     def ask_user_for_mode(self) -> str:
         msg = textwrap.dedent("""
@@ -327,6 +330,85 @@ class ScenarioRebalancingEngine:
         return weights
 
     # ------------------------
+    # Comparison Enabling Methods
+    # ------------------------
+
+    def portfolio_delta_summary(
+        self,
+        original_df: pd.DataFrame,
+        combined_df: pd.DataFrame,
+        threshold: float = 0.005
+    ) -> pd.DataFrame:
+        """
+        Compute per-asset summary of changes between original and combined portfolios.
+
+        Parameters:
+        original_df : pd.DataFrame
+            Original portfolio dataframe with columns 'Name', 'Level', 'Quantity', 'DirtyPrice'.
+        combined_df : pd.DataFrame
+            Optimized/combined portfolio dataframe with columns 'Name', 'Level', 'Allocated_Amount', 'YTM'.
+        threshold : float
+            Minimum absolute weight change to include (fraction, e.g., 0.005 = 0.5%)
+
+        Returns:
+        pd.DataFrame
+            Significant per-asset changes with columns:
+            'Name', 'Level', 'Original_Amount', 'Combined_Amount', 'Delta', 'Delta_pct', 'YTM'
+        """
+
+        # Compute original allocation amounts
+        if "DirtyPrice" in original_df.columns and "Quantity" in original_df.columns:
+            original_df = original_df.copy()
+            original_df["Original_Amount"] = original_df["DirtyPrice"] * original_df["Quantity"]
+        else:
+            raise ValueError("Original portfolio must have 'DirtyPrice' and 'Quantity' columns.")
+
+        # Ensure combined_df has Allocated_Amount
+        if "Allocated_Amount" not in combined_df.columns:
+            raise ValueError("Combined portfolio must have 'Allocated_Amount' column.")
+
+        # Align by asset name
+        merged = pd.merge(
+            original_df[["Name", "Level", "Original_Amount"]],
+            combined_df[["Name", "Level", "Allocated_Amount", "YTM"]],
+            on=["Name", "Level"],
+            how="outer"
+        ).fillna(0.0)
+
+        merged["Delta"] = merged["Allocated_Amount"] - merged["Original_Amount"]
+        total_combined = merged["Allocated_Amount"].sum()
+        merged["Delta_pct"] = merged["Delta"] / total_combined
+
+        # Filter by threshold
+        merged = merged[np.abs(merged["Delta_pct"]) >= threshold]
+
+        # Sort by magnitude of change, descending
+        merged = merged.reindex(merged["Delta_pct"].abs().sort_values(ascending=False).index)
+
+        return merged.reset_index(drop=True)
+
+
+    def portfolio_level_summary(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Summarize allocations at the Level (L1/L2/L3) granularity.
+
+        Parameters:
+        df : pd.DataFrame
+            Portfolio DataFrame with 'Level' and 'Allocated_Amount' or 'Original_Amount'
+
+        Returns:
+        pd.DataFrame
+            Level summary with total allocation and percentage of portfolio.
+        """
+        summary = df.groupby("Level").agg(
+            Total_Allocated=pd.NamedAgg(column="Allocated_Amount", aggfunc="sum")
+        ).reset_index()
+        total = summary["Total_Allocated"].sum()
+        summary["Pct_of_Portfolio"] = summary["Total_Allocated"] / total
+        return summary
+
+
+    # ------------------------
     # AI-style report generator (templated)
     # ------------------------
 
@@ -341,8 +423,7 @@ class ScenarioRebalancingEngine:
         The report structure is tightly controlled and uses scenario data +
         optimized portfolios + combined portfolio.
 
-        Parameters
-        ----------
+        Parameters:
         scenario_descriptions : dict
             Mapping: scenario name -> description (from scenario generation module)
         openai_api_key : str
@@ -365,24 +446,39 @@ class ScenarioRebalancingEngine:
             scen = info["scenario"]
             df = info["df"]
             metrics = info["metrics"]
+            # Build compact per-asset summary
+            top_allocations = df.nlargest(10, "Allocated_Amount")[
+                ["Name", "Level", "Allocated_Amount", "YTM"]
+            ].to_dict(orient="records")
+
+            # Optionally, include delta from base portfolio if you have it
+            delta_summary = self.portfolio_delta_summary(self.base_portfolio.build_assets_summary(), df) 
+
+            # Optionally, include allocation by Level
+            level_summary = df.groupby("Level")["Allocated_Amount"].sum().to_dict()
 
             scenario_payload[name] = {
                 "description": scenario_descriptions.get(name, ""),
                 "probability": scen.probability,
                 "net_cash_outflow": self.net_cash_outflow,
                 "metrics": metrics,
-                "per_asset": df.to_dict(orient="records"),
+                "top_allocations": top_allocations, 
+                "delta_summary": delta_summary.to_dict(orient="records"),      
+                "level_summary": level_summary,      
             }
 
         combined_payload = combined_df.to_dict(orient="records")
+        top_combined_allocations = combined_df[
+        combined_df["Allocated_Amount"] / self.net_cash_outflow > 0.05
+        ][["Name", "Level", "Allocated_Amount", "YTM"]].to_dict(orient="records")
 
         full_payload = {
             "base_portfolio_nco": getattr(self.base_portfolio, "net_cash_outflow", None),
             "scenarios": scenario_payload,
-            "final_combined_portfolio": combined_payload,
+            "final_combined_portfolio_top_allocations": top_combined_allocations,
         }
 
-        # --- Build VERY TIGHT prompt for the LLM ---
+        # --- Build TIGHT prompt for the LLM: can be extended to include more details, extrapolate more ---
         system_msg = """
 You are an expert fixed-income portfolio manager specializing in HQLA, liquidity ratios, bank treasury,
 and stress scenario construction.
@@ -390,6 +486,11 @@ and stress scenario construction.
 Your task is to produce a CLEAN, PRECISE, HIGHLY STRUCTURED report. 
 Tone: institutional, concise, no marketing language, no fluff.
 Do NOT invent numbers. Use only what is given in the payload.
+
+Use ONLY the data provided in the payload. Do NOT invent numbers. 
+All per-scenario dataframes and the final portfolio dataframe have been pre-filtered 
+to include only top allocations (significant allocations, typically >5% of net cash outflow). 
+You may summarize, aggregate, and compare scenarios. Focus on key metrics.
 """
 
         user_msg = f"""
@@ -397,8 +498,6 @@ Write a **strictly structured** professional report titled:
 
     **“HQLA Scenario Optimization & Rebalancing Analysis”**
 
-Use ONLY the data provided in the JSON block below.
-Do NOT invent, guess, or extrapolate unknown numbers.
 
 DATA:
 {json.dumps(full_payload, indent=2)}
@@ -420,6 +519,7 @@ DATA:
    - Probability  
    - Net Cash Outflow  
    - 2–3 bullets summarizing unique pressures (YTM shifts, curve shocks, liquidity stress)  
+   - Note: per-asset lists are already top allocations
 
 3. Portfolio Behavior Under Scenarios  
    For each scenario:  
@@ -432,6 +532,7 @@ DATA:
    - Describe overall allocation profile  
    - Major overweight/underweight vs base  
    - Provide commentary on risk, duration, LCR buffer, and haircut implications
+   - Note: final portfolio contains only material allocations
 
 5. Recommendations
    - Clear, concise bullets (max 6)
@@ -444,11 +545,12 @@ ABSOLUTE RULES:
 - Do NOT repeat the data verbatim.
 - Do NOT speculate or add data that is missing.
 - Do NOT speak generically — ground all statements in the provided numbers.
+- Ground all statements in the provided numbers only.
 - Maintain numerical consistency.
 """
 
         # --- Call OpenAI API ---
-        client = OpenAI(api_key=openai_api_key)
+        client = OpenAI(api_key="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")
 
         response = client.chat.completions.create(
             model=model,
@@ -468,8 +570,7 @@ ABSOLUTE RULES:
         """
         Full workflow using a pre-specified dictionary of scenarios.
 
-        Parameters
-        ----------
+        Parameters:
         scenarios_dict : dict
             Mapping of scenario_name -> {
                 "description": str,
@@ -543,4 +644,5 @@ ABSOLUTE RULES:
         else:
             print("Base portfolio not updated.")
 
+        return report
 
