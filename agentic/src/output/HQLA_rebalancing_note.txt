@@ -1,0 +1,15 @@
+Note on HQLA Scenario Rebalancing Output
+
+The output in this folder contains the results of the latest HQLA portfolio scenario rebalancing test exercise using the mean-only optimization method. 
+
+Key context for interpretation:
+
+- The optimization concentrated allocations in Level 1 (L1) assets. Specifically, only four instruments received significant allocations. This is expected under a mean-maximization approach, as these assets have the highest yields-to-maturity (YTM).
+- The portfolio results focus on allocated amounts and expected returns. Metrics such as modified duration are not populated in this dataset.
+- The AI-generated report provides a qualitative overview of scenario impacts and portfolio behavior across the four stress scenarios.
+- Please interpret the results in light of the optimizer choice and the current data availability. This optimizer serves as a placeholder in the pipeline; it is recommended to use sophisticated in-house models that capture the complexity of the task and leverage more accurate instrument-level data, as the current data is purely synthetic for test purposes.
+
+This note is provided for context to help understand the results in the `agentic/src/output` folder.
+
+Best regards,  
+Aryaa Gunavante  
