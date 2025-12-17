@@ -12,8 +12,9 @@ from openai import OpenAI
 import QuantLib as ql
 
 
-from .hqla_portfolio_opt import HQLA_Portfolio_Opt_Enhanced
-from .hqla_portfolio import Portfolio
+from hqla_portfolio_opt import HQLA_Portfolio_Opt_Enhanced
+from hqla_portfolio import Portfolio
+from hqla_instruments import Fixed, Floating, Zero
 
 # ------------------------
 # Scenario dataclass
@@ -22,9 +23,21 @@ from .hqla_portfolio import Portfolio
 class Scenario:
     name: str
     yield_curve_handle: ql.YieldTermStructureHandle
-    sofr_handle: Optional[Any]
+    sofr_handle: Optional[Any] = None
     probability: float = 0.0
     metadata: Dict = None  # Optional extra info (description)
+
+    def build_sofr_handle(self):
+        # Create a SOFR index using the scenario yield curve
+        self.sofr_handle = ql.OvernightIndex(
+            "SOFR",
+            0,
+            ql.USDCurrency(),
+            ql.TARGET(),
+            ql.Actual360(),
+            self.yield_curve_handle
+        )
+
 
 # ------------------------
 # ScenarioRebalancingEngine
@@ -90,7 +103,18 @@ class ScenarioRebalancingEngine:
             # Create a deep copy
             scen_portfolio = self.base_portfolio.clone()
 
-            # Reprice the portfolio with all curves (up/down and survival curves)
+            if scen.sofr_handle is None:
+                raise ValueError(f"Scenario {scen.name} has no SOFR handle")
+
+            for level, group in scen_portfolio.assets.items():
+                for inst in group:
+                    if isinstance(inst, Floating):
+                        inst.build_bond(index=scen.sofr_handle)
+                    else:
+                        inst.build_bond()
+
+            # Reprice the portfolio with all
+            #  curves (up/down and survival curves)
             # Extract curves from scenario metadata (built in convert_frontend_scenarios_with_curves)
             up_curve = scen.metadata.get("up_curve")
             down_curve = scen.metadata.get("down_curve")

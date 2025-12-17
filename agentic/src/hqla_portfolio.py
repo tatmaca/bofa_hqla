@@ -12,7 +12,7 @@ from typing import Dict, List
 
 import QuantLib as ql
 
-from . import hqla_instruments as HQLA
+import hqla_instruments as HQLA
 
 
 class Portfolio:

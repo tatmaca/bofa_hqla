@@ -51,6 +51,8 @@ class HQLA_Asset(ABC):
         # Placeholder for the QuantLib bond object
         self.bond = None
 
+        
+
     @abstractmethod
     def build_bond(self, **kwargs):
         """
@@ -76,10 +78,11 @@ class HQLA_Asset(ABC):
         self.bond.setPricingEngine(engine)
         self.clean_price = self.bond.cleanPrice()
         self.dirty_price = self.bond.dirtyPrice()
+        dc = ql.Thirty360(ql.Thirty360.USA)
+
         self.ytm = (
             self.bond.bondYield(
-                self.clean_price,
-                ql.Thirty360(ql.Thirty360.USA),
+                dc,
                 ql.Compounded,
                 ql.Semiannual,
             )
@@ -248,6 +251,8 @@ class Floating(HQLA_Asset):
         )
         return self.bond
 
+    
+
 
 class Fixed(HQLA_Asset):
     """
@@ -309,6 +314,8 @@ class Fixed(HQLA_Asset):
         )
         return self.bond
 
+    
+
 
 class Zero(HQLA_Asset):
     """
@@ -355,6 +362,7 @@ class Zero(HQLA_Asset):
             paymentConvention=self.business_day_conv,
         )
         return self.bond
+
 
 
 # Levels

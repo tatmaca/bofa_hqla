@@ -3,6 +3,8 @@ import base64
 import datetime as dt
 import datetime as _dt
 import io
+import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -12,10 +14,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from hqla_portfolio import Portfolio
+import hqla_instruments as HQLA
+from scenario_rebalancing import ScenarioRebalancingEngine, Scenario
+
+
+
+# module-level globals
+portfolio = None
+base_curve_handle = None
+base_curve = None
+base_curve_up = None
+base_curve_down = None
+survival_curves = {}
+survival_curves_up = {}
+survival_curves_down = {}
+base_curve_tenor_strs = []
+realized_portfolio_summary = None
+
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / "tools" / "news_ingestion"))
-
-from generate_scenario_predictions import generate_all_scenario_curves
 
 app = FastAPI()
 portfolio = Portfolio()
@@ -555,9 +572,7 @@ async def optimize_scenarios(request: Request):
                 status_code=400,
                 content={"error": "scenarioCurves is required"}
             )
-        
-        from .scenario_rebalancing import ScenarioRebalancingEngine, Scenario
-        
+                
         # Convert scenarios WITH their corresponding curves
         scenarios = convert_frontend_scenarios_with_curves(
             scenario_matrix,
@@ -672,9 +687,7 @@ def convert_frontend_scenarios_with_curves(
     
     Returns:
         List of Scenario objects with proper QuantLib curve handles
-    """
-    from .scenario_rebalancing import Scenario
-    
+    """    
     scenarios = []
     today = ql.Date.todaysDate()
     
@@ -739,10 +752,13 @@ def convert_frontend_scenarios_with_curves(
         scenario = Scenario(
             name=name,
             yield_curve_handle=yield_curve_handle,
-            sofr_handle=None,
             probability=probability,
             metadata=metadata
         )
+
+        scenario.build_sofr_handle()
+
+
         
         scenarios.append(scenario)
     
@@ -781,6 +797,8 @@ def build_ql_curve_from_data(curve_data: list, today: ql.Date) -> ql.YieldTermSt
     
     return ql.YieldTermStructureHandle(curve)
 
+    
+    return sofr_index
 
 def build_all_curves_for_scenario(
     yield_curve_handle: ql.YieldTermStructureHandle,
