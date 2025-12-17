@@ -10,6 +10,3 @@ Key context for interpretation:
 - Please interpret the results in light of the optimizer choice and the current data availability. This optimizer serves as a placeholder in the pipeline; it is recommended to use sophisticated in-house models that capture the complexity of the task and leverage more accurate instrument-level data, as the current data is purely synthetic for test purposes.
 
 This note is provided for context to help understand the results in the `agentic/src/output` folder.
-
-Best regards,  
-Aryaa Gunavante  
