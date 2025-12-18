@@ -962,7 +962,7 @@ async def optimize_scenarios(request: Request):
         engine.run_rebalancing(
             method=optimization_method,
             verbose=False,
-            max_position_size=0.40
+            max_position_size=0.20
         )
         
         # Combine portfolios

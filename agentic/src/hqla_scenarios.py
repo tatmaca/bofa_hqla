@@ -75,11 +75,11 @@ class ScenarioGenerator:
         self,
         base_curve_handle,
         scenarios,
-        up_curve: ql.YieldTermStructureHandle,
-        down_curve: ql.YieldTermStructureHandle,
-        survival_curves: Dict[str, ql.DefaultProbabilityTermStructureHandle],
-        survival_curves_up: Dict[str, ql.DefaultProbabilityTermStructureHandle],
-        survival_curves_down: Dict[str, ql.DefaultProbabilityTermStructureHandle],
+        up_curve=None,
+        down_curve=None,
+        survival_curves=None,
+        survival_curves_up=None,
+        survival_curves_down=None
     ):
         """
         Scenarios: 1D array of parallel shifts (decimal).

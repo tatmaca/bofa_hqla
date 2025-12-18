@@ -129,7 +129,7 @@ class ScenarioRebalancingEngine:
             if method == "mean_lexicographic":
                 out = opt.lexicographic_mean_optimize(**kwargs)
             elif method == "mean_variance_lexicographic":
-                out = opt.mean_variance_lexicographic(**kwargs)
+                out = opt.mean_variance_lexicographic(base_curve_handle=scen.yield_curve_handle, **kwargs)
             else:
                 raise ValueError(f"Unknown method '{method}'")
 
@@ -462,9 +462,9 @@ class ScenarioRebalancingEngine:
                 "probability": scen.probability,
                 "net_cash_outflow": self.net_cash_outflow,
                 "metrics": metrics,
-                "top_allocations": top_allocations, 
-                "delta_summary": delta_summary.to_dict(orient="records"),      
-                "level_summary": level_summary,      
+                "top_allocations": top_allocations#, 
+                #"delta_summary": delta_summary.to_dict(orient="records"),      
+                #"level_summary": level_summary,      
             }
 
         combined_payload = combined_df.to_dict(orient="records")
@@ -550,7 +550,7 @@ ABSOLUTE RULES:
 """
 
         # --- Call OpenAI API ---
-        client = OpenAI(api_key="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")
+        client = OpenAI(api_key=openai_api_key)
 
         response = client.chat.completions.create(
             model=model,

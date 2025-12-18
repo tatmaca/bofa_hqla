@@ -219,7 +219,7 @@ async def main():
     ]
 },
         "combineMode": "probability_weighted",
-        "optimizationMethod": "mean_lexicographic",
+        "optimizationMethod": "mean_variance_lexicographic",
         "netCashOutflow": 1_000_000_000
     }
 
@@ -238,8 +238,6 @@ async def main():
         resp_dict = response
     else:
         resp_dict = json.loads(response.body.decode())
-
-    print(json.dumps(resp_dict, indent=2))
 
     # ---------- Save final portfolio to CSV ----------
     final_portfolio = resp_dict.get("final_portfolio")

@@ -271,7 +271,7 @@ class HQLA_Portfolio_Opt_Enhanced:
 
     def lexicographic_mean_optimize(
         self,
-        max_position_size: float = 0.30,
+        max_position_size: float = 0.05,
         min_position_size: float = 0.0,
         max_total_allocation: float = 2.0,
         verbose: bool = True,
@@ -420,7 +420,7 @@ class HQLA_Portfolio_Opt_Enhanced:
         n_random: int = 500,
         bp_std: float = 0.01,
         use_shrinkage: bool = True,
-        max_position_size: float = 0.30,
+        max_position_size: float = 0.05,
         min_position_size: float = 0.0,
         max_total_allocation: float = 2.0,
         verbose: bool = True,
