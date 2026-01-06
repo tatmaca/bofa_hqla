@@ -1,0 +1,17 @@
+** Note on HQLA Scenario Rebalancing Output **
+
+This note is provided for context to support interpretation of the results contained in the `agentic/src/output` folder.
+
+The output in this folder contains the results of the latest HQLA portfolio scenario rebalancing test exercise using a mean–variance optimization framework.
+
+Key context for interpretation:
+- The underlying instrument data used in this exercise is synthetic and intended solely for testing and pipeline validation purposes. Accordingly, the optimizer implemented here should be viewed as a placeholder component.
+- The reported outputs focus on allocated amounts and expected returns within the scenarios. Certain risk metrics (e.g., modified duration, convexity, or DV01 decompositions) are not populated in the current dataset.
+- The accompanying AI-generated report provides a qualitative synthesis of scenario assumptions, stress transmission channels, and portfolio behavior across the four scenarios. Due to token and context-length constraints, the prompts and data passed to the language model are necessarily limited and should be viewed as a summarized interpretive layer rather than an exhaustive analytical representation.
+- The optimization incorporates an explicit diversification constraint, implemented as a hard maximum allocation cap of 5% per instrument (relative to total portfolio allocation). While this results in a mechanically well-diversified portfolio across a large number of instruments, the diversification mechanism itself is manual and somewhat arbitrary, serving primarily as a guardrail against concentration. In practice, diversification should be more appropriately handled through in-house optimization frameworks that embed richer covariance structures, liquidity dynamics, and regulatory trade-offs directly into the objective function and constraint set.
+- For production use, it is strongly recommended to rely on in-house HQLA optimization models that incorporate richer instrument-level data, more granular liquidity and haircut dynamics, and institution-specific regulatory and balance sheet considerations.
+
+This exercise is intended to provide insight into how AI-enabled tooling can be used to support interpretability, documentation, and narrative synthesis in risk and liquidity analysis, while complementing established quantitative and in-house modeling frameworks. Thank you for your attention!
+
+Best regards,
+Aryaa Gunavante

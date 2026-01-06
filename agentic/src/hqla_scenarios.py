@@ -75,11 +75,11 @@ class ScenarioGenerator:
         self,
         base_curve_handle,
         scenarios,
-        up_curve: ql.YieldTermStructureHandle,
-        down_curve: ql.YieldTermStructureHandle,
-        survival_curves: Dict[str, ql.DefaultProbabilityTermStructureHandle],
-        survival_curves_up: Dict[str, ql.DefaultProbabilityTermStructureHandle],
-        survival_curves_down: Dict[str, ql.DefaultProbabilityTermStructureHandle],
+        up_curve=None,
+        down_curve=None,
+        survival_curves=None,
+        survival_curves_up=None,
+        survival_curves_down=None
     ):
         """
         Scenarios: 1D array of parallel shifts (decimal).
@@ -122,16 +122,3 @@ class ScenarioGenerator:
                 R[s_idx, i] = r
 
         return R, base_prices, inst_list
-
-    def make_psd_cov(self, R):
-        # R: scenarios × assets
-        Omega_star = np.cov(R, rowvar=False, ddof=1)  # shape N×N
-        # symmetric eigh
-        eigvals, eigvecs = la.eigh(Omega_star)
-        eigvals_clipped = np.clip(eigvals, a_min=0.0, a_max=None)
-        Omega_psd = (eigvecs * eigvals_clipped) @ eigvecs.T
-        # numeric stabilization
-        eps = 1e-12
-        Omega_psd += eps * np.eye(Omega_psd.shape[0])
-        # print(Omega_psd)
-        return Omega_psd

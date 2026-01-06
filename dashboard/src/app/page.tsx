@@ -143,7 +143,8 @@ async function runScenarioGen(
   };
 
   const normalizeScenarioMatrix = (rows: any[]) => {
-    if (!Array.isArray(rows) || !rows.length) return { matrix: [], sumBefore: 0 };
+    if (!Array.isArray(rows) || !rows.length)
+      return { matrix: [], sumBefore: 0 };
     const probs = rows.map((sc) => {
       const raw =
         typeof sc?.Probability !== "undefined"
@@ -160,7 +161,9 @@ async function runScenarioGen(
       0,
     );
     const base =
-      totalRaw > 0 ? probs.map((p) => p / totalRaw) : probs.map(() => 1 / probs.length);
+      totalRaw > 0
+        ? probs.map((p) => p / totalRaw)
+        : probs.map(() => 1 / probs.length);
     // force exact sum to 1 by adjusting the last entry
     let adj = [...base];
     if (adj.length > 0) {
@@ -299,7 +302,8 @@ async function runScenarioGen(
         .filter(Boolean),
     );
     const probabilitySum = scenarioMatrix.reduce(
-      (acc, sc: any) => acc + (typeof sc?.Probability === "number" ? sc.Probability : 0),
+      (acc, sc: any) =>
+        acc + (typeof sc?.Probability === "number" ? sc.Probability : 0),
       0,
     );
     const scenarios = scenarioMatrix.map((sc: any, idx: number) => {
@@ -696,31 +700,31 @@ async function runOptimize(
   }
 }
 
-async function runMonitor(setter: (s: any) => void) {
-  setter((s: any) => ({
-    ...s,
-    status: "running",
-    pct: 18,
-    logs: [...s.logs, "Scraping FOMC/Fed-speak, UST auction, geopolitics…"],
-  }));
-  await fakeWait(600);
-  setter((s: any) => ({
-    ...s,
-    pct: 70,
-    logs: [...s.logs, "Classified: ‘hawkish tilt’ → scenario score +0.1"],
-  }));
-  await fakeWait(600);
-  setter((s: any) => ({
-    ...s,
-    status: "done",
-    pct: 100,
-    logs: [...s.logs, "Briefing drafted + alerts queued"],
-    output: {
-      brief:
-        "Hawkish Fed language nudged bear-steepener risk; suggest +$200mm 2y add, monitor MBS basis.",
-    },
-  }));
-}
+// async function runMonitor(setter: (s: any) => void) {
+//   setter((s: any) => ({
+//     ...s,
+//     status: "running",
+//     pct: 18,
+//     logs: [...s.logs, "Scraping FOMC/Fed-speak, UST auction, geopolitics…"],
+//   }));
+//   await fakeWait(600);
+//   setter((s: any) => ({
+//     ...s,
+//     pct: 70,
+//     logs: [...s.logs, "Classified: ‘hawkish tilt’ → scenario score +0.1"],
+//   }));
+//   await fakeWait(600);
+//   setter((s: any) => ({
+//     ...s,
+//     status: "done",
+//     pct: 100,
+//     logs: [...s.logs, "Briefing drafted + alerts queued"],
+//     output: {
+//       brief:
+//         "Hawkish Fed language nudged bear-steepener risk; suggest +$200mm 2y add, monitor MBS basis.",
+//     },
+//   }));
+// }
 
 const Step = ({
   index,
@@ -762,6 +766,9 @@ const Step = ({
 };
 
 export default function HqlaE2EDashboard() {
+  const [newsTopFactors, setNewsTopFactors] = useState<any[]>([]);
+  const [newsArticles, setNewsArticles] = useState<any[]>([]);
+  const [activeNewsArticle, setActiveNewsArticle] = useState<any>(null);
   const [portfolioName, setPortfolioName] = useState("Example HQLA Portfolio");
   const [yaml, setYaml] = useState(
     "# shocks.yaml\nmove_index: 110\nyield_curve: bear_steepener\ncredit_spreads: { ig_oas: +15, hy_oas: +45 }\n",
@@ -786,24 +793,19 @@ export default function HqlaE2EDashboard() {
     logs: [],
     output: null,
   } as any);
-  const [mon, setMon] = useState({
-    status: "idle",
-    pct: 0,
-    logs: [],
-    output: null,
-  } as any);
   const [yieldScenario, setYieldScenario] = useState<string | null>(null);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
   const [selectedDebateRun, setSelectedDebateRun] = useState<number | null>(
     null,
   );
   const [offlineMode, setOfflineMode] = useState(false);
-  const [activeNewsArticle, setActiveNewsArticle] = useState<any | null>(null);
   const [attributionDate, setAttributionDate] = useState("2025-11-27");
   const [attributionMode, setAttributionMode] = useState("all");
   const [attributionImages, setAttributionImages] = useState<any[]>([]);
   const [loadingAttribution, setLoadingAttribution] = useState(false);
   const [attributionError, setAttributionError] = useState<string | null>(null);
+  const [newsAttribution, setNewsAttribution] = useState<any[]>([]);
+  const [newsAttrError, setNewsAttrError] = useState<string | null>(null);
   const [attributionIdx, setAttributionIdx] = useState(0);
   const [attributionZoom, setAttributionZoom] = useState<{
     open: boolean;
@@ -820,10 +822,7 @@ export default function HqlaE2EDashboard() {
   const [combineMode, setCombineMode] = useState("probability_weighted");
   const [worstBy, setWorstBy] = useState("expected_return");
   const [topK, setTopK] = useState(2);
-  const scenarioDate = useMemo(
-    () => new Date().toISOString().slice(0, 10),
-    [],
-  );
+  const scenarioDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   // Debate configuration (mirrors Python MAD config high-level knobs)
   const [debateRounds, setDebateRounds] = useState(3);
@@ -900,6 +899,7 @@ export default function HqlaE2EDashboard() {
     rawMatrixText?: string;
   } | null>(null);
 
+  const [mon, setMon] = useState<any>({ status: "idle" });
   const pipelinePct = useMemo(() => {
     const pcs = [
       scenario.pct || 0,
@@ -949,6 +949,52 @@ export default function HqlaE2EDashboard() {
       setLoadingPortfolio(false);
     }
   }
+  async function runMonitor() {
+    try {
+      setMon({ status: "loading" });
+
+      const res = await fetch(`${API_BASE}/news-monitor/`);
+      if (!res.ok) {
+        console.error("API call failed:", res.status, res.statusText);
+        setMon({ status: "error" });
+        return;
+      }
+
+      const data = await res.json(); // articles is a list of dicts
+      const articles = data.articles;
+      console.log("Fetched articles:", articles);
+
+      // store all articles in one state
+      setNewsArticles(articles);
+
+      // optionally select the first article to display in preview
+      setActiveNewsArticle(articles[0] || null);
+
+      // fetch top factors + top articles for context
+      const today = new Date().toISOString().slice(0, 10);
+      try {
+        const tfRes = await fetch(
+          `${API_BASE}/news-top-factors?date=${today}&top_factors=3&top_articles=3`,
+        );
+        if (tfRes.ok) {
+          const tfData = await tfRes.json();
+          setNewsTopFactors(
+            Array.isArray(tfData?.factors) ? tfData.factors : [],
+          );
+        } else {
+          setNewsTopFactors([]);
+        }
+      } catch (err) {
+        console.error("Top factor fetch error:", err);
+        setNewsTopFactors([]);
+      }
+
+      setMon({ status: "done" });
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setMon({ status: "error" });
+    }
+  }
 
   async function handleUploadYieldCurve() {
     if (!yieldCurveFile) return;
@@ -982,11 +1028,18 @@ export default function HqlaE2EDashboard() {
     setPortfolioSummary(data);
   }
 
+  const normalizeDate = (dateStr: string) => {
+    if (!dateStr) return dateStr;
+    return dateStr.replace(/\//g, "-");
+  };
+
   const loadAttributionInline = async () => {
     const fallbackDate = new Date().toISOString().slice(0, 10);
-    const dateParam = attributionDate || fallbackDate;
+    const dateParam = normalizeDate(attributionDate || fallbackDate);
     setLoadingAttribution(true);
     setAttributionError(null);
+    setNewsAttrError(null);
+    setNewsAttribution([]);
     try {
       const res = await fetch(
         `${API_BASE}/attribution/json?date=${dateParam}&image_mode=${attributionMode}&embed_images=true`,
@@ -1000,11 +1053,29 @@ export default function HqlaE2EDashboard() {
         data?.chart_images?.length && Array.isArray(data.chart_images)
           ? data.chart_images
           : (data?.chart_urls || []).map((url: string, i: number) => ({
-              name: `chart_${i + 1}`,
-              url,
-            }));
+            name: `chart_${i + 1}`,
+            url,
+          }));
       setAttributionImages(imgs || []);
       setAttributionIdx(0);
+
+      // Load news-driven attribution (top factors + headlines)
+      try {
+        const nfRes = await fetch(
+          `${API_BASE}/news-top-factors?date=${dateParam}&top_factors=3&top_articles=3`,
+        );
+        if (nfRes.ok) {
+          const nfData = await nfRes.json();
+          setNewsAttribution(Array.isArray(nfData?.factors) ? nfData.factors : []);
+        } else {
+          setNewsAttribution([]);
+          setNewsAttrError("新闻归因加载失败");
+        }
+      } catch (err) {
+        console.error("News attribution fetch error:", err);
+        setNewsAttribution([]);
+        setNewsAttrError("新闻归因加载失败");
+      }
     } catch (err: any) {
       setAttributionError(err?.message || "Failed to load attribution");
       setAttributionImages([]);
@@ -1101,13 +1172,8 @@ export default function HqlaE2EDashboard() {
       ? liveDebateForRun
       : activeDebate;
   const newsOutput = mon.output;
-  const newsSummary = newsOutput?.summary;
-  const newsBuckets = Array.isArray(newsOutput?.buckets)
-    ? newsOutput.buckets
-    : [];
-  const newsArticles = Array.isArray(newsOutput?.articles)
-    ? newsOutput.articles.slice(0, 6)
-    : [];
+  const [newsSummary, setNewsSummary] = useState<any>(null);
+  const [newsBuckets, setNewsBuckets] = useState<any[]>([]);
   const scenarioCsvSnapshot = newsOutput?.scenarioCsv;
   const scenarioMetadata = scenario.output?.metadata;
   const scenarioRunLabel =
@@ -1142,7 +1208,8 @@ export default function HqlaE2EDashboard() {
       netCashOutflow,
       minLcr,
       maxLcr,
-      targetDuration: targetDuration === "" ? undefined : Number(targetDuration),
+      targetDuration:
+        targetDuration === "" ? undefined : Number(targetDuration),
       durationTolerance,
       allocationBuffer,
     }),
@@ -1192,9 +1259,7 @@ export default function HqlaE2EDashboard() {
     (latestOptInputs as any)?.worstBy ||
     "expected_return";
   const resolvedTopK =
-    (latestOptInputs as any)?.top_k ??
-    (latestOptInputs as any)?.topK ??
-    topK;
+    (latestOptInputs as any)?.top_k ?? (latestOptInputs as any)?.topK ?? topK;
   const resolvedMinLcr =
     (latestOptInputs as any)?.min_lcr ??
     (latestOptInputs as any)?.minLcr ??
@@ -1414,7 +1479,12 @@ export default function HqlaE2EDashboard() {
                   scenario.output?.scenarioMatrix ||
                   [];
                 await runImpact(setImpact, scenarioMatrix);
-                await runOptimize(setOpt, scenarioMatrix, null, optimizerParams);
+                await runOptimize(
+                  setOpt,
+                  scenarioMatrix,
+                  null,
+                  optimizerParams,
+                );
                 await runMonitor(setMon, scenarioMatrix);
               }}
             >
@@ -1960,10 +2030,16 @@ export default function HqlaE2EDashboard() {
                           <Badge variant="secondary">running…</Badge>
                         )}
                         {opt.output?.scenarioResults &&
-                          Object.keys(opt.output.scenarioResults).length > 0 && (
+                          Object.keys(opt.output.scenarioResults).length >
+                            0 && (
                             <Badge variant="secondary">
-                              {Object.keys(opt.output.scenarioResults).length} scenario
-                              {Object.keys(opt.output.scenarioResults).length > 1 ? "s" : ""} priced
+                              {Object.keys(opt.output.scenarioResults).length}{" "}
+                              scenario
+                              {Object.keys(opt.output.scenarioResults).length >
+                              1
+                                ? "s"
+                                : ""}{" "}
+                              priced
                             </Badge>
                           )}
                       </div>
@@ -2008,7 +2084,8 @@ export default function HqlaE2EDashboard() {
                           </ul>
                         ) : (
                           <div className="text-xs text-muted-foreground">
-                            Run scenario generation to populate optimizer inputs.
+                            Run scenario generation to populate optimizer
+                            inputs.
                           </div>
                         )}
                       </div>
@@ -2020,7 +2097,8 @@ export default function HqlaE2EDashboard() {
                           </p>
                           {typeof opt.output?.probabilitySum === "number" && (
                             <span className="text-[11px] text-slate-500">
-                              Prob sum {(opt.output.probabilitySum * 100).toFixed(1)}%
+                              Prob sum{" "}
+                              {(opt.output.probabilitySum * 100).toFixed(1)}%
                             </span>
                           )}
                         </div>
@@ -2047,7 +2125,8 @@ export default function HqlaE2EDashboard() {
                                         : "—"}
                                     </TableCell>
                                     <TableCell>
-                                      {typeof row.metrics?.expected_return === "number"
+                                      {typeof row.metrics?.expected_return ===
+                                      "number"
                                         ? row.metrics.expected_return.toFixed(2)
                                         : "—"}
                                     </TableCell>
@@ -2084,17 +2163,23 @@ export default function HqlaE2EDashboard() {
                                   {(opt.output.combinedPortfolio || [])
                                     .slice(0, 4)
                                     .map((row: any, idx: number) => (
-                                      <TableRow key={`${row.Name || row.name}-${idx}`}>
+                                      <TableRow
+                                        key={`${row.Name || row.name}-${idx}`}
+                                      >
                                         <TableCell className="font-medium">
-                                          {row.Name || row.name || `Asset ${idx + 1}`}
+                                          {row.Name ||
+                                            row.name ||
+                                            `Asset ${idx + 1}`}
                                         </TableCell>
                                         <TableCell>
-                                          {typeof row.Combined_Weight === "number"
+                                          {typeof row.Combined_Weight ===
+                                          "number"
                                             ? `${(row.Combined_Weight * 100).toFixed(2)}%`
                                             : "—"}
                                         </TableCell>
                                         <TableCell>
-                                          {typeof row.Allocated_Amount === "number"
+                                          {typeof row.Allocated_Amount ===
+                                          "number"
                                             ? `$${row.Allocated_Amount.toLocaleString()}`
                                             : "—"}
                                         </TableCell>
@@ -2108,13 +2193,16 @@ export default function HqlaE2EDashboard() {
                       </div>
                     </div>
 
-                    <LogView logs={(opt.logs || []).slice(-8)} title="Optimizer" />
+                    <LogView
+                      logs={(opt.logs || []).slice(-8)}
+                      title="Optimizer"
+                    />
                   </div>
                 </div>
 
                 <FlowArrow />
 
-                {/* News */}
+                {/* News Section */}
                 <div className="min-w-[320px] flex-1">
                   <Step
                     index={4}
@@ -2122,205 +2210,169 @@ export default function HqlaE2EDashboard() {
                     desc="Find news relevant to scenarios; closes the loop"
                     status={mon.status as any}
                   />
+
                   <div className="mt-2 rounded-lg border p-2">
                     <div className="rounded-lg border p-3 bg-white/70 space-y-3">
-                      {newsOutput ? (
-                        <>
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                            <div>
-                              <p className="font-semibold text-sm">
-                                {newsSummary?.headline ||
-                                  "News cycle refreshed."}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {newsSummary?.detail ||
-                                  "Latest headlines bucketed by macro driver."}
-                              </p>
-                              {newsSummary?.reason && (
-                                <p className="text-[11px] text-slate-500 mt-1">
-                                  {newsSummary.reason}
-                                </p>
-                              )}
-                              {newsSummary?.date && (
-                                <p className="text-[11px] text-slate-400 mt-0.5">
-                                  Snapshot: {newsSummary.date}
-                                </p>
-                              )}
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              <Badge
-                                variant={
-                                  newsSummary?.shouldUpdate
-                                    ? "destructive"
-                                    : "secondary"
-                                }
-                              >
-                                {newsSummary?.shouldUpdate
-                                  ? "Update scenarios"
-                                  : "In sync"}
-                              </Badge>
-                              {newsOutput?.metadata?.date_range && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-[11px]"
-                                >
-                                  {newsOutput.metadata.date_range.start} →{" "}
-                                  {newsOutput.metadata.date_range.end}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                          <div className="grid gap-2 sm:grid-cols-2">
-                            {newsBuckets.map((bucket: any) => (
+                      {newsTopFactors.length > 0 && (
+                        <div className="space-y-2 text-xs">
+                          <p className="text-sm font-semibold text-slate-800">
+                            Top factors (news-driven)
+                          </p>
+                          <div className="space-y-2">
+                            {newsTopFactors.map((f: any, idx: number) => (
                               <div
-                                key={bucket.name}
-                                className="border rounded-md p-2 space-y-1"
+                                key={f?.name || idx}
+                                className="border rounded-md p-2 bg-slate-50"
                               >
-                                <div className="flex items-start justify-between gap-2">
-                                  <div>
-                                    <p className="text-[11px] uppercase text-slate-500 tracking-wide">
-                                      {bucket.label}
-                                    </p>
-                                    <p className="text-xl font-semibold">
-                                      {bucket.count}
-                                    </p>
-                                  </div>
-                                  <Badge
-                                    variant={
-                                      bucket.uncovered
-                                        ? "destructive"
-                                        : "outline"
-                                    }
-                                  >
-                                    {bucket.uncovered
-                                      ? "Needs coverage"
-                                      : "Covered"}
-                                  </Badge>
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-semibold text-slate-800">
+                                    {idx + 1}. {f?.name || "Factor"}
+                                  </span>
+                                  <span className="text-[11px] text-slate-600">
+                                    {typeof f?.score === "number"
+                                      ? f.score.toFixed(3)
+                                      : "-"}
+                                  </span>
                                 </div>
-                                <p className="text-[11px] text-muted-foreground">
-                                  {bucket.description}
-                                </p>
-                                {bucket.coverage?.length ? (
-                                  <p className="text-[11px] text-emerald-600">
-                                    Scenarios: {bucket.coverage.join(", ")}
-                                  </p>
-                                ) : (
-                                  <p className="text-[11px] text-rose-600">
-                                    No judge scenarios mapped
-                                  </p>
-                                )}
-                                {bucket.topHeadlines?.[0]?.title && (
-                                  <p className="text-[11px] text-slate-600 truncate">
-                                    Top: {bucket.topHeadlines[0].title}
-                                  </p>
-                                )}
+                                {Array.isArray(f?.articles) &&
+                                  f.articles.length > 0 && (
+                                    <ul className="mt-1 space-y-1">
+                                      {f.articles.slice(0, 3).map(
+                                        (a: any, i: number) => (
+                                          <li
+                                            key={i}
+                                            className="flex items-center justify-between gap-2"
+                                          >
+                                            <a
+                                              href={a?.url}
+                                              target="_blank"
+                                              rel="noreferrer"
+                                              className="text-sky-600 underline"
+                                            >
+                                              {a?.title || "Article"}
+                                            </a>
+                                            <span className="text-[11px] text-slate-500">
+                                              {typeof a?.score === "number"
+                                                ? a.score.toFixed(3)
+                                                : ""}
+                                            </span>
+                                          </li>
+                                        ),
+                                      )}
+                                    </ul>
+                                  )}
                               </div>
                             ))}
-                            {!newsBuckets.length && (
-                              <div className="text-sm text-muted-foreground">
-                                No categorized news found in the selected
-                                window.
-                              </div>
-                            )}
                           </div>
-                          <p className="text-[11px] text-slate-500">
-                            Covered = at least one judge scenario references
-                            this bucket (based on channels & keywords).
-                            Uncovered buckets lack explicit scenario coverage
-                            and may require a MAD refresh.
-                          </p>
-                          {newsArticles.length > 0 && (
-                            <div className="grid gap-2 sm:grid-cols-5">
-                              <div className="sm:col-span-2">
-                                <p className="text-xs font-medium text-slate-600">
-                                  Headlines
-                                </p>
-                                <ul className="mt-1 space-y-1 text-xs">
-                                  {newsArticles.map(
-                                    (article: any, idx: number) => (
-                                      <li key={`${article.bucket}-${idx}`}>
-                                        <button
-                                          className={`text-left w-full rounded px-2 py-1 ${activeNewsArticle === article ? "bg-slate-200" : "text-muted-foreground hover:text-slate-800"}`}
-                                          onClick={() =>
-                                            setActiveNewsArticle(article)
-                                          }
-                                        >
-                                          <span className="font-semibold text-slate-600">
-                                            {article.bucketLabel}:
-                                          </span>{" "}
-                                          {article.title}
-                                        </button>
-                                      </li>
-                                    ),
-                                  )}
-                                </ul>
-                              </div>
-                              <div className="sm:col-span-3 border rounded-md p-3 bg-slate-50 space-y-2 text-xs text-slate-700 min-h-[120px]">
-                                {activeNewsArticle ? (
-                                  <>
-                                    <div className="flex items-center justify-between gap-2">
-                                      <p className="text-sm font-semibold text-slate-800">
-                                        {activeNewsArticle.title}
-                                      </p>
-                                      {activeNewsArticle.source && (
-                                        <span className="text-[11px] text-slate-500">
-                                          {activeNewsArticle.source}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <p>
-                                      {activeNewsArticle.summary ||
-                                        "No summary available."}
-                                    </p>
-                                    {activeNewsArticle.url && (
+                        </div>
+                      )}
+                      {newsArticles.length > 0 ? (
+                        <>
+                          {/* Table of articles */}
+                          <div className="mt-2 overflow-x-auto max-h-64">
+                            {" "}
+                            {/* fixed height for vertical scroll */}
+                            <table className="min-w-full border-collapse border border-slate-300 text-xs">
+                              <thead>
+                                <tr className="bg-gray-100">
+                                  <th className="p-2 text-left">Title</th>
+                                  <th className="p-2 text-left">Bucket</th>
+                                  <th className="p-2 text-left">Source</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {newsArticles.map((article, idx) => (
+                                  <tr
+                                    key={article.id || idx}
+                                    className={`border-t ${
+                                      activeNewsArticle === article
+                                        ? "bg-slate-200"
+                                        : ""
+                                    }`}
+                                    onClick={() =>
+                                      setActiveNewsArticle(article)
+                                    }
+                                  >
+                                    <td className="p-2">
                                       <a
-                                        href={activeNewsArticle.url}
+                                        href={article.url}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="text-sky-600 underline text-[11px]"
+                                        className="text-sky-600 underline"
                                       >
-                                        Open article
+                                        {article.title}
                                       </a>
-                                    )}
-                                  </>
-                                ) : (
-                                  <p className="text-muted-foreground">
-                                    Select a headline to view its summary.
-                                  </p>
+                                    </td>
+                                    <td className="p-2">
+                                      {article.bucket || "Uncategorized"}
+                                    </td>
+                                    <td className="p-2">{article.source}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          {/* Active Article Preview */}
+                          {activeNewsArticle && (
+                            <div className="mt-3 border rounded-md p-3 bg-slate-50 space-y-2 text-xs text-slate-700 min-h-[120px]">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-sm font-semibold text-slate-800">
+                                  {activeNewsArticle.title}
+                                </p>
+                                {activeNewsArticle.source && (
+                                  <span className="text-[11px] text-slate-500">
+                                    {activeNewsArticle.source}
+                                  </span>
                                 )}
                               </div>
+                              <p>
+                                {activeNewsArticle.summary
+                                  ? activeNewsArticle.summary.length > 200
+                                    ? activeNewsArticle.summary.slice(0, 200) +
+                                      "..."
+                                    : activeNewsArticle.summary
+                                  : "No summary available."}
+                              </p>
+                              {activeNewsArticle.url && (
+                                <a
+                                  href={activeNewsArticle.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-sky-600 underline text-[11px]"
+                                >
+                                  Open article
+                                </a>
+                              )}
                             </div>
                           )}
                         </>
                       ) : (
                         <div className="text-sm text-muted-foreground min-h-[90px] flex items-center justify-center">
-                          No news brief yet. Click Run Monitor.
+                          No news articles yet. Click Run Monitor.
                         </div>
                       )}
                     </div>
+
+                    {/* Buttons */}
                     <div className="flex flex-wrap items-center gap-2 mt-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() =>
-                          runMonitor(
-                            setMon,
-                            scenario.output?.scenarioMatrix || [],
-                          )
-                        }
+                        onClick={() => runMonitor()}
                       >
-                        <PlayCircle className="h-4 w-4 mr-1" />
-                        Run Monitor
+                        <PlayCircle className="h-4 w-4 mr-1" /> Run Monitor
                       </Button>
+
                       <Button
                         variant="ghost"
                         size="sm"
                         title="Use news to refresh MAD scenarios"
                         onClick={handleNewsUpdate}
                       >
-                        <RefreshCw className="h-4 w-4 mr-1" />
-                        Update Scenarios
+                        <RefreshCw className="h-4 w-4 mr-1" /> Update Scenarios
                       </Button>
+
                       {scenarioCsvSnapshot && (
                         <Button
                           variant="ghost"
@@ -2332,10 +2384,10 @@ export default function HqlaE2EDashboard() {
                             )
                           }
                         >
-                          <Download className="h-4 w-4 mr-1" />
-                          Scenario CSV
+                          <Download className="h-4 w-4 mr-1" /> Scenario CSV
                         </Button>
                       )}
+
                       <Button
                         variant="ghost"
                         size="sm"
@@ -2387,20 +2439,20 @@ export default function HqlaE2EDashboard() {
                           <option value="none">None</option>
                         </select>
                       </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-medium leading-none">
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-sm font-medium leading-none">
                           Load inline
-                    </label>
-                    <Button
-                      className="w-full"
-                      onClick={loadAttributionInline}
-                      disabled={loadingAttribution}
-                    >
-                      {loadingAttribution
-                        ? "Loading attribution..."
-                        : "Load attribution inline"}
-                    </Button>
-                  </div>
+                        </label>
+                        <Button
+                          className="w-full"
+                          onClick={loadAttributionInline}
+                          disabled={loadingAttribution}
+                        >
+                          {loadingAttribution
+                            ? "Loading attribution..."
+                            : "Load attribution inline"}
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -2440,9 +2492,10 @@ export default function HqlaE2EDashboard() {
                         size="sm"
                         className="pointer-events-auto"
                         onClick={() =>
-                          setAttributionIdx((i) =>
-                            (i - 1 + attributionImages.length) %
-                            Math.max(attributionImages.length, 1),
+                          setAttributionIdx(
+                            (i) =>
+                              (i - 1 + attributionImages.length) %
+                              Math.max(attributionImages.length, 1),
                           )
                         }
                       >
@@ -2455,8 +2508,9 @@ export default function HqlaE2EDashboard() {
                         size="sm"
                         className="pointer-events-auto"
                         onClick={() =>
-                          setAttributionIdx((i) =>
-                            (i + 1) % Math.max(attributionImages.length, 1),
+                          setAttributionIdx(
+                            (i) =>
+                              (i + 1) % Math.max(attributionImages.length, 1),
                           )
                         }
                       >
@@ -2484,9 +2538,12 @@ export default function HqlaE2EDashboard() {
                               transition={{ duration: 0.25 }}
                             >
                               <div className="flex items-center justify-between px-3 py-2 border-b text-xs font-semibold text-slate-700">
-                                <span>{img?.name || `Chart ${attributionIdx + 1}`}</span>
+                                <span>
+                                  {img?.name || `Chart ${attributionIdx + 1}`}
+                                </span>
                                 <span className="text-slate-500">
-                                  {attributionIdx + 1} / {attributionImages.length}
+                                  {attributionIdx + 1} /{" "}
+                                  {attributionImages.length}
                                 </span>
                               </div>
                               <button
@@ -2496,14 +2553,18 @@ export default function HqlaE2EDashboard() {
                                   setAttributionZoom({
                                     open: true,
                                     src: null, // derive from idx
-                                    title: img?.name || `Chart ${attributionIdx + 1}`,
+                                    title:
+                                      img?.name ||
+                                      `Chart ${attributionIdx + 1}`,
                                   })
                                 }
                               >
                                 {src ? (
                                   <img
                                     src={src}
-                                    alt={img?.name || `chart-${attributionIdx + 1}`}
+                                    alt={
+                                      img?.name || `chart-${attributionIdx + 1}`
+                                    }
                                     className="max-h-[480px] w-full object-contain transition-transform duration-200 hover:scale-[1.03]"
                                     loading="lazy"
                                   />
@@ -2555,6 +2616,73 @@ export default function HqlaE2EDashboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* News attribution (top factors + headlines) */}
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle>News Attribution</CardTitle>
+            <CardDescription>
+              Top news-driven factors and their key headlines for the selected
+              date.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {newsAttrError && (
+              <div className="text-sm text-red-600 mb-3">{newsAttrError}</div>
+            )}
+            {newsAttribution.length > 0 ? (
+              <div className="grid md:grid-cols-3 gap-3">
+                {newsAttribution.map((f: any, idx: number) => (
+                  <div
+                    key={f?.name || idx}
+                    className="border rounded-md p-3 bg-white/80 space-y-2"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-slate-800 text-sm">
+                        {idx + 1}. {f?.name || "Factor"}
+                      </span>
+                      <span className="text-[11px] text-slate-600">
+                        {typeof f?.score === "number"
+                          ? f.score.toFixed(3)
+                          : "-"}
+                      </span>
+                    </div>
+                    {Array.isArray(f?.articles) && f.articles.length > 0 ? (
+                      <ul className="space-y-1 text-xs">
+                        {f.articles.slice(0, 3).map((a: any, i: number) => (
+                          <li key={i} className="flex justify-between gap-2">
+                            <a
+                              href={a?.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-sky-600 underline"
+                            >
+                              {a?.title || "Article"}
+                            </a>
+                            <span className="text-[11px] text-slate-500">
+                              {typeof a?.score === "number"
+                                ? a.score.toFixed(2)
+                                : ""}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        No articles available for this factor.
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No news attribution yet. Click “Load attribution inline” above to
+                load factor and news attribution for the selected date.
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Hidden sections kept for future use */}
         <div className="hidden" />
@@ -2725,9 +2853,12 @@ export default function HqlaE2EDashboard() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              setAttributionIdx((i) =>
-                                (i - 1 + Math.max(attributionImages.length, 1)) %
-                                Math.max(attributionImages.length, 1),
+                              setAttributionIdx(
+                                (i) =>
+                                  (i -
+                                    1 +
+                                    Math.max(attributionImages.length, 1)) %
+                                  Math.max(attributionImages.length, 1),
                               );
                             }}
                           >
@@ -2739,8 +2870,10 @@ export default function HqlaE2EDashboard() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              setAttributionIdx((i) =>
-                                (i + 1) % Math.max(attributionImages.length, 1),
+                              setAttributionIdx(
+                                (i) =>
+                                  (i + 1) %
+                                  Math.max(attributionImages.length, 1),
                               );
                             }}
                           >
@@ -2752,7 +2885,11 @@ export default function HqlaE2EDashboard() {
                     {src ? (
                       <img
                         src={src}
-                        alt={img?.name || attributionZoom.title || "attribution-chart"}
+                        alt={
+                          img?.name ||
+                          attributionZoom.title ||
+                          "attribution-chart"
+                        }
                         className="max-h-[80vh] max-w-[92vw] w-auto object-contain"
                       />
                     ) : (
@@ -3122,30 +3259,41 @@ export default function HqlaE2EDashboard() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {(opt.output?.combinedPortfolio || []).map((row: any, i: number) => {
-                        const w = typeof row.Combined_Weight === "number" ? row.Combined_Weight : null;
-                        const alloc = typeof row.Allocated_Amount === "number" ? row.Allocated_Amount : null;
-                        return (
-                          <TableRow key={i}>
-                            <TableCell className="font-medium">
-                              {row.Name || row.name || `Asset ${i + 1}`}
-                            </TableCell>
-                            <TableCell>
-                              {w !== null ? `${(w * 100).toFixed(2)}%` : "—"}
-                            </TableCell>
-                            <TableCell>
-                              {alloc !== null ? `$${alloc.toLocaleString()}` : "—"}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
+                      {(opt.output?.combinedPortfolio || []).map(
+                        (row: any, i: number) => {
+                          const w =
+                            typeof row.Combined_Weight === "number"
+                              ? row.Combined_Weight
+                              : null;
+                          const alloc =
+                            typeof row.Allocated_Amount === "number"
+                              ? row.Allocated_Amount
+                              : null;
+                          return (
+                            <TableRow key={i}>
+                              <TableCell className="font-medium">
+                                {row.Name || row.name || `Asset ${i + 1}`}
+                              </TableCell>
+                              <TableCell>
+                                {w !== null ? `${(w * 100).toFixed(2)}%` : "—"}
+                              </TableCell>
+                              <TableCell>
+                                {alloc !== null
+                                  ? `$${alloc.toLocaleString()}`
+                                  : "—"}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        },
+                      )}
                       {!opt.output?.combinedPortfolio?.length && (
                         <TableRow>
                           <TableCell
                             colSpan={3}
                             className="text-center text-muted-foreground"
                           >
-                            No combined portfolio yet. Run optimization after uploading portfolio and curve.
+                            No combined portfolio yet. Run optimization after
+                            uploading portfolio and curve.
                           </TableCell>
                         </TableRow>
                       )}
@@ -3165,7 +3313,9 @@ export default function HqlaE2EDashboard() {
             <div className="space-y-4 max-h-[78vh] overflow-auto">
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Net cash outflow</label>
+                  <label className="text-sm font-medium">
+                    Net cash outflow
+                  </label>
                   <Input
                     type="number"
                     value={netCashOutflow}
@@ -3175,13 +3325,17 @@ export default function HqlaE2EDashboard() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Allocation buffer</label>
+                  <label className="text-sm font-medium">
+                    Allocation buffer
+                  </label>
                   <Input
                     type="number"
                     step="0.01"
                     value={allocationBuffer}
                     onChange={(e) =>
-                      setAllocationBuffer(Number.parseFloat(e.target.value) || 0)
+                      setAllocationBuffer(
+                        Number.parseFloat(e.target.value) || 0,
+                      )
                     }
                   />
                 </div>
@@ -3208,7 +3362,9 @@ export default function HqlaE2EDashboard() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Target duration (yrs)</label>
+                  <label className="text-sm font-medium">
+                    Target duration (yrs)
+                  </label>
                   <Input
                     type="number"
                     step="0.1"
@@ -3220,13 +3376,17 @@ export default function HqlaE2EDashboard() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Duration tolerance</label>
+                  <label className="text-sm font-medium">
+                    Duration tolerance
+                  </label>
                   <Input
                     type="number"
                     step="0.1"
                     value={durationTolerance}
                     onChange={(e) =>
-                      setDurationTolerance(Number.parseFloat(e.target.value) || 0)
+                      setDurationTolerance(
+                        Number.parseFloat(e.target.value) || 0,
+                      )
                     }
                   />
                 </div>
@@ -3237,7 +3397,9 @@ export default function HqlaE2EDashboard() {
                     value={optMethod}
                     onChange={(e) => setOptMethod(e.target.value)}
                   >
-                    <option value="mean_lexicographic">mean_lexicographic</option>
+                    <option value="mean_lexicographic">
+                      mean_lexicographic
+                    </option>
                     <option value="mean_variance_lexicographic">
                       mean_variance_lexicographic
                     </option>
@@ -3250,7 +3412,9 @@ export default function HqlaE2EDashboard() {
                     value={combineMode}
                     onChange={(e) => setCombineMode(e.target.value)}
                   >
-                    <option value="probability_weighted">probability_weighted</option>
+                    <option value="probability_weighted">
+                      probability_weighted
+                    </option>
                     <option value="worst_case">worst_case</option>
                     <option value="top_k_worst_avg">top_k_worst_avg</option>
                   </select>
@@ -3267,13 +3431,17 @@ export default function HqlaE2EDashboard() {
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Top K (worst avg)</label>
+                  <label className="text-sm font-medium">
+                    Top K (worst avg)
+                  </label>
                   <Input
                     type="number"
                     min={1}
                     value={topK}
                     onChange={(e) =>
-                      setTopK(Math.max(1, Number.parseInt(e.target.value || "1", 10)))
+                      setTopK(
+                        Math.max(1, Number.parseInt(e.target.value || "1", 10)),
+                      )
                     }
                   />
                 </div>
@@ -3292,7 +3460,10 @@ export default function HqlaE2EDashboard() {
                   <PlayCircle className="h-4 w-4 mr-2" />
                   Run with these parameters
                 </Button>
-                <Button variant="outline" onClick={() => setOpenOptParams(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setOpenOptParams(false)}
+                >
                   Close
                 </Button>
               </div>

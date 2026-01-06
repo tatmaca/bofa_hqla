@@ -12,7 +12,7 @@ levels = {
     "1": {
         "type": ["Fixed", "Floating"],
         "ratings": [""],
-        "coupon_range": (0.0, 0.05),
+        "coupon_range": (0.0, 0.1),
     },  # T-bills, gov
     "2A": {"type": ["Fixed"], "ratings": ["AAA", "AA"], "coupon_range": (0.02, 0.08)},
     "2B": {
@@ -32,7 +32,7 @@ def random_isin():
 
 def random_name(level):
     prefix_map = {
-        "1": ["GOV", "TBILL", "SOFR"],
+        "1": ["GOV", "TBILL"],
         "2A": ["Corp", "GovBond"],
         "2B": ["Corp", "Emerging", "Foreign"],
     }
@@ -48,7 +48,7 @@ def random_maturity(issue_date, min_years=1, max_years=30):
 portfolio = []
 
 for _ in range(num_instruments):
-    level = random.choices(["1", "2A", "2B"], weights=[0.2, 0.4, 0.4])[0]
+    level = random.choices(["1", "2A", "2B"], weights=[0.9, 0.08, 0.02])[0]
     attr = levels[level]
 
     bond_type = random.choice(attr["type"])
@@ -86,5 +86,5 @@ for _ in range(num_instruments):
 
 # Convert to DataFrame and save
 df = pd.DataFrame(portfolio)
-df.to_csv("simulated_portfolio_2.csv", index=False)
+df.to_csv("representative_portfolio.csv", index=False)
 print("Portfolio CSV generated:", len(df), "rows")

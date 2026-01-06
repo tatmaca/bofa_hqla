@@ -1,0 +1,421 @@
+# Debate Transcript — Run 1
+
+### **JUDGE** (Judge)
+
+**JSON**
+
+```json
+[
+  {
+    "Scenario": "Bear Steepening of the Yield Curve",
+    "Description": "A bear steepening of the yield curve with long-term rates increasing by 50 bps, impacting funding costs and HQLA valuations.",
+    "Probability": 0.13,
+    "Rationale": "Rising inflation concerns and economic activity could lead to higher long-term rates. This scenario is relevant given recent CPI prints and FOMC guidance.",
+    "ImpactChannels": "Rates, Curve",
+    "Shocks": {"move_index": 50, "yield_curve": "bear_steepener", "credit_spreads": {}},
+    "MetricsDelta": {"LCR": -2, "NSFR": -1},
+    "TradeList": ["Add $2bn 10-year USTs", "Reduce $1bn short-term repo"],
+    "Assumptions": "Inflation remains a concern, leading to increased long-term rates.",
+    "Signals": ["10-year yield > 4.00%", "CPI > 3.5% on 2025-01-15", "FOMC meeting on 2025-02-01"],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Widening of Credit Spreads",
+    "Description": "Credit spreads widen with IG OAS increasing by 25 bps and HY OAS by 60 bps.",
+    "Probability": 0.10,
+    "Rationale": "Corporate balance sheets may deteriorate due to higher funding costs and economic uncertainty, impacting valuations of corporate bonds held in Level 2 portfolio.",
+    "ImpactChannels": "Credit",
+    "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {"ig_oas": 25, "hy_oas": 60}},
+    "MetricsDelta": {"LCR": -1, "OCI": -3},
+    "TradeList": ["Reduce $1bn corporate bonds", "Add $500mm agency MBS"],
+    "Assumptions": "Economic uncertainty leads to higher risk aversion among investors.",
+    "Signals": ["IG OAS > 145 bps", "HY OAS > 470 bps on 2025-02-15", "Corporate earnings reports in March 2025"],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Regulatory Changes to TLAC Requirements",
+    "Description": "New regulatory measures increase TLAC requirements, straining capital ratios and liquidity.",
+    "Probability": 0.12,
+    "Rationale": "Potential regulatory changes could affect BoA's capital structure and funding mix, requiring proactive balance sheet management.",
+    "ImpactChannels": "Regulation",
+    "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+    "MetricsDelta": {"LCR": -3, "NSFR": -2},
+    "TradeList": ["Raise $2bn in long-term debt", "Rebalance capital structure"],
+    "Assumptions": "Regulatory environment remains stringent, necessitating adjustments.",
+    "Signals": ["Basel Committee meeting on 2025-03-10", "TLAC proposal release on 2025-04-20"],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Retail Deposit Outflows",
+    "Description": "A significant shift in consumer sentiment leads to retail deposit outflows of 5%.",
+    "Probability": 0.12,
+    "Rationale": "Consumer behavior may shift due to economic uncertainty or interest rate changes, pressuring liquidity metrics.",
+    "ImpactChannels": "Deposits",
+    "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+    "MetricsDelta": {"LCR": -5, "NSFR": -4},
+    "TradeList": ["Increase marketing efforts to retain deposits", "Enhance digital banking services"],
+    "Assumptions": "Economic sentiment influences consumer deposit behavior.",
+    "Signals": ["Retail deposit growth rate < 1% on 2025-04-15", "Consumer sentiment index < 80 on 2025-06-30"],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis increases by 50 bps due to rising interest rates, impacting HQLA valuations.",
+    "Probability": 0.10,
+    "Rationale": "Interest rates may rise, leading to reduced demand for MBS and negative valuation impact on Level 2 assets.",
+    "ImpactChannels": "MBS",
+    "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+    "MetricsDelta": {"LCR": -2, "OCI": -4},
+    "TradeList": ["Reduce MBS exposure by $1bn", "Increase UST holdings by $500mm"],
+    "Assumptions": "Interest rate environment impacts demand for MBS.",
+    "Signals": ["MBS basis > 40 bps on 2025-05-15", "Weekly MBS issuance > $10bn"],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Bearish Equity Market Correction",
+    "Description": "Significant equity market correction leads to increased risk aversion, tightening credit spreads.",
+    "Probability": 0.09,
+    "Rationale": "Market volatility can lead to tighter credit conditions and reduced consumer/corporate borrowing.",
+    "ImpactChannels": "Credit",
+    "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {"ig_oas": 30, "hy_oas": 70}},
+    "MetricsDelta": {"LCR": -2, "NSFR": -1},
+    "TradeList": ["Increase cash reserves by $1bn", "Limit new corporate lending"],
+    "Assumptions": "Market corrections lead to increased risk aversion and tighter credit.",
+    "Signals": ["S&P 500 declines > 5% on 2025-03-15", "VIX > 20 on 2025-04-01"],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Commodity Price Surge",
+    "Description": "Surge in commodity prices leads to inflationary pressures and aggressive rate hikes.",
+    "Probability": 0.09,
+    "Rationale": "Higher commodity prices could necessitate more aggressive monetary policy, impacting funding costs and HQLA.",
+    "ImpactChannels": "Rates, Credit",
+    "Shocks": {"move_index": 0, "yield_curve": "bear_steepener", "credit_spreads": {}},
+    "MetricsDelta": {"LCR": -3, "NSFR": -2},
+    "TradeList": ["Add $2bn in TIPS", "Adjust loan pricing to reflect higher rates"],
+    "Assumptions": "Inflation driven by commodity prices leads to rate hikes.",
+    "Signals": ["Crude oil > $90/barrel on 2025-06-15", "CPI > 4.0% on 2025-05-01"],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Global Geopolitical Tensions",
+    "Description": "Increased geopolitical tensions lead to market volatility and wider credit spreads.",
+    "Probability": 0.07,
+    "Rationale": "Geopolitical risks can lead to market instability and wider credit spreads, impacting funding and liquidity.",
+    "ImpactChannels": "Credit",
+    "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {"ig_oas": 10}},
+    "MetricsDelta": {"LCR": -1, "NSFR": -1},
+    "TradeList": ["Increase liquidity buffer by $1bn", "Limit risk exposure in volatile regions"],
+    "Assumptions": "Geopolitical tensions lead to increased market volatility.",
+    "Signals": ["Conflict escalation news on 2025-04-01", "Market volatility index > 25 on 2025-06-30"],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Stable Rates with Regulatory Changes",
+    "Description": "A stable interest rate environment with significant regulatory changes affecting liquidity.",
+    "Probability": 0.07,
+    "Rationale": "Regulatory changes may occur in a stable rate environment, requiring proactive liquidity management.",
+    "ImpactChannels": "Regulation",
+    "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+    "MetricsDelta": {"LCR": -2, "NSFR": -3},
+    "TradeList": ["Evaluate capital structure adjustments", "Prepare for compliance changes"],
+    "Assumptions": "Regulatory environment remains dynamic despite stable rates.",
+    "Signals": ["Regulatory proposals on 2025-03-10", "Review of bank stress tests on 2025-06-01"],
+    "PredictionDate": "2025-12-14"
+  },
+  {
+    "Scenario": "Economic Recovery with Strong Consumer Spending",
+    "Description": "A robust economic recovery leads to increased consumer spending and deposit growth.",
+    "Probability": 0.11,
+    "Rationale": "Strong economic conditions could bolster consumer confidence and deposit inflows, improving liquidity metrics.",
+    "ImpactChannels": "Deposits",
+    "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+    "MetricsDelta": {"LCR": 3, "NSFR": 2},
+    "TradeList": ["Increase marketing for savings accounts", "Expand consumer lending products"],
+    "Assumptions": "Economic recovery enhances consumer confidence and spending.",
+    "Signals": ["Retail sales growth > 6% on 2025-05-15", "Consumer sentiment index > 90 on 2025-06-30"],
+    "PredictionDate": "2025-12-14"
+  }
+]
+```
+
+## Round 1
+
+### **Proponent**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepening of the Yield Curve",
+        "Description": "A bear steepening of the yield curve with long-term rates increasing by 50 bps, impacting funding costs and HQLA valuations.",
+        "Probability": 0.15,
+        "Rationale": "Rising inflation concerns and economic activity could lead to higher long-term rates.",
+        "ImpactChannels": "Rates, Curve",
+        "Shocks": {"move_index": 50, "yield_curve": "bear_steepener", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1},
+        "TradeList": ["Add $2bn 10-year USTs", "Reduce $1bn short-term repo"],
+        "Assumptions": "Inflation remains a concern, leading to increased long-term rates.",
+        "Signals": ["10-year yield > 4.00%", "CPI > 3.5% on 2025-01-15", "FOMC meeting on 2025-02-01"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Widening of Credit Spreads",
+        "Description": "Credit spreads widen with IG OAS increasing by 25 bps and HY OAS by 60 bps.",
+        "Probability": 0.10,
+        "Rationale": "Corporate balance sheets may deteriorate due to higher funding costs.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {"ig_oas": 25, "hy_oas": 60}},
+        "MetricsDelta": {"LCR": -1, "OCI": -3},
+        "TradeList": ["Reduce $1bn corporate bonds", "Add $500mm agency MBS"],
+        "Assumptions": "Economic uncertainty leads to higher risk aversion among investors.",
+        "Signals": ["IG OAS > 145 bps", "HY OAS > 470 bps on 2025-02-15", "Corporate earnings reports in March 2025"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Regulatory Changes to TLAC Requirements",
+        "Description": "New regulatory measures increase TLAC requirements, straining capital ratios and liquidity.",
+        "Probability": 0.12,
+        "Rationale": "Potential regulatory changes could affect BoA's capital structure.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2},
+        "TradeList": ["Raise $2bn in long-term debt", "Rebalance capital structure"],
+        "Assumptions": "Regulatory environment remains stringent, necessitating adjustments.",
+        "Signals": ["Basel Committee meeting on 2025-03-10", "TLAC proposal release on 2025-04-20"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Retail Deposit Outflows",
+        "Description": "A significant shift in consumer sentiment leads to retail deposit outflows of 5%.",
+        "Probability": 0.12,
+        "Rationale": "Consumer behavior may shift due to economic uncertainty or interest rate changes.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -4},
+        "TradeList": ["Increase marketing efforts to retain deposits", "Enhance digital banking services"],
+        "Assumptions": "Economic sentiment influences consumer deposit behavior.",
+        "Signals": ["Retail deposit growth rate < 1% on 2025-04-15", "Consumer sentiment index < 80 on 2025-06-30"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "MBS basis increases by 50 bps due to rising interest rates, impacting HQLA valuations.",
+        "Probability": 0.10,
+        "Rationale": "Interest rates may rise, leading to reduced demand for MBS.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -2, "OCI": -4},
+        "TradeList": ["Reduce MBS exposure by $1bn", "Increase UST holdings by $500mm"],
+        "Assumptions": "Interest rate environment impacts demand for MBS.",
+        "Signals": ["MBS basis > 40 bps on 2025-05-15", "Weekly MBS issuance > $10bn"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Bearish Equity Market Correction",
+        "Description": "Significant equity market correction leads to increased risk aversion, tightening credit spreads.",
+        "Probability": 0.10,
+        "Rationale": "Market volatility can lead to tighter credit conditions.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {"ig_oas": 30, "hy_oas": 70}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1},
+        "TradeList": ["Increase cash reserves by $1bn", "Limit new corporate lending"],
+        "Assumptions": "Market corrections lead to increased risk aversion and tighter credit.",
+        "Signals": ["S&P 500 declines > 5% on 2025-03-15", "VIX > 20 on 2025-04-01"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Commodity Price Surge",
+        "Description": "Surge in commodity prices leads to inflationary pressures and aggressive rate hikes.",
+        "Probability": 0.10,
+        "Rationale": "Higher commodity prices could necessitate more aggressive monetary policy.",
+        "ImpactChannels": "Rates, Credit",
+        "Shocks": {"move_index": 0, "yield_curve": "bear_steepener", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2},
+        "TradeList": ["Add $2bn in TIPS", "Adjust loan pricing to reflect higher rates"],
+        "Assumptions": "Inflation driven by commodity prices leads to rate hikes.",
+        "Signals": ["Crude oil > $90/barrel on 2025-06-15", "CPI > 4.0% on 2025-05-01"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Global Geopolitical Tensions",
+        "Description": "Increased geopolitical tensions lead to market volatility and wider credit spreads.",
+        "Probability": 0.08,
+        "Rationale": "Geopolitical risks can lead to market instability.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {"ig_oas": 10}},
+        "MetricsDelta": {"LCR": -1, "NSFR": -1},
+        "TradeList": ["Increase liquidity buffer by $1bn", "Limit risk exposure in volatile regions"],
+        "Assumptions": "Geopolitical tensions lead to increased market volatility.",
+        "Signals": ["Conflict escalation news on 2025-04-01", "Market volatility index > 25 on 2025-06-30"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Stable Rates with Regulatory Changes",
+        "Description": "A stable interest rate environment with significant regulatory changes affecting liquidity.",
+        "Probability": 0.08,
+        "Rationale": "Regulatory changes may occur in a stable rate environment.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -3},
+        "TradeList": ["Evaluate capital structure adjustments", "Prepare for compliance changes"],
+        "Assumptions": "Regulatory environment remains dynamic despite stable rates.",
+        "Signals": ["Regulatory proposals on 2025-03-10", "Review of bank stress tests on 2025-06-01"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Economic Recovery with Strong Consumer Spending",
+        "Description": "A robust economic recovery leads to increased consumer spending and deposit growth.",
+        "Probability": 0.05,
+        "Rationale": "Strong economic conditions could bolster consumer confidence.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": +3, "NSFR": +2},
+        "TradeList": ["Increase marketing for savings accounts", "Expand consumer lending products"],
+        "Assumptions": "Economic recovery enhances consumer confidence and spending.",
+        "Signals": ["Retail sales growth > 6% on 2025-05-15", "Consumer sentiment index > 90 on 2025-06-30"],
+        "PredictionDate": "2025-12-14"
+    }
+]
+```
+
+### **Devil's advocate**
+
+**JSON**
+
+```json
+[
+    {
+        "Scenario": "Bear Steepening of the Yield Curve",
+        "Description": "A bear steepening of the yield curve with long-term rates increasing by 50 bps, impacting funding costs and HQLA valuations.",
+        "Probability": 0.12,
+        "Rationale": "Rising inflation concerns and economic activity could lead to higher long-term rates.",
+        "ImpactChannels": "Rates, Curve",
+        "Shocks": {"move_index": 50, "yield_curve": "bear_steepener", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1},
+        "TradeList": ["Add $2bn 10-year USTs", "Reduce $1bn short-term repo"],
+        "Assumptions": "Inflation remains a concern, leading to increased long-term rates.",
+        "Signals": ["10-year yield > 4.00%", "CPI > 3.5% on 2025-01-15", "FOMC meeting on 2025-02-01"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Widening of Credit Spreads",
+        "Description": "Credit spreads widen with IG OAS increasing by 25 bps and HY OAS by 60 bps.",
+        "Probability": 0.08,
+        "Rationale": "Corporate balance sheets may deteriorate due to higher funding costs.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {"ig_oas": 25, "hy_oas": 60}},
+        "MetricsDelta": {"LCR": -1, "OCI": -3},
+        "TradeList": ["Reduce $1bn corporate bonds", "Add $500mm agency MBS"],
+        "Assumptions": "Economic uncertainty leads to higher risk aversion among investors.",
+        "Signals": ["IG OAS > 145 bps", "HY OAS > 470 bps on 2025-02-15", "Corporate earnings reports in March 2025"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Regulatory Changes to TLAC Requirements",
+        "Description": "New regulatory measures increase TLAC requirements, straining capital ratios and liquidity.",
+        "Probability": 0.10,
+        "Rationale": "Potential regulatory changes could affect BoA's capital structure.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2},
+        "TradeList": ["Raise $2bn in long-term debt", "Rebalance capital structure"],
+        "Assumptions": "Regulatory environment remains stringent, necessitating adjustments.",
+        "Signals": ["Basel Committee meeting on 2025-03-10", "TLAC proposal release on 2025-04-20"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Retail Deposit Outflows",
+        "Description": "A significant shift in consumer sentiment leads to retail deposit outflows of 5%.",
+        "Probability": 0.10,
+        "Rationale": "Consumer behavior may shift due to economic uncertainty or interest rate changes.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -5, "NSFR": -4},
+        "TradeList": ["Increase marketing efforts to retain deposits", "Enhance digital banking services"],
+        "Assumptions": "Economic sentiment influences consumer deposit behavior.",
+        "Signals": ["Retail deposit growth rate < 1% on 2025-04-15", "Consumer sentiment index < 80 on 2025-06-30"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "MBS Basis Widening",
+        "Description": "MBS basis increases by 50 bps due to rising interest rates, impacting HQLA valuations.",
+        "Probability": 0.10,
+        "Rationale": "Interest rates may rise, leading to reduced demand for MBS.",
+        "ImpactChannels": "MBS",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -2, "OCI": -4},
+        "TradeList": ["Reduce MBS exposure by $1bn", "Increase UST holdings by $500mm"],
+        "Assumptions": "Interest rate environment impacts demand for MBS.",
+        "Signals": ["MBS basis > 40 bps on 2025-05-15", "Weekly MBS issuance > $10bn"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Bearish Equity Market Correction",
+        "Description": "Significant equity market correction leads to increased risk aversion, tightening credit spreads.",
+        "Probability": 0.08,
+        "Rationale": "Market volatility can lead to tighter credit conditions.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {"ig_oas": 30, "hy_oas": 70}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -1},
+        "TradeList": ["Increase cash reserves by $1bn", "Limit new corporate lending"],
+        "Assumptions": "Market corrections lead to increased risk aversion and tighter credit.",
+        "Signals": ["S&P 500 declines > 5% on 2025-03-15", "VIX > 20 on 2025-04-01"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Commodity Price Surge",
+        "Description": "Surge in commodity prices leads to inflationary pressures and aggressive rate hikes.",
+        "Probability": 0.08,
+        "Rationale": "Higher commodity prices could necessitate more aggressive monetary policy.",
+        "ImpactChannels": "Rates, Credit",
+        "Shocks": {"move_index": 0, "yield_curve": "bear_steepener", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -3, "NSFR": -2},
+        "TradeList": ["Add $2bn in TIPS", "Adjust loan pricing to reflect higher rates"],
+        "Assumptions": "Inflation driven by commodity prices leads to rate hikes.",
+        "Signals": ["Crude oil > $90/barrel on 2025-06-15", "CPI > 4.0% on 2025-05-01"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Global Geopolitical Tensions",
+        "Description": "Increased geopolitical tensions lead to market volatility and wider credit spreads.",
+        "Probability": 0.05,
+        "Rationale": "Geopolitical risks can lead to market instability.",
+        "ImpactChannels": "Credit",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {"ig_oas": 10}},
+        "MetricsDelta": {"LCR": -1, "NSFR": -1},
+        "TradeList": ["Increase liquidity buffer by $1bn", "Limit risk exposure in volatile regions"],
+        "Assumptions": "Geopolitical tensions lead to increased market volatility.",
+        "Signals": ["Conflict escalation news on 2025-04-01", "Market volatility index > 25 on 2025-06-30"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Stable Rates with Regulatory Changes",
+        "Description": "A stable interest rate environment with significant regulatory changes affecting liquidity.",
+        "Probability": 0.05,
+        "Rationale": "Regulatory changes may occur in a stable rate environment.",
+        "ImpactChannels": "Regulation",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": -2, "NSFR": -3},
+        "TradeList": ["Evaluate capital structure adjustments", "Prepare for compliance changes"],
+        "Assumptions": "Regulatory environment remains dynamic despite stable rates.",
+        "Signals": ["Regulatory proposals on 2025-03-10", "Review of bank stress tests on 2025-06-01"],
+        "PredictionDate": "2025-12-14"
+    },
+    {
+        "Scenario": "Economic Recovery with Strong Consumer Spending",
+        "Description": "A robust economic recovery leads to increased consumer spending and deposit growth.",
+        "Probability": 0.05,
+        "Rationale": "Strong economic conditions could bolster consumer confidence.",
+        "ImpactChannels": "Deposits",
+        "Shocks": {"move_index": 0, "yield_curve": "", "credit_spreads": {}},
+        "MetricsDelta": {"LCR": +3, "NSFR": +2},
+        "TradeList": ["Increase marketing for savings accounts", "Expand consumer lending products"],
+        "Assumptions": "Economic recovery enhances consumer confidence and spending.",
+        "Signals": ["Retail sales growth > 6% on 2025-05-15", "Consumer sentiment index > 90 on 2025-06-30"],
+        "PredictionDate": "2025-12-14"
+    }
+]
+```
+
