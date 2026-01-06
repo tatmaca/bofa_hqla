@@ -1,0 +1,262 @@
+[
+  {
+    "Scenario": "Bear Steepening",
+    "Description": "Yield curve steepens with 10y UST yields rising by 40 bps while 2y remains stable.",
+    "Probability": 0.138298,
+    "Rationale": "Strong economic data leads to expectations of higher long-term rates, impacting HQLA valuations.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move": 40,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Add $1bn UST 10y via auction"
+    ],
+    "Assumptions": "Economic growth exceeds expectations, leading to inflation concerns.",
+    "Signals": [
+      "10y UST yield > 4.00%",
+      "GDP growth > 3% (release: 2025-01-30)",
+      "CPI > 3% (release: 2025-02-15)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Widening Credit Spreads",
+    "Description": "IG OAS increases by 25 bps and HY OAS increases by 60 bps.",
+    "Probability": 0.117021,
+    "Rationale": "Increased concerns over corporate defaults lead to wider credit spreads.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "ig_oas": 25,
+      "hy_oas": 60
+    },
+    "MetricsDelta": {
+      "OCI": -5,
+      "LCR": -1
+    },
+    "TradeList": [
+      "Reduce $500mn corporate bond exposure"
+    ],
+    "Assumptions": "Economic indicators signal potential slowdown.",
+    "Signals": [
+      "IG OAS > 145 bps",
+      "HY OAS > 470 bps",
+      "Default rate > 3% (release: 2025-03-15)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Retail Deposit Beta Increase",
+    "Description": "Retail deposit beta rises to 30%, leading to a $20bn outflow.",
+    "Probability": 0.106383,
+    "Rationale": "Rising interest rates lead customers to seek higher yields, impacting liquidity.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "deposits": -20
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Add $1bn in short-term borrowings"
+    ],
+    "Assumptions": "Competition for deposits increases as rates rise.",
+    "Signals": [
+      "Deposit beta > 30% (weekly monitoring)",
+      "Retail outflows > $5bn in any week"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "MBS Basis Widening",
+    "Description": "MBS basis widens by 50 bps due to supply-demand imbalances.",
+    "Probability": 0.106383,
+    "Rationale": "Increased supply of MBS leads to a deteriorating basis.",
+    "ImpactChannels": [
+      "MBS"
+    ],
+    "Shocks": {
+      "mbs_basis": 50
+    },
+    "MetricsDelta": {
+      "NII": -2,
+      "OCI": -3
+    },
+    "TradeList": [
+      "Sell $500mn MBS to reduce exposure"
+    ],
+    "Assumptions": "Market conditions lead to increased issuance of MBS.",
+    "Signals": [
+      "MBS basis > 100 bps",
+      "MBS issuance > $15bn (monthly)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Regulatory Changes",
+    "Description": "Increased GSIB surcharge by 50 bps and TLAC requirements.",
+    "Probability": 0.117021,
+    "Rationale": "New regulations necessitate higher capital and liquidity buffers.",
+    "ImpactChannels": [
+      "Regulation"
+    ],
+    "Shocks": {},
+    "MetricsDelta": {
+      "LCR": -4,
+      "NSFR": -3
+    },
+    "TradeList": [
+      "Increase capital reserves by $2bn"
+    ],
+    "Assumptions": "Regulatory environment becomes more stringent.",
+    "Signals": [
+      "FSB meetings (2025-02-01)",
+      "Basel IV updates (2025-03-15)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Commodity Price Surge",
+    "Description": "Commodity prices rise by 20%, leading to inflationary pressures.",
+    "Probability": 0.106383,
+    "Rationale": "Rising commodity prices push interest rates higher, affecting capital ratios.",
+    "ImpactChannels": [
+      "Commodity Prices",
+      "Rates"
+    ],
+    "Shocks": {
+      "move": 25
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Increase commodities exposure by $500mn"
+    ],
+    "Assumptions": "Geopolitical factors drive commodity prices higher.",
+    "Signals": [
+      "Oil prices > $90/barrel",
+      "Commodity inflation > 5% (release: 2025-01-15)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Geopolitical Tensions",
+    "Description": "Heightened geopolitical risks lead to a flight to safety, tightening credit spreads.",
+    "Probability": 0.095745,
+    "Rationale": "Risk-off sentiment pushes investors toward safe assets.",
+    "ImpactChannels": [
+      "Credit"
+    ],
+    "Shocks": {
+      "ig_oas": -20,
+      "hy_oas": -30
+    },
+    "MetricsDelta": {
+      "LCR": 1,
+      "NSFR": 1
+    },
+    "TradeList": [
+      "Add $1bn in USTs via repo"
+    ],
+    "Assumptions": "Tensions escalate, leading to market volatility.",
+    "Signals": [
+      "Geopolitical events (ongoing)",
+      "VIX > 25"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Economic Slowdown",
+    "Description": "Economic growth slows, leading to lower interest rates and tighter credit spreads.",
+    "Probability": 0.085106,
+    "Rationale": "Reduced consumer spending and business investments affect capital ratios.",
+    "ImpactChannels": [
+      "Rates",
+      "Credit"
+    ],
+    "Shocks": {
+      "move": -50,
+      "ig_oas": -15,
+      "hy_oas": -25
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Reduce corporate bond exposure by $1bn"
+    ],
+    "Assumptions": "Macroeconomic indicators signal a downturn.",
+    "Signals": [
+      "GDP growth < 1% (release: 2025-04-30)",
+      "Unemployment > 5% (monthly)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Treasury Issuance Surge",
+    "Description": "Increased Treasury issuance leads to a bear steepening of the yield curve.",
+    "Probability": 0.06383,
+    "Rationale": "Higher issuance pressures rates upward, affecting HQLA valuations.",
+    "ImpactChannels": [
+      "Rates",
+      "Curve"
+    ],
+    "Shocks": {
+      "move": 30,
+      "yield_curve": "bear_steepener"
+    },
+    "MetricsDelta": {
+      "LCR": -2,
+      "NSFR": -1
+    },
+    "TradeList": [
+      "Add $500mn in short-term bills"
+    ],
+    "Assumptions": "Government borrowing increases significantly.",
+    "Signals": [
+      "Treasury auction results (2025-01-10)",
+      "Debt ceiling discussions (2025-03-01)"
+    ],
+    "PredictionDate": "2025-12-17"
+  },
+  {
+    "Scenario": "Wealth Management Runoff",
+    "Description": "Rising interest rates lead to a significant runoff in wealth management accounts, impacting liquidity.",
+    "Probability": 0.06383,
+    "Rationale": "Clients seek higher yields elsewhere, straining liquidity metrics.",
+    "ImpactChannels": [
+      "Deposits"
+    ],
+    "Shocks": {
+      "deposits": -15
+    },
+    "MetricsDelta": {
+      "LCR": -3,
+      "NSFR": -2
+    },
+    "TradeList": [
+      "Increase liquidity reserves by $1bn"
+    ],
+    "Assumptions": "Interest rates rise, leading to client migration.",
+    "Signals": [
+      "Wealth management outflows > $1bn (monthly)",
+      "Market rates > 4%"
+    ],
+    "PredictionDate": "2025-12-17"
+  }
+]
